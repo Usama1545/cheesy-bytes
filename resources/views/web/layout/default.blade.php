@@ -129,34 +129,36 @@
                     <!-- Size Selection -->
                     <div class="card mb-3">
                         <div class="card-header">Select Size</div>
-                        <div class="card-body d-flex justify-content-between flex-wrap gap-2" id="sizeContainer">
-                            @foreach(helper::customPizzaSize() as $size)
-                                <button type="button"
-                                        class="btn btn-primary rounded-pill px-4 py-2 size-btn"
-                                        data-size-id="{{ $size->id }}"
-                                        data-price="{{ $size->price }}">
-                                    {{ $size->name }}
-                                </button>
-                            @endforeach
+                        <div class="card-body">
+                            <div class=" d-flex justify-content-between flex-wrap gap-2" id="sizeContainer">
+                                @foreach(helper::customPizzaSize() as $size)
+                                    <button type="button"
+                                            class="btn round-button size-btn"
+                                            data-size-id="{{ $size->id }}"
+                                            data-price="{{ $size->price }}">
+                                        {{ $size->name }}"
+                                    </button>
+                                @endforeach
+                            </div>
+                            <hr>
+                            <div class="card-body d-flex flex-wrap gap-2" id="crustContainer"></div>
                         </div>
                     </div>
 
                     <!-- Crust Selection -->
-                    <div class="card mb-3">
-                        <div class="card-header">Select Crust</div>
-                        <div class="card-body d-flex flex-wrap gap-2" id="crustContainer"></div>
-                    </div>
 
                     <!-- Topping Selection -->
                     <div class="card mb-3">
                         <div class="card-header">Select Toppings</div>
-                        <div class="card-body d-flex flex-wrap gap-2" id="toppingContainer"></div>
+                        <div class="card-body">
+                            <div class="topping-grid" id="toppingContainer"></div>
+                        </div>
                     </div>
 
                     <!-- Sauce Selection -->
                     <div class="card mb-3">
                         <div class="card-header">Select Sauces</div>
-                        <div class="card-body d-flex flex-wrap gap-2" id="sauceContainer"></div>
+                        <div class="card-body justify-content-between gap-2" id="sauceContainer"></div>
                     </div>
                 </div>
             </div>
@@ -375,6 +377,19 @@
 <!-- Fancybox 4.0 JS -->
 
 <script>
+    const roundButtons = document.querySelectorAll('.round-button');
+
+    // Add event listeners to toggle the selected state
+    roundButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove the 'selected' class from all buttons
+            roundButtons.forEach(btn => btn.classList.remove('selected'));
+
+            // Add the 'selected' class to the clicked button
+            button.classList.add('selected');
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         const sizeContainer = document.getElementById('sizeContainer');
         const crustContainer = document.getElementById('crustContainer');
@@ -418,9 +433,10 @@
 
         function displayCrusts() {
             crustContainer.innerHTML = ''; // Clear crust container
-            console.log(selectedSize);
-            const filteredCrusts = allCrusts.filter(crust => crust.size_id === selectedSize.id);
-
+            console.log(selectedSize.id);
+            const filteredCrusts = allCrusts.filter(crust =>
+                String(crust.size_id) === String(selectedSize.id)
+            );
 
             filteredCrusts.forEach(crust => {
                 const label = document.createElement('label');
@@ -433,7 +449,9 @@
                 data-crust-id="${crust.id}"
                 data-price="${crust.price}"
             />
-            ${crust.name} ($${crust.price})
+             <span>${crust.name}</span>
+        <div class="text-muted small mx-4">${crust.description}</div> <!-- Added description -->
+
         `;
                 label.querySelector('input').addEventListener('change', () => selectCrust(crust));
                 crustContainer.appendChild(label);
@@ -443,12 +461,12 @@
         function displayToppings() {
             toppingContainer.innerHTML = ''; // Clear toppings container
             const filteredToppings = allToppings.filter(topping =>
-                topping.size_id = selectedSize.id
+                String(topping.size_id) === String(selectedSize.id)
             );
 
             filteredToppings.forEach(topping => {
                 const label = document.createElement('label');
-                label.className = 'form-check-label d-block';
+                label.className = 'form-check-label d-block text-sm';
                 label.innerHTML = `
             <input
                 type="checkbox"
@@ -466,15 +484,15 @@
         function displaySauces() {
             sauceContainer.innerHTML = ''; // Clear sauces container
             const filteredSauces = allSauces.filter(sauce =>
-                sauce.size_id = selectedSize.id
+                String(sauce.size_id) === String(selectedSize.id)
             );
-
             filteredSauces.forEach(sauce => {
                 const label = document.createElement('label');
-                label.className = 'form-check-label d-block';
+                label.className = 'form-check-label d-block text-sm mb-1';
                 label.innerHTML = `
             <input
-                type="checkbox"
+                type="radio"
+                name="sauce"
                 class="form-check-input sauce-checkbox"
                 data-sauce-id="${sauce.id}"
                 data-price="${sauce.price}"

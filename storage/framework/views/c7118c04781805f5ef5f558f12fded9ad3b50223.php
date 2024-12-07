@@ -173,6 +173,9 @@
         <?php echo $__env->make('web.nodata', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php endif; ?>
 
+<script>
+
+</script>
 
     <style>
         @media (min-width: 1440px) {
@@ -181,18 +184,52 @@
                 max-width: 20%;
             }
         }
+        .round-button {
+            width: 70px; /* adjust to your desired width */
+            height: 70px; /* adjust to your desired height */
+            border-radius: 50% !important; /* make the corners fully rounded */
+            border: 1px solid;
+            cursor: pointer;
+            background-color: #f48384;
+            transition: background-color 0.3s ease; /* Smooth transition for background color */
 
-        .modal-backdrop {
-            z-index: 1040; /* Ensure backdrop is below modal */
-            background-color: rgba(0, 0, 0, 0.5); /* Default semi-transparent black */
+        }
+        .round-button:hover {
+            background-color: #ac1515; /* Hover color for all buttons */
+            color: #fff; /* Optional: Change text color on hover */
+        }
+        .round-button.selected {
+            background-color: #ac1515 !important;
+            color: #fff; /* Optional: Change text color for better visibility */
         }
 
-        .modal-backdrop.show {
-            opacity: 0.5; /* Ensure proper visibility */
+
+        .topping-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns with equal width */
+            gap: 16px; /* Adjust gap between rows and columns */
+
+            align-items: center; /* Center items vertically */
         }
 
-        .modal {
-            z-index: 1055; /* Ensure modal is above backdrop */
+        .topping-grid .topping-item {
+            width: 100%; /* Ensure consistent width */
+            text-align: center; /* Center content */
+            padding: 10px;
+            border: 1px solid #ccc; /* Optional: Add a border for visual clarity */
+            border-radius: 8px; /* Optional: Add rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Optional: Add hover effects */
+        }
+
+        .topping-grid .topping-item:hover {
+            transform: translateY(-5px); /* Lift item slightly on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+        }
+
+        .text-sm {
+            font-size: 14px;
+            color: grey;
         }
 
     </style>

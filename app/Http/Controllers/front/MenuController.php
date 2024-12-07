@@ -44,7 +44,8 @@ class MenuController extends Controller
                 })
                 ->where('item.item_status', '1')
                 ->where('item.cat_id', @$categorydata->id)
-                ->orderBy('item.reorder_id');
+                ->groupBy('item.id') // Ensure proper grouping
+                ->orderBy('item.reorder_id')->get();
         } else {
             $getitemlist = Item::with('category_info', 'subcategory_info', 'item_image')
                 ->select('item.*',
@@ -75,7 +76,8 @@ class MenuController extends Controller
                 'id' => $crust->id,
                 'name' => $crust->name,
                 'price' => $crust->price,
-                'size_ids' => $crust->size_id,
+                'description' => $crust->description,
+                'size_id' => $crust->size_id,
             ];
         });
 
@@ -89,7 +91,7 @@ class MenuController extends Controller
                 'id' => $topping->id,
                 'name' => $topping->name,
                 'price' => $topping->price,
-                'size_ids' => $topping->size_id,
+                'size_id' => $topping->size_id,
             ];
         });
 
