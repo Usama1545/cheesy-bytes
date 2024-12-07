@@ -2,6 +2,10 @@
 
 namespace App\Helpers;
 
+use App\Models\CustomPizzaCrust;
+use App\Models\CustomPizzaSauce;
+use App\Models\CustomPizzaSize;
+use App\Models\CustomPizzaTopping;
 use App\Models\Roles;
 use App\Models\Cart;
 use App\Models\Category;
@@ -451,6 +455,27 @@ class helper
         $getsociallinks = SocialLinks::all();
         return $getsociallinks;
     }
+
+    public static function customPizzaSize()
+    {
+        return CustomPizzaSize::select('id', 'name', 'price')->get();
+    }
+
+    public static function getCrusts($sizeId)
+    {
+        return CustomPizzaCrust::where('size_id', $sizeId)->get();  // Fetch crusts based on sizeId
+    }
+
+    public static function getToppings($sizeId)
+    {
+        return CustomPizzaTopping::where('size_id', $sizeId)->get();  // Fetch crusts based on sizeId
+    }
+
+    public static function getSauces($sizeId)
+    {
+        return CustomPizzaSauce::where('size_id', $sizeId)->get();  // Fetch crusts based on sizeId
+    }
+
     public static function top_deals()
     {
         date_default_timezone_set(helper::appdata()->timezone);

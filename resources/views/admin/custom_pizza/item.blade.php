@@ -3,6 +3,10 @@
     @include('admin.breadcrumb')
 
     <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h3>Custom Pizzas</h3>
+            <a href="custom_pizza/add" class="btn btn-primary">Add New <i class="fa fa-plus"></i></a>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card border-0">
@@ -18,7 +22,7 @@
                                     <th>{{ trans('labels.action') }}</th>
                                 </tr>
                                 </thead>
-                                <tbody  data-url="{{ url('admin/item/reorder_item') }}">
+                                <tbody>
                                 @php $i = 1; @endphp
                                 @foreach ($getitem as $item)
                                     <tr class="row1" data-id="{{ $item->id }}">
@@ -55,5 +59,4 @@
 
 @endsection
 @section('script')
-    <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/additem.js') }}"></script>
 @endsection

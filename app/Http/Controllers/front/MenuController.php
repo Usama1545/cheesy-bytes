@@ -5,6 +5,9 @@ namespace App\Http\Controllers\front;
 use App\Helpers\helper;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\CustomPizzaCrust;
+use App\Models\CustomPizzaSauce;
+use App\Models\CustomPizzaTopping;
 use App\Models\Subcategory;
 use App\Models\Item;
 use Illuminate\Http\Request;
@@ -63,5 +66,47 @@ class MenuController extends Controller
         });
 
         return view('web.menu', compact('topdeals', 'categorydata', 'subcategories', 'getitemlist'));
+    }
+
+    public function getCrusts()
+    {
+        $crusts = CustomPizzaCrust::all()->map(function ($crust) {
+            return [
+                'id' => $crust->id,
+                'name' => $crust->name,
+                'price' => $crust->price,
+                'size_ids' => $crust->size_id,
+            ];
+        });
+
+        return response()->json($crusts);
+    }
+
+    public function getToppings()
+    {
+        $toppings = CustomPizzaTopping::all()->map(function ($topping) {
+            return [
+                'id' => $topping->id,
+                'name' => $topping->name,
+                'price' => $topping->price,
+                'size_ids' => $topping->size_id,
+            ];
+        });
+
+        return response()->json($toppings);
+    }
+
+    public function getSauces()
+    {
+        $sauces = CustomPizzaSauce::all()->map(function ($sauce) {
+            return [
+                'id' => $sauce->id,
+                'name' => $sauce->name,
+                'price' => $sauce->price,
+                'size_id' => $sauce->size_id,
+            ];
+        });
+
+        return response()->json($sauces);
     }
 }

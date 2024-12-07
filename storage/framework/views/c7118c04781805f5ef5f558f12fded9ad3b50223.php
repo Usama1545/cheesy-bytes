@@ -38,14 +38,14 @@
                     </div>
                     <div>
                         <?php if(strtolower(@$categorydata->category_name) == strtolower('Pizza')): ?>
-                        <button
-                            class="btn btn-sm btn-secondary fw-500 py-2 px-4 rounded-3 d-flex justify-content-center align-items-center"
-                            onclick=""
-                            style="min-width: 120px;">
-                            Create Pizza
-                            <i class="fa fa-solid fa-plus ms-2"></i>
-                            <div class="loader d-none"></div>
-                        </button>
+                            <button
+                                class="btn btn-sm btn-secondary fw-500 py-2 px-4 rounded-3 d-flex justify-content-center align-items-center"
+                                data-bs-toggle="modal" data-bs-target="#customPizzaModal"
+                                style="min-width: 120px;">
+                                Create Pizza
+                                <i class="fa fa-solid fa-plus ms-2"></i>
+                                <div class="loader d-none"></div>
+                            </button>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -173,16 +173,30 @@
         <?php echo $__env->make('web.nodata', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php endif; ?>
 
+
     <style>
         @media (min-width: 1440px) {
             .col-lg-2-4 {
-                flex: 0 0 20%;  /* Makes the columns take up 20% of the container on large screens */
+                flex: 0 0 20%; /* Makes the columns take up 20% of the container on large screens */
                 max-width: 20%;
             }
         }
 
+        .modal-backdrop {
+            z-index: 1040; /* Ensure backdrop is below modal */
+            background-color: rgba(0, 0, 0, 0.5); /* Default semi-transparent black */
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.5; /* Ensure proper visibility */
+        }
+
+        .modal {
+            z-index: 1055; /* Ensure modal is above backdrop */
+        }
 
     </style>
+
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('web.layout.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/web/menu.blade.php ENDPATH**/ ?>

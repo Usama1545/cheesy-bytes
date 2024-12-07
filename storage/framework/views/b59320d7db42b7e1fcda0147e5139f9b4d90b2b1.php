@@ -2,6 +2,10 @@
     <?php echo $__env->make('admin.breadcrumb', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h3>Custom Pizzas</h3>
+            <a href="custom_pizza/add" class="btn btn-primary">Add New <i class="fa fa-plus"></i></a>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card border-0">
@@ -17,7 +21,7 @@
                                     <th><?php echo e(trans('labels.action')); ?></th>
                                 </tr>
                                 </thead>
-                                <tbody  data-url="<?php echo e(url('admin/item/reorder_item')); ?>">
+                                <tbody>
                                 <?php $i = 1; ?>
                                 <?php $__currentLoopData = $getitem; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="row1" data-id="<?php echo e($item->id); ?>">
@@ -56,7 +60,6 @@
 
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('script'); ?>
-    <script src="<?php echo e(url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/additem.js')); ?>"></script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/custom_pizza/item.blade.php ENDPATH**/ ?>

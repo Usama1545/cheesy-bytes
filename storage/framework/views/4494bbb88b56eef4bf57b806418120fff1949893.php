@@ -2,7 +2,7 @@
     <?php echo $__env->make('admin.breadcrumb', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <div class="container-fluid">
-       
+
         <div class="row">
             <div class="col-12">
                 <div class="card border-0">

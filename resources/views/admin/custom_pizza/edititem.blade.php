@@ -11,7 +11,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <div id="privacy-policy-three" class="privacy-policy">
-                            <form method="post" action="{{ URL::to('admin/item/update') }}" name="about" id="about"
+                            <form method="post" action="{{ URL::to('admin/custom_pizza/update') }}" name="about" id="about"
                                   enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" class="form-control" id="id" name="id"
@@ -52,13 +52,13 @@
                                         <div class="row data-amenities align-items-center mb-3">
                                             <div class="form-group col-12 col-lg-5 col-md-5">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
-                                                <input type="text" name="name[]" class="form-control" placeholder="Name"
+                                                <input type="text" name="crust_name[]" class="form-control" placeholder="Name"
                                                        required value="{{ $option->name }}">
                                             </div>
                                             <div class="form-group col-12 col-lg-5 col-md-5">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
-                                                <input type="number" name="price[]" class="form-control"
+                                                <input type="number" name="crust_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
                                             <div class="col-12 col-lg-2 d-flex align-items-center">
@@ -69,7 +69,7 @@
                                             <div class="form-group col-12 col-lg-12 col-md-12">
                                                 <label for="description" class="col-form-label">Description <span
                                                         class="text-danger">*</span></label>
-                                                <textarea name="description[]" class="form-control"
+                                                <textarea name="crust_description[]" class="form-control"
                                                           placeholder="Description"
                                                           required>{{ $option->description }}</textarea>
                                             </div>
@@ -101,15 +101,15 @@
                                     <!-- Existing Crust Options -->
                                     @foreach ($getitem->toppings as $option)
                                         <div class="row data-toppings align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-3 col-md-4">
+                                            <div class="form-group col-12 col-lg-5 col-md-5">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
-                                                <input type="text" name="name[]" class="form-control" placeholder="Name"
+                                                <input type="text" name="topping_name[]" class="form-control" placeholder="Name"
                                                        required value="{{ $option->name }}">
                                             </div>
-                                            <div class="form-group col-12 col-lg-3 col-md-4">
+                                            <div class="form-group col-12 col-lg-5 col-md-5">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
-                                                <input type="number" name="price[]" class="form-control"
+                                                <input type="number" name="topping_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
                                             <div class="col-12 col-lg-2 d-flex align-items-center">
@@ -146,15 +146,15 @@
                                     <!-- Existing Crust Options -->
                                     @foreach ($getitem->sauces as $option)
                                         <div class="row data-sauces align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-3 col-md-4">
+                                            <div class="form-group col-12 col-lg-5 col-md-5">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
-                                                <input type="text" name="name[]" class="form-control" placeholder="Name"
+                                                <input type="text" name="sauce_name[]" class="form-control" placeholder="Name"
                                                        required value="{{ $option->name }}">
                                             </div>
-                                            <div class="form-group col-12 col-lg-3 col-md-4">
+                                            <div class="form-group col-12 col-lg-5 col-md-5">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
-                                                <input type="number" name="price[]" class="form-control"
+                                                <input type="number" name="sauce_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
                                             <div class="col-12 col-lg-2 d-flex align-items-center">
@@ -218,10 +218,10 @@
             <div class="row data-amenities mb-3">
                 <div class="form-group col-12 col-lg-5 col-md-5">
                     <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
-                    <input type="text" name="name[]" class="form-control" placeholder="Name" required>
+                    <input type="text" name="crust_name[]" class="form-control" placeholder="Name" required>
                 </div><div class="form-group col-12 col-lg-5 col-md-5">
                     <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                    <input type="number" name="price[]" class="form-control" placeholder="Price" required>
+                    <input type="number" name="crust_price[]" class="form-control" placeholder="Price" required>
                 </div>
 
 
@@ -232,7 +232,7 @@
                 </div>
 <div class="form-group col-12 col-lg-12 col-md-12">
                     <label for="description" class="col-form-label">Description <span class="text-danger">*</span></label>
-                    <textarea name="description[]" class="form-control" placeholder="Description" required></textarea>
+                    <textarea name="crust_description[]" class="form-control" placeholder="Description" required></textarea>
                 </div>
             </div>
         `);
@@ -255,10 +255,10 @@
             <div class="row data-toppings mb-3">
                 <div class="form-group col-12 col-lg-5 col-md-5">
                     <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
-                    <input type="text" name="name[]" class="form-control" placeholder="Name" required>
+                    <input type="text" name="topping_name[]" class="form-control" placeholder="Name" required>
                 </div><div class="form-group col-12 col-lg-5 col-md-5">
                     <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                    <input type="number" name="price[]" class="form-control" placeholder="Price" required>
+                    <input type="number" name="topping_price[]" class="form-control" placeholder="Price" required>
                 </div>
 
 
@@ -285,10 +285,10 @@
             <div class="row data-sauces mb-3">
                 <div class="form-group col-12 col-lg-5 col-md-5">
                     <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
-                    <input type="text" name="name[]" class="form-control" placeholder="Name" required>
+                    <input type="text" name="sauce_name[]" class="form-control" placeholder="Name" required>
                 </div><div class="form-group col-12 col-lg-5 col-md-5">
                     <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                    <input type="number" name="price[]" class="form-control" placeholder="Price" required>
+                    <input type="number" name="sauce_price[]" class="form-control" placeholder="Price" required>
                 </div>
 
 

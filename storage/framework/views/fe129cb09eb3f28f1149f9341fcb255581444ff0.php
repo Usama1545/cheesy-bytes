@@ -117,7 +117,7 @@
 
                                 $var = ["{eye}", "{count}"];
                                 $newvar   = ["<i class='fa-solid fa-eye'></i>", rand(Helper::appdata()->min_view_count,Helper::appdata()->max_view_count)];
-                                
+
                                 $fake_view = str_replace($var, $newvar, Helper::appdata()->fake_view_message);
                                 ?>
                                 <div class="d-flex gap-1 align-items-center blink_me mb-2">
@@ -125,7 +125,7 @@
                                 </div>
                                 <?php endif; ?>
                             <?php endif; ?>
-                            
+
                             <div class="d-flex pb-2 border-bottom">
                                 <div class="col-auto">
                                     <?php if($getitemdata->tax != '' && $getitemdata->tax != 0): ?>
@@ -728,7 +728,6 @@
         </section>
     <?php endif; ?>
     <!-- RELATED PRODUCTS Section End Here -->
-    <?php echo $__env->make('web.subscribeform', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('scripts'); ?>
     <script src="<?php echo e(url(env('ASSETSPATHURL') . 'web-assets/js/item-image-carousel/main.js')); ?>"></script>

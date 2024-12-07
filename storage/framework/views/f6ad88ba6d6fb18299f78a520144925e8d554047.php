@@ -99,31 +99,9 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="item_type" class="col-form-label"><?php echo e(trans('labels.item_type')); ?>
-
-                                                <span class="text-danger">*</span> </label>
-                                            <div class="col-md-12">
-                                                <div class="form-check-inline w-100 mb-1">
-                                                    <input class="form-check-input me-0" type="radio" name="item_type"
-                                                        id="veg" value="1" required
-                                                        <?php if($getitem->item_type == 1): ?> checked <?php endif; ?>>
-                                                    <label class="form-check-label" for="veg">
-                                                        <img src="<?php echo e(helper::image_path('veg.svg')); ?>" alt=""
-                                                            srcset=""> <?php echo e(trans('labels.veg')); ?></label>
-                                                </div>
-                                                <div class="form-check-inline w-100">
-                                                    <input class="form-check-input me-0" type="radio" name="item_type"
-                                                        id="nonveg" value="2" required
-                                                        <?php if($getitem->item_type == 2): ?> checked <?php endif; ?>>
-                                                    <label class="form-check-label" for="nonveg">
-                                                        <img src="<?php echo e(helper::image_path('nonveg.svg')); ?>" alt=""
-                                                            srcset=""> <?php echo e(trans('labels.nonveg')); ?></label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <input class="form-check-input me-0" type="radio" name="item_type"
+                                           id="veg" value="1" checked hidden
+                                           <?php if(old('item_type') == 1): ?> checked <?php endif; ?>>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 d-flex flex-wrap justify-content-between align-items-center">
@@ -205,6 +183,8 @@
                                         <div id="more_editextras_fields"></div>
                                     </div>
                                 </div>
+
+                                <hr>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6">
                                         <div class="form-group">

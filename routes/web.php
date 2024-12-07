@@ -132,8 +132,12 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 	Route::post('/promocodes/apply', [WebPromocodeController::class, 'checkpromocode']);
 	Route::post('/promocodes/remove', [WebPromocodeController::class, 'removepromocode']);
 
+    Route::get('/getCrusts', [MenuController::class, 'getCrusts']);
+    Route::get('/getToppings', [MenuController::class, 'getToppings']);
+    Route::get('/getSauces', [MenuController::class, 'getSauces']);
 
-	Route::group(['middleware' => 'UserMiddleware'], function () {
+
+    Route::group(['middleware' => 'UserMiddleware'], function () {
 
 		// user
 		Route::get('/profile', [WebUserController::class, 'getProfile'])->name('user-profile');
@@ -169,6 +173,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 	Route::get('/', function () {
 		return view('admin.auth.login');
 	});
+
+
 	Route::post('check-login', [AdminController::class, 'check_admin']);
 	Route::get('/forgot-password', function () {
 		return view('admin.auth.forgot_password');
@@ -303,8 +309,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::get('custom_pizza', [CustomPizzaController::class, 'index']);
         Route::get('custom_pizza/add', [CustomPizzaController::class, 'additem']);
         Route::post('custom_pizza/store', [CustomPizzaController::class, 'store']);
+        Route::post('custom_pizza/update', [CustomPizzaController::class, 'update']);
         Route::get('custom_pizza-{id}', [CustomPizzaController::class, 'edititem']);
         Route::post('custom_pizza/delete', [CustomPizzaController::class, 'delete']);
+
 
         // payment
 		Route::get('payment', [PaymentController::class, 'index']);
