@@ -77,10 +77,10 @@
                            href="<?php echo e(route('home')); ?>"><?php echo e(trans('labels.home')); ?></a>
                         <a class="nav-link px-3 <?php echo e(request()->is('categories') ? 'active' : ''); ?>"
                            href="<?php echo e(route('categories')); ?>"><?php echo e(trans('labels.menu')); ?></a>
-                        <a class="nav-link px-3 <?php echo e(request()->is('blogs') ? 'active' : ''); ?>"
-                           href="<?php echo e(route('blogs')); ?> "><?php echo e(trans('labels.blogs')); ?></a>
-                        <a class="nav-link px-3 <?php echo e(request()->is('faq') ? 'active' : ''); ?>"
-                           href="<?php echo e(route('faq')); ?>"><?php echo e(trans('labels.faq')); ?></a>
+
+
+
+
                         <a class="nav-link px-3 <?php echo e(request()->is('contactus') ? 'active' : ''); ?>"
                            href="<?php echo e(route('contact-us')); ?> "><?php echo e(trans('labels.help_contact_us')); ?></a></div>
 

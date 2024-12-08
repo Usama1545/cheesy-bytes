@@ -23,7 +23,7 @@
                                         <i class="fa-solid fa-circle-arrow-right"></i> </a>
                                 <?php endif; ?>
                                 <?php if($sliderdata['category_info'] != ''): ?>
-                                    <a href="<?php echo e(URL::to('/menu/?category=' . $sliderdata['category_info']->slug)); ?>"
+                                    <a href="<?php echo e(URL::to('/menu/' . $sliderdata['category_info']->slug)); ?>"
                                        class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp"><?php echo e(trans('labels.explore')); ?>
 
                                         <i class="fa-solid fa-circle-arrow-right"></i> </a>
@@ -93,7 +93,7 @@
                         <div id="category" class="owl-carousel mt-2">
                             <?php $__currentLoopData = helper::get_categories(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $categorydata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="category-wrapper category-item rounded-4">
-                                    <a href="<?php echo e(URL::to('/menu/?category=' . $categorydata->slug)); ?>">
+                                    <a href="<?php echo e(URL::to('/menu/' . $categorydata->slug)); ?>">
                                         <div class="d-flex justify-content-center">
                                             <div class="cat rounded-circle">
                                                 <img src="<?php echo e(helper::image_path($categorydata->image)); ?>"
@@ -222,7 +222,7 @@
             <div class="row">
                 <?php $__currentLoopData = helper::get_categories_list(4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $categorydata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="col-lg-3 col-md-4 col-sm-6 col-12 mt-2 position-relative">
-                        <a href="<?php echo e(URL::to('/menu/?category=' . $categorydata->slug)); ?>" class="d-block text-decoration-none">
+                        <a href="<?php echo e(URL::to('/menu/' . $categorydata->slug)); ?>" class="d-block text-decoration-none">
                             <div class="position-relative">
                                 <img src="<?php echo e(helper::image_path($categorydata->image)); ?>"
                                      class="rounded-4 img-fluid" alt="category" style="height: 340px;">

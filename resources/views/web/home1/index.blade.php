@@ -22,7 +22,7 @@
                                         <i class="fa-solid fa-circle-arrow-right"></i> </a>
                                 @endif
                                 @if ($sliderdata['category_info'] != '')
-                                    <a href="{{ URL::to('/menu/?category=' . $sliderdata['category_info']->slug) }}"
+                                    <a href="{{ URL::to('/menu/' . $sliderdata['category_info']->slug) }}"
                                        class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp">{{ trans('labels.explore') }}
                                         <i class="fa-solid fa-circle-arrow-right"></i> </a>
                                 @endif
@@ -91,7 +91,7 @@
                         <div id="category" class="owl-carousel mt-2">
                             @foreach (helper::get_categories() as $categorydata)
                                 <div class="category-wrapper category-item rounded-4">
-                                    <a href="{{ URL::to('/menu/?category=' . $categorydata->slug) }}">
+                                    <a href="{{ URL::to('/menu/' . $categorydata->slug) }}">
                                         <div class="d-flex justify-content-center">
                                             <div class="cat rounded-circle">
                                                 <img src="{{ helper::image_path($categorydata->image) }}"
@@ -217,7 +217,7 @@
             <div class="row">
                 @foreach (helper::get_categories_list(4) as $categorydata)
                     <div class="col-lg-3 col-md-4 col-sm-6 col-12 mt-2 position-relative">
-                        <a href="{{ URL::to('/menu/?category=' . $categorydata->slug) }}" class="d-block text-decoration-none">
+                        <a href="{{ URL::to('/menu/' . $categorydata->slug) }}" class="d-block text-decoration-none">
                             <div class="position-relative">
                                 <img src="{{ helper::image_path($categorydata->image) }}"
                                      class="rounded-4 img-fluid" alt="category" style="height: 340px;">

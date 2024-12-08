@@ -173,9 +173,9 @@
         <?php echo $__env->make('web.nodata', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php endif; ?>
 
-<script>
+    <script>
 
-</script>
+    </script>
 
     <style>
         @media (min-width: 1440px) {
@@ -184,6 +184,7 @@
                 max-width: 20%;
             }
         }
+
         .round-button {
             width: 70px; /* adjust to your desired width */
             height: 70px; /* adjust to your desired height */
@@ -194,10 +195,12 @@
             transition: background-color 0.3s ease; /* Smooth transition for background color */
 
         }
+
         .round-button:hover {
             background-color: #ac1515; /* Hover color for all buttons */
             color: #fff; /* Optional: Change text color on hover */
         }
+
         .round-button.selected {
             background-color: #ac1515 !important;
             color: #fff; /* Optional: Change text color for better visibility */
@@ -230,6 +233,61 @@
         .text-sm {
             font-size: 14px;
             color: grey;
+        }
+
+        .btn-outline-primary {
+            padding: 9px !important;
+            font-size: 12px;
+            font-weight: 500;
+            color: #ac1515;
+        }
+        .btn-outline-primary:hover {
+            background-color: #ac1515; /* Hover color for all buttons */
+            color: #fff; /* Optional: Change text color on hover */
+        }
+
+
+        .btn.btn-primary {
+            padding: 9px !important;
+            font-weight: 500;
+            font-size: 12px;
+            color: white;
+        }
+        .btn.btn-primary:hover {
+            background-color: #ac1515; /* Hover color for all buttons */
+            color: #fff; /* Optional: Change text color on hover */
+            border-color: #ac1515;
+        }
+
+        .pizza-topping__part {
+            display: inline-flex;
+            flex-direction: column; /* Stack SVG and label vertically */
+            align-items: center; /* Center align SVG and label */
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .pizza-topping__icon {
+            width: 30px;
+            height: 30px;
+            fill: lightgray; /* Default icon color */
+            transition: fill 0.3s;
+        }
+
+        .pizza-topping__part input:checked + svg {
+            fill: #ac1515; /* Highlight color on selection */
+        }
+
+        .pizza-topping__label {
+            margin-top: 5px; /* Add some space between SVG and label */
+            font-size: 14px;
+            color: #333;
+        }
+
+        @media (min-width: 992px) {
+            .modal-lg, .modal-xl {
+                --bs-modal-width: 900px;
+            }
         }
 
     </style>

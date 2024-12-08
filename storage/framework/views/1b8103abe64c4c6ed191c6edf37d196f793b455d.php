@@ -27,7 +27,7 @@
             <?php $__currentLoopData = helper::get_categories(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $categorydata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="col-lg-2-4 col-md-3 col-sm-4 col-12">
                     <div class="category-wrapper mx-2" style="width: 270px; height: 270px">
-                        <a href="<?php echo e(URL::to('/menu/?category=' . $categorydata->slug)); ?>">
+                        <a href="<?php echo e(URL::to('/menu/' . $categorydata->slug)); ?>">
 
                                 <img src="<?php echo e(helper::image_path($categorydata->image)); ?>" class="" style="width: 165px;height: 160px"
                                     alt="category">

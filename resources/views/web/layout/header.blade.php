@@ -77,10 +77,10 @@
                            href="{{ route('home') }}">{{ trans('labels.home') }}</a>
                         <a class="nav-link px-3 {{ request()->is('categories') ? 'active' : '' }}"
                            href="{{ route('categories') }}">{{ trans('labels.menu') }}</a>
-                        <a class="nav-link px-3 {{ request()->is('blogs') ? 'active' : '' }}"
-                           href="{{ route('blogs') }} ">{{ trans('labels.blogs') }}</a>
-                        <a class="nav-link px-3 {{ request()->is('faq') ? 'active' : '' }}"
-                           href="{{ route('faq') }}">{{ trans('labels.faq') }}</a>
+{{--                        <a class="nav-link px-3 {{ request()->is('blogs') ? 'active' : '' }}"--}}
+{{--                           href="{{ route('blogs') }} ">{{ trans('labels.blogs') }}</a>--}}
+{{--                        <a class="nav-link px-3 {{ request()->is('faq') ? 'active' : '' }}"--}}
+{{--                           href="{{ route('faq') }}">{{ trans('labels.faq') }}</a>--}}
                         <a class="nav-link px-3 {{ request()->is('contactus') ? 'active' : '' }}"
                            href="{{ route('contact-us') }} ">{{ trans('labels.help_contact_us') }}</a></div>
 

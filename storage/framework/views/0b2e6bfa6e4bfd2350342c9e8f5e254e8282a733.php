@@ -64,9 +64,7 @@
                                     </li>
                                     <li style="color: black !important"><a style="color: black !important" href="<?php echo e(route('contact-us')); ?>"
                                             class="text-white"><?php echo e(trans('labels.help_contact_us')); ?></a></li>
-                                    <li style="color: black !important"><a style="color: black !important" href="<?php echo e(route('gallery')); ?>"
-                                            class="text-white"><?php echo e(trans('labels.gallery')); ?></a>
-                                    </li>
+
                                     <?php if(@helper::checkaddons('blog')): ?>
                                         <li style="color: black !important"><a style="color: black !important" href="<?php echo e(route('blogs')); ?>"
                                                 class="text-white"><?php echo e(trans('labels.blogs')); ?></a>

@@ -26,7 +26,7 @@
             @foreach (helper::get_categories() as $categorydata)
                 <div class="col-lg-2-4 col-md-3 col-sm-4 col-12">
                     <div class="category-wrapper mx-2" style="width: 270px; height: 270px">
-                        <a href="{{ URL::to('/menu/?category=' . $categorydata->slug) }}">
+                        <a href="{{ URL::to('/menu/' . $categorydata->slug) }}">
 
                                 <img src="{{ helper::image_path($categorydata->image) }}" class="" style="width: 165px;height: 160px"
                                     alt="category">

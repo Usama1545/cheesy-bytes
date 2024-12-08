@@ -125,7 +125,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body row">
-                <div class="col-md-8 border-end">
+                <div class="col-md-7 border-end">
                     <!-- Size Selection -->
                     <div class="card mb-3">
                         <div class="card-header">Select Size</div>
@@ -159,6 +159,14 @@
                     <div class="card mb-3">
                         <div class="card-header">Select Sauces</div>
                         <div class="card-body justify-content-between gap-2" id="sauceContainer"></div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card mb-3">
+                        <div class="card-header">My Pizza</div>
+                        <div class="card-body">
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -397,11 +405,18 @@
         });
     });
 
+    document.querySelectorAll('.circle').forEach(circle => {
+        circle.addEventListener('click', function () {
+            circle.classList.toggle('filled');
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         const sizeContainer = document.getElementById('sizeContainer');
         const crustContainer = document.getElementById('crustContainer');
         const toppingContainer = document.getElementById('toppingContainer');
         const sauceContainer = document.getElementById('sauceContainer');
+        const selectedToppings = {};
 
         let allCrusts = [];
         let allToppings = [];
@@ -420,8 +435,24 @@
                     allToppings = toppings;
                     allSauces = sauces;
                     displayOptions(); // Initially empty until size is selected
+                    autoSelectFirstSize();
+                    autoSelectFirstCrust();
                 })
                 .catch(error => console.error('Error fetching options:', error));
+        }
+
+        function autoSelectFirstSize() {
+            const firstSize = sizeContainer.querySelector('.size-btn');
+            if (firstSize) {
+                firstSize.click();
+            }
+        }
+
+        function autoSelectFirstCrust() {
+            const firstSize = crustContainer.querySelector('.crust-checkbox');
+            if (firstSize) {
+                firstSize.click();
+            }
         }
 
         // Display options based on the selected size
@@ -463,6 +494,7 @@
                 label.querySelector('input').addEventListener('change', () => selectCrust(crust));
                 crustContainer.appendChild(label);
             });
+            autoSelectFirstCrust();
         }
 
         function displayToppings() {
@@ -482,10 +514,121 @@
                 data-price="${topping.price}"
             />
             ${topping.name} ($${topping.price})
+            <div class="topping-options" style="display: none; margin-top: 10px;">
+                <div class="form-group justify-content-between">
+                    <div class="btn-group" role="group" data-topping-id="${topping.id}">
+                        <div class="pizza-topping">
+                            <!-- Left -->
+                            <label data-quid="topping-portion-C-1/2-left" class="pizza-topping__part pizza-topping__part--left">
+                                <input aria-label="Cheese on left side" data-part="left" name="Part|${topping.id}" hidden type="radio" value="1/2">
+                                <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon">
+                                    <path d="M11.4847 21.876L12.5861 21.9883V20.8811V3.11841V2.01126L11.4847 2.12357C9.03877 2.37296 6.77239 3.52107 5.12442 5.34558C3.47646 7.17009 2.56415 9.54119 2.56415 11.9998C2.56415 14.4583 3.47646 16.8294 5.12442 18.6539C6.77238 20.4785 9.03876 21.6266 11.4847 21.876Z"></path>
+                                </svg>
+                                <span class="pizza-topping__label">Left</span>
+                            </label>
+
+                            <!-- Full -->
+                            <label data-quid="topping-portion-C-full" class="pizza-topping__part pizza-topping__part--full">
+                                <input aria-label="Cheese on full pizza" data-part="full" name="Part|${topping.id}" hidden type="radio" value="1">
+                                <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon">
+                                    <circle cx="12.5" cy="12" r="10"></circle>
+                                </svg>
+                                <span class="pizza-topping__label">Full</span>
+                            </label>
+
+                            <!-- Right -->
+                            <label data-quid="topping-portion-C-1/2-right" class="pizza-topping__part pizza-topping__part--right">
+                                <input aria-label="Cheese on right side" data-part="right" name="Part|${topping.id}" hidden type="radio" value="1/2">
+                                <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon">
+                                    <path d="M12.5861 2.01126V2.12357C15.0321 2.37296 17.2985 3.52107 18.9465 5.34558C20.5945 7.17009 21.5068 9.54119 21.5068 11.9998C21.5068 14.4583 20.5945 16.8294 18.9465 18.6539C17.2985 20.4785 15.0321 21.6266 12.5861 21.876V2.01126Z"></path>
+                                </svg>
+                                <span class="pizza-topping__label">Right</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mt-2 justify-content-between">
+                    <div class="btn-group" role="group" data-topping-id="${topping.id}">
+                        <button type="button" class="btn btn-outline-primary quantity-btn p-1 text-sm" data-quantity="none">None</button>
+                        <button type="button" class="btn btn-outline-primary quantity-btn p-1 text-sm" data-quantity="light">Light</button>
+                        <button type="button" class="btn btn-outline-primary quantity-btn p-1 text-sm" data-quantity="normal">Normal</button>
+                        <button type="button" class="btn btn-outline-primary quantity-btn p-1 text-sm" data-quantity="extra">Extra</button>
+                    </div>
+                </div>
+            </div>
         `;
-                label.querySelector('input').addEventListener('change', (event) => toggleTopping(topping, event.target.checked));
+
+                const input = label.querySelector('input.topping-checkbox');
+                const optionsContainer = label.querySelector('.topping-options');
+                const sideInputs = label.querySelectorAll('[data-part]');
+                const quantityButtons = label.querySelectorAll('.quantity-btn');
+
+                // Handle topping checkbox toggle
+                input.addEventListener('change', (event) => {
+                    const isChecked = event.target.checked;
+                    optionsContainer.style.display = isChecked ? 'block' : 'none';
+                    if (!isChecked) {
+                        delete selectedToppings[topping.id]; // Remove topping if unchecked
+
+                    } else {
+                        selectedToppings[topping.id] = { topping_id:topping.id ,side: null, quantity: null }; // Initialize if checked
+                        clearOtherToppingOptions(topping.id);
+                    }
+                });
+
+                sideInputs.forEach(sideInput => {
+                    sideInput.addEventListener('change', () => {
+                        const selectedSide = label.querySelector(
+                            'input[name="Part|' + topping.id + '"]:checked'
+                        )?.dataset.part || null;
+                        updateToppingSelection(topping.id, selectedSide, undefined);
+                    });
+                });
+
+                quantityButtons.forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        updateButtonGroup(button, 'quantity-btn');
+                        const selectedQuantity = button.dataset.quantity;
+                        updateToppingSelection(topping.id, undefined, selectedQuantity);
+                    });
+                });
+
                 toppingContainer.appendChild(label);
             });
+        }
+
+
+        function clearOtherToppingOptions(selectedToppingId) {
+            const allOptions = document.querySelectorAll('.topping-options');
+            allOptions.forEach(options => {
+                const toppingId = options.querySelector('.side-btn')?.closest('.form-group').dataset.toppingId;
+                if (toppingId && toppingId !== String(selectedToppingId)) {
+                    options.style.display = 'none';
+                    const input = document.querySelector(`.topping-checkbox[data-topping-id="${toppingId}"]`);
+                    if (input) input.checked = false; // Uncheck the other topping
+                }
+            });
+        }
+
+
+        function updateButtonGroup(selectedButton, className) {
+            const buttons = selectedButton.parentElement.querySelectorAll(`.${className}`);
+            buttons.forEach(button => button.classList.remove('btn-primary'));
+            buttons.forEach(button => button.classList.add('btn-outline-primary'));
+            selectedButton.classList.remove('btn-outline-primary');
+            selectedButton.classList.add('btn-primary');
+        }
+
+        function updateToppingSelection(toppingId, side, quantity) {
+            if (!selectedToppings[toppingId]) {
+                selectedToppings[toppingId] = { topping_id:toppingId ,side: null, quantity: null };
+            }
+            if (side !== undefined) {
+                selectedToppings[toppingId].side = side;
+            }
+            if (quantity !== undefined) {
+                selectedToppings[toppingId].quantity = quantity;
+            }
         }
 
         function displaySauces() {
@@ -532,15 +675,12 @@
             // Logic to handle crust selection (e.g., updating the summary)
         }
 
-        function toggleTopping(topping, isChecked) {
-            console.log('Topping toggled:', topping, isChecked);
-            // Logic to add/remove topping in the summary based on isChecked
-        }
-
         function toggleSauce(sauce, isChecked) {
             console.log('Sauce toggled:', sauce, isChecked);
             // Logic to add/remove sauce in the summary based on isChecked
         }
+
+
     });
 
 </script>

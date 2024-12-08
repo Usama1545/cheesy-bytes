@@ -56,7 +56,8 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 	Route::get('/direction', [HomeController::class, 'change_dir'])->name('change_dir');
 	Route::get('/categories', [HomeController::class, 'categories'])->name('categories');
 	// item
-	Route::get('/menu', [MenuController::class, 'index'])->name('menu');
+    Route::get('menu/{category}', [MenuController::class, 'index'])->name('menu');
+    Route::get('{country}/menu/{category}', [MenuController::class, 'index_con'])->name('menu');
 	Route::get('/show-item', [WebItemController::class, 'showitem']);
 	Route::get('/item-{slug}', [WebItemController::class, 'itemdetails'])->name('itemdetails');
 	Route::get('/search', [WebItemController::class, 'search'])->name('search');

@@ -63,9 +63,7 @@
                                     </li>
                                     <li style="color: black !important"><a style="color: black !important" href="{{ route('contact-us') }}"
                                             class="text-white">{{ trans('labels.help_contact_us') }}</a></li>
-                                    <li style="color: black !important"><a style="color: black !important" href="{{ route('gallery') }}"
-                                            class="text-white">{{ trans('labels.gallery') }}</a>
-                                    </li>
+
                                     @if (@helper::checkaddons('blog'))
                                         <li style="color: black !important"><a style="color: black !important" href="{{ route('blogs') }}"
                                                 class="text-white">{{ trans('labels.blogs') }}</a>
