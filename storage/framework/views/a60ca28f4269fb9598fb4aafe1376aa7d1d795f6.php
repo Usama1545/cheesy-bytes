@@ -57,21 +57,21 @@
             </ul>
         </li>
     <?php endif; ?>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <?php if(Auth::user()->type != 1): ?>
         <?php if(in_array('1', $modules) || in_array('2', $modules)): ?>
             <li class="nav-item mt-3">
@@ -226,14 +226,14 @@
             <i class="fa-solid fa-list-tree"></i><span class="nav-text "><?php echo e(trans('labels.subcategories')); ?></span>
         </a>
     </li>
-    <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('11', $modules) == true ? '' : 'd-none') : ''); ?>"
-        id="11">
-        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/shippingarea*') ? 'active' : ''); ?>"
-           href="<?php echo e(URL::to('/admin/shippingarea')); ?>" aria-expanded="false">
-            <i class="fa-solid fa-list-timeline"></i><span
-                class="nav-text "><?php echo e(trans('labels.shippingarea')); ?></span>
-        </a>
-    </li>
+    
+    
+    
+    
+    
+    
+    
+    
     <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('30', $modules) == true ? '' : 'd-none') : ''); ?>"
         id="30">
         <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/tax*') ? 'active' : ''); ?>"
@@ -289,6 +289,23 @@
     <li class="nav-item mt-3">
         <h6 class="text-muted mb-2 fs-7 text-uppercase"><?php echo e(trans('labels.restaurant_management')); ?></h6>
     </li>
+    <li class="nav-item mb-2 fs-7 "
+        id="11">
+        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/branches*') ? 'active' : ''); ?>"
+           href="<?php echo e(URL::to('/admin/branches')); ?>" aria-expanded="false">
+            <i class="fa-solid fa-list-timeline"></i><span
+                class="nav-text ">Branches</span>
+        </a>
+    </li>
+    <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('11', $modules) == true ? '' : 'd-none') : ''); ?>"
+        id="11">
+        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/shippingarea*') ? 'active' : ''); ?>"
+           href="<?php echo e(URL::to('/admin/shippingarea')); ?>" aria-expanded="false">
+            <i class="fa-solid fa-list-timeline"></i><span
+                class="nav-text "><?php echo e(trans('labels.shippingarea')); ?></span>
+        </a>
+    </li>
+
     
     <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('12', $modules) == true ? '' : 'd-none') : ''); ?>"
         id="12">

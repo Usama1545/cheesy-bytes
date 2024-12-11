@@ -222,4 +222,9 @@ class HomeController extends Controller
         session()->put('direction', $request->dir);
         return redirect()->back();
     }
+
+    public function location()
+    {
+        return view('web.restaurant');
+    }
 }

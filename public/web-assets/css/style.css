@@ -41,7 +41,8 @@ ul {
     border-color: var(--bs-primary);
 }
 .btn-primary:hover {
-    background-color: #f83838;
+    background-color: #ac1515;
+    border-color: black;
 }
 
 .btn-secondary {

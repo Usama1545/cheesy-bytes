@@ -15,11 +15,11 @@
                                 <h5 class="animate__animated animate__fadeInUp mb-3">{{ $sliderdata->title }}</h5>
                                 <p class="animate__animated animate__fadeInUp">{{ $sliderdata->description }}</p>
                                 <div class="button-container mt-auto">
-                                    <a href="{{ URL::to('/restaurants?type=Delivery') }}"
+                                    <a href="{{ URL::to('/location?type=Delivery') }}"
                                        class="btn btn-primary fw-500 px-4 py-2 mx-6 animate__animated animate__fadeInUp">
                                         DELIVERY
                                     </a>
-                                    <a href="{{ URL::to('/restaurants?type=Carryout') }}"
+                                    <a href="{{ URL::to('/location?type=Carryout') }}"
                                        class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp">
                                         CARRYOUT
                                     </a>

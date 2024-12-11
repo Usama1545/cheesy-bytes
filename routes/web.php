@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\BranchController;
 use App\Http\Controllers\admin\CustomPizzaController;
 use App\Http\Controllers\admin\DippingController;
 use Illuminate\Support\Facades\Route;
@@ -56,9 +57,11 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 	Route::get('/', [HomeController::class, 'index'])->name('home');
 	Route::get('/direction', [HomeController::class, 'change_dir'])->name('change_dir');
 	Route::get('/categories', [HomeController::class, 'categories'])->name('categories');
+	Route::get('/location', [HomeController::class, 'location'])->name('location');
 	// item
     Route::get('menu/{category}', [MenuController::class, 'index'])->name('menu');
     Route::get('{country}/menu/{category}', [MenuController::class, 'index_con'])->name('menu');
+
 	Route::get('/show-item', [WebItemController::class, 'showitem']);
 	Route::get('/item-{slug}', [WebItemController::class, 'itemdetails'])->name('itemdetails');
 	Route::get('/search', [WebItemController::class, 'search'])->name('search');
@@ -354,6 +357,14 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 		Route::post('shippingarea/delete', [ShippingareaController::class, 'delete']);
 		Route::post('shippingarea/update-{id}', [ShippingareaController::class, 'update']);
 		Route::post('shippingarea/reorder_shippingarea', [ShippingareaController::class, 'reorder_shippingarea']);
+
+        // branches
+        Route::get('branches', [BranchController::class, 'index']);
+		Route::get('branches/add', [BranchController::class, 'add']);
+		Route::post('branches/store', [BranchController::class, 'store']);
+		Route::get('branches-{id}', [BranchController::class, 'Edit']);
+		Route::post('branches/delete', [BranchController::class, 'delete']);
+		Route::post('branches/update-{id}', [BranchController::class, 'update']);
 		// tax
 		Route::get('tax', [TaxController::class, 'index']);
 		Route::get('tax/add', [TaxController::class, 'add']);

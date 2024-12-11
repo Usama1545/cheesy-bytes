@@ -56,21 +56,21 @@
             </ul>
         </li>
     @endif
-{{--    @if (@helper::checkaddons('otp'))--}}
-{{--        <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('26', $modules) == true ? '' : 'd-none') : '' }}"--}}
-{{--            id="26">--}}
-{{--            <a class="nav-link rounded d-flex {{ request()->is('admin/otp-configuration*') ? 'active' : '' }}"--}}
-{{--               href="{{ URL::to('/admin/otp-configuration') }}" aria-expanded="false">--}}
-{{--                <i class="fa-solid fa-key-skeleton"></i>--}}
-{{--                <div class="w-100 d-flex justify-content-between align-items-center">--}}
-{{--                    {{ trans('labels.otp_configuration') }}--}}
-{{--                    @if (env('Environment') == 'sendbox')--}}
-{{--                        <small class="badge bg-danger">{{ trans('labels.addon') }}</small>--}}
-{{--                    @endif--}}
-{{--                </div>--}}
-{{--            </a>--}}
-{{--        </li>--}}
-{{--    @endif--}}
+    {{--    @if (@helper::checkaddons('otp'))--}}
+    {{--        <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('26', $modules) == true ? '' : 'd-none') : '' }}"--}}
+    {{--            id="26">--}}
+    {{--            <a class="nav-link rounded d-flex {{ request()->is('admin/otp-configuration*') ? 'active' : '' }}"--}}
+    {{--               href="{{ URL::to('/admin/otp-configuration') }}" aria-expanded="false">--}}
+    {{--                <i class="fa-solid fa-key-skeleton"></i>--}}
+    {{--                <div class="w-100 d-flex justify-content-between align-items-center">--}}
+    {{--                    {{ trans('labels.otp_configuration') }}--}}
+    {{--                    @if (env('Environment') == 'sendbox')--}}
+    {{--                        <small class="badge bg-danger">{{ trans('labels.addon') }}</small>--}}
+    {{--                    @endif--}}
+    {{--                </div>--}}
+    {{--            </a>--}}
+    {{--        </li>--}}
+    {{--    @endif--}}
     @if (Auth::user()->type != 1)
         @if (in_array('1', $modules) || in_array('2', $modules))
             <li class="nav-item mt-3">
@@ -222,14 +222,14 @@
             <i class="fa-solid fa-list-tree"></i><span class="nav-text ">{{ trans('labels.subcategories') }}</span>
         </a>
     </li>
-    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('11', $modules) == true ? '' : 'd-none') : '' }}"
-        id="11">
-        <a class="nav-link rounded d-flex {{ request()->is('admin/shippingarea*') ? 'active' : '' }}"
-           href="{{ URL::to('/admin/shippingarea') }}" aria-expanded="false">
-            <i class="fa-solid fa-list-timeline"></i><span
-                class="nav-text ">{{ trans('labels.shippingarea') }}</span>
-        </a>
-    </li>
+    {{--    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('11', $modules) == true ? '' : 'd-none') : '' }}"--}}
+    {{--        id="11">--}}
+    {{--        <a class="nav-link rounded d-flex {{ request()->is('admin/shippingarea*') ? 'active' : '' }}"--}}
+    {{--           href="{{ URL::to('/admin/shippingarea') }}" aria-expanded="false">--}}
+    {{--            <i class="fa-solid fa-list-timeline"></i><span--}}
+    {{--                class="nav-text ">{{ trans('labels.shippingarea') }}</span>--}}
+    {{--        </a>--}}
+    {{--    </li>--}}
     <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('30', $modules) == true ? '' : 'd-none') : '' }}"
         id="30">
         <a class="nav-link rounded d-flex {{ request()->is('admin/tax*') ? 'active' : '' }}"
@@ -285,6 +285,23 @@
     <li class="nav-item mt-3">
         <h6 class="text-muted mb-2 fs-7 text-uppercase">{{ trans('labels.restaurant_management') }}</h6>
     </li>
+    <li class="nav-item mb-2 fs-7 "
+        id="11">
+        <a class="nav-link rounded d-flex {{ request()->is('admin/branches*') ? 'active' : '' }}"
+           href="{{ URL::to('/admin/branches') }}" aria-expanded="false">
+            <i class="fa-solid fa-list-timeline"></i><span
+                class="nav-text ">Branches</span>
+        </a>
+    </li>
+    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('11', $modules) == true ? '' : 'd-none') : '' }}"
+        id="11">
+        <a class="nav-link rounded d-flex {{ request()->is('admin/shippingarea*') ? 'active' : '' }}"
+           href="{{ URL::to('/admin/shippingarea') }}" aria-expanded="false">
+            <i class="fa-solid fa-list-timeline"></i><span
+                class="nav-text ">{{ trans('labels.shippingarea') }}</span>
+        </a>
+    </li>
+
     {{--    @endif--}}
     <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('12', $modules) == true ? '' : 'd-none') : '' }}"
         id="12">
