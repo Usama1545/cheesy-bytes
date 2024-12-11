@@ -57,22 +57,21 @@
             </ul>
         </li>
     <?php endif; ?>
-    <?php if(@helper::checkaddons('otp')): ?>
-        <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('26', $modules) == true ? '' : 'd-none') : ''); ?>"
-            id="26">
-            <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/otp-configuration*') ? 'active' : ''); ?>"
-               href="<?php echo e(URL::to('/admin/otp-configuration')); ?>" aria-expanded="false">
-                <i class="fa-solid fa-key-skeleton"></i>
-                <div class="w-100 d-flex justify-content-between align-items-center">
-                    <?php echo e(trans('labels.otp_configuration')); ?>
 
-                    <?php if(env('Environment') == 'sendbox'): ?>
-                        <small class="badge bg-danger"><?php echo e(trans('labels.addon')); ?></small>
-                    <?php endif; ?>
-                </div>
-            </a>
-        </li>
-    <?php endif; ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <?php if(Auth::user()->type != 1): ?>
         <?php if(in_array('1', $modules) || in_array('2', $modules)): ?>
             <li class="nav-item mt-3">
@@ -255,6 +254,13 @@
         <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/addongroup*') ? 'active' : ''); ?>"
            href="<?php echo e(URL::to('/admin/addongroup')); ?>" aria-expanded="false">
             <i class="fa-solid fa-plus-minus"></i><span class="nav-text "><?php echo e(trans('labels.addons_group')); ?></span>
+        </a>
+    </li>
+    <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('9', $modules) == true ? '' : 'd-none') : ''); ?>"
+        id="9">
+        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/sides') ? 'active' : ''); ?>"
+           href="<?php echo e(URL::to('/admin/dipping')); ?>" aria-expanded="false">
+            <i class="fa-solid fa-plus-minus"></i><span class="nav-text ">Dipping</span>
         </a>
     </li>
     <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : ''); ?>"

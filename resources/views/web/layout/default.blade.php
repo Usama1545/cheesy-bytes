@@ -128,13 +128,14 @@
                 <div class="col-md-7 border-end">
                     <!-- Size Selection -->
                     <div class="card mb-3">
-                        <div class="card-header">Select Size</div>
+                        <div class="card-header" style="background: #D6B62B">Select Size</div>
                         <div class="card-body">
-                            <div class=" d-flex justify-content-between flex-wrap gap-2" id="sizeContainer">
+                            <div class=" d-flex justify-content-between flex-wrap gap-2 mx-5" id="sizeContainer">
                                 @foreach(helper::customPizzaSize() as $size)
                                     <button type="button"
                                             class="btn round-button size-btn"
                                             data-size-id="{{ $size->id }}"
+                                            data-label="{{ $size->label }}"
                                             data-price="{{ $size->price }}">
                                         {{ $size->name }}"
                                     </button>
@@ -144,12 +145,11 @@
                             <div class="card-body d-flex flex-wrap gap-2" id="crustContainer"></div>
                         </div>
                     </div>
-
                     <!-- Crust Selection -->
 
                     <!-- Topping Selection -->
                     <div class="card mb-3">
-                        <div class="card-header">Select Toppings</div>
+                        <div class="card-header" style="background: #D6B62B">Select Toppings</div>
                         <div class="card-body">
                             <div class="topping-grid" id="toppingContainer"></div>
                         </div>
@@ -157,23 +157,146 @@
 
                     <!-- Sauce Selection -->
                     <div class="card mb-3">
-                        <div class="card-header">Select Sauces</div>
+                        <div class="card-header" style="background: #D6B62B">Select Sauces</div>
                         <div class="card-body justify-content-between gap-2" id="sauceContainer"></div>
                     </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="card mb-3">
-                        <div class="card-header">My Pizza</div>
-                        <div class="card-body">
 
+
+                    <!-- Dipping Selection -->
+                    <div class="card mb-3">
+                        <div class="card-header" style="background: #D6B62B">Select Dipping Sause</div>
+                        <div class="card-body">
+                            @foreach(helper::getSides() as $dipping)
+                                <div class="d-flex align-items-center gap-3 mb-3 dipping-item" data-name="{{ $dipping->name }}">
+                                    <!-- Dipping Image -->
+                                    <img src="{{ helper::image_path($dipping->image) }}"
+                                         alt="Dipping Sauce"
+                                         class="img-fluid rounded h-70px"
+                                         style="object-fit: cover;">
+
+                                    <!-- Dipping Name -->
+                                    <span class="flex-grow-1 text-sm">{{ $dipping->name }}</span>
+
+                                    <!-- Quantity Controls -->
+                                    <div class="d-flex align-items-center ms-auto">
+                                        <!-- Decrease Button -->
+                                        <button data-action="decrease"
+                                                class="btn btn-secondary bg-gray rounded-circle d-flex justify-content-center align-items-center"
+                                                style="width: 40px; height: 40px; font-size: 1.2rem; background: #a8a7a7; border-color: gray;">
+                                            -
+                                        </button>
+
+                                        <!-- Quantity Display -->
+                                        <span class="fw-semibold mx-3 quantity"
+                                              style="min-width: 30px; text-align: center;">0</span>
+
+                                        <!-- Increase Button -->
+                                        <button data-action="increase"
+                                                class="btn btn-primary rounded-circle d-flex justify-content-center align-items-center"
+                                                style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Special Selection -->
+
+                    <div class="card mb-3">
+                        <div class="card-header" style="background: #D6B62B">Special Instructions</div>
+                        <div class="card-body">
+                            <div class="row col-12" style="">
+                                <!-- Bake Options -->
+                                <div class="col-12 col-md-3" style="border-right: 1px solid #cccaca">
+                                    <h6>BAKE</h6>
+                                    <div>
+                                        <label class="text-sm" style="font-size: 11px">
+                                            <input type="radio" name="bake" class="form-check-input" value="well-done" >
+                                            Well Done
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm" style="font-size: 11px">
+                                            <input type="radio" name="bake" class="form-check-input" value="normal-bake" checked>
+                                            Normal Bake
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Seasoning Options -->
+                                <div class="col-12 col-md-5" style="border-right: 1px solid #cccaca">
+                                    <h6>SEASONING</h6>
+                                    <div>
+                                        <label class="text-sm" style="font-size: 11px">
+                                            <input type="radio" name="seasoning" class="form-check-input" value="garlic-seasoned-crust" checked>
+                                            Garlic-Seasoned Crust
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm" style="font-size: 11px">
+                                            <input type="radio" name="seasoning" class="form-check-input" value="no-garlic-seasoned-crust" >
+                                            No Garlic-Seasoned Crust
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Cut Options -->
+                                <div class="col-12 col-md-4">
+                                    <h6>CUT</h6>
+                                    <div>
+                                        <label class="text-sm" style="font-size: 11px">
+                                            <input type="radio" name="cut" class="form-check-input" value="pie-cut" checked>
+                                            Pie Cut
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm" style="font-size: 11px">
+                                            <input type="radio" name="cut" class="form-check-input" value="square-cut" >
+                                            Square Cut
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm" style="font-size: 11px">
+                                            <input type="radio" name="cut" class="form-check-input" value="uncut">
+                                            Uncut
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-5">
+                    <div class="card mb-3" id="myPizzaCard">
+                        <div class="card-header" style="background: #D6B62B">My Pizza</div>
+                        <div class="card-body">
+                            <div id="PizzaSummary" class="pizza-summary"></div>
+                            <hr style="margin: 10px 0; border: 1px solid #ddd;">
+                            <div class="d-flex align-items-center gap-3" style="font-size: 0.800rem;">
+                                <span class="">Quantity:</span>
+                                <button data-action="decrease_quantity"
+                                        class="btn btn-secondary rounded-circle d-flex justify-content-center align-items-center"
+                                        style="width: 40px; height: 40px; font-size: 1.5rem;background: #a8a7a7; border-color: gray;">
+                                    -
+                                </button>
+                                <span id="overall-quantity" class="fw-semibold"
+                                      style="min-width: 30px; text-align: center;">1</span>
+                                <button data-action="increase_quantity"
+                                        class="btn btn-primary rounded-circle d-flex justify-content-center align-items-center"
+                                        style="width: 40px; height: 40px; font-size: 1.5rem;">
+                                    +
+                                </button>
+                            </div>
+                            <button id="submit-quantity" class="btn btn-primary mt-3"
+                                    style="width: 100%;font-size: 15px">Submit
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveChanges">Save and Add to Cart</button>
             </div>
         </div>
     </div>
@@ -404,12 +527,104 @@
         });
     });
 
+
+    function updateOverallQuantity(change) {
+        const quantityDisplay = document.getElementById('overall-quantity');
+        let currentQuantity = parseInt(quantityDisplay.textContent, 10);
+        console.log(currentQuantity);
+        currentQuantity = Math.max(1, currentQuantity + change); // Ensure the quantity is at least 1
+        quantityDisplay.textContent = currentQuantity;
+        document.getElementById('overall-quantity').textContent = currentQuantity;
+    }
+
+
     document.addEventListener('DOMContentLoaded', function () {
         const sizeContainer = document.getElementById('sizeContainer');
         const crustContainer = document.getElementById('crustContainer');
         const toppingContainer = document.getElementById('toppingContainer');
         const sauceContainer = document.getElementById('sauceContainer');
-        const selectedToppings = {};
+        const quantityValue = document.getElementById('overall-quantity');
+        const decreaseButton = document.querySelector('button[data-action="decrease"]');
+        const increaseButton = document.querySelector('button[data-action="increase"]');
+        const decreaseQuantityButton = document.querySelector('button[data-action="decrease_quantity"]');
+        const increaseQuantityButton = document.querySelector('button[data-action="increase_quantity"]');
+        const submitButton = document.getElementById('submit-quantity');
+        const dippingItems = document.querySelectorAll('.dipping-item');
+        const selectedDippingsElement = document.getElementById('selected-dippings');
+        const selectedDippings = {};
+        let dippingsArray = [];
+        let bake = '';
+        let cut = '';
+        let seasoning = '';
+        let dippingName = '';
+
+        let quantity = 1;
+        let pizzaQuantity = 1;
+
+        function updateQuantityDisplay() {
+            quantityValue.textContent = pizzaQuantity;
+        }
+
+        increaseButton.addEventListener('click', () => {
+            quantity++;
+            updateQuantityDisplay();
+        });
+
+        increaseQuantityButton.addEventListener('click', () => {
+            pizzaQuantity++;
+            updateQuantityDisplay();
+        });
+
+        decreaseButton.addEventListener('click', () => {
+            if (quantity > 1) {
+                quantity--;
+                updateQuantityDisplay();
+            }
+        });
+        decreaseQuantityButton.addEventListener('click', () => {
+            if (pizzaQuantity > 1) {
+                pizzaQuantity--;
+                updateQuantityDisplay();
+            }
+        });
+
+        submitButton.addEventListener('click', () => {
+            const payload = {
+                size: selectedSize,
+                crust: selectedCrusts,
+                toppings: selectedToppings,
+                sauce: selectedSauces,
+                quantity: pizzaQuantity,
+                bake: bake,
+                cut: cut,
+                seasoning: seasoning,
+                selectedDippings: dippingsArray
+            };
+
+            fetch('/create-pizza', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(`Order submitted successfully: ${JSON.stringify(data)}`);
+                })
+                .catch(error => {
+                    console.error('Error submitting order:', error);
+                    alert('Failed to submit the order. Please try again.');
+                });
+        });
+
+        updateQuantityDisplay();
+
+
+        let selectedToppings = [];
+        let selectedCrusts = null;
+        let selectedSauces = null;
 
         let allCrusts = [];
         let allToppings = [];
@@ -452,6 +667,9 @@
         function displayOptions() {
             if (!selectedSize) return;
 
+            selectedSauces = null;
+            selectedCrusts = null;
+            selectedToppings = [];
             // Filter and display crusts
             displayCrusts();
 
@@ -464,7 +682,7 @@
 
         function displayCrusts() {
             crustContainer.innerHTML = ''; // Clear crust container
-            console.log(selectedSize.id);
+            console.log(selectedSize);
             const filteredCrusts = allCrusts.filter(crust =>
                 String(crust.size_id) === String(selectedSize.id)
             );
@@ -561,10 +779,23 @@
                     const isChecked = event.target.checked;
                     optionsContainer.style.display = isChecked ? 'block' : 'none';
                     if (!isChecked) {
-                        delete selectedToppings[topping.id]; // Remove topping if unchecked
+                        const index = selectedToppings.findIndex(t => t.topping_id === topping.id);
+                        if (index > -1) {
+                            selectedToppings.splice(index, 1);
+                        }
+                        label.querySelectorAll('[data-part]').forEach(input => input.checked = false);
+                        label.querySelectorAll('.quantity-btn').forEach(btn => btn.classList.add('btn-outline-primary'));
+                        label.querySelectorAll('.quantity-btn').forEach(btn => btn.classList.remove('btn-primary'));
+
+                        renderPizzaSummary();
 
                     } else {
-                        selectedToppings[topping.id] = { topping_id:topping.id ,side: null, quantity: null }; // Initialize if checked
+                        selectedToppings.push({
+                            topping_id: topping.id,
+                            topping_name: topping.name,
+                            side: null,
+                            quantity: null
+                        }); // Initialize if checked
                         clearOtherToppingOptions(topping.id);
                     }
                 });
@@ -574,7 +805,7 @@
                         const selectedSide = label.querySelector(
                             'input[name="Part|' + topping.id + '"]:checked'
                         )?.dataset.part || null;
-                        updateToppingSelection(topping.id, selectedSide, undefined);
+                        updateToppingSelection(topping.id, topping.name, selectedSide, undefined);
                     });
                 });
 
@@ -582,14 +813,13 @@
                     button.addEventListener('click', (event) => {
                         updateButtonGroup(button, 'quantity-btn');
                         const selectedQuantity = button.dataset.quantity;
-                        updateToppingSelection(topping.id, undefined, selectedQuantity);
+                        updateToppingSelection(topping.id, topping.name, undefined, selectedQuantity);
                     });
                 });
 
                 toppingContainer.appendChild(label);
             });
         }
-
 
         function clearOtherToppingOptions(selectedToppingId) {
             const allOptions = document.querySelectorAll('.topping-options');
@@ -603,25 +833,28 @@
             });
         }
 
+        function updateToppingSelection(toppingId, toppingName, side, quantity) {
+            const index = selectedToppings.findIndex(t => t.topping_id === toppingId);
 
-        function updateButtonGroup(selectedButton, className) {
-            const buttons = selectedButton.parentElement.querySelectorAll(`.${className}`);
-            buttons.forEach(button => button.classList.remove('btn-primary'));
-            buttons.forEach(button => button.classList.add('btn-outline-primary'));
-            selectedButton.classList.remove('btn-outline-primary');
-            selectedButton.classList.add('btn-primary');
-        }
-
-        function updateToppingSelection(toppingId, side, quantity) {
-            if (!selectedToppings[toppingId]) {
-                selectedToppings[toppingId] = { topping_id:toppingId ,side: null, quantity: null };
+            if (index === -1) {
+                // Add a new topping if it doesn't exist
+                selectedToppings.push({
+                    topping_id: toppingId || null,
+                    topping_name: toppingName || null,
+                    side: side || null,
+                    quantity: quantity || null
+                });
+            } else {
+                // Update the existing topping's values
+                if (side !== undefined) {
+                    selectedToppings[index].side = side;
+                }
+                if (quantity !== undefined) {
+                    selectedToppings[index].quantity = quantity;
+                }
             }
-            if (side !== undefined) {
-                selectedToppings[toppingId].side = side;
-            }
-            if (quantity !== undefined) {
-                selectedToppings[toppingId].quantity = quantity;
-            }
+            console.log(selectedToppings);
+            renderPizzaSummary();
         }
 
         function displaySauces() {
@@ -653,6 +886,7 @@
             if (card) {
                 selectedSize = {
                     id: card.dataset.sizeId,
+                    label: card.dataset.label,
                     name: card.textContent.trim(),
                     price: parseFloat(card.dataset.price),
                 };
@@ -664,14 +898,164 @@
         fetchOptions();
 
         function selectCrust(crust) {
-            console.log('Crust selected:', crust);
-            // Logic to handle crust selection (e.g., updating the summary)
+            selectedCrusts = crust;
+            renderPizzaSummary();
         }
 
         function toggleSauce(sauce, isChecked) {
-            console.log('Sauce toggled:', sauce, isChecked);
-            // Logic to add/remove sauce in the summary based on isChecked
+            selectedSauces = sauce;
+            renderPizzaSummary();
         }
+
+        function updateButtonGroup(selectedButton, className) {
+            const buttons = selectedButton.parentElement.querySelectorAll(`.${className}`);
+            buttons.forEach(button => button.classList.remove('btn-primary'));
+            buttons.forEach(button => button.classList.add('btn-outline-primary'));
+            selectedButton.classList.remove('btn-outline-primary');
+            selectedButton.classList.add('btn-primary');
+        }
+
+        dippingItems.forEach(item => {
+            const decreaseButton = item.querySelector('button[data-action="decrease"]');
+            const increaseButton = item.querySelector('button[data-action="increase"]');
+            const quantityElement = item.querySelector('.quantity');
+            const dippingName = item.getAttribute('data-name');
+
+            // Increase quantity
+            increaseButton.addEventListener('click', () => {
+                const currentQuantity = parseInt(quantityElement.textContent, 10);
+                const newQuantity = currentQuantity + 1;
+                quantityElement.textContent = newQuantity;
+
+                selectedDippings[dippingName] = newQuantity;
+
+                dippingsArray.push({'name': dippingName, 'quantity': newQuantity});
+                updateSelectedDippings();
+            });
+
+            // Decrease quantity
+            decreaseButton.addEventListener('click', () => {
+                const currentQuantity = parseInt(quantityElement.textContent, 10);
+                if (currentQuantity > 0) {
+                    const newQuantity = currentQuantity - 1;
+                    quantityElement.textContent = newQuantity;
+
+                    if (newQuantity === 0) {
+                        dippingsArray = dippingsArray.filter(dipping => dipping.name !== dippingName);
+                        delete selectedDippings[dippingName];
+                    } else {
+                        selectedDippings[dippingName] = newQuantity;
+                    }
+
+
+                    updateSelectedDippings();
+                }
+            });
+        });
+
+        // Update the selected dippings display
+        function updateSelectedDippings() {
+            const namesWithQuantities = Object.entries(selectedDippings)
+                .filter(([name, quantity]) => quantity > 0)
+                .map(([name, quantity]) => `${quantity} ${name}`);
+
+            dippingName = namesWithQuantities.length > 0 ? namesWithQuantities.join(', ') : '';
+            renderPizzaSummary();
+        }
+
+        function getSelectedValues() {
+            // Get the selected radio value for each category
+            bake = document.querySelector('input[name="bake"]:checked')?.value || '';
+            seasoning = document.querySelector('input[name="seasoning"]:checked')?.value || '';
+            cut = document.querySelector('input[name="cut"]:checked')?.value || '';
+
+        }
+
+        // Add event listener to all radio buttons
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', getSelectedValues);
+        });
+
+        // Initial fetch to show default values
+        getSelectedValues();
+
+        function renderPizzaSummary() {
+            const pizzaSummaryElement = document.getElementById('PizzaSummary');
+            pizzaSummaryElement.innerHTML = ''; // Clear previous summary
+
+            // Size and Crust
+            const sizeCrustElement = document.createElement('div');
+            sizeCrustElement.style.marginBottom = '10px';
+
+            sizeCrustElement.innerHTML = `<strong>  ${selectedSize.label} (${selectedSize.name}), ${selectedCrusts.name}</strong> `;
+            pizzaSummaryElement.appendChild(sizeCrustElement);
+
+
+            // Sauce
+            const sauceElement = document.createElement('div');
+            sauceElement.style.marginBottom = '10px';
+            if (selectedSauces) {
+                sauceElement.innerHTML = `<span class="text-sm" style="font-size: 12px">${selectedSauces.name}</span>`;
+            }
+            pizzaSummaryElement.appendChild(sauceElement);
+
+            const dippingElement = document.createElement('div');
+            dippingElement.style.marginBottom = '10px';
+
+            dippingElement.innerHTML = `<span class="fw-bold text-sm" style="font-size: 12px">Dippings</span>:<span class="text-sm" style="font-size: 12px"> ${dippingName} </span>`;
+            if(dippingName) {
+                pizzaSummaryElement.appendChild(dippingElement);
+            }
+
+            // Toppings grouped by side
+            const sides = ['left', 'right', 'full'];
+            sides.forEach(side => {
+                const toppingsOnSide = selectedToppings.filter(topping => topping.side === side);
+                if (toppingsOnSide.length > 0) {
+                    const toppingElement = document.createElement('div');
+                    toppingElement.style.display = 'flex';
+                    toppingElement.style.alignItems = 'center'; // Vertically center content
+                    toppingElement.style.marginBottom = '10px'; // Add spacing between elements if needed
+
+                    const sideSvg = side === 'left'
+                        ? `
+                            <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #ac1515; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
+                                <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #ac1515">
+                                    <path d="M11.4847 21.876L12.5861 21.9883V20.8811V3.11841V2.01126L11.4847 2.12357C9.03877 2.37296 6.77239 3.52107 5.12442 5.34558C3.47646 7.17009 2.56415 9.54119 2.56415 11.9998C2.56415 14.4583 3.47646 16.8294 5.12442 18.6539C6.77238 20.4785 9.03876 21.6266 11.4847 21.876Z"></path>
+                                </svg>
+                            </div>`
+                        : side === 'right'
+                            ? `
+                                <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #ac1515; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
+                                    <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #ac1515">
+                                        <path d="M12.5861 2.01126V2.12357C15.0321 2.37296 17.2985 3.52107 18.9465 5.34558C20.5945 7.17009 21.5068 9.54119 21.5068 11.9998C21.5068 14.4583 20.5945 16.8294 18.9465 18.6539C17.2985 20.4785 15.0321 21.6266 12.5861 21.876V2.01126Z"></path>
+                                    </svg>
+                                </div>`
+                            : `
+                                <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #ac1515; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
+                                    <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #ac1515">
+                                        <circle cx="12.5" cy="12" r="10"></circle>
+                                    </svg>
+                                </div>`;
+
+                    toppingElement.innerHTML = `
+                        ${sideSvg}
+                        <div  class="text-sm" style="margin-left: 10px; font-size: 12px;">
+                            ${toppingsOnSide.map(topping => `${topping.topping_name} (${topping.quantity || ''})`).join(', ')}
+                        </div>
+                    `;
+
+                    pizzaSummaryElement.appendChild(toppingElement);
+                }
+            });
+
+
+
+
+
+        }
+
+        renderPizzaSummary();
 
 
     });

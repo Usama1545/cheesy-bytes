@@ -10,17 +10,18 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <div id="privacy-policy-three" class="privacy-policy">
-                            <form method="post" action="<?php echo e(URL::to('admin/dipping/store')); ?>" name="about" id="about"
+                            <form method="post" action="<?php echo e(URL::to('admin/custom_pizza/update')); ?>" name="about" id="about"
                                   enctype="multipart/form-data">
                                 <?php echo csrf_field(); ?>
-
+                                <input type="hidden" class="form-control" id="id" name="id"
+                                       value="<?php echo e($getitem->id); ?>">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="cat_id" class="col-form-label">Size
                                                 <span class="text-danger">*</span> </label>
-                                            <input name="name" required class="form-control"
-                                                  value="<?php echo e(old('name')); ?>" placeholder="size">
+                                            <input name="name" type="number" required class="form-control"
+                                                   value="<?php echo e($getitem->name); ?>" placeholder="size">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -29,20 +30,21 @@
                                                    class="col-form-label"><?php echo e(trans('labels.price')); ?><span
                                                     class="text-danger">*</span></label>
                                             <input name="price" type="number" class="form-control" required
-                                                   value="<?php echo e(old('price')); ?>" placeholder="price">
+                                                   value="<?php echo e($getitem->price); ?>" placeholder="price">
 
 
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="col-md-6">
                                     <label class="col-form-label" for=""><?php echo e(trans('labels.image')); ?>
 
                                         <span class="text-danger">*</span> </label>
-                                    <input type="file" class="form-control" name="image" accept="image/*" required>
+                                    <input type="file" class="form-control" name="image" id="image"
+                                           accept="image/*">
+                                    <img src="<?php echo e(helper::image_path($getitem->image)); ?>" alt=""
+                                         class="img-fluid rounded h-50px mt-1">
                                 </div>
-
                                 <div
                                     class="form-group <?php echo e(session()->get('direction') == '2' ? 'text-start' : 'text-end'); ?>">
                                     <a href="<?php echo e(URL::to('admin/item')); ?>"
@@ -73,4 +75,4 @@
 
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/custom_pizza/additem.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/dipping/edititem.blade.php ENDPATH**/ ?>

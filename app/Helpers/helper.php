@@ -13,6 +13,7 @@ use App\Models\Payment;
 use App\Models\Order;
 use App\Models\FooterFeatures;
 use App\Models\Ratting;
+use App\Models\Sides;
 use App\Models\User;
 use App\Models\Time;
 use App\Models\Languages;
@@ -458,7 +459,7 @@ class helper
 
     public static function customPizzaSize()
     {
-        return CustomPizzaSize::select('id', 'name', 'price')->get();
+        return CustomPizzaSize::select('id', 'name','label', 'price')->get();
     }
 
     public static function getCrusts($sizeId)
@@ -474,6 +475,11 @@ class helper
     public static function getSauces($sizeId)
     {
         return CustomPizzaSauce::where('size_id', $sizeId)->get();  // Fetch crusts based on sizeId
+    }
+
+    public static function getSides()
+    {
+        return Sides::all();  // Fetch crusts based on sizeId
     }
 
     public static function top_deals()

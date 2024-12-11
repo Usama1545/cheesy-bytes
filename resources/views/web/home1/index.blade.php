@@ -10,26 +10,26 @@
                 <div class="carousel-inner">
                     @foreach ($sliders as $key => $sliderdata)
                         <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
-                            <img src="{{ helper::image_path($sliderdata->image) }}" class="d-block img-fluid"
-                                 alt="slider">
-                            <div
-                                class="carousel-caption d-flex h-100 align-items-center justify-content-center flex-column">
-                                <h5 class="animate__animated animate__fadeInUp">{{ $sliderdata->title }}</h5>
+                            <img src="{{ helper::image_path($sliderdata->image) }}" class="d-block img-fluid" alt="slider">
+                            <div class="carousel-caption d-flex h-100 align-items-center justify-content-center flex-column">
+                                <h5 class="animate__animated animate__fadeInUp mb-3">{{ $sliderdata->title }}</h5>
                                 <p class="animate__animated animate__fadeInUp">{{ $sliderdata->description }}</p>
-                                @if ($sliderdata['item_info'] != '')
-                                    <a href="{{ URL::to('/item-' . $sliderdata['item_info']->slug) }}"
-                                       class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp">{{ trans('labels.explore') }}
-                                        <i class="fa-solid fa-circle-arrow-right"></i> </a>
-                                @endif
-                                @if ($sliderdata['category_info'] != '')
-                                    <a href="{{ URL::to('/menu/' . $sliderdata['category_info']->slug) }}"
-                                       class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp">{{ trans('labels.explore') }}
-                                        <i class="fa-solid fa-circle-arrow-right"></i> </a>
-                                @endif
+                                <div class="button-container mt-auto">
+                                    <a href="{{ URL::to('/restaurants?type=Delivery') }}"
+                                       class="btn btn-primary fw-500 px-4 py-2 mx-6 animate__animated animate__fadeInUp">
+                                        DELIVERY
+                                    </a>
+                                    <a href="{{ URL::to('/restaurants?type=Carryout') }}"
+                                       class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp">
+                                        CARRYOUT
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
+
+
                 <button class="carousel-control-prev {{ count($sliders) == 1 ? 'd-none' : '' }}" type="button"
                         data-bs-target="#slidercarousel" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -120,6 +120,36 @@
         </section>
     @endif
     <!-- Category Section End Here -->
+
+    @if (count($topitemlist) > 0)
+        <section class="menu sec-padding position-relative">
+            <div class="container">
+                <div class="row g-3 align-items-center justify-content-between mb-sm-5 mb-4">
+                    <div class="col-auto menu-heading">
+                        <h1 class="text-uppercase">{{ trans('labels.trending') }}</h1>
+                        <p class="sub-lables text-capitalize mt-2 mb-0">Popular Products</p>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ URL::to('/view-all?type=topitems') }}"
+                           class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3">{{ trans('labels.view_all') }}</a>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    @foreach ($topitemlist as $itemdata)
+                        @include('web.home1.itemview')
+                    @endforeach
+                </div>
+            </div>
+{{--            <div class="tomato-shape-1 d-md-flex d-none">--}}
+{{--                <img src="{{ asset('web-assets/images/theme-bg-image/tomato-shape.png') }}"--}}
+{{--                     alt="shape-img">--}}
+{{--            </div>--}}
+{{--            <div class="chili-shape-1 d-md-flex d-none">--}}
+{{--                <img src="{{ asset('web-assets/images/theme-bg-image/chili-shape.png') }}"--}}
+{{--                     alt="shape-img">--}}
+{{--            </div>--}}
+        </section>
+    @endif
 
     <!-- Top Deal Section Start Here -->
     @if (count($topdealsproduct) > 0 )
@@ -221,7 +251,8 @@
                             <div class="position-relative">
                                 <img src="{{ helper::image_path($categorydata->image) }}"
                                      class="rounded-4 img-fluid" alt="category" style="height: 340px;">
-                                <div class="position-absolute top-50 start-50 translate-middle text-black fw-bold px-3 rounded text-center">
+                                <div
+                                    class="position-absolute top-50 start-50 translate-middle text-black fw-bold px-3 rounded text-center">
                                     <p class="m-0" style="font-size: 16px;">Restaurant</p>
                                     <p class="m-0" style="font-size: 24px;">{{ $categorydata->category_name }}</p>
                                 </div>
@@ -234,22 +265,50 @@
     </section>
 
     <!-- slider-gallery end Here -->
-<style>
-    .gallery-slider .item {
-        width: 345px !important; /* Fixed width */
-        height: 340px;          /* Fixed height */
-        margin: 10px;           /* Add spacing */
-    }
+    <style>
+        .carousel-caption {
+            position: absolute;
+            bottom: 20px; /* Adjust the space from the bottom of the image */
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+        }
 
-    .gallery-slider .item img.fixed-dimensions {
-        width: 100%;    /* Make the image fit the fixed container */
-        height: 100%;   /* Stretch the image to fill the container */
-        object-fit: cover; /* Ensure proper scaling */
+        .carousel-caption h5 {
+            margin-top: 140px; /* Moves the title lower */
+        }
+
+        .button-container {
+            margin-top: 20px; /* Adds a gap between the title and the buttons */
+            display: flex;
+            justify-content: center; /* Centers buttons horizontally */
+            gap: 100px; /* Space between the buttons */
+        }
+
+        .carousel-item img {
+            object-fit: cover; /* Ensures the image covers the entire space */
+        }
+        .gallery-slider .item {
+            width: 345px !important; /* Fixed width */
+            height: 340px; /* Fixed height */
+            margin: 10px; /* Add spacing */
+        }
+
+        .gallery-slider .item img.fixed-dimensions {
+            width: 100%; /* Make the image fit the fixed container */
+            height: 100%; /* Stretch the image to fill the container */
+            object-fit: cover; /* Ensure proper scaling */
+        }
+@media (max-width: 786px) {
+    .carousel-caption h5 {
+        margin-top: 90px; /* Moves the title lower */
     }
-    /*.blog-wrapper .owl-item {*/
-    /*    width: 360px !important; !* Set the fixed width *!*/
-    /*}*/
-</style>
+}
+        /*.blog-wrapper .owl-item {*/
+        /*    width: 360px !important; !* Set the fixed width *!*/
+        /*}*/
+    </style>
 @endsection
 @section('scripts')
     <!-- JS For Promotional Banner Section 1 -->

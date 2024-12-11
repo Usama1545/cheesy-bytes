@@ -40,6 +40,9 @@ ul {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary);
 }
+.btn-primary:hover {
+    background-color: #f83838;
+}
 
 .btn-secondary {
     color: #fff;

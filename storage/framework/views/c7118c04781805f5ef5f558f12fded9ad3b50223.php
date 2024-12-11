@@ -283,6 +283,18 @@
             font-size: 14px;
             color: #333;
         }
+        #myPizzaCard {
+            position: sticky;
+            top: 15px; /* Adjust the top position for the sticky card */
+            z-index: 1050; /* Ensure it's above other content */
+        }
+
+        @media (max-width: 767px) {
+            #myPizzaCard {
+                position: relative; /* For mobile screens, we can revert to a non-sticky position */
+                margin-top: 10px; /* Add a bit of spacing on top for smaller screens */
+            }
+        }
 
         @media (min-width: 992px) {
             .modal-lg, .modal-xl {

@@ -40,10 +40,10 @@
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
                                                 <a class="btn btn-sm btn-info square" tooltip="<?php echo e(trans('labels.edit')); ?>"
-                                                   href="<?php echo e(URL::to('admin/custom_pizza-' . $item->id)); ?>"> <i class="fa-solid fa-pen-to-square"></i></a>
+                                                   href="<?php echo e(URL::to('admin/dipping-' . $item->id)); ?>"> <i class="fa-solid fa-pen-to-square"></i></a>
                                                 <a class="btn btn-sm btn-danger square" tooltip="<?php echo e(trans('labels.delete')); ?>"
                                                    <?php if(env('Environment') == 'sendbox'): ?> onclick="myFunction()"
-                                                   <?php else: ?> onclick="Delete('<?php echo e($item->id); ?>','<?php echo e(URL::to('admin/custom_pizza/delete')); ?>')" <?php endif; ?>>
+                                                   <?php else: ?> onclick="Delete('<?php echo e($item->id); ?>','<?php echo e(URL::to('admin/dipping/delete')); ?>')" <?php endif; ?>>
                                                     <i class="fa fa-trash"></i></a>
                                             </div>
                                         </td>
@@ -62,4 +62,4 @@
 <?php $__env->startSection('script'); ?>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/custom_pizza/item.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/dipping/item.blade.php ENDPATH**/ ?>

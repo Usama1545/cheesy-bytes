@@ -20,7 +20,7 @@
                                             <label for="cat_id" class="col-form-label">Size
                                                 <span class="text-danger">*</span> </label>
                                             <input name="name" required class="form-control"
-                                                  value="<?php echo e(old('name')); ?>" placeholder="size">
+                                                   value="<?php echo e(old('name')); ?>" placeholder="size">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -73,4 +73,4 @@
 
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/custom_pizza/additem.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/dipping/additem.blade.php ENDPATH**/ ?>

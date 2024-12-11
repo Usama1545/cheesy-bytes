@@ -24,12 +24,10 @@
     <div class="container">
         <div class="row g-3 mb-3 mt-5">
             @foreach (helper::get_categories() as $categorydata)
-                <div class="col-lg-2-4 col-md-3 col-sm-4 col-12">
-                    <div class="category-wrapper mx-2" style="width: 270px; height: 270px">
+                <div class="col-lg-2-4 col-md-4 col-sm-6 col-12">
+                    <div class="category-wrapper mx-2">
                         <a href="{{ URL::to('/menu/' . $categorydata->slug) }}">
-
-                                <img src="{{ helper::image_path($categorydata->image) }}" class="" style="width: 165px;height: 160px"
-                                    alt="category">
+                            <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category">
                         </a>
                         <p class="my-2 text-start">{{ $categorydata->category_name }}</p>
                     </div>
@@ -38,6 +36,18 @@
         </div>
     </div>
     <style>
+        .category-wrapper {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .category-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the image covers the entire space */
+        }
+
         @media (min-width: 992px) {
             .col-lg-2-4 {
                 flex: 0 0 20%;  /* Makes the columns take up 20% of the container on large screens */

@@ -9,7 +9,7 @@ class CustomPizza extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sauce_ids','size_id','crust_id','base_price'];
+    protected $fillable = ['sauce_id','size_id','crust_id','base_price','bake','cut','seasoning'];
 
     public function toppings()
     {

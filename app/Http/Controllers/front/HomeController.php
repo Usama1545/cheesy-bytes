@@ -102,7 +102,7 @@ class HomeController extends Controller
                 ->groupBy('order_details.item_id', 'item.id', 'cart.item_id')
                 ->orderByDesc('item_order_counter')
                 ->where('item.item_status', '1')
-                ->take(9)->get();
+                ->take(3)->get();
 
             $todayspecial = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('favorite', function ($query) use ($user_id) {
@@ -160,7 +160,7 @@ class HomeController extends Controller
                 ->groupBy('order_details.item_id', 'item.id', 'cart.item_id')
                 ->orderByDesc('item_order_counter')
                 ->where('item.item_status', '1')
-                ->take(8)->get();
+                ->take(3)->get();
 
             $todayspecial = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('cart', function ($query) use ($session_id) {

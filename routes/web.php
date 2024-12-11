@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\CustomPizzaController;
+use App\Http\Controllers\admin\DippingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\ItemController;
@@ -95,7 +96,8 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 
 
 	// cart
-	Route::get('/cart', [CartController::class, 'index'])->name('cart');
+    Route::post('/create-pizza', [CustomPizzaController::class, 'create_pizza'])->name('create_pizza');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart');
 	Route::post('/cart/deleteitem', [CartController::class, 'deletecartitem']);
 	Route::post('/cart/qtyupdate', [CartController::class, 'qtyupdate']);
 	Route::post('addtocart', [CartController::class, 'addtocart']);
@@ -313,6 +315,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::post('custom_pizza/update', [CustomPizzaController::class, 'update']);
         Route::get('custom_pizza-{id}', [CustomPizzaController::class, 'edititem']);
         Route::post('custom_pizza/delete', [CustomPizzaController::class, 'delete']);
+
+        Route::get('dipping', [DippingController::class, 'index']);
+        Route::get('dipping/add', [DippingController::class, 'additem']);
+        Route::post('dipping/store', [DippingController::class, 'store']);
+        Route::post('dipping/update', [DippingController::class, 'update']);
+        Route::get('dipping-{id}', [DippingController::class, 'edititem']);
+        Route::post('dipping/delete', [DippingController::class, 'delete']);
 
 
         // payment
