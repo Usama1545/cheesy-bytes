@@ -118,7 +118,7 @@ class MenuController extends Controller
             return $item->subcategory_info->subcategory_name ?? $item->category_info->category_name;
         });
 
-        return view('web.menu', compact('topdeals', 'categorydata', 'subcategories', 'getitemlist'));
+        return view('web.menu', compact('topdeals', 'categorydata', 'subcategories', 'getitemlist','country'));
     }
 
     public function getCrusts()

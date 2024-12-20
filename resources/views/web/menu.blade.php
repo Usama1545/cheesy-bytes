@@ -23,8 +23,19 @@
         <section class="menu-section">
 
             <div class="container">
+                    <div class="card  w-100 mt-3" style="background-color: #D6B62B">
+                        <div class="d-flex flex-column flex-md-row justify-content-between mx-1 mx-md-5 my-1 align-items-center">
+                            <h4 class="my-3 text-uppercase fw-bold">START YOUR ORDER</h4>
+                            <div class="d-flex  flex-md-row align-items-center gap-2 mt-2 mt-md-0">
+                                <a href="{{ URL::to('/location?type=Delivery') }}" class="btn btn-secondary">Delivery</a>
+                                <span class="mx-1  text-sm text-uppercase ">- OR -</span>
+                                <a href="{{ URL::to('/location?type=Carryout') }}" class="btn btn-secondary">Carryout</a>
+                            </div>
+                        </div>
+                    </div>
+
                 <div class="d-flex justify-content-between align-items-center w-100">
-                    <div>
+                    <div class="mx-0 mx-md-3">
                         <h2 class="my-3 text-uppercase">
                             CHEESY BITE {{ $categorydata->category_name }}
                         </h2>
@@ -35,10 +46,10 @@
                             The Cheesy Bite Lunch
                         </p>
                     </div>
-                    <div>
+                    <div class="mx-0 mx-md-3">
                         @if(strtolower(@$categorydata->category_name) == strtolower('Pizza'))
                             <button
-                                class="btn btn-sm btn-secondary fw-500 py-2 px-4 rounded-3 d-flex justify-content-center align-items-center"
+                                class="btn btn-sm btn-secondary fw-500 py-2 mt-5 mt-md-0 px-4 rounded-3 d-flex justify-content-center align-items-center"
                                 data-bs-toggle="modal" data-bs-target="#customPizzaModal"
                                 style="min-width: 120px;">
                                 Create Pizza
@@ -49,13 +60,13 @@
                     </div>
                 </div>
 
-                <div class="row">
+
 
                     @if (count($getitemlist) > 0)
                         <div class="menu my-0">
-                            <div class="row g-4 boxes">
+                            <div class="row mx-1 g-4 boxes">
                                 @foreach ($getitemlist as $subcategory => $groupItems)
-                                    <div class="card mx-1" style="background-color: #D6B62B">
+                                    <div class="card " style="background-color: #D6B62B">
                                         <h5 class="my-3 text-uppercase fw-bold"> {{ $subcategory }}</h5>
                                     </div>
 
@@ -160,12 +171,13 @@
                                     @endforeach
                                 @endforeach
                             </div>
+                            <h1>Welcome to Cheesy Bite – The Best Cheesy, Halal, and Stuffed Crust Pizza in {{ $country }}!
+                            </h1>
                         </div>
                     @else
                         @include('web.nodata')
                     @endif
                 </div>
-            </div>
         </section>
     @else
         @include('web.nodata')
@@ -195,12 +207,12 @@
         }
 
         .round-button:hover {
-            background-color: #ac1515; /* Hover color for all buttons */
+            background-color: #DE1616; /* Hover color for all buttons */
             color: #fff; /* Optional: Change text color on hover */
         }
 
         .round-button.selected {
-            background-color: #ac1515 !important;
+            background-color: #DE1616 !important;
             color: #fff; /* Optional: Change text color for better visibility */
         }
 
@@ -237,10 +249,11 @@
             padding: 9px !important;
             font-size: 12px;
             font-weight: 500;
-            color: #ac1515;
+            color: #DE1616;
         }
+
         .btn-outline-primary:hover {
-            background-color: #ac1515; /* Hover color for all buttons */
+            background-color: #DE1616; /* Hover color for all buttons */
             color: #fff; /* Optional: Change text color on hover */
         }
 
@@ -251,10 +264,11 @@
             font-size: 12px;
             color: white;
         }
+
         .btn.btn-primary:hover {
-            background-color: #ac1515; /* Hover color for all buttons */
+            background-color: #DE1616; /* Hover color for all buttons */
             color: #fff; /* Optional: Change text color on hover */
-            border-color: #ac1515;
+            border-color: #DE1616;
         }
 
         .pizza-topping__part {
@@ -273,7 +287,7 @@
         }
 
         .pizza-topping__part input:checked + svg {
-            fill: #ac1515; /* Highlight color on selection */
+            fill: #DE1616; /* Highlight color on selection */
         }
 
         .pizza-topping__label {
@@ -281,6 +295,7 @@
             font-size: 14px;
             color: #333;
         }
+
         #myPizzaCard {
             position: sticky;
             top: 15px; /* Adjust the top position for the sticky card */

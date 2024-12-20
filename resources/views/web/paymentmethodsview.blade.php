@@ -5,7 +5,7 @@
     @foreach ($getpaymentmethods as $key => $pmdata)
         @php
             // Check if the current $pmdata is a system addon and activated
-            if ($pmdata->payment_type == '1' || $pmdata->payment_type == '2') {
+            if ($pmdata->payment_type == '1' || $pmdata->payment_type == '2' || $pmdata->payment_type == '4') {
                 $systemAddonActivated = true;
             } else {
                 $systemAddonActivated = false;

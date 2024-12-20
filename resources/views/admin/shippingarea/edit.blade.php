@@ -9,6 +9,22 @@
                         @csrf
                         <div class="row">
                             <input type="hidden" name="id"value="{{ $shippingareadata->id }}">
+                            <div class="form-group">
+                                <label class="form-label">{{ trans('labels.state') }}<span class="text-danger"> *
+                                        </span></label>
+                                <select class="form-control form-select" name="state_id">
+                                    @foreach($states as $state)
+                                        <option value="{{ $state->id  }}" {{ $state->id == $shippingareadata->state_id ? 'selected' : '' }}>{{ $state->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ trans('labels.city') }}<span class="text-danger"> *
+                                        </span></label>
+                                <input type="text" class="form-control" name="city" value="{{ $shippingareadata->city }}"
+                                       placeholder="{{ trans('labels.city') }}" required>
+                            </div>
+
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-label">{{ trans('labels.area_name') }}

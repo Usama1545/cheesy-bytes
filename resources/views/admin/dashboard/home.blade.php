@@ -144,7 +144,7 @@
                                     @forelse ($user_years as $useryear)
                                         <option value="{{ $useryear->year }}" {{ date('Y') == $useryear->year ? 'selected' : '' }}>{{ $useryear->year }}</option>
                                     @empty
-                                        <option value="" selected disabled>{{ trans('labels.select') }}</option>    
+                                        <option value="" selected disabled>{{ trans('labels.select') }}</option>
                                     @endforelse
                                 </select>
                             </div>
@@ -167,7 +167,7 @@
                                     @forelse ($earnings_years as $earnings)
                                         <option value="{{ $earnings->year }}" {{ date('Y') == $earnings->year ? 'selected' : '' }}>{{ $earnings->year }}</option>
                                     @empty
-                                        <option value="" selected disabled>{{ trans('labels.select') }}</option>    
+                                        <option value="" selected disabled>{{ trans('labels.select') }}</option>
                                     @endforelse
                                 </select>
                             </div>
@@ -233,7 +233,7 @@
                                     @forelse ($order_years as $orderyear)
                                         <option value="{{ $orderyear->year }}" {{ date('Y') == $orderyear->year ? 'selected' : '' }}>{{ $orderyear->year }}</option>
                                     @empty
-                                        <option value="" selected disabled>{{ trans('labels.select') }}</option>    
+                                        <option value="" selected disabled>{{ trans('labels.select') }}</option>
                                     @endforelse
                                 </select>
                             </div>
@@ -259,7 +259,7 @@
         var labels = {{ Js::from($orderlabels) }};
         var deliverydata = {{ Js::from($deliverydata) }};
         var pickupdata = {{ Js::from($pickupdata) }};
-        
+
         var delivery_orders = {{ Js::from(trans('labels.delivery_orders')) }};
         var pickup_orders = {{ Js::from(trans('labels.pickup_orders')) }};
         createOrdersChart(labels, deliverydata, pickupdata);
@@ -290,13 +290,13 @@
                 labels: labels,
                 datasets: [{
                     label: delivery_orders,
-                    backgroundColor: ['#ac1515'],
-                    borderColor: ['#ac1515'],
+                    backgroundColor: ['#DE1616'],
+                    borderColor: ['#DE1616'],
                     data: deliverydata,
                 }, {
                     label: pickup_orders,
-                    backgroundColor: ['#ac151563'],
-                    borderColor: ['#ac1515'],
+                    backgroundColor: ['#DE1616'],
+                    borderColor: ['#DE1616'],
                     data: pickupdata,
                 }]
             };
@@ -410,8 +410,8 @@
                 labels: labels,
                 datasets: [{
                     label: 'Earnings ',
-                    backgroundColor: ['#ac1515'],
-                    borderColor: ['#ac1515'],
+                    backgroundColor: ['#DE1616'],
+                    borderColor: ['#DE1616'],
                     pointStyle: 'circle',
                     pointRadius: 5,
                     pointHoverRadius: 10,

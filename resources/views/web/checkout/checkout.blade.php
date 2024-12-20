@@ -55,35 +55,35 @@
                                         <div class="col-12 d-flex gap-3">
                                             @if ($getsettings->pickup_delivery == 1)
                                                 <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type"
-                                                        value="1" checked id="delivery">
+                                                    <input class="form-check-input" type="radio" name="order_type" value="1" id="delivery"
+                                                        {{ $address->address_type === 'delivery' ? 'checked' : ($address->address_type === 'carryout' ? '' : 'checked')  }}>
                                                     <label class="form-check-label fs-7 fw-500" for="delivery">
                                                         {{ trans('labels.delivery') }}
                                                     </label>
                                                 </div>
                                                 <div class="form-check form-check-inline mb-0">
                                                     <input class="form-check-input" type="radio" name="order_type"
-                                                        value="2" id="pickup">
+                                                        value="2" id="pickup" {{ $address->address_type === 'carryout' ? 'checked' : '' }}>
                                                     <label class="form-check-label fs-7 fw-500" for="pickup">
                                                         {{ trans('labels.take_away') }}
                                                     </label>
                                                 </div>
-                                            @elseif($getsettings->pickup_delivery == 2)
-                                                <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type"
-                                                        value="1" checked id="delivery">
-                                                    <label class="form-check-label fs-7 fw-500" for="delivery">
-                                                        {{ trans('labels.delivery') }}
-                                                    </label>
-                                                </div>
-                                            @elseif($getsettings->pickup_delivery == 3)
-                                                <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type"
-                                                        value="2" id="pickup" checked>
-                                                    <label class="form-check-label fs-7 fw-500" for="pickup">
-                                                        {{ trans('labels.take_away') }}
-                                                    </label>
-                                                </div>
+{{--                                            @elseif($getsettings->pickup_delivery == 2)--}}
+{{--                                                <div class="form-check form-check-inline mb-0">--}}
+{{--                                                    <input class="form-check-input" type="radio" name="order_type"--}}
+{{--                                                        value="1" checked id="delivery">--}}
+{{--                                                    <label class="form-check-label fs-7 fw-500" for="delivery">--}}
+{{--                                                        {{ trans('labels.delivery') }}--}}
+{{--                                                    </label>--}}
+{{--                                                </div>--}}
+{{--                                            @elseif($getsettings->pickup_delivery == 3)--}}
+{{--                                                <div class="form-check form-check-inline mb-0">--}}
+{{--                                                    <input class="form-check-input" type="radio" name="order_type"--}}
+{{--                                                        value="2" id="pickup" checked>--}}
+{{--                                                    <label class="form-check-label fs-7 fw-500" for="pickup">--}}
+{{--                                                        {{ trans('labels.take_away') }}--}}
+{{--                                                    </label>--}}
+{{--                                                </div>--}}
                                             @endif
                                         </div>
                                     </div>
@@ -211,50 +211,58 @@
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <textarea name="address" id="new_address" class="form-control" rows="6"
-                                                placeholder="{{ trans('labels.address') }}" required>{{ old('address') }}</textarea>
+                                                placeholder="{{ trans('labels.address') }}" required>{{ $address->address ?? old('address') }}</textarea>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label for="landmark" class="form-label">{{ trans('labels.landmark') }}
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" name="landmark" id="new_landmark"
-                                                placeholder="{{ trans('labels.landmark') }}"
-                                                value="{{ old('landmark') }}">
-                                        </div>
+
                                         <div class="col-md-6">
                                             <label for="city" class="form-label">{{ trans('labels.city') }}
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" class="form-control" name="city" id="new_city"
-                                                placeholder="{{ trans('labels.city') }}" value="{{ old('city') }}">
+                                                placeholder="{{ trans('labels.city') }}" value="{{ $address->city ?? old('city') }}">
                                         </div>
                                         <div class="col-md-6">
                                             <label for="state" class="form-label">{{ trans('labels.state') }}
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control" name="state" id="new_state"
-                                                placeholder="{{ trans('labels.state') }}" value="{{ old('state') }}">
+                                            <select class="form-control form-select" name="state_id" id="state">
+                                                @foreach($states as $state)
+                                                    <option value="{{ $state->name }}" {{ $address->state == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label for="country" class="form-label">{{ trans('labels.country') }}
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" name="country" id="new_country"
-                                                placeholder="{{ trans('labels.country') }}"
-                                                value="{{ old('country') }}">
-                                        </div>
+
                                         <div class="col-md-6">
                                             <label for="pincode" class="form-label">{{ trans('labels.pincode') }}
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" class="form-control" name="pincode" id="new_pincode"
                                                 placeholder="{{ trans('labels.pincode') }}"
-                                                value="{{ old('pincode') }}">
+                                                value="{{ $address->zip ?? old('pincode') }}">
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="card mb-3" id="pickupdiv">
+                                <div class="card-body">
+                                    <div class="heading mb-2 border-bottom">
+                                        <h5>{{ trans('labels.shippingarea') }}</h5>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <select name="delivery_area" id="pickup_area" class="form-select">
+                                                <option value="" data-charge="0">{{ trans('labels.select') }}
+                                                </option>
+                                                @foreach ($branches as $area)
+                                                    <option value="{{ $area->id }}"
+                                                            data-charge="0">{{ $area->name.','.$area->address.' '.$area->city.' '.$area->state->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card mb-3" id="shipping_area">
                                 <div class="card-body">
                                     <div class="heading mb-2 border-bottom">
@@ -262,7 +270,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <select name="delivery_area" id="delivery_area" class="form-select">
+                                            <select name="delivery_area" id="shipping_delivery_area" class="form-select">
                                                 <option value="" data-charge="0">{{ trans('labels.select') }}
                                                 </option>
                                                 @foreach ($shippingarea as $area)
@@ -376,7 +384,7 @@
                                         <div class="row justify-content-between align-items-center">
                                             <div class="col-auto"><span>{{ $tax }}</span></div>
                                             <div class="col-auto">
-                                                <span> {{ helper::currency_format($rate) }}</sp>
+                                                <span> {{ helper::currency_format($rate) }}</span>
                                             </div>
                                         </div>
                                     @endforeach
@@ -428,6 +436,7 @@
                 <input type="hidden" name="user_email" id="user_email" value="{{ @Auth::user()->email }}">
                 <input type="hidden" name="user_mobile" id="user_mobile" value="{{ @Auth::user()->mobile }}">
                 <input type="hidden" name="buynow" id="buynow" value="{{ request()->get('buynow') }}">
+                <input type="hidden" name="delivery_area" id="buynow" value="{{ request()->get('buynow') }}">
 
                 <input type="hidden" name="sloturl" id="sloturl" value="{{ URL::to('/timeslot') }}">
                 <input type="hidden" name="orderurl" id="orderurl" value="{{ URL::to('placeorder') }}">
@@ -602,6 +611,36 @@
             enableTime: false,
             altInput: true,
             altFormat: dateFormat,
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const pickupRadio = document.getElementById("pickup");
+            const deliveryRadio = document.getElementById("delivery");
+            const pickupDiv = document.getElementById("pickupdiv");
+            const addressDiv = document.getElementById("addressdiv");
+
+            // Function to toggle display
+            function togglePickupCard() {
+                if (pickupRadio.checked) {
+                    pickupDiv.style.display = "block";
+                } else {
+                    pickupDiv.style.display = "none";
+                }
+            }
+            function toggleAddressCard() {
+                if (deliveryRadio.checked) {
+                    pickupDiv.style.display = "none";
+                }
+            }
+
+            // Initial check on page load
+            togglePickupCard();
+            toggleAddressCard();
+
+            // Listen for changes to the radio button
+            pickupRadio.addEventListener("change", togglePickupCard);
+            deliveryRadio.addEventListener("change", toggleAddressCard);
         });
     </script>
 @endsection

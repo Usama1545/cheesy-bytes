@@ -60,6 +60,47 @@
 
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('script'); ?>
+    <script>
+        function Delete(id, deleteurl) {
+            "use strict";
+            swalWithBootstrapButtons.fire({
+                icon: 'warning',
+                title: are_you_sure,
+                showCancelButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                confirmButtonText: yes,
+                cancelButtonText: no,
+                reverseButtons: true,
+                showLoaderOnConfirm: true,
+                preConfirm: function () {
+                    return new Promise(function (resolve, reject) {
+                        $.ajax({
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            url: deleteurl,
+                            data: {id: id},
+                            method: 'POST',
+                            success: function (response) {
+                                if (response == 1) {
+                                    location.reload();
+                                } else {
+                                    swal_cancelled()
+                                }
+                            },
+                            error: function (e) {
+                                swal_cancelled()
+                            }
+                        });
+                    });
+                },
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    result.dismiss === Swal.DismissReason.cancel
+                }
+            })
+        }
+
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/dipping/item.blade.php ENDPATH**/ ?>

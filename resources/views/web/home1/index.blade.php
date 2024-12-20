@@ -152,7 +152,7 @@
     @endif
 
     <!-- Top Deal Section Start Here -->
-    @if (count($topdealsproduct) > 0 )
+    @if (count($topdealsproduct) > 0)
         <section class="theme-1-top-deal menu-special position-relative sec-padding bg-primary-rgb">
             <div class="container">
                 <div class="row g-4">
@@ -170,17 +170,18 @@
                         <div class="px-4 rounded-4 overflow-hidden">
                             <div class="deals-heading mb-md-0 mb-3 text-end align-content-end">
                                 <div class="col-lg-auto text-center">
-                                    <a href="{{ URL::to('/view-all?type=topdeals') }}"
-                                       class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3">
-                                        {{ trans('labels.view_all') }}
-                                        <i class="fa-solid fa-arrow-right"></i>
-                                    </a>
+{{--                                    <a href="{{ URL::to('/view-all?type=topdeals') }}"--}}
+{{--                                       class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3">--}}
+{{--                                        {{ trans('labels.view_all') }}--}}
+{{--                                        <i class="fa-solid fa-arrow-right"></i>--}}
+{{--                                    </a>--}}
                                 </div>
                             </div>
                             <div class="countdown d-flex justify-content-center gap-2 mt-3" id="countdown"></div>
                         </div>
                     </div>
                     @foreach ($topdealsproduct as $itemdata)
+
                         @include('web.home1.todayitemview')
                     @endforeach
                 </div>
@@ -191,33 +192,6 @@
     @endif
     <!-- Top Deal Section End Here -->
 
-    <!-- Blog Section Start Here -->
-    @if (@helper::checkaddons('blog'))
-        @if (count($getblogs) > 0)
-            <section>
-                <div class="blog-wrapper sec-padding pt-0">
-                    <div class="container">
-                        <div class="row g-2 align-items-center justify-content-between mb-sm-5 mb-4">
-                            <div class="col-auto blog-heading">
-                                <h1 class="text-uppercase">{{ trans('labels.latest_blogs') }}</h1>
-                                <p class="sub-lables text-capitalize mt-2 mb-0">{{ trans('labels.top_blogs') }}</p>
-                            </div>
-                            <div class="col-auto">
-                                <a href="{{ route('blogs') }}"
-                                   class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3">{{ trans('labels.view_all') }}</a>
-                            </div>
-                        </div>
-                        <div class="row g-sm-4 g-3">
-                            @foreach ($getblogs as $bloglist)
-                                @include('web.blogs.blogview')
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </section>
-        @endif
-    @endif
-    <!-- Blog Section End Here -->
 
     <!-- slider-gallery start Here -->
     @if (count($getgalleries) > 0)
@@ -242,6 +216,8 @@
     @endif
 
 
+
+
     <section class="blog-wrapper sec-padding">
         <div class="mx-5 mt-2">
             <div class="row">
@@ -263,6 +239,35 @@
             </div>
         </div>
     </section>
+
+    <!-- Blog Section Start Here -->
+    @if (@helper::checkaddons('blog'))
+        @if (count($getblogs) > 0)
+            <section>
+                <div class="blog-wrapper sec-padding pt-4">
+                    <div class="container">
+                        <div class="row g-2 align-items-center justify-content-between mb-sm-5 mb-4">
+                            <div class="col-auto blog-heading">
+                                <h1 class="text-uppercase">{{ trans('labels.latest_blogs') }}</h1>
+                                <p class="sub-lables text-capitalize mt-2 mb-0">{{ trans('labels.top_blogs') }}</p>
+                            </div>
+                            <div class="col-auto">
+                                <a href="{{ route('blogs') }}"
+                                   class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3">{{ trans('labels.view_all') }}</a>
+                            </div>
+                        </div>
+                        <div class="row g-sm-4 g-3">
+                            @foreach ($getblogs as $bloglist)
+                                @include('web.blogs.blogview')
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+    @endif
+    <!-- Blog Section End Here -->
+
 
     <!-- slider-gallery end Here -->
     <style>

@@ -4,6 +4,9 @@ namespace App\Http\Controllers\front;
 
 use App\helpers\helper;
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
+use App\Models\CustomerAddress;
+use App\Models\Shippingarea;
 use App\Models\Slider;
 use App\Models\Item;
 use App\Models\Banner;
@@ -13,8 +16,11 @@ use App\Models\Gallery;
 use App\Models\Ratting;
 use App\Models\Languages;
 use App\Models\Settings;
+use App\Models\State;
 use App\Models\Team;
+use App\Models\TopDeals;
 use App\Models\WhyChooseUs;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Session;
@@ -24,6 +30,7 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
+        $currentDateTime = now(); // Get the current date and time
         $topdeals = helper::top_deals();
         $offer_price = 0;
         if ($topdeals != null && $topdeals->offer_type == 1) {
@@ -119,21 +126,48 @@ class HomeController extends Controller
                 ->where('item.item_status', '1')
                 ->orderBy('item.reorder_id')->take(8)->get();
 
-            $topdealsproduct = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
-                ->leftJoin('favorite', function ($query) use ($user_id) {
-                    $query->on('favorite.item_id', '=', 'item.id')
-                        ->where('favorite.user_id', '=', $user_id);
-                })
+//            $topdealsproduct = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+//                ->leftJoin('favorite', function ($query) use ($user_id) {
+//                    $query->on('favorite.item_id', '=', 'item.id')
+//                        ->where('favorite.user_id', '=', $user_id);
+//                })
+//                ->leftJoin('cart', function ($query) use ($user_id) {
+//                    $query->on('cart.item_id', '=', 'item.id')
+//                        ->where('cart.user_id', '=', $user_id)
+//                        ->where('cart.buynow', '=', '0');
+//                })
+//                ->groupBy('item.id', 'cart.item_id')
+//                ->where('item.is_top_deals', '1')
+//                ->where('item.item_status', '1')
+//                ->where('item.price', '>', $offer_price)
+//                ->orderBy('item.reorder_id')->take(8)->get();
+            $topdealsproduct = TopDeals::with('product') // Ensure the product relationship is defined in TopDeals
+            ->join('item', 'top_deals.product_id', '=', 'item.id') // Join with the product table
+            ->leftJoin('favorite', function ($query) use ($user_id) {
+                $query->on('favorite.item_id', '=', 'item.id')
+                    ->where('favorite.user_id', '=', $user_id);
+            })
                 ->leftJoin('cart', function ($query) use ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.user_id', '=', $user_id)
                         ->where('cart.buynow', '=', '0');
                 })
-                ->groupBy('item.id', 'cart.item_id')
-                ->where('item.is_top_deals', '1')
-                ->where('item.item_status', '1')
-                ->where('item.price', '>', $offer_price)
-                ->orderBy('item.reorder_id')->take(8)->get();
+                ->where(function ($query) use ($currentDateTime) {
+                    $query->where('end_date', '>', $currentDateTime->toDateString()) // If end_date is in the future
+                    ->orWhere(function ($query) use ($currentDateTime) {
+                        $query->where('end_date', '=', $currentDateTime->toDateString()) // Check same day
+                        ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
+                    });
+                })
+                ->where('item.item_status', '1') // Filter by product item status
+                ->select(
+                    'top_deals.*',
+                    'item.*',
+                    'favorite.id as favorite_id', // Include favorite-related data
+                    'cart.id as cart_id' // Include cart-related data
+                )->distinct() // Ensure distinct rows
+                ->get();
+
 
             $recommended = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('favorite', function ($query) use ($user_id) {
@@ -174,17 +208,38 @@ class HomeController extends Controller
                 ->orderBy('item.reorder_id')
                 ->take(8)->get();
 
-            $topdealsproduct = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
-                ->leftJoin('cart', function ($query) use ($session_id) {
+//            $topdealsproduct = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+//                ->leftJoin('cart', function ($query) use ($session_id) {
+//                    $query->on('cart.item_id', '=', 'item.id')
+//                        ->where('cart.session_id', '=', $session_id)
+//                        ->where('cart.buynow', '=', '0');
+//                })
+//                ->groupBy('item.id', 'cart.item_id')
+//                ->where('item.is_top_deals', '1')
+//                ->where('item.item_status', '1')
+//                ->where('item.price', '>', $offer_price)
+//                ->orderBy('item.reorder_id')->take(10)->get();
+            $topdealsproduct = TopDeals::with('product')
+            ->join('item', 'top_deals.product_id', '=', 'item.id')
+                ->leftJoin('cart', function ($query) use ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')
-                        ->where('cart.session_id', '=', $session_id)
+                        ->where('cart.user_id', '=', $user_id)
                         ->where('cart.buynow', '=', '0');
                 })
-                ->groupBy('item.id', 'cart.item_id')
-                ->where('item.is_top_deals', '1')
-                ->where('item.item_status', '1')
-                ->where('item.price', '>', $offer_price)
-                ->orderBy('item.reorder_id')->take(10)->get();
+                ->where(function ($query) use ($currentDateTime) {
+                    $query->where('end_date', '>', $currentDateTime->toDateString()) // If end_date is in the future
+                    ->orWhere(function ($query) use ($currentDateTime) {
+                        $query->where('end_date', '=', $currentDateTime->toDateString()) // Check same day
+                        ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
+                    });
+                })
+                ->where('item.item_status', '1') // Filter by product item status
+                ->select(
+                    'top_deals.*',
+                    'item.*',
+                    'cart.id as cart_id' // Include cart-related data
+                )->distinct() // Ensure distinct rows
+                ->get();
 
             $recommended = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('cart', function ($query) use ($session_id) {
@@ -209,14 +264,17 @@ class HomeController extends Controller
         $lang = Languages::get();
         return view('web.home' . $theme . '.index', compact('sliders', 'banners', 'todayspecial', 'topitemlist', 'storereviews', 'getteams', 'getfaqs', 'getblogs', 'getwhychooseus', 'recommended', 'topdealsproduct', 'topdeals', 'getgalleries', 'lang'));
     }
+
     public function categories(Request $request)
     {
         return view('web.categoryviewall');
     }
+
     public function menu(Request $request)
     {
         return view('web.menu');
     }
+
     public function change_dir(Request $request)
     {
         session()->put('direction', $request->dir);
@@ -225,6 +283,51 @@ class HomeController extends Controller
 
     public function location()
     {
-        return view('web.restaurant');
+        $states = State::all();
+        return view('web.restaurant', compact('states'));
+    }
+
+    public function location_store(Request $request)
+    {
+        $not_available = false;
+        $address = CustomerAddress::updateOrCreate(
+            [
+                'zip' => $request->zip,
+                'state' => $request->state_id,
+                'city' => $request->city,
+                'address_type' => $request->type,
+                'session_id' => auth()->check() ? null : Session::getId(),
+                'user_id' => auth()->check() ? auth()->id() : null,
+            ],
+            [
+                'address' => $request->street_address ?? $request->address ?? null,
+            ]
+        );
+        if ($request->type === 'carryout') {
+            $shipping = Branch::where('city', $request->city)->orWhere('state_id', $request->state_id)->with('state')->get();
+
+        } else {
+            $shipping = Shippingarea::where('city', $request->city)->where('state_id', $request->state_id)->with('state')->get();
+            if (!$shipping) {
+                $not_available = true;
+                $shipping = Shippingarea::where('city', $request->city)->orWhere('state_id', $request->state_id)->with('state')->get();
+            }
+        }
+
+        return view('web.location', compact('not_available', 'shipping', 'address'));
+    }
+
+    public function location_update($id, $address_id)
+    {
+        CustomerAddress::findOrFail($address_id)->update([
+            'address_id' => $id
+        ]);
+
+        return redirect()->to('/categories');
+    }
+
+    public function rewards()
+    {
+        return view('web.reward');
     }
 }

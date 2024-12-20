@@ -2,30 +2,27 @@
     <div class="card rounded-4 h-100" style="border-color: var(--bs-primary)">
         <div class="d-flex align-items-center p-2 h-100">
             <div class="card-image card-second d-flex align-items-center col-auto position-relative">
-                <a href="<?php echo e(URL::to('item-' . $itemdata->slug)); ?>">
-                    <img src="<?php echo e(@helper::image_path($itemdata['item_image']->image_name)); ?>"
+                <a href="<?php echo e(URL::to('item-' . $itemdata->product->slug)); ?>">
+                    <img src="<?php echo e(@helper::image_path($itemdata->product['item_image']->image_name)); ?>"
                         class="card-img-top border-0 rounded-4" alt="dishes">
                 </a>
             </div>
             <div class="card-body py-0 <?php echo e(session()->get('direction') == '2' ? 'pe-3 ps-0' : 'ps-3 pe-0'); ?>">
+
                 <?php
-                    if ($itemdata->is_top_deals == 1 && $topdeals != null) {
-                        if (@$topdeals->offer_type == 1) {
-                            if ($itemdata->item_price > @$topdeals->offer_amount) {
-                                $price = $itemdata->item_price - @$topdeals->offer_amount;
+
+                        if (@$itemdata->offer_type == 1) {
+                            if ($itemdata->product->price > @$itemdata->offer_amount) {
+                                $price = $itemdata->product->price - @$itemdata->offer_amount;
                             } else {
-                                $price = $itemdata->item_price;
+                                $price = $itemdata->product->price;
                             }
                         } else {
-                            $price = $itemdata->item_price - $itemdata->item_price * (@$topdeals->offer_amount / 100);
+                            $price = $itemdata->product->price - $itemdata->product->price * (@$itemdata->offer_amount / 100);
                         }
-                        $original_price = $itemdata->item_price;
+                        $original_price = $itemdata->product->price;
                         $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                    } else {
-                        $price = $itemdata->item_price;
-                        $original_price = $itemdata->original_price;
-                        $off = $itemdata->discount_percentage;
-                    }
+
                 ?>
                 <!-- off lable -->
                 <?php if($off > 0): ?>
@@ -35,33 +32,26 @@
                 <?php endif; ?>
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="fs-8 cat-span text-muted">
-                        <span><?php echo e($itemdata['category_info']->category_name); ?></span>
+                        <span><?php echo e($itemdata->product['category_info']->category_name); ?></span>
                     </div>
                     
                     <div class="d-flex fs-8 align-items-center">
                         <i class="fa-solid fa-star text-warning"></i>
                         <p class="m-0 text-dark fw-500 <?php echo e(session()->get('direction') == '2' ? 'pe-1' : 'ps-1'); ?>">
-                            <?php echo e(number_format($itemdata->avg_ratting, 1)); ?></p>
+                            <?php echo e(number_format($itemdata->product->avg_ratting, 1)); ?></p>
                     </div>
                 </div>
                 <h5 class="fs-6 mb-0 item-card-title d-flex text-h">
-                    <?php if($itemdata->item_type == 1): ?>
-                        <img src="<?php echo e(helper::image_path('veg.svg')); ?>" alt=""
-                            class="<?php echo e(session()->get('direction') == '2' ? 'ms-1' : 'me-1'); ?>">
-                    <?php else: ?>
-                        <img src="<?php echo e(helper::image_path('nonveg.svg')); ?>" alt=""
-                            class="<?php echo e(session()->get('direction') == '2' ? 'ms-1' : 'me-1'); ?>">
-                    <?php endif; ?>
                     <div class="d-flex gap-1">
-                        <a href="<?php echo e(URL::to('item-' . $itemdata->slug)); ?>">
+                        <a href="<?php echo e(URL::to('item-' . $itemdata->product->slug)); ?>">
                             <p class="item-card-title mb-0 line-2 fs-7">
-                                <?php echo e($itemdata->item_name); ?>
+                                <?php echo e($itemdata->product->item_name); ?>
 
                             </p>
                         </a>
-                        <?php if($itemdata->item_allergens != null): ?>
+                        <?php if($itemdata->product->item_allergens != null): ?>
                             <div type="button"
-                                onclick="itemsallergens('<?php echo e($itemdata->id); ?>','<?php echo e(route('get_item_allergens')); ?>')">
+                                onclick="itemsallergens('<?php echo e($itemdata->product->id); ?>','<?php echo e(route('get_item_allergens')); ?>')">
                                 <div class="btn-info">
                                     <i class="fa-solid fa-info"></i>
                                 </div>
@@ -84,19 +74,19 @@
                                 <div class="item-quantity py-1 px-5">
                                     <button type="button" class="btn btn-sm  fw-500"
                                         onclick="removefromcart('<?php echo e(URL::to('/cart')); ?>','<?php echo e(trans('messages.remove_cartitem_note')); ?>','<?php echo e(trans('labels.goto_cart')); ?>')">-</button>
-                                    <input class="fw-500 item-total-qty-<?php echo e($itemdata->slug); ?>" type="text"
-                                        value="<?php echo e(helper::get_item_cart($itemdata->id)); ?>" disabled />
+                                    <input class="fw-500 item-total-qty-<?php echo e($itemdata->product->slug); ?>" type="text"
+                                        value="<?php echo e(helper::get_item_cart($itemdata->product->id)); ?>" disabled />
                                     <button class="btn btn-sm fw-500 border-0"
-                                        onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">+</button>
+                                        onclick="showitem('<?php echo e($itemdata->product->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">+</button>
                                 </div>
                             <?php else: ?>
                                 <button
-                                    class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->slug); ?>"
-                                    onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">
+                                    class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->product->slug); ?>"
+                                    onclick="showitem('<?php echo e($itemdata->product->slug); ?>','<?php echo e(URL::to('/show-deal-item')); ?>')">
                                     <?php echo e(trans('labels.add')); ?>
 
-                                    <i class="fa-solid fa-plus addon_modal_icon_<?php echo e($itemdata->slug); ?>"></i>
-                                    <div class="loader d-none addon_modal_loader_<?php echo e($itemdata->slug); ?>"></div>
+                                    <i class="fa-solid fa-plus addon_modal_icon_<?php echo e($itemdata->product->slug); ?>"></i>
+                                    <div class="loader d-none addon_modal_loader_<?php echo e($itemdata->product->slug); ?>"></div>
                                 </button>
                             <?php endif; ?>
                         </div>

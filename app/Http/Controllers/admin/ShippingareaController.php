@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\State;
 use Illuminate\Http\Request;
 use App\Models\Shippingarea;
 
@@ -10,17 +11,22 @@ class ShippingareaController extends Controller
 {
     public function index()
     {
-        $shippingarealist = Shippingarea::orderBy('reorder_id')->get();
-        return view('admin.shippingarea.index', compact('shippingarealist'));
+        $states = State::all();
+        $shippingarealist = Shippingarea::with('state')->get();
+        return view('admin.shippingarea.index', compact('shippingarealist','states'));
     }
     public function add()
     {
-        return view('admin.shippingarea.add');
+        $states = State::all();
+
+        return view('admin.shippingarea.add', compact('states'));
     }
     public function store(Request $request)
     {
         $shippingarea = new Shippingarea();
         $shippingarea->name = $request->name;
+        $shippingarea->state_id = $request->state_id;
+        $shippingarea->city = $request->city;
         $shippingarea->delivery_charge = $request->delivery_charge;
         $shippingarea->save();
         return redirect('/admin/shippingarea')->with('success', trans('messages.success'));
@@ -29,6 +35,8 @@ class ShippingareaController extends Controller
     {
         $shippingarea = Shippingarea::find($request->id);
         $shippingarea->name = $request->name;
+        $shippingarea->state_id = $request->state_id;
+        $shippingarea->city = $request->city;
         $shippingarea->delivery_charge = $request->delivery_charge;
         $shippingarea->save();
         return redirect('/admin/shippingarea')->with('success', trans('messages.success'));
@@ -36,8 +44,9 @@ class ShippingareaController extends Controller
 
     public function Edit(Request $request)
     {
+        $states = State::all();
         $shippingareadata = Shippingarea::find($request->id);
-        return view('admin.shippingarea.edit', compact('shippingareadata'));
+        return view('admin.shippingarea.edit', compact('shippingareadata','states'));
     }
 
     public function delete(Request $request)

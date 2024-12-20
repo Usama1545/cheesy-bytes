@@ -143,7 +143,7 @@
                                     <?php $__empty_1 = true; $__currentLoopData = $user_years; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $useryear): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <option value="<?php echo e($useryear->year); ?>" <?php echo e(date('Y') == $useryear->year ? 'selected' : ''); ?>><?php echo e($useryear->year); ?></option>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                        <option value="" selected disabled><?php echo e(trans('labels.select')); ?></option>    
+                                        <option value="" selected disabled><?php echo e(trans('labels.select')); ?></option>
                                     <?php endif; ?>
                                 </select>
                             </div>
@@ -166,7 +166,7 @@
                                     <?php $__empty_1 = true; $__currentLoopData = $earnings_years; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $earnings): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <option value="<?php echo e($earnings->year); ?>" <?php echo e(date('Y') == $earnings->year ? 'selected' : ''); ?>><?php echo e($earnings->year); ?></option>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                        <option value="" selected disabled><?php echo e(trans('labels.select')); ?></option>    
+                                        <option value="" selected disabled><?php echo e(trans('labels.select')); ?></option>
                                     <?php endif; ?>
                                 </select>
                             </div>
@@ -232,7 +232,7 @@
                                     <?php $__empty_1 = true; $__currentLoopData = $order_years; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $orderyear): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <option value="<?php echo e($orderyear->year); ?>" <?php echo e(date('Y') == $orderyear->year ? 'selected' : ''); ?>><?php echo e($orderyear->year); ?></option>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                        <option value="" selected disabled><?php echo e(trans('labels.select')); ?></option>    
+                                        <option value="" selected disabled><?php echo e(trans('labels.select')); ?></option>
                                     <?php endif; ?>
                                 </select>
                             </div>
@@ -258,7 +258,7 @@
         var labels = <?php echo e(Js::from($orderlabels)); ?>;
         var deliverydata = <?php echo e(Js::from($deliverydata)); ?>;
         var pickupdata = <?php echo e(Js::from($pickupdata)); ?>;
-        
+
         var delivery_orders = <?php echo e(Js::from(trans('labels.delivery_orders'))); ?>;
         var pickup_orders = <?php echo e(Js::from(trans('labels.pickup_orders'))); ?>;
         createOrdersChart(labels, deliverydata, pickupdata);
@@ -289,13 +289,13 @@
                 labels: labels,
                 datasets: [{
                     label: delivery_orders,
-                    backgroundColor: ['#ac1515'],
-                    borderColor: ['#ac1515'],
+                    backgroundColor: ['#DE1616'],
+                    borderColor: ['#DE1616'],
                     data: deliverydata,
                 }, {
                     label: pickup_orders,
-                    backgroundColor: ['#ac151563'],
-                    borderColor: ['#ac1515'],
+                    backgroundColor: ['#DE1616'],
+                    borderColor: ['#DE1616'],
                     data: pickupdata,
                 }]
             };
@@ -409,8 +409,8 @@
                 labels: labels,
                 datasets: [{
                     label: 'Earnings ',
-                    backgroundColor: ['#ac1515'],
-                    borderColor: ['#ac1515'],
+                    backgroundColor: ['#DE1616'],
+                    borderColor: ['#DE1616'],
                     pointStyle: 'circle',
                     pointRadius: 5,
                     pointHoverRadius: 10,

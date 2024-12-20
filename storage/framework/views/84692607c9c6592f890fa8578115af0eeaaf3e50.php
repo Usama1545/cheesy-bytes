@@ -15,11 +15,11 @@
                                 <h5 class="animate__animated animate__fadeInUp mb-3"><?php echo e($sliderdata->title); ?></h5>
                                 <p class="animate__animated animate__fadeInUp"><?php echo e($sliderdata->description); ?></p>
                                 <div class="button-container mt-auto">
-                                    <a href="<?php echo e(URL::to('/restaurants?type=Delivery')); ?>"
+                                    <a href="<?php echo e(URL::to('/location?type=Delivery')); ?>"
                                        class="btn btn-primary fw-500 px-4 py-2 mx-6 animate__animated animate__fadeInUp">
                                         DELIVERY
                                     </a>
-                                    <a href="<?php echo e(URL::to('/restaurants?type=Carryout')); ?>"
+                                    <a href="<?php echo e(URL::to('/location?type=Carryout')); ?>"
                                        class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp">
                                         CARRYOUT
                                     </a>
@@ -153,7 +153,7 @@
     <?php endif; ?>
 
     <!-- Top Deal Section Start Here -->
-    <?php if(count($topdealsproduct) > 0 ): ?>
+    <?php if(count($topdealsproduct) > 0): ?>
         <section class="theme-1-top-deal menu-special position-relative sec-padding bg-primary-rgb">
             <div class="container">
                 <div class="row g-4">
@@ -172,18 +172,18 @@
                         <div class="px-4 rounded-4 overflow-hidden">
                             <div class="deals-heading mb-md-0 mb-3 text-end align-content-end">
                                 <div class="col-lg-auto text-center">
-                                    <a href="<?php echo e(URL::to('/view-all?type=topdeals')); ?>"
-                                       class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3">
-                                        <?php echo e(trans('labels.view_all')); ?>
 
-                                        <i class="fa-solid fa-arrow-right"></i>
-                                    </a>
+
+
+
+
                                 </div>
                             </div>
                             <div class="countdown d-flex justify-content-center gap-2 mt-3" id="countdown"></div>
                         </div>
                     </div>
                     <?php $__currentLoopData = $topdealsproduct; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $itemdata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+
                         <?php echo $__env->make('web.home1.todayitemview', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
@@ -194,33 +194,6 @@
     <?php endif; ?>
     <!-- Top Deal Section End Here -->
 
-    <!-- Blog Section Start Here -->
-    <?php if(@helper::checkaddons('blog')): ?>
-        <?php if(count($getblogs) > 0): ?>
-            <section>
-                <div class="blog-wrapper sec-padding pt-0">
-                    <div class="container">
-                        <div class="row g-2 align-items-center justify-content-between mb-sm-5 mb-4">
-                            <div class="col-auto blog-heading">
-                                <h1 class="text-uppercase"><?php echo e(trans('labels.latest_blogs')); ?></h1>
-                                <p class="sub-lables text-capitalize mt-2 mb-0"><?php echo e(trans('labels.top_blogs')); ?></p>
-                            </div>
-                            <div class="col-auto">
-                                <a href="<?php echo e(route('blogs')); ?>"
-                                   class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3"><?php echo e(trans('labels.view_all')); ?></a>
-                            </div>
-                        </div>
-                        <div class="row g-sm-4 g-3">
-                            <?php $__currentLoopData = $getblogs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $bloglist): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <?php echo $__env->make('web.blogs.blogview', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        <?php endif; ?>
-    <?php endif; ?>
-    <!-- Blog Section End Here -->
 
     <!-- slider-gallery start Here -->
     <?php if(count($getgalleries) > 0): ?>
@@ -245,6 +218,8 @@
     <?php endif; ?>
 
 
+
+
     <section class="blog-wrapper sec-padding">
         <div class="mx-5 mt-2">
             <div class="row">
@@ -266,6 +241,35 @@
             </div>
         </div>
     </section>
+
+    <!-- Blog Section Start Here -->
+    <?php if(@helper::checkaddons('blog')): ?>
+        <?php if(count($getblogs) > 0): ?>
+            <section>
+                <div class="blog-wrapper sec-padding pt-4">
+                    <div class="container">
+                        <div class="row g-2 align-items-center justify-content-between mb-sm-5 mb-4">
+                            <div class="col-auto blog-heading">
+                                <h1 class="text-uppercase"><?php echo e(trans('labels.latest_blogs')); ?></h1>
+                                <p class="sub-lables text-capitalize mt-2 mb-0"><?php echo e(trans('labels.top_blogs')); ?></p>
+                            </div>
+                            <div class="col-auto">
+                                <a href="<?php echo e(route('blogs')); ?>"
+                                   class="btn btn-sm btn-outline-primary px-4 py-2 rounded-3"><?php echo e(trans('labels.view_all')); ?></a>
+                            </div>
+                        </div>
+                        <div class="row g-sm-4 g-3">
+                            <?php $__currentLoopData = $getblogs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $bloglist): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php echo $__env->make('web.blogs.blogview', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+    <?php endif; ?>
+    <!-- Blog Section End Here -->
+
 
     <!-- slider-gallery end Here -->
     <style>

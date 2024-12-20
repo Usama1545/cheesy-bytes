@@ -3,8 +3,6 @@
         <tr>
             <th></th>
             <th>#</th>
-            <th>{{ trans('labels.name') }}</th>
-            <th>{{ trans('labels.image') }}</th>
             <th>{{ trans('labels.rating') }}</th>
             <th>{{ trans('labels.description') }}</th>
             <th>{{ trans('labels.created_date') }}</th>
@@ -18,11 +16,7 @@
             <tr class="row1" data-id="{{ $storereview->id }}">
                 <td><a tooltip="{{ trans('labels.move') }}"><i class="fa-light fa-up-down-left-right mx-2"></i></a></td>
                 <td>@php echo $i++; @endphp</td>
-                <td> {{ $storereview->name }} </td>
-                <td>
-                    <img src="{{ helper::image_path($storereview->image) }}" alt=""
-                        class="img-fluid rounded h-50px mt-1">
-                </td>
+
                 <td> {{ $storereview->ratting }} </td>
                 <td> {{ $storereview->comment }} </td>
                 <td>
@@ -35,9 +29,9 @@
                 </td>
                 <td>
                     <div class="d-flex flex-wrap gap-1">
-                        <a class="btn btn-sm btn-info square" tooltip="{{ trans('labels.edit') }}"
-                            href="{{ URL::to('admin/store-review-' . $storereview->id) }}"><i
-                                class="fa fa-pen-to-square"></i></a>
+{{--                        <a class="btn btn-sm btn-info square" tooltip="{{ trans('labels.edit') }}"--}}
+{{--                            href="{{ URL::to('admin/store-review-' . $storereview->id) }}"><i--}}
+{{--                                class="fa fa-pen-to-square"></i></a>--}}
                         <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.delete') }}"
                             href="javascript:void(0)"
                             @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="DeleteData('{{ $storereview->id }}','{{ URL::to('admin/store-review/destroy') }}')" @endif>

@@ -5,7 +5,7 @@
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h3>Dipping</h3>
-            <a href="dipping/add" class="btn btn-primary">Add New <i class="fa fa-plus"></i></a>
+            <a href="topDeals/add" class="btn btn-primary">Add New <i class="fa fa-plus"></i></a>
         </div>
         <div class="row">
             <div class="col-12">
@@ -15,34 +15,38 @@
                             <table class="table table-striped table-bordered zero-configuration">
                                 <thead>
                                 <tr>
-                                    <th>{{ trans('labels.name') }}</th>
-                                    <th>{{ trans('labels.price') }}</th>
-                                    <th>{{ trans('labels.created_date') }}</th>
-                                    <th>{{ trans('labels.updated_date') }}</th>
+                                    <th>Product</th>
+                                    <th>Offer Type</th>
+                                    <th>Offer Amount</th>
+                                    <th>Start Date /Time</th>
+                                    <th>End Date / Time</th>
                                     <th>{{ trans('labels.action') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @php $i = 1; @endphp
-                                @foreach ($getitem as $item)
+                                @foreach ($deals as $item)
                                     <tr class="row1" data-id="{{ $item->id }}">
-                                        <td>{{ $item->name }}</td>
-                                        <td>{{ $item->price }}</td>
+                                        <td>{{ $item->product->item_name }}</td>
+                                        <td>{{ $item->offer_type === 1 ? 'Flat Price' : "Percentage" }}</td>
+                                        <td>{{ $item->offer_amount }}</td>
                                         <td>
-                                            {{ helper::date_format($item->created_at) }} <br>
-                                            {{ helper::time_format($item->created_at) }}
+                                            {{ helper::date_format($item->start_date) }} <br>
+                                            {{ helper::time_format($item->start_time) }}
                                         </td>
                                         <td>
-                                            {{ helper::date_format($item->updated_at) }} <br>
-                                            {{ helper::time_format($item->updated_at) }}
+                                            {{ helper::date_format($item->end_date) }} <br>
+                                            {{ helper::time_format($item->end_time) }}
                                         </td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
-                                                <a class="btn btn-sm btn-info square" tooltip="{{ trans('labels.edit') }}"
-                                                   href="{{ URL::to('admin/dipping-' . $item->id) }}"> <i class="fa-solid fa-pen-to-square"></i></a>
-                                                <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.delete') }}"
-                                                   @if (env('Environment') == 'sendbox') onclick="myFunction()"
-                                                   @else onclick="Delete('{{ $item->id }}','{{ URL::to('admin/dipping/delete') }}')" @endif>
+                                                <a class="btn btn-sm btn-info square"
+                                                   tooltip="{{ trans('labels.edit') }}"
+                                                   href="{{ URL::to('admin/topDeals-' . $item->id) }}"> <i
+                                                        class="fa-solid fa-pen-to-square"></i></a>
+                                                <a class="btn btn-sm btn-danger square"
+                                                   tooltip="{{ trans('labels.delete') }}"
+                                                   onclick="Delete('{{ $item->id }}','{{ URL::to('admin/topDeals/delete') }}')">
                                                     <i class="fa fa-trash"></i></a>
                                             </div>
                                         </td>

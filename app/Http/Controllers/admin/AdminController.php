@@ -43,7 +43,7 @@ class AdminController extends Controller
         $order_tax = Order::where('status', '!=', '6')->where('status', '!=', '7')->sum('tax_amount');
         $getorders = Order::with('user_info')->select('order.*')->whereDate('created_at', Carbon::today())->get();
 
-        $topitems = Item::with('category_info', 'subcategory_info', 'item_image')->leftJoin('order_details', 'order_details.item_id', 'item.id')
+        $topitems = Item::with('category_info', 'subcategory_info', 'item_image')->leftJoin('order_details', 'order_details.item_id', 'item.id')->whereNull('custom_pizza_id')
             ->select('item.id', 'item.cat_id', 'item.subcat_id', 'item.item_name', 'item.slug', DB::raw('count(order_details.item_id) as item_order_counter'))
             ->groupBy('order_details.item_id')
             ->orderByDesc('item_order_counter')

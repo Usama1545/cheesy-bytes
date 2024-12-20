@@ -10,6 +10,21 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
+                                    <label class="form-label">{{ trans('labels.state') }}<span class="text-danger"> *
+                                        </span></label>
+                                    <select class="form-control form-select" name="state_id">
+                                        @foreach($states as $state)
+                                            <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">{{ trans('labels.city') }}<span class="text-danger"> *
+                                        </span></label>
+                                    <input type="text" class="form-control" name="city" value="{{ old('city') }}"
+                                        placeholder="{{ trans('labels.city') }}" required>
+                                </div>
+                                <div class="form-group">
                                     <label class="form-label">{{ trans('labels.area_name') }}<span class="text-danger"> *
                                         </span></label>
                                     <input type="text" class="form-control" name="name" value="{{ old('name') }}"

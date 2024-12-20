@@ -302,7 +302,9 @@
     </div>
 </div>
 
-
+<div id="errorAlert" class="alert alert-danger d-none" role="alert">
+    A simple danger alert—check it out!
+</div>
 <!-- Modal Subscribe-->
 <div class="modal" id="NewsModal" tabindex="-1" aria-labelledby="NewsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -611,11 +613,15 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    alert(`Order submitted successfully: ${JSON.stringify(data)}`);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('customPizzaModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
                 })
                 .catch(error => {
-                    console.error('Error submitting order:', error);
-                    alert('Failed to submit the order. Please try again.');
+                    const alert = document.getElementById("errorAlert");
+                    alert.textContent = "Error submitting order: " + error.message;
+                    alert.classList.remove("d-none");
                 });
         });
 
@@ -1019,21 +1025,21 @@
 
                     const sideSvg = side === 'left'
                         ? `
-                            <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #ac1515; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
-                                <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #ac1515">
+                            <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #DE1616; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
+                                <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #DE1616">
                                     <path d="M11.4847 21.876L12.5861 21.9883V20.8811V3.11841V2.01126L11.4847 2.12357C9.03877 2.37296 6.77239 3.52107 5.12442 5.34558C3.47646 7.17009 2.56415 9.54119 2.56415 11.9998C2.56415 14.4583 3.47646 16.8294 5.12442 18.6539C6.77238 20.4785 9.03876 21.6266 11.4847 21.876Z"></path>
                                 </svg>
                             </div>`
                         : side === 'right'
                             ? `
-                                <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #ac1515; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
-                                    <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #ac1515">
+                                <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #DE1616; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
+                                    <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #DE1616">
                                         <path d="M12.5861 2.01126V2.12357C15.0321 2.37296 17.2985 3.52107 18.9465 5.34558C20.5945 7.17009 21.5068 9.54119 21.5068 11.9998C21.5068 14.4583 20.5945 16.8294 18.9465 18.6539C17.2985 20.4785 15.0321 21.6266 12.5861 21.876V2.01126Z"></path>
                                     </svg>
                                 </div>`
                             : `
-                                <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #ac1515; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
-                                    <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #ac1515">
+                                <div style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #DE1616; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0;">
+                                    <svg aria-hidden="true" fill="none" focusable="false" height="24" viewBox="0 0 25 24" width="25" class="pizza-topping__icon" style="fill: #DE1616">
                                         <circle cx="12.5" cy="12" r="10"></circle>
                                     </svg>
                                 </div>`;

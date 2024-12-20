@@ -19,7 +19,7 @@
                                 <label class="form-label">State<span
                                         class="text-danger"> * </span></label>
                                 <input type="text" class="form-control" name="state"
-                                       value="{{ $branch->state }}"
+                                       value="{{ $branch->state->name }}"
                                        placeholder="state" required>
                             </div>
                             <div class="form-group col-md-6">

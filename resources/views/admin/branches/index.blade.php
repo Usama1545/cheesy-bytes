@@ -27,7 +27,7 @@
                                 @foreach ($getitem as $item)
                                     <tr class="row1" data-id="{{ $item->id }}">
                                         <td>{{ $item->name }}</td>
-                                        <td>{{ $item->state }}</td>
+                                        <td>{{ $item->state->name }}</td>
                                         <td>
                                             {{ $item->city }} <br>
                                         </td>

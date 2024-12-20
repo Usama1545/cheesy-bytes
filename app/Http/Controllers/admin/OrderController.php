@@ -165,7 +165,7 @@ class OrderController extends Controller
     {
         $od = Order::where('id', $request->id)->first();
         $orderdata = Order::with('user_info', 'driver_info')->where('order.id', $request->id)->first();
-        $ordersdetails = OrderDetails::where('order_details.order_id', $request->id)->get();
+        $ordersdetails = OrderDetails::where('order_details.order_id', $request->id)->with('custom_pizza')->get();
         $getdriver = User::where('type', '3')->where('is_available', 1)->orderByDesc('id')->get();
         return view('admin.orders.invoice', compact('orderdata', 'ordersdetails', 'getdriver'));
     }

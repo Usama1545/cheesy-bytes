@@ -13,7 +13,12 @@ class Branch extends Model
         'name',
         'address',
         'city',
-        'state',
+        'state_id',
         'zip',
     ];
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
 }

@@ -6,6 +6,7 @@ use App\Models\CustomPizzaCrust;
 use App\Models\CustomPizzaSauce;
 use App\Models\CustomPizzaSize;
 use App\Models\CustomPizzaTopping;
+use App\Models\Item;
 use App\Models\Roles;
 use App\Models\Cart;
 use App\Models\Category;
@@ -221,6 +222,11 @@ class helper
     {
         $data = Roles::select('modules')->where('id', Auth::user()->role_id)->first();
         return @$data->modules;
+    }
+    public static function getItems()
+    {
+        $data = Item::select('item_name','id')->get();
+        return $data;
     }
     public static function get_user_cart()
     {
@@ -482,6 +488,11 @@ class helper
         return Sides::all();  // Fetch crusts based on sizeId
     }
 
+    public function getCustomPizzaDetails($id)
+    {
+        return App\Models\CustomPizza::with('toppings','size','crust','dipping','sauce')->where('id', $id)->first();
+    }
+
     public static function top_deals()
     {
         date_default_timezone_set(helper::appdata()->timezone);
@@ -489,7 +500,6 @@ class helper
         $current_time  = Carbon::now()->format('H:i:s');
         $topdeal = TopDeals::first();
         $topdeals = null;
-        if (@helper::checkaddons('top_deals')) {
             if (isset($topdeal) && $topdeal->top_deals_switch == 1) {
                 $startDate = $topdeal['start_date'];
                 $starttime = $topdeal['start_time'];
@@ -520,7 +530,7 @@ class helper
                     }
                 }
             }
-        }
+
         return $topdeals;
     }
 

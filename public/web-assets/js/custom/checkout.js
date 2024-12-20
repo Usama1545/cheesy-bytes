@@ -320,8 +320,13 @@ function validatedata() {
             toastr.error($('#new_pincode_message').val());
             return false;
         }
-        if ($('#delivery_area').val() == '') {
+        if ($('#shipping_delivery_area').is(':visible') && $('#shipping_delivery_area').val() == '') {
             toastr.error($('#shipping_area_message').val());
+            return false;
+        }
+
+        if ($('#pickupdiv').is(':visible') && $('#pickup_area').val() == '') {
+            toastr.error($('#pickup_area_message').val());
             return false;
         }
     }
@@ -340,6 +345,7 @@ function validatedata() {
     var pincode = $('#new_pincode').val();
     var country = $('#new_country').val();
     var state = $('#new_state').val();
+    var delivery_area = $('#shipping_delivery_area').val() || $('#pickup_area').val();
     var city = $('#new_city').val();
     var address_type = $("input:radio[name=address_type]:checked").val();
     var order_notes = $('#order_notes').val();
@@ -364,6 +370,7 @@ function validatedata() {
                 order_type: neworder_type,
                 delivery_charge: delivery_charge,
                 grand_total: total,
+                delivery_area: delivery_area,
                 tax_amount: tax_amount,
                 address_type: address_type,
                 address: address,

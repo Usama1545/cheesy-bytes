@@ -13,8 +13,13 @@ class CustomPizza extends Model
 
     public function toppings()
     {
-        return $this->belongsToMany(PizzaTopping::class, 'custom_pizza_topping')
-            ->withPivot('position', 'price');
+        return $this->belongsToMany(CustomPizzaTopping::class, 'custom_pizza_selected_toppings', 'pizza_id', 'topping_id')
+            ->withPivot('side', 'quantity');
+    }
+    public function dipping()
+    {
+        return $this->belongsToMany(Sides::class, 'custom_pizza_selected_dippings', 'pizza_id', 'dipping_id')
+            ->withPivot( 'quantity');
     }
 
     public function size()
@@ -26,5 +31,10 @@ class CustomPizza extends Model
     {
         return $this->belongsTo(CustomPizzaCrust::class, 'crust_id');
     }
+    public function sauce()
+    {
+        return $this->belongsTo(CustomPizzaSauce::class, 'sauce_id');
+    }
+
 
 }

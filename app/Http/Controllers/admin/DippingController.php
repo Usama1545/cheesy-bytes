@@ -6,6 +6,7 @@ use App\Models\Sides;
 use App\Models\CustomPizzaSauce;
 use App\Models\CustomPizzaSize;
 use App\Models\CustomPizzaTopping;
+use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -19,7 +20,6 @@ class DippingController extends Controller
 
     public function additem()
     {
-
         return view('admin.dipping.additem');
     }
 
@@ -67,5 +67,14 @@ class DippingController extends Controller
 
         return redirect('admin/dipping')->with('success', 'pizza Dipping Updated successfully!');
 
+    }
+    public function delete(Request $request)
+    {
+        $category = Sides::where('id', $request->id)->first();
+        if($category){
+            $category->delete();
+            return 1;
+        }
+        return 0;
     }
 }

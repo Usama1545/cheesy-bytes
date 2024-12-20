@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\BranchController;
 use App\Http\Controllers\admin\CustomPizzaController;
+use App\Http\Controllers\admin\DealController;
 use App\Http\Controllers\admin\DippingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\AdminController;
@@ -58,14 +59,18 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 	Route::get('/direction', [HomeController::class, 'change_dir'])->name('change_dir');
 	Route::get('/categories', [HomeController::class, 'categories'])->name('categories');
 	Route::get('/location', [HomeController::class, 'location'])->name('location');
+	Route::post('/location/store', [HomeController::class, 'location_store'])->name('location_store');
+	Route::post('/location/update/{id}/{address_id}', [HomeController::class, 'location_update'])->name('location_update');
 	// item
     Route::get('menu/{category}', [MenuController::class, 'index'])->name('menu');
     Route::get('{country}/menu/{category}', [MenuController::class, 'index_con'])->name('menu');
 
 	Route::get('/show-item', [WebItemController::class, 'showitem']);
+	Route::get('/show-deal-item', [WebItemController::class, 'showDealitem']);
 	Route::get('/item-{slug}', [WebItemController::class, 'itemdetails'])->name('itemdetails');
 	Route::get('/search', [WebItemController::class, 'search'])->name('search');
 	Route::get('/view-all', [WebItemController::class, 'viewall'])->name('viewall');
+	Route::get('/reward', [HomeController::class, 'rewards'])->name('rewards');
 	Route::get('/get-item-allergens', [WebItemController::class, 'getitemallergens'])->name('get_item_allergens');
 	// otherpages
 	Route::get('/abous-us', [WebOtherPagesController::class, 'aboutus'])->name('about-us');
@@ -325,6 +330,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::post('dipping/update', [DippingController::class, 'update']);
         Route::get('dipping-{id}', [DippingController::class, 'edititem']);
         Route::post('dipping/delete', [DippingController::class, 'delete']);
+
+  Route::get('topDeals', [DealController::class, 'index']);
+        Route::get('topDeals/add', [DealController::class, 'additem']);
+        Route::post('topDeals/store', [DealController::class, 'store']);
+        Route::post('topDeals/update', [DealController::class, 'update']);
+        Route::get('topDeals-{id}', [DealController::class, 'edititem']);
+        Route::post('topDeals/delete', [DealController::class, 'delete']);
 
 
         // payment

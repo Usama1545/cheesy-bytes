@@ -277,6 +277,13 @@
             <i class="fa-solid fa-list-timeline"></i><span class="nav-text ">Custom Pizza</span>
         </a>
     </li>
+    <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : ''); ?>"
+        id="10">
+        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/topDeals*') ? 'active' : ''); ?>"
+           href="<?php echo e(URL::to('/admin/topDeals')); ?>" aria-expanded="false">
+            <i class="fa-solid fa-badge-percent"></i><span class="nav-text ">Deals</span>
+        </a>
+    </li>
     <?php if(@helper::checkaddons('product_review')): ?>
         <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('29', $modules) == true ? '' : 'd-none') : ''); ?>"
             id="29">

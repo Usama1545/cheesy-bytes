@@ -28,19 +28,19 @@
                             <div class="card px-0 overflow-hidden border-bottom-0 rounded-3">
                                 <div class="table-responsive">
                                     <table class="table m-0">
-                                        <thead class="table-light bg-primary">
-                                            <tr>
-                                                <th class="cart-table-title p-3 text-white">
+                                        <thead class="table-light bg-primary" style="background-color: #D6B62B">
+                                            <tr style="background-color: #D6B62B">
+                                                <th class="cart-table-title p-3 text-white" style="background-color: #D6B62B">
                                                     {{ trans('labels.item') }}
                                                 </th>
-                                                <th class="cart-table-title p-3 text-white">
+                                                <th class="cart-table-title p-3 text-white" style="background-color: #D6B62B">
                                                     {{ trans('labels.price') }}
                                                 </th>
-                                                <th class="cart-table-title p-3 text-white">
+                                                <th class="cart-table-title p-3 text-white" style="background-color: #D6B62B">
                                                     {{ trans('labels.qty') }}</th>
-                                                <th class="cart-table-title p-3 text-white">
+                                                <th class="cart-table-title p-3 text-white" style="background-color: #D6B62B">
                                                     {{ trans('labels.total') }}</th>
-                                                <th class="cart-table-title p-3 text-white text-center">
+                                                <th class="cart-table-title p-3 text-white text-center" style="background-color: #D6B62B">
                                                     {{ trans('labels.action') }}
                                                 </th>
                                             </tr>

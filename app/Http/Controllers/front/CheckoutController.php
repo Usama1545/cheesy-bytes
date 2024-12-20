@@ -5,6 +5,9 @@ namespace App\Http\Controllers\front;
 use App\Http\Controllers\Controller;
 use App\Helpers\helper;
 use App\Helpers\whatsapp_helper;
+use App\Models\Branch;
+use App\Models\CustomerAddress;
+use App\Models\State;
 use Illuminate\Http\Request;
 use App\Models\Address;
 use App\Models\Cart;
@@ -82,9 +85,19 @@ class CheckoutController extends Controller
 
         $taxArr['tax'] = $tax_name;
         $taxArr['rate'] = $tax_price;
-        $shippingarea = Shippingarea::orderBy('reorder_id')->get();
+        $states = State::all();
+        $branches = Branch::with('state')->get();
+        $shippingarea = Shippingarea::with('state')->get();
+        $address = CustomerAddress::where('user_id',auth()->id())->orWhere('session_id',session::getId())->with('state')->first();
+        if (!$address) {
+            $address = (object)[
+                'address_type' => '', // Default or empty value
+                'state' => null, // For the relationship
+                'other_field' => '', // Add other fields as needed
+            ];
+        }
         if (count($getcartlist) > 0) {
-            return view('web.checkout.checkout', compact('getaddresses', 'getpaymentmethods', 'getcartlist', 'taxArr', 'getsettings', 'shippingarea'));
+            return view('web.checkout.checkout', compact('getaddresses', 'getpaymentmethods', 'getcartlist', 'taxArr', 'getsettings', 'shippingarea','address','states','branches'));
         } else {
             return redirect()->back();
         }
@@ -146,7 +159,7 @@ class CheckoutController extends Controller
         try {
 
             if ($request->transaction_type == 1 || $request->transaction_type == 2 || $request->transaction_type == 3 || $request->transaction_type == 4 || $request->transaction_type == 5 || $request->transaction_type == 6) {
-            
+
                 $address = $request->address;
                 $address_type = $request->address_type;
                 $landmark = $request->landmark;
@@ -284,13 +297,15 @@ class CheckoutController extends Controller
             $order->order_type = $order_type;
 
             if ($order_type == 1) {
+                $shipping = Shippingarea::find($request->delivery_area);
                 $order->address_type = $address_type;
                 $order->address = $address;
                 $order->landmark = $landmark;
                 $order->postal_code = $postal_code;
                 $order->country = $country;
-                $order->state = $state;
+                $order->state = $shipping->state->name;
                 $order->city = $city;
+                $order->delivery_area = $request->delivery_area;
             } else {
                 $order->address_type = null;
                 $order->address = null;
@@ -299,6 +314,7 @@ class CheckoutController extends Controller
                 $order->country = null;
                 $order->state = null;
                 $order->city = null;
+                $order->branch_id = $request->delivery_area;
             }
 
             $order->name = $name;
@@ -356,6 +372,7 @@ class CheckoutController extends Controller
                     $od->order_id = $order->id;
                     $od->user_id = @$checkuser->id;
                     $od->item_id = $cart->item_id;
+                    $od->custom_pizza_id = $cart->custom_pizza_id ?? null;
                     $od->item_name = $cart->item_name;
                     $od->item_type = $cart->item_type;
                     $od->item_image = $cart->item_image;
@@ -404,7 +421,7 @@ class CheckoutController extends Controller
                 }
                 session()->forget('discount_data');
                 session()->forget('userdata');
-                
+
                 if ($transaction_type == 7 || $transaction_type == 8 || $transaction_type == 9 || $transaction_type == 10 || $transaction_type == 11 || $transaction_type == 12 || $transaction_type == 13 || $transaction_type == 14) {
                     return redirect('/success-' . $order_number)->with('success', trans('messages.order_placed_note'));
                 }
@@ -446,7 +463,7 @@ class CheckoutController extends Controller
                         $minute = helper::appdata()->interval_time;
                     }
 
-                    $firsthalf = new CarbonPeriod(date("H:i", strtotime($time->open_time)), $minute . ' minutes', date("H:i", strtotime($time->break_start))); // for create use 24 hours format later change format 
+                    $firsthalf = new CarbonPeriod(date("H:i", strtotime($time->open_time)), $minute . ' minutes', date("H:i", strtotime($time->break_start))); // for create use 24 hours format later change format
 
                     $secondhalf =  new CarbonPeriod(date("H:i", strtotime($time->break_end)), $minute . ' minutes', date("H:i", strtotime($time->close_time)));
 

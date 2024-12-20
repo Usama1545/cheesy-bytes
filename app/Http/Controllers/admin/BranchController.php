@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
+use App\Models\State;
 use Illuminate\Http\Request;
 use App\Models\Shippingarea;
 
@@ -20,10 +21,14 @@ class BranchController extends Controller
     }
     public function store(Request $request)
     {
+        $state = State::firstOrCreate(
+            ['name' => strtoupper($request->state)]
+        );
+
         $branch = new Branch();
         $branch->name = $request->name;
         $branch->city = $request->city;
-        $branch->state = $request->state;
+        $branch->state_id = $state->id;
         $branch->zip = $request->zip;
         $branch->address = $request->address;
         $branch->save();
@@ -31,10 +36,14 @@ class BranchController extends Controller
     }
     public function update(Request $request)
     {
+        $state = State::firstOrCreate(
+            ['name' => strtoupper($request->state)]
+        );
+
         $branch = Branch::find($request->id);
         $branch->name = $request->name;
         $branch->city = $request->city;
-        $branch->state = $request->state;
+        $branch->state_id = $state->id;
         $branch->zip = $request->zip;
         $branch->address = $request->address;
         $branch->save();

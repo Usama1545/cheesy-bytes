@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class PizzaTopping extends Model
 {
     use HasFactory;
+    protected $table = 'custom_pizza_selected_toppings';
 
-    protected $fillable = ['custom_pizza_id','topping_id','position','price'];
+    protected $fillable = ['pizza_id','topping_id','side','quantity'];
     public function customPizzas()
     {
         return $this->belongsToMany(CustomPizza::class, 'custom_pizza_topping')

@@ -214,7 +214,7 @@ class CustomPizzaController extends Controller
             CustomPizzaSelectedTopping::create([
                 'topping_id' => $topping['topping_id'],
                 'side' => $topping['side'],
-                'quantity' => $topping['quantity'],
+                'quantity' => $topping['quantity'] ?? 'normal',
                 'pizza_id' => $pizza->id,
             ]);
         }
@@ -240,13 +240,13 @@ class CustomPizzaController extends Controller
             $cart->session_id = Session::getId();
         }
 
-        $cart->item_id = $pizza->id;
+        $cart->custom_pizza_id = $pizza->id;
         $cart->item_name = $request->size['label'] . ' - ' . $request->crust['name'];
-        $cart->item_type = 'Pizza';
+        $cart->item_type = 2;
         $cart->item_image = 'item-6742283c7c0ff.png';
         $cart->item_price = helper::number_format($totalPrice);
-        $cart->extras_price =  null;
-        $cart->extras_total_price = null;
+        $cart->extras_price =  0;
+        $cart->extras_total_price = 0;
 
         $cart->qty = $request->quantity;
         $cart->save();
@@ -262,5 +262,14 @@ class CustomPizzaController extends Controller
         return response()->json(['status' => 1, 'message' => trans('messages.success'), 'data' => $total_count, 'total_item_count' => helper::get_item_cart($pizza->id)], 200);
 
 
+    }
+    public function delete(Request $request)
+    {
+        $category = CustomPizzaSize::where('id', $request->id)->first();
+        if($category){
+            $category->delete();
+            return 1;
+        }
+        return 0;
     }
 }

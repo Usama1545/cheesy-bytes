@@ -55,8 +55,8 @@
                                         <div class="col-12 d-flex gap-3">
                                             <?php if($getsettings->pickup_delivery == 1): ?>
                                                 <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type"
-                                                        value="1" checked id="delivery">
+                                                    <input class="form-check-input" type="radio" name="order_type" value="1" id="delivery"
+                                                        <?php echo e($address->address_type === 'delivery' ? 'checked' : ($address->address_type === 'carryout' ? '' : 'checked')); ?>>
                                                     <label class="form-check-label fs-7 fw-500" for="delivery">
                                                         <?php echo e(trans('labels.delivery')); ?>
 
@@ -64,30 +64,28 @@
                                                 </div>
                                                 <div class="form-check form-check-inline mb-0">
                                                     <input class="form-check-input" type="radio" name="order_type"
-                                                        value="2" id="pickup">
+                                                        value="2" id="pickup" <?php echo e($address->address_type === 'carryout' ? 'checked' : ''); ?>>
                                                     <label class="form-check-label fs-7 fw-500" for="pickup">
                                                         <?php echo e(trans('labels.take_away')); ?>
 
                                                     </label>
                                                 </div>
-                                            <?php elseif($getsettings->pickup_delivery == 2): ?>
-                                                <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type"
-                                                        value="1" checked id="delivery">
-                                                    <label class="form-check-label fs-7 fw-500" for="delivery">
-                                                        <?php echo e(trans('labels.delivery')); ?>
 
-                                                    </label>
-                                                </div>
-                                            <?php elseif($getsettings->pickup_delivery == 3): ?>
-                                                <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type"
-                                                        value="2" id="pickup" checked>
-                                                    <label class="form-check-label fs-7 fw-500" for="pickup">
-                                                        <?php echo e(trans('labels.take_away')); ?>
 
-                                                    </label>
-                                                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -225,42 +223,29 @@
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <textarea name="address" id="new_address" class="form-control" rows="6"
-                                                placeholder="<?php echo e(trans('labels.address')); ?>" required><?php echo e(old('address')); ?></textarea>
+                                                placeholder="<?php echo e(trans('labels.address')); ?>" required><?php echo e($address->address ?? old('address')); ?></textarea>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label for="landmark" class="form-label"><?php echo e(trans('labels.landmark')); ?>
 
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" name="landmark" id="new_landmark"
-                                                placeholder="<?php echo e(trans('labels.landmark')); ?>"
-                                                value="<?php echo e(old('landmark')); ?>">
-                                        </div>
                                         <div class="col-md-6">
                                             <label for="city" class="form-label"><?php echo e(trans('labels.city')); ?>
 
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" class="form-control" name="city" id="new_city"
-                                                placeholder="<?php echo e(trans('labels.city')); ?>" value="<?php echo e(old('city')); ?>">
+                                                placeholder="<?php echo e(trans('labels.city')); ?>" value="<?php echo e($address->city ?? old('city')); ?>">
                                         </div>
                                         <div class="col-md-6">
                                             <label for="state" class="form-label"><?php echo e(trans('labels.state')); ?>
 
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control" name="state" id="new_state"
-                                                placeholder="<?php echo e(trans('labels.state')); ?>" value="<?php echo e(old('state')); ?>">
+                                            <select class="form-control form-select" name="state_id" id="state">
+                                                <?php $__currentLoopData = $states; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $state): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($state->name); ?>" <?php echo e($address->state == $state->id ? 'selected' : ''); ?>><?php echo e($state->name); ?></option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </select>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label for="country" class="form-label"><?php echo e(trans('labels.country')); ?>
 
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" name="country" id="new_country"
-                                                placeholder="<?php echo e(trans('labels.country')); ?>"
-                                                value="<?php echo e(old('country')); ?>">
-                                        </div>
                                         <div class="col-md-6">
                                             <label for="pincode" class="form-label"><?php echo e(trans('labels.pincode')); ?>
 
@@ -268,12 +253,33 @@
                                             </label>
                                             <input type="text" class="form-control" name="pincode" id="new_pincode"
                                                 placeholder="<?php echo e(trans('labels.pincode')); ?>"
-                                                value="<?php echo e(old('pincode')); ?>">
+                                                value="<?php echo e($address->zip ?? old('pincode')); ?>">
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="card mb-3" id="pickupdiv">
+                                <div class="card-body">
+                                    <div class="heading mb-2 border-bottom">
+                                        <h5><?php echo e(trans('labels.shippingarea')); ?></h5>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <select name="delivery_area" id="pickup_area" class="form-select">
+                                                <option value="" data-charge="0"><?php echo e(trans('labels.select')); ?>
 
+                                                </option>
+                                                <?php $__currentLoopData = $branches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $area): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($area->id); ?>"
+                                                            data-charge="0"><?php echo e($area->name.','.$area->address.' '.$area->city.' '.$area->state->name); ?>
+
+                                                    </option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card mb-3" id="shipping_area">
                                 <div class="card-body">
                                     <div class="heading mb-2 border-bottom">
@@ -281,7 +287,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <select name="delivery_area" id="delivery_area" class="form-select">
+                                            <select name="delivery_area" id="shipping_delivery_area" class="form-select">
                                                 <option value="" data-charge="0"><?php echo e(trans('labels.select')); ?>
 
                                                 </option>
@@ -401,7 +407,7 @@
                                         <div class="row justify-content-between align-items-center">
                                             <div class="col-auto"><span><?php echo e($tax); ?></span></div>
                                             <div class="col-auto">
-                                                <span> <?php echo e(helper::currency_format($rate)); ?></sp>
+                                                <span> <?php echo e(helper::currency_format($rate)); ?></span>
                                             </div>
                                         </div>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -454,6 +460,7 @@
                 <input type="hidden" name="user_email" id="user_email" value="<?php echo e(@Auth::user()->email); ?>">
                 <input type="hidden" name="user_mobile" id="user_mobile" value="<?php echo e(@Auth::user()->mobile); ?>">
                 <input type="hidden" name="buynow" id="buynow" value="<?php echo e(request()->get('buynow')); ?>">
+                <input type="hidden" name="delivery_area" id="buynow" value="<?php echo e(request()->get('buynow')); ?>">
 
                 <input type="hidden" name="sloturl" id="sloturl" value="<?php echo e(URL::to('/timeslot')); ?>">
                 <input type="hidden" name="orderurl" id="orderurl" value="<?php echo e(URL::to('placeorder')); ?>">
@@ -643,6 +650,36 @@ unset($__errorArgs, $__bag); ?>
             enableTime: false,
             altInput: true,
             altFormat: dateFormat,
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const pickupRadio = document.getElementById("pickup");
+            const deliveryRadio = document.getElementById("delivery");
+            const pickupDiv = document.getElementById("pickupdiv");
+            const addressDiv = document.getElementById("addressdiv");
+
+            // Function to toggle display
+            function togglePickupCard() {
+                if (pickupRadio.checked) {
+                    pickupDiv.style.display = "block";
+                } else {
+                    pickupDiv.style.display = "none";
+                }
+            }
+            function toggleAddressCard() {
+                if (deliveryRadio.checked) {
+                    pickupDiv.style.display = "none";
+                }
+            }
+
+            // Initial check on page load
+            togglePickupCard();
+            toggleAddressCard();
+
+            // Listen for changes to the radio button
+            pickupRadio.addEventListener("change", togglePickupCard);
+            deliveryRadio.addEventListener("change", toggleAddressCard);
         });
     </script>
 <?php $__env->stopSection(); ?>

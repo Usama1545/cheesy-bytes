@@ -8,6 +8,9 @@
     <title>{{ trans('labels.print') }}</title>
     <link rel="stylesheet" href="{{ url('storage/app/public/admin-assets/assets/css/bootstrap/bootstrap.min.css') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ helper::image_path(@helper::appdata()->favicon) }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
     <style type="text/css">
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
@@ -87,7 +90,7 @@
             border-bottom: 1px dashed #000;
         }
 
-        .resept .table>:not(caption)>*>* {
+        .resept .table > :not(caption) > * > * {
             background-color: transparent !important;
         }
 
@@ -130,255 +133,320 @@
 </head>
 
 <body>
-    <div id="printDiv">
-        <div class="resept p-2">
-            <div class="address">
-                <h5 class="m-0 text-uppercase fs-8 text-center line-2 fw-600">{{ @helper::appdata()->short_title }}</h5>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center ">
-                    <small class=" text-uppercase fs-10 text-center text-dark fw-500 line-2">
-                        @if ($orderdata->order_type == 1)
-                            {{ @$orderdata->address . ' ' . @$orderdata->landmark . ',' . @$orderdata->city . ',' . @$orderdata->state . ',' . @$orderdata->country . ',' . @$orderdata->postal_code }}
-                        @elseif ($orderdata->order_type == 2)
-                            {{ trans('labels.pickup') }}
-                        @elseif ($orderdata->order_type == 3)
-                            {{ trans('labels.pos') }}
-                        @endif
-                    </small>
-                </div>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
-                    <p class=" m-0 fw-500 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ trans('labels.name') }} :</p>
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
-                        {{ @$orderdata->name }}
-                    </small>
-                </div>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
-                    <p class="fw-500 m-0 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ trans('labels.email') }} :</p>
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
-                        {{ @$orderdata->email }}
-                    </small>
-                </div>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
-                    <p class="fw-500 m-0 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ trans('labels.mobile') }} :</p>
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
-                        {{ @$orderdata->mobile }}
-                    </small>
-                </div>
+<div id="printDiv">
+    <div class="resept p-2">
+        <div class="address">
+            <h5 class="m-0 text-uppercase fs-8 text-center line-2 fw-600">{{ @helper::appdata()->short_title }}</h5>
+            <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center ">
+                <small class=" text-uppercase fs-10 text-center text-dark fw-500 line-2">
+                    @if ($orderdata->order_type == 1)
+                        {{ @$orderdata->address . ' ,' . @$orderdata->city . ',' . @$orderdata->state . ',' . @$orderdata->postal_code }}
+                    @elseif ($orderdata->order_type == 2)
+                        {{ trans('labels.pickup') }}
+                    @elseif ($orderdata->order_type == 3)
+                        {{ trans('labels.pos') }}
+                    @endif
+                </small>
             </div>
-            <div class="total-billes-amount">
+            <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
+                <p class=" m-0 fw-500 text-uppercase fs-10 text-center text-dark line-1">
+                    {{ trans('labels.name') }} :</p>
+                <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
+                    {{ @$orderdata->name }}
+                </small>
+            </div>
+            <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
+                <p class="fw-500 m-0 text-uppercase fs-10 text-center text-dark line-1">
+                    {{ trans('labels.email') }} :</p>
+                <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
+                    {{ @$orderdata->email }}
+                </small>
+            </div>
+            <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
+                <p class="fw-500 m-0 text-uppercase fs-10 text-center text-dark line-1">
+                    {{ trans('labels.mobile') }} :</p>
+                <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
+                    {{ @$orderdata->mobile }}
+                </small>
+            </div>
+        </div>
+        <div class="total-billes-amount">
+            <div
+                class="fw-500 d-flex gap-1 align-items-center justify-content-center mt-1 text-uppercase fs-10 text-center text-dark">
+                {{ trans('labels.order_number') }} :
+                <small class="fw-500 text-uppercase fs-10 text-center text-dark line-1">
+                    #{{ $orderdata->order_number }}
+                </small>
+            </div>
+            <p
+                class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
+                {{ trans('labels.order_date') }} :
+                <small
+                    class="fw-500 text-uppercase fs-10 text-center text-dark line-1">{{ @helper::date_format($orderdata->created_at) }}
+                </small>
+            </p>
+        </div>
+        <div class="total-billes-amount">
+            @if ($orderdata->delivery_date != '')
                 <div
-                    class="fw-500 d-flex gap-1 align-items-center justify-content-center mt-1 text-uppercase fs-10 text-center text-dark">
-                    {{ trans('labels.order_number') }} :
+                    class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark">
+                    {{ $orderdata->order_type == '1' ? trans('labels.delivery_date') : trans('labels.pickup_date') }}
+                    :
                     <small class="fw-500 text-uppercase fs-10 text-center text-dark line-1">
-                        #{{ $orderdata->order_number }}
+                        {{ @helper::date_format($orderdata->delivery_date) }}
                     </small>
                 </div>
+            @endif
+            @if ($orderdata->delivery_time != '')
                 <p
                     class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
-                    {{ trans('labels.order_date') }} :
+                    {{ $orderdata->order_type == '1' ? trans('labels.delivery_time') : trans('labels.pickup_time') }}
+                    :
                     <small
-                        class="fw-500 text-uppercase fs-10 text-center text-dark line-1">{{ @helper::date_format($orderdata->created_at) }}
+                        class="fw-500 text-uppercase fs-10 text-center text-dark line-1">{{ $orderdata->delivery_time }}
                     </small>
                 </p>
-            </div>
-            <div class="total-billes-amount">
-                @if ($orderdata->delivery_date != '')
-                    <div
-                        class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark">
-                        {{ $orderdata->order_type == '1' ? trans('labels.delivery_date') : trans('labels.pickup_date') }}
-                        :
-                        <small class="fw-500 text-uppercase fs-10 text-center text-dark line-1">
-                            {{ @helper::date_format($orderdata->delivery_date) }}
-                        </small>
-                    </div>
-                @endif
-                @if ($orderdata->delivery_time != '')
-                    <p
-                        class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ $orderdata->order_type == '1' ? trans('labels.delivery_time') : trans('labels.pickup_time') }}
-                        :
-                        <small
-                            class="fw-500 text-uppercase fs-10 text-center text-dark line-1">{{ $orderdata->delivery_time }}
-                        </small>
-                    </p>
-                @endif
-            </div>
-            <table class="table table-borderless my-2 bg-transparent">
-                <thead class="underline-3">
-                    <tr class="text-dark">
-                        <th scope="col" class="product-text-size fw-bold">#</th>
-                        <th scope="col" class="product-text-size fw-bold">{{ trans('labels.item') }}
-                        </th>
-                        <th scope="col" class="product-text-size fw-bold text-center">{{ trans('labels.price') }}
-                        </th>
-                        <th scope="col" class="product-text-size fw-bold text-center">{{ trans('labels.qty') }}
-                        </th>
-                        <th scope="col" class="product-text-size fw-bold text-center pe-0">
-                            {{ trans('labels.total') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $order_total = 0;
-                        $qty = 0;
-                    @endphp
-                    @foreach ($ordersdetails as $key => $orders)
-                        @php
-                            $order_total +=
-                                ($orders['item_price'] +
-                                    $orders['addons_total_price'] +
-                                    $orders['extras_total_price']) *
-                                $orders['qty'];
-                            $qty += $orders['qty'];
-                        @endphp
-                        <tr class="align-middle">
-                            <td class="py-2">
-                                <p class="fw-500 text-dark line-1 m-0 product-text-size">{{ ++$key }}</p>
-                            </td>
-                            <td class="py-2">
-                                <h6 class="m-0 fw-500 product-text-size">
-                                    {{ $orders->item_name }}
-                                    [{{ $orders->item_type == 1 ? trans('labels.veg') : trans('labels.nonveg') }}]
-                                    <br>
-                                    @php
-                                        $addons_name = explode('| ', $orders->addons_name);
-                                        $addons_price = explode('| ', $orders->addons_price);
-                                        $extras_name = explode('| ', $orders->extras_name);
-                                        $extras_price = explode('| ', $orders->extras_price);
-                                    @endphp
-                                    @if ($orders->addons_id != '')
-                                        @foreach ($addons_name as $key => $val)
-                                            <span class="text-muted">{{ $addons_name[$key] }} :
+            @endif
+            @if ($orderdata->branch_id != '')
+                <p
+                    class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
+                    Pickup From:
+                    <small
+                        class="fw-500 text-uppercase fs-10 text-center text-dark ">{{ $orderdata->branch->name. '-' . $orderdata->branch->city. '-' .$orderdata->branch->state->name }}
+                    </small>
+                </p>
+            @endif
+            @if ($orderdata->delivery_area != '')
+                <p
+                    class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
+                    Delivery Zone:
+                    <small
+                        class="fw-500 text-uppercase fs-10 text-center text-dark ">{{ $orderdata->shipping->name. '-' . $orderdata->shipping->city. '-' .$orderdata->shipping->state->name }}
+                    </small>
+                </p>
+            @endif
+        </div>
+        <table class="table  my-2 ">
+            <thead class="underline-3">
+            <tr class="text-dark">
+                <th scope="col" class="product-text-size fw-bold">#</th>
+                <th scope="col" class="product-text-size fw-bold">{{ trans('labels.item') }}
+                </th>
+                <th scope="col" class="product-text-size fw-bold text-center">{{ trans('labels.price') }}
+                </th>
+                <th scope="col" class="product-text-size fw-bold text-center">{{ trans('labels.qty') }}
+                </th>
+                <th scope="col" class="product-text-size fw-bold text-center pe-0">
+                    {{ trans('labels.total') }}
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @php
+                $order_total = 0;
+                $qty = 0;
+            @endphp
+            @foreach ($ordersdetails as $key => $orders)
+                @php
+                    $order_total +=
+                        ($orders['item_price'] +
+                            $orders['addons_total_price'] +
+                            $orders['extras_total_price']) *
+                        $orders['qty'];
+                    $qty += $orders['qty'];
+                @endphp
+                <tr class="align-middle">
+                    <td class="py-2">
+                        <p class="fw-500 text-dark line-1 m-0 product-text-size">{{ ++$key }}</p>
+                    </td>
+                    <td class="py-2">
+                        <h6 class="m-0 fw-500 product-text-size">
+                            {{ $orders->item_name }}
+
+                            <br>
+                            @php
+                                $addons_name = explode('| ', $orders->addons_name);
+                                $addons_price = explode('| ', $orders->addons_price);
+                                $extras_name = explode('| ', $orders->extras_name);
+                                $extras_price = explode('| ', $orders->extras_price);
+                            @endphp
+                            @if ($orders->addons_id != '')
+                                @foreach ($addons_name as $key => $val)
+                                    <span class="text-muted">{{ $addons_name[$key] }} :
                                                 <span>{{ helper::currency_format($addons_price[$key]) }}</span>
                                             </span><br>
-                                        @endforeach
-                                    @endif
-                                    @if ($orders->extras_id != '')
-                                        @foreach ($extras_name as $key => $val)
-                                            <span class="text-muted">{{ $extras_name[$key] }} :
+                                @endforeach
+                            @endif
+                            @if ($orders->extras_id != '')
+                                @foreach ($extras_name as $key => $val)
+                                    <span class="text-muted">{{ $extras_name[$key] }} :
                                                 <span>{{ helper::currency_format($extras_price[$key]) }}</span>
                                             </span><br>
-                                        @endforeach
-                                    @endif
-                                </h6>
-                            </td>
-                            <td class="py-2 text-end">
-                                <div class="fw-500 product-text-size d-flex align-items-center justify-content-center">
-                                    <p class="m-0 text-dark">
-                                        {{ helper::currency_format($orders->item_price) }}
-                                        @if ($orders->addons_total_price != 0 || $orders->extras_total_price != 0)
-                                            <br><small class="text-muted">+
-                                                {{ helper::currency_format($orders->addons_total_price + $orders->extras_total_price) }}</small>
-                                        @endif
+                                @endforeach
+                            @endif
+                            @if ($orders->custom_pizza_id != null)
+                                    <?php $data = (new App\Helpers\helper)->getCustomPizzaDetails($orders->custom_pizza_id) ?>
+                                <div class="mt-2 border-bottom" id="extras">
+                                    <p class="m-0 ">Size: <small class="text-muted">{{ $data->size->label }}
+                                            ({{$data->size->name }}")</small></p>
+                                    <p class="m-0 ">Special: <small class="text-muted">{{ $data->cut }}
+                                            / {{ $data->bake }} / {{ $data->seasoning }}</small></p>
+                                    <p class="m-0 ">Crust: <small class="text-muted">{{ $data->crust->name }}</small>
                                     </p>
+                                    <p class="m-0 ">Sauce: <small class="text-muted">{{ $data->sauce->name }}</small>
+                                    </p>
+                                    <p class="m-0 ">Toppings </p>
+                                    <ul class="m-0 p-0" id="item-extras">
+                                        @foreach($data->toppings as $topping)
+                                            <li class="list-group-item  d-flex  text-muted">
+                                                <small
+                                                    class="flex-grow-1 ">{{ $topping->name }}</small>
+                                                <small
+                                                    class="ml-3">{{ $topping->pivot->side }}</small>
+                                                <small
+                                                    class=" px-3">{{ $topping->pivot->quantity }}</small>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <p class="m-0 ">Dipping</p>
+                                    <ul class="m-0 p-0" id="item-extras">
+                                        @foreach($data->dipping as $dipping)
+                                            <li class="list-group-item  d-flex  text-muted">
+                                                <small
+                                                    class="flex-grow-1 ">{{ $dipping->name }}</small>
+
+                                                <small
+                                                    class=" px-3">{{ $dipping->pivot->quantity }}
+                                                    x {{ $dipping->price }}$</small>
+                                                <small
+                                                    class="px-3">{{ $dipping->pivot->quantity * $dipping->price }}
+                                                    $</small>
+                                            </li>
+                                        @endforeach
+                                    </ul>
                                 </div>
-                            </td>
-                            <td class="py-2 text-end">
-                                <div class="fw-500 product-text-size d-flex align-items-center justify-content-center">
-                                    <p class="m-0 text-dark">{{ $orders->qty }}</p>
-                                </div>
-                            </td>
-                            <td class="py-2 pe-0 text-end">
-                                <p class="text-dark fw-500 line-1 m-0  product-text-size">
-                                    {{ helper::currency_format($orders->item_price * $orders->qty + $orders->addons_total_price + $orders->extras_total_price) }}
-                                </p>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    <tr class="underline-3">
-                        <td class="py-2" colspan="3">
-                            <h6 class="line-1 m-0 fw-600 product-text-size">{{ trans('labels.subtotal') }}</h6>
-                        </td>
-                        <td class="py-2 text-end">
-                            <div class=" product-text-size d-flex align-items-center justify-content-center">
-                                <p class="m-0 text-dark">{{ $qty }}</p>
-                            </div>
-                        </td>
-                        <td class="py-2 pe-0 text-end">
-                            <p class="text-dark line-1 fw-500 m-0  product-text-size">
-                                {{ helper::currency_format($order_total) }}
+
+                            @endif
+                        </h6>
+                    </td>
+                    <td class="py-2 text-end">
+                        <div class="fw-500 product-text-size d-flex align-items-center justify-content-center">
+                            <p class="m-0 text-dark">
+                                {{ helper::currency_format($orders->item_price) }}
+                                @if ($orders->addons_total_price != 0 || $orders->extras_total_price != 0)
+                                    <br><small class="text-muted">+
+                                        {{ helper::currency_format($orders->addons_total_price + $orders->extras_total_price) }}</small>
+                                @endif
                             </p>
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-            <div class="col-12 d-flex mb-2 justify-content-end">
-                <div class="col-7">
-                    <div class="col-12">
-                        <div class="text-dark">
-                            @if (!empty($orderdata->discount_amount))
-                                <div class="d-flex justify-content-between text-dark my-1">
-                                    <div class="">
+                        </div>
+                    </td>
+                    <td class="py-2 text-end">
+                        <div class="fw-500 product-text-size d-flex align-items-center justify-content-center">
+                            <p class="m-0 text-dark">{{ $orders->qty }}</p>
+                        </div>
+                    </td>
+                    <td class="py-2 pe-0 text-end">
+                        <p class="text-dark fw-500 line-1 m-0  product-text-size">
+                            {{ helper::currency_format($orders->item_price * $orders->qty + $orders->addons_total_price + $orders->extras_total_price) }}
+                        </p>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+            <tfoot>
+            <tr class="underline-3">
+                <td class="py-2" colspan="3">
+                    <h6 class="line-1 m-0 fw-600 product-text-size">{{ trans('labels.subtotal') }}</h6>
+                </td>
+                <td class="py-2 text-end">
+                    <div class=" product-text-size d-flex align-items-center justify-content-center">
+                        <p class="m-0 text-dark">{{ $qty }}</p>
+                    </div>
+                </td>
+                <td class="py-2 pe-0 text-end">
+                    <p class="text-dark line-1 fw-500 m-0  product-text-size">
+                        {{ helper::currency_format($order_total) }}
+                    </p>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+        <div class="col-12 d-flex mb-2 justify-content-end">
+            <div class="col-7">
+                <div class="col-12">
+                    <div class="text-dark">
+                        @if (!empty($orderdata->discount_amount))
+                            <div class="d-flex justify-content-between text-dark my-1">
+                                <div class="">
                                         <span class="txt-resept-font-size fw-500 text-uppercase line-1">
                                             {{ trans('labels.discount') }}
                                             {{ $orderdata->offer_code != '' ? '(' . $orderdata->offer_code . ')' : '' }}
                                         </span>
-                                    </div>
-                                    <div class="">
+                                </div>
+                                <div class="">
                                         <span class="txt-resept-font-size fw-500 text-uppercase text-end line-1">
                                             {{ helper::currency_format($orderdata->discount_amount) }}
                                         </span>
-                                    </div>
                                 </div>
-                            @endif
-                            @php
-                                $tax = explode('|', $orderdata->tax_amount);
-                                $tax_name = explode('|', $orderdata->tax_name);
-                            @endphp
-                            @if ($orderdata->tax_amount != null && $orderdata->tax_name != null)
-                                @foreach ($tax as $key => $tax_value)
-                                    <div class="d-flex justify-content-between text-dark my-1">
-                                        <div class="">
+                            </div>
+                        @endif
+                        @php
+                            $tax = explode('|', $orderdata->tax_amount);
+                            $tax_name = explode('|', $orderdata->tax_name);
+                        @endphp
+                        @if ($orderdata->tax_amount != null && $orderdata->tax_name != null)
+                            @foreach ($tax as $key => $tax_value)
+                                <div class="d-flex justify-content-between text-dark my-1">
+                                    <div class="">
                                             <span
                                                 class="txt-resept-font-size fw-500 text-uppercase line-1">{{ $tax_name[$key] }}</span>
-                                        </div>
-                                        <div class="">
+                                    </div>
+                                    <div class="">
                                             <span class="txt-resept-font-size fw-500 text-uppercase text-end line-1">
                                                 {{ helper::currency_format($tax_value) }}
                                             </span>
-                                        </div>
                                     </div>
-                                @endforeach
-                            @endif
-                            @if ($orderdata->delivery_charge != 0)
-                                <div class="d-flex justify-content-between text-dark my-1">
-                                    <div class="">
+                                </div>
+                            @endforeach
+                        @endif
+                        @if ($orderdata->delivery_charge != 0)
+                            <div class="d-flex justify-content-between text-dark my-1">
+                                <div class="">
                                         <span class="txt-resept-font-size fw-500 text-uppercase line-1">
                                             {{ trans('labels.delivery_charge') }}
                                         </span>
-                                    </div>
-                                    <div class="">
+                                </div>
+                                <div class="">
                                         <span class="txt-resept-font-size fw-500 text-uppercase line-1 text-end">
                                             {{ helper::currency_format($orderdata->delivery_charge) }}
                                         </span>
-                                    </div>
                                 </div>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
-            <div class="col-12 d-flex justify-content-between underline-3 py-2">
-                <span class="fw-semibold product-text-size line-1">{{ trans('labels.grand_total') }}</span>
-                <span
-                    class="fw-semibold line-1 product-text-size">{{ helper::currency_format($orderdata->grand_total) }}</span>
-            </div>
-            <h2 class="my-2 fs-8 fw-600 text-center line-1">{{ trans('labels.thanks_for_order') }}</h2>
-            <div class="col-12 mt-2 d-flex justify-content-center">
-                <button type='button' id="btnPrint"
+        </div>
+        <div class="col-12 d-flex justify-content-between underline-3 py-2">
+            <span class="fw-semibold product-text-size line-1">{{ trans('labels.grand_total') }}</span>
+            <span
+                class="fw-semibold line-1 product-text-size">{{ helper::currency_format($orderdata->grand_total) }}</span>
+        </div>
+        <h2 class="my-2 fs-8 fw-600 text-center line-1">{{ trans('labels.thanks_for_order') }}</h2>
+        <div class="col-12 mt-2 d-flex justify-content-center">
+            <button type='button' id="btnPrint"
                     class="rounded border-0 btn btn-primary text-light text-capitalize fs-8 px-3 py-2">{{ trans('labels.print') }}</button>
-            </div>
         </div>
     </div>
-    <script>
-        const $btnPrint = document.querySelector("#btnPrint");
-        $btnPrint.addEventListener("click", () => {
-            window.print();
-        });
-    </script>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+    const $btnPrint = document.querySelector("#btnPrint");
+    $btnPrint.addEventListener("click", () => {
+        window.print();
+    });
+</script>
 </body>

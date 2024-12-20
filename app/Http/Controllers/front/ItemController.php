@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
+use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use App\Models\Item;
 use App\Models\Addons;
@@ -37,6 +38,54 @@ class ItemController extends Controller
             "item_type" => $iteminfo->item_type,
             "item_type_image" => $iteminfo->item_type == 1 ? helper::image_path("veg.svg") : helper::image_path("nonveg.svg"),
             "price" => $iteminfo->price,
+            "video_url" => $iteminfo->video_url,
+            "is_top_deals" => $iteminfo->is_top_deals,
+            "tax" => $iteminfo->tax,
+            "image_name" => @$iteminfo['item_image']->image_name,
+            "is_favorite" => $iteminfo->is_favorite,
+            "addons_group" => AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $iteminfo->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get(),
+            "addons" => Addons::select('id', 'addongroup_id', 'name', 'price')->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get(),
+            "extras" => Extra::where('item_id', $iteminfo->id)->get(),
+        );
+        foreach ($itemdata['addons_group'] as $addons_group) {
+            $addons_group->availableAddons = $itemdata['addons']->where('addongroup_id', $addons_group->id);
+        }
+        if ($request->ajax()) {
+            $html = view('web.addonsmodal', compact('topdeals', 'itemdata'))->render();
+            return response()->json(['status' => 1, 'output' => $html, 'id' => $iteminfo->id], 200);
+        }
+    }
+
+    public function showDealitem(Request $request)
+    {
+        $topdeals = helper::top_deals();
+        $user_id = @Auth::user()->id;
+        $iteminfo = Item::with(['subcategory_info', 'category_info', 'item_image'])
+            ->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'))
+            ->leftJoin('favorite', function ($query) use ($user_id) {
+                $query->on('favorite.item_id', '=', 'item.id')
+                    ->where('favorite.user_id', '=', $user_id);
+            })
+            ->where('item.slug', '=', $request->slug)
+            ->where('item.item_status', '1')
+            ->first();
+        $deal = TopDeals::where('product_id',$iteminfo->id)->first();
+            if ($deal->offer_type == 1) {
+                if ($iteminfo->price > $deal->offer_amount) {
+                    $price = $iteminfo->price - $deal->offer_amount;
+                } else {
+                    $price = $iteminfo->price;
+                }
+            } else {
+                $price = $iteminfo->price - $iteminfo->price * ($deal->offer_amount / 100);
+            }
+        $itemdata = array(
+            "id" => $iteminfo->id,
+            "slug" => $iteminfo->slug,
+            "item_name" => $iteminfo->item_name,
+            "item_type" => $iteminfo->item_type,
+            "item_type_image" => $iteminfo->item_type == 1 ? helper::image_path("veg.svg") : helper::image_path("nonveg.svg"),
+            "price" => $price,
             "video_url" => $iteminfo->video_url,
             "is_top_deals" => $iteminfo->is_top_deals,
             "tax" => $iteminfo->tax,
@@ -137,7 +186,6 @@ class ItemController extends Controller
         $data['threestaraverage'] = $threestaraverage;
         $data['twostaraverage'] = $twostaraverage;
         $data['onestaraverage'] = $onestaraverage;
-
         return view('web.productdetails', $data, compact('topdeals', 'getitemdata', 'getrelateditems', 'itemreviewdata'));
     }
     public function search(Request $request)
@@ -284,7 +332,9 @@ class ItemController extends Controller
                 $getsearchitems = $getsearchitems->paginate(15);
             }
         }
+
         return view('web.viewall', compact('getsearchitems', 'topdeals'));
+
     }
 
     public function getitemallergens(Request $request)
