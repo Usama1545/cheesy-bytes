@@ -1,4 +1,8 @@
 @extends('admin.theme.default')
+@section('styles')
+    <link rel="stylesheet"
+          href="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/css/bootstrap/bootstrap-select.v1.14.0-beta2.min.css') }}">
+@endsection
 @section('content')
     @include('admin.breadcrumb')
     <div class="container-fluid">
@@ -26,6 +30,22 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="getaddons_id"
+                                                   class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                            <?php $selected = explode(',', $addonsdata->branch_ids); ?>
+                                            <select name="branch_ids[]" class="form-control selectpicker" multiple required
+                                                    data-live-search="true" id="getaddons_id">
+                                                @foreach (helper::get_branchs() as $branch)
+                                                    <option value="{{ $branch->id }}"
+                                                        {{ in_array($branch->id, $selected) ? 'selected' : '' }}>
+                                                        {{ $branch->name.'-'.$branch->city }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
                                         <div class="form-group">
                                             <label class="col-form-label"
                                                 for="addons_name">{{ trans('labels.addons_name') }} <span
@@ -83,4 +103,19 @@
 @endsection
 @section('script')
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/addons.js') }}"></script>
+
+    <script>
+        var placehodername = "{{ trans('labels.name') }}";
+        var placeholderprice = "{{ trans('labels.price') }}";
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1/ckeditor.js"></script>
+    <script type="text/javascript">
+        CKEDITOR.replace('allergens');
+    </script>
+    <script
+        src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/bootstrap/bootstrap-select.v1.14.0-beta2.min.js') }}">
+    </script>
+    <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/additem.js') }}"></script>
 @endsection
+

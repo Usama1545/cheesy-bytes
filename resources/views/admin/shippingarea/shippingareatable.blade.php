@@ -2,6 +2,7 @@
     <thead>
         <tr class="text-uppercase fw-500">
             <th>State</th>
+            <th>Branch</th>
             <th>City</th>
             <th>{{ trans('labels.area_name') }}</th>
             <th>{{ trans('labels.delivery_charge') }}</th>
@@ -14,6 +15,7 @@
         @foreach ($shippingarealist as $shippingarea)
             <tr class="row1" data-id="{{ $shippingarea->id }}">
                 <td>{{ $shippingarea->state->name }}</td>
+                <td>{{ $shippingarea->branch->name.'-'. $shippingarea->branch->city}}</td>
                 <td>{{ $shippingarea->city }}</td>
                 <td>{{ $shippingarea->name }}</td>
                 <td>{{ helper::currency_format($shippingarea->delivery_charge, $shippingarea->vendor_id) }}

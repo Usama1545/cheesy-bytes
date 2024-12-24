@@ -58,11 +58,11 @@
                         <div class="navbar-nav mx-auto header-head-box">
                             <a class="nav-link px-3 <?php echo e(request()->is('/') ? 'active' : ''); ?>"
                                href="<?php echo e(route('home')); ?>"><?php echo e(trans('labels.home')); ?></a>
-                            <a class="nav-link px-3 <?php echo e(request()->is('categories') ? 'active' : ''); ?>"
+                            <a class="nav-link px-3 <?php echo e(request()->is('categories') || request()->is('*/categories') ? 'active' : ''); ?>"
                                href="<?php echo e(route('categories')); ?>"><?php echo e(trans('labels.menu')); ?></a>
-                            <a class="nav-link px-3 <?php echo e(request()->is('reward') ? 'active' : ''); ?>"
+                            <a class="nav-link px-3 <?php echo e(request()->is('reward') || request()->is('*/reward') ? 'active' : ''); ?>"
                                href="<?php echo e(URL::to('reward')); ?> ">Rewards</a>
-                            <a class="nav-link px-3 <?php echo e(request()->is('location') ? 'active' : ''); ?>"
+                            <a class="nav-link px-3 <?php echo e(request()->is('location')  || request()->is('*/location')   ? 'active' : ''); ?>"
                                href="<?php echo e(URL::to('location')); ?> ">Location</a>
                             <div class="nav-link px-3">
                                 <div class="header-banner">

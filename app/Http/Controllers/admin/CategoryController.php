@@ -30,6 +30,7 @@ class CategoryController extends Controller
         $category = new Category;
         $category->image = $image;
         $category->category_name = $request->category_name;
+        $category->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $category->slug = $this->getcategoryslug($request->category_name, '');
         $category->save();
         return redirect('admin/category')->with('success', trans('messages.success'));
@@ -52,6 +53,7 @@ class CategoryController extends Controller
             $category->save();
         }
         $category->category_name = $request->category_name;
+        $category->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $category->slug = $this->getcategoryslug($request->category_name, $request->id);
         $category->save();
         return redirect('admin/category')->with('success', trans('messages.success'));
@@ -125,7 +127,7 @@ class CategoryController extends Controller
         return response()->json(['status' => 1, 'msg' => 'Update Successfully!!'], 200);
     }
 
-    // subcategory 
+    // subcategory
 
     public function subcategory_index(Request $request)
     {

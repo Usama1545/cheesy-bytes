@@ -97,6 +97,22 @@
                                     <input class="form-check-input me-0" type="radio" name="item_type"
                                            id="veg" value="1" checked hidden
                                            @if (old('item_type') == 1) checked @endif>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="getaddons_id"
+                                                class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                            <?php $selected = explode(',', $getitem->branch_ids); ?>
+                                            <select name="branch_ids[]" class="form-control selectpicker" multiple required
+                                                data-live-search="true" id="getaddons_id">
+                                                @foreach (helper::get_branchs() as $branch)
+                                                        <option value="{{ $branch->id }}"
+                                                            {{ in_array($branch->id, $selected) ? 'selected' : '' }}>
+                                                            {{ $branch->name.'-'.$branch->city }}
+                                                        </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 d-flex flex-wrap justify-content-between align-items-center">

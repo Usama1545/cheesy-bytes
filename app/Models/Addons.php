@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Addons extends Model
 {
     protected $table = 'addons';
-    protected $fillable = ['addongroup_id', 'name', 'price'];
+    protected $fillable = ['addongroup_id', 'name', 'price','branch_ids'];
 
     public function category()
     {

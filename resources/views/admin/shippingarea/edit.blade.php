@@ -19,6 +19,14 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label class="col-form-label">Branch</label>
+                                <select class="form-control form-select" name="branch_id">
+                                    @foreach(helper::get_branchs() as $branch)
+                                        <option value="{{ $branch->id }}" {{ $branch->id == $shippingareadata->branch_id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label class="form-label">{{ trans('labels.city') }}<span class="text-danger"> *
                                         </span></label>
                                 <input type="text" class="form-control" name="city" value="{{ $shippingareadata->city }}"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProductSizeCrust;
 use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use App\Models\Item;
@@ -69,16 +70,16 @@ class ItemController extends Controller
             ->where('item.slug', '=', $request->slug)
             ->where('item.item_status', '1')
             ->first();
-        $deal = TopDeals::where('product_id',$iteminfo->id)->first();
-            if ($deal->offer_type == 1) {
-                if ($iteminfo->price > $deal->offer_amount) {
-                    $price = $iteminfo->price - $deal->offer_amount;
-                } else {
-                    $price = $iteminfo->price;
-                }
+        $deal = TopDeals::where('product_id', $iteminfo->id)->first();
+        if ($deal->offer_type == 1) {
+            if ($iteminfo->price > $deal->offer_amount) {
+                $price = $iteminfo->price - $deal->offer_amount;
             } else {
-                $price = $iteminfo->price - $iteminfo->price * ($deal->offer_amount / 100);
+                $price = $iteminfo->price;
             }
+        } else {
+            $price = $iteminfo->price - $iteminfo->price * ($deal->offer_amount / 100);
+        }
         $itemdata = array(
             "id" => $iteminfo->id,
             "slug" => $iteminfo->slug,
@@ -103,7 +104,164 @@ class ItemController extends Controller
             return response()->json(['status' => 1, 'output' => $html, 'id' => $iteminfo->id], 200);
         }
     }
+
+    public function productdetails($id)
+    {
+        $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'))
+            ->groupBy('item.id')
+            ->where('item.id', $id)
+            ->where('item.item_status', '1')
+            ->first();
+        $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $getitemdata->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
+        $getitemdata['addons'] = Addons::select('id', 'addongroup_id', 'name', 'price')
+            ->where('is_deleted', 2)
+            ->where('is_available', 1)
+            ->where(function ($query) {
+                $branchId = \Illuminate\Support\Facades\Session::get('branch_id');
+                $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
+                ->orWhere('branch_ids', 'like', "$branchId,%") // Match start
+                ->orWhere('branch_ids', 'like', "%,$branchId") // Match end
+                ->orWhere('branch_ids', '=', $branchId);
+            })
+            ->orderByDesc('id')->get();
+        foreach ($getitemdata['addons_group'] as $addons_group) {
+            $addons_group->availableAddons = $getitemdata['addons']->where('addongroup_id', $addons_group->id);
+        }
+        $getitemdata['extras'] = Extra::where('item_id', $getitemdata->id)->get();
+        $crusts = ProductSizeCrust::where('item_id', $id)->get();
+
+        $groupedData = $crusts->groupBy(function ($item) {
+            return $item->size_id . '_' . $item->price; // Group by size_id and price
+        })->map(function ($items) {
+            $firstItem = $items->first();
+            return [
+                'id' => $firstItem->size_id,
+                'name' => $firstItem->size->name, // Assuming a relationship with Size model
+                'label' => $firstItem->size->label, // Assuming a relationship with Size model
+
+                'crusts' => $items->map(function ($item) {
+                    return [
+                        'id' => $item->crust_id,
+                        'name' => $item->crust->name, // Assuming a relationship with Crust model
+                        'price' => $item->price,
+                    ];
+                })->toArray(),
+            ];
+        })->values()->toArray();
+
+
+        $responce = [
+            'item_detail' => $getitemdata,
+            'crust_data' => $groupedData
+        ];
+        return ['responce' => $responce];
+    }
+
     public function itemdetails(Request $request)
+    {
+        $user_id = @Auth::user()->id;
+        $session_id = Session::getId();
+        $topdeals = helper::top_deals();
+
+        if ($user_id != null) {
+            $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+                ->leftJoin('favorite', function ($query) use ($user_id) {
+                    $query->on('favorite.item_id', '=', 'item.id')
+                        ->where('favorite.user_id', '=', $user_id);
+                })
+                ->leftJoin('cart', function ($query) use ($user_id) {
+                    $query->on('cart.item_id', '=', 'item.id')
+                        ->where('cart.user_id', '=', $user_id)
+                        ->where('cart.buynow', '=', '0');
+                })
+                ->groupBy('item.id', 'cart.item_id')
+                ->where('item.slug', '=', $request->slug)
+                ->where('item.item_status', '1')
+                ->first();
+            $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $getitemdata->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
+            $getitemdata['addons'] = Addons::select('id', 'addongroup_id', 'name', 'price')
+                ->where('is_deleted', 2)
+                ->where('is_available', 1)
+                ->where(function ($query) {
+                    $branchId = \Illuminate\Support\Facades\Session::get('branch_id');
+                    $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('branch_ids', '=', $branchId);
+                })
+                ->orderByDesc('id')->get();
+            foreach ($getitemdata['addons_group'] as $addons_group) {
+                $addons_group->availableAddons = $getitemdata['addons']->where('addongroup_id', $addons_group->id);
+            }
+            $getitemdata['extras'] = Extra::where('item_id', $getitemdata->id)->get();
+            $getrelateditems = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+                ->leftJoin('favorite', function ($query) use ($user_id) {
+                    $query->on('favorite.item_id', '=', 'item.id')
+                        ->where('favorite.user_id', '=', $user_id);
+                })
+                ->leftJoin('cart', function ($query) use ($user_id) {
+                    $query->on('cart.item_id', '=', 'item.id')
+                        ->where('cart.user_id', '=', $user_id)
+                        ->where('cart.buynow', '=', '0');
+                })
+                ->groupBy('item.id', 'cart.item_id')
+                ->orderByDesc('item.id')
+                ->where('item.id', '!=', @$getitemdata->id)
+                ->where('item.cat_id', '=', @$getitemdata->cat_id)
+                ->where('item.item_status', '1')
+                ->take(3)->get();
+        } else {
+            $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+                ->leftJoin('cart', function ($query) use ($session_id) {
+                    $query->on('cart.item_id', '=', 'item.id')
+                        ->where('cart.session_id', '=', $session_id)
+                        ->where('cart.buynow', '=', '0');
+                })
+                ->groupBy('item.id', 'cart.item_id')
+                ->where('item.slug', '=', $request->slug)
+                ->where('item.item_status', '1')
+                ->first();
+            $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $getitemdata->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
+            $getitemdata['addons'] = Addons::select('id', 'addongroup_id', 'branch_ids', 'name', 'price')
+                ->where(function ($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('branch_ids', '=', $branchId);
+                })
+                ->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
+            foreach ($getitemdata['addons_group'] as $addons_group) {
+                $addons_group->availableAddons = $getitemdata['addons']->where('addongroup_id', $addons_group->id);
+            }
+            $getrelateditems = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+                ->leftJoin('cart', function ($query) use ($session_id) {
+                    $query->on('cart.item_id', '=', 'item.id')
+                        ->where('cart.session_id', '=', $session_id)
+                        ->where('cart.buynow', '=', '0');
+                })
+                ->groupBy('item.id', 'cart.item_id')
+                ->orderByDesc('item.id')
+                ->where('item.id', '!=', @$getitemdata->id)
+                ->where('item.cat_id', '=', @$getitemdata->cat_id)
+                ->where('item.item_status', '1')
+                ->take(3)->get();
+        }
+        $itemreviewdata = Ratting::with('user_info')->select('id', 'ratting', 'comment', 'item_id', 'user_id', 'created_at')->where('item_id', $getitemdata->id)->where('status', 1)->get();
+        $fivestaraverage = Ratting::where('item_id', $getitemdata->id)->where('status', 1)->where('ratting', 5)->count();
+        $fourstaraverage = Ratting::where('item_id', $getitemdata->id)->where('status', 1)->where('ratting', 4)->count();
+        $threestaraverage = Ratting::where('item_id', $getitemdata->id)->where('status', 1)->where('ratting', 3)->count();
+        $twostaraverage = Ratting::where('item_id', $getitemdata->id)->where('status', 1)->where('ratting', 2)->count();
+        $onestaraverage = Ratting::where('item_id', $getitemdata->id)->where('status', 1)->where('ratting', 1)->count();
+        $data['fivestaraverage'] = $fivestaraverage;
+        $data['fourstaraverage'] = $fourstaraverage;
+        $data['threestaraverage'] = $threestaraverage;
+        $data['twostaraverage'] = $twostaraverage;
+        $data['onestaraverage'] = $onestaraverage;
+        return view('web.productdetails', $data, compact('topdeals', 'getitemdata', 'getrelateditems', 'itemreviewdata'));
+    }
+
+    public function itemdetailsCon(Request $request, $county)
     {
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
@@ -186,8 +344,9 @@ class ItemController extends Controller
         $data['threestaraverage'] = $threestaraverage;
         $data['twostaraverage'] = $twostaraverage;
         $data['onestaraverage'] = $onestaraverage;
-        return view('web.productdetails', $data, compact('topdeals', 'getitemdata', 'getrelateditems', 'itemreviewdata'));
+        return view('web.productdetails', $data, compact('topdeals', 'getitemdata', 'getrelateditems', 'itemreviewdata', 'county'));
     }
+
     public function search(Request $request)
     {
         $user_id = @Auth::user()->id;
@@ -232,6 +391,7 @@ class ItemController extends Controller
 
         return view('web.search', compact('topdeals', 'getsearchitems'));
     }
+
     public function viewall(Request $request)
     {
         $user_id = @Auth::user()->id;

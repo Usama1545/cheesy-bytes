@@ -5,7 +5,7 @@
             <th>#</th>
             <th>{{ trans('labels.name') }}</th>
             <th>{{ trans('labels.category') }}</th>
-            <th>{{ trans('labels.featured') }}</th>
+{{--            <th>{{ trans('labels.featured') }}</th>--}}
             <th>{{ trans('labels.status') }}</th>
             <th>{{ trans('labels.created_date') }}</th>
             <th>{{ trans('labels.updated_date') }}</th>
@@ -21,19 +21,19 @@
                 <td><img @if ($item->item_type == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
                         class="item-type-img" alt=""> {{ $item->item_name }}</td>
                 <td>{{ @$item['category_info']->category_name }}</td>
-                <td>
-                    @if ($item->is_featured == 1)
-                        <a class="btn btn-sm btn-success square" tooltip="{{ trans('labels.active') }}"
-                            @if (env('Environment') == 'sendbox') onclick="myFunction()"
-                    @else onclick="StatusFeatured('{{ $item->id }}','2','{{ URL::to('admin/item/featured') }}')" @endif><i
-                                class="fa-sharp fa-solid fa-check"></i></a>
-                    @else
-                        <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.deactive') }}"
-                            @if (env('Environment') == 'sendbox') onclick="myFunction()"
-                    @else onclick="StatusFeatured('{{ $item->id }}','1','{{ URL::to('admin/item/featured') }}')" @endif><i
-                                class="fa-sharp fa-solid fa-xmark"></i></a>
-                    @endif
-                </td>
+{{--                <td>--}}
+{{--                    @if ($item->is_featured == 1)--}}
+{{--                        <a class="btn btn-sm btn-success square" tooltip="{{ trans('labels.active') }}"--}}
+{{--                            @if (env('Environment') == 'sendbox') onclick="myFunction()"--}}
+{{--                    @else onclick="StatusFeatured('{{ $item->id }}','2','{{ URL::to('admin/item/featured') }}')" @endif><i--}}
+{{--                                class="fa-sharp fa-solid fa-check"></i></a>--}}
+{{--                    @else--}}
+{{--                        <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.deactive') }}"--}}
+{{--                            @if (env('Environment') == 'sendbox') onclick="myFunction()"--}}
+{{--                    @else onclick="StatusFeatured('{{ $item->id }}','1','{{ URL::to('admin/item/featured') }}')" @endif><i--}}
+{{--                                class="fa-sharp fa-solid fa-xmark"></i></a>--}}
+{{--                    @endif--}}
+{{--                </td>--}}
                 <td>
                     @if ($item->item_status == 1)
                         <a class="btn btn-sm btn-success square" tooltip="{{ trans('labels.active') }}"

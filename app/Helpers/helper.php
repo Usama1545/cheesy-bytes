@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Branch;
 use App\Models\CustomPizzaCrust;
 use App\Models\CustomPizzaSauce;
 use App\Models\CustomPizzaSize;
@@ -15,6 +16,7 @@ use App\Models\Order;
 use App\Models\FooterFeatures;
 use App\Models\Ratting;
 use App\Models\Sides;
+use App\Models\Size;
 use App\Models\User;
 use App\Models\Time;
 use App\Models\Languages;
@@ -376,7 +378,32 @@ class helper
     }
     public static function get_categories()
     {
-        return Category::with('item_info')->select('id', 'category_name', 'slug', 'image')->where('is_available', '=', '1')->where('is_deleted', '2')->orderBy('reorder_id')->get();
+        return Category::with('item_info')
+            ->select('id', 'category_name', 'slug', 'image')
+            ->where('is_available', '=', '1')
+            ->where('is_deleted', '=', '2')
+            ->where(function($query) {
+                $branchId = Session::get('branch_id');
+                $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
+                ->orWhere('branch_ids', 'like', "$branchId,%") // Match start
+                ->orWhere('branch_ids', 'like', "%,$branchId") // Match end
+                ->orWhere('branch_ids', '=', $branchId);
+            })
+            ->orderBy('reorder_id')
+            ->get();
+    }
+
+    public static function get_branchs()
+    {
+        return Branch::all();
+    }
+    public static function get_sizes()
+    {
+        return Size::all();
+    }
+    public static function get_crusts()
+    {
+        return App\Models\Crust::all();
     }
 
     public static function get_categories_list($limit = null)

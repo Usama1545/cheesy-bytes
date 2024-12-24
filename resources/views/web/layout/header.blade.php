@@ -58,11 +58,11 @@
                         <div class="navbar-nav mx-auto header-head-box">
                             <a class="nav-link px-3 {{ request()->is('/') ? 'active' : '' }}"
                                href="{{ route('home') }}">{{ trans('labels.home') }}</a>
-                            <a class="nav-link px-3 {{ request()->is('categories') ? 'active' : '' }}"
+                            <a class="nav-link px-3 {{ request()->is('categories') || request()->is('*/categories') ? 'active' : '' }}"
                                href="{{ route('categories') }}">{{ trans('labels.menu') }}</a>
-                            <a class="nav-link px-3 {{ request()->is('reward') ? 'active' : '' }}"
+                            <a class="nav-link px-3 {{ request()->is('reward') || request()->is('*/reward') ? 'active' : '' }}"
                                href="{{ URL::to('reward') }} ">Rewards</a>
-                            <a class="nav-link px-3 {{ request()->is('location') ? 'active' : '' }}"
+                            <a class="nav-link px-3 {{ request()->is('location')  || request()->is('*/location')   ? 'active' : '' }}"
                                href="{{ URL::to('location') }} ">Location</a>
                             <div class="nav-link px-3">
                                 <div class="header-banner">

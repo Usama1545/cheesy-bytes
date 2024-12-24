@@ -26,6 +26,7 @@ class AddonsController extends Controller
         $addons = new Addons();
         $addons->addongroup_id = $request->addongroup_id;
         $addons->name = $request->name;
+        $addons->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $addons->price = helper::number_format($request->type == 1 ? 0 : $request->price);
         $addons->save();
         return redirect('admin/addongroup-' . $request->addongroup_id)->with('success', trans('messages.success'));
@@ -41,6 +42,7 @@ class AddonsController extends Controller
         $addons = Addons::find($request->id);
         $addons->addongroup_id = $request->addongroup_id;
         $addons->name = $request->name;
+        $addons->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $addons->price = helper::number_format($request->type == 1 ? 0 : $request->price);
         $addons->save();
         return redirect('admin/addongroup-' . $request->addongroup_id)->with('success', trans('messages.success'));

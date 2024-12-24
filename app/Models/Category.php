@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Session;
 class Category extends Model
 {
     protected $table = 'categories';
-    protected $fillable = ['category_name', 'image'];
+    protected $fillable = ['category_name', 'image','branch_ids'];
 
     public function category_info()
     {
@@ -16,6 +16,12 @@ class Category extends Model
 
     public function item_info()
     {
-        return $this->hasMany('App\Models\Item', 'cat_id', 'id');
+        return $this->hasMany('App\Models\Item', 'cat_id', 'id')->where(function($query) {
+            $branchId = Session::get('branch_id');
+            $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+            ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+            ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+            ->orWhere('item.branch_ids', '=', $branchId);
+        });
     }
 }

@@ -102,6 +102,23 @@
                                     <input class="form-check-input me-0" type="radio" name="item_type"
                                            id="veg" value="1" checked hidden
                                            <?php if(old('item_type') == 1): ?> checked <?php endif; ?>>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="getaddons_id"
+                                                class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                            <?php $selected = explode(',', $getitem->branch_ids); ?>
+                                            <select name="branch_ids[]" class="form-control selectpicker" multiple required
+                                                data-live-search="true" id="getaddons_id">
+                                                <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <option value="<?php echo e($branch->id); ?>"
+                                                            <?php echo e(in_array($branch->id, $selected) ? 'selected' : ''); ?>>
+                                                            <?php echo e($branch->name.'-'.$branch->city); ?>
+
+                                                        </option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 d-flex flex-wrap justify-content-between align-items-center">

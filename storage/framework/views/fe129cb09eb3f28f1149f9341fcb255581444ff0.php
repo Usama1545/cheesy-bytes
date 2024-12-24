@@ -714,10 +714,17 @@
                         <h2 class="text-capitalize fs-2 fw-600">
                             <?php echo e(trans('labels.related_items')); ?></h2>
                     </div>
-                    <div class="col-auto px-1 pb-2"><a
-                            href="<?php echo e(URL::to('menu?category=' . $getitemdata['category_info']->slug)); ?>"
-                            class="btn btn-outline-primary px-4 py-2"><?php echo e(trans('labels.view_all')); ?></a>
-                    </div>
+                    <?php if(isset($county)): ?>
+                        <div class="col-auto px-1 pb-2"><a
+                                href="<?php echo e(URL::to($county.'/menu/' . $getitemdata['category_info']->slug)); ?>"
+                                class="btn btn-outline-primary px-4 py-2"><?php echo e(trans('labels.view_all')); ?></a>
+                        </div>
+                    <?php else: ?>
+                        <div class="col-auto px-1 pb-2"><a
+                                href="<?php echo e(URL::to('menu/' . $getitemdata['category_info']->slug)); ?>"
+                                class="btn btn-outline-primary px-4 py-2"><?php echo e(trans('labels.view_all')); ?></a>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="row g-4">
                     <?php $__currentLoopData = $getrelateditems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $itemdata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>

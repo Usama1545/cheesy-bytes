@@ -173,7 +173,7 @@
         @if (Session::has('error'))
             toastr.error("{{ session('error') }}");
         @endif
-        // New Notification 
+        // New Notification
         var noticount = 0;
         (function noti() {
             $.ajax({
@@ -195,8 +195,8 @@
                             localStorage.setItem("count", response.count);
                             jQuery("#order-modal").modal('show');
                             var audio = new Audio(
-                                "{{ url(env('ASSETSPATHURL')) }}/admin-assets/notification/" + response
-                                .noti);
+                                "{{ asset('admin-assets/notification/') }}" + "/" + response.noti
+                            );
                             audio.play();
                         }
                     } else {

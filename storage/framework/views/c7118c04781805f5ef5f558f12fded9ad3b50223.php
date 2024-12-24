@@ -23,16 +23,17 @@
         <section class="menu-section">
 
             <div class="container">
-                    <div class="card  w-100 mt-3" style="background-color: #D6B62B">
-                        <div class="d-flex flex-column flex-md-row justify-content-between mx-1 mx-md-5 my-1 align-items-center">
-                            <h4 class="my-3 text-uppercase fw-bold">START YOUR ORDER</h4>
-                            <div class="d-flex  flex-md-row align-items-center gap-2 mt-2 mt-md-0">
-                                <a href="<?php echo e(URL::to('/location?type=Delivery')); ?>" class="btn btn-secondary">Delivery</a>
-                                <span class="mx-1  text-sm text-uppercase ">- OR -</span>
-                                <a href="<?php echo e(URL::to('/location?type=Carryout')); ?>" class="btn btn-secondary">Carryout</a>
-                            </div>
+                <div class="card  w-100 mt-3" style="background-color: #D6B62B">
+                    <div
+                        class="d-flex flex-column flex-md-row justify-content-between mx-1 mx-md-5 my-1 align-items-center">
+                        <h4 class="my-3 text-uppercase fw-bold">START YOUR ORDER</h4>
+                        <div class="d-flex  flex-md-row align-items-center gap-2 mt-2 mt-md-0">
+                            <a href="<?php echo e(URL::to('/location?type=Delivery')); ?>" class="btn btn-secondary">Delivery</a>
+                            <span class="mx-1  text-sm text-uppercase ">- OR -</span>
+                            <a href="<?php echo e(URL::to('/location?type=Carryout')); ?>" class="btn btn-secondary">Carryout</a>
                         </div>
                     </div>
+                </div>
 
                 <div class="d-flex justify-content-between align-items-center w-100">
                     <div class="mx-0 mx-md-3">
@@ -62,124 +63,147 @@
                 </div>
 
 
+                <?php if(count($getitemlist) > 0): ?>
+                    <div class="menu my-0">
+                        <div class="row mx-1 g-4 boxes">
+                            <?php $__currentLoopData = $getitemlist; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subcategory => $groupItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="card " style="background-color: #D6B62B">
+                                    <h5 class="my-3 text-uppercase fw-bold"> <?php echo e($subcategory); ?></h5>
+                                </div>
 
-                    <?php if(count($getitemlist) > 0): ?>
-                        <div class="menu my-0">
-                            <div class="row mx-1 g-4 boxes">
-                                <?php $__currentLoopData = $getitemlist; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subcategory => $groupItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <div class="card " style="background-color: #D6B62B">
-                                        <h5 class="my-3 text-uppercase fw-bold"> <?php echo e($subcategory); ?></h5>
-                                    </div>
+                                <?php $__currentLoopData = $groupItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $itemdata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                                    <?php $__currentLoopData = $groupItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $itemdata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="col-12 col-lg-2-4 col-md-4 col-sm-12">
+                                        <div class="w-full" style="">
+                                            <div class="card  overflow-hidden h-100">
+                                                <?php if(strtolower(@$categorydata->category_name) == strtolower('Pizza')): ?>
+                                                    <a data-bs-toggle="modal"
+                                                       data-bs-target="#PizzaModal"
+                                                       class="cursor-pointer"
+                                                       data-product-id="<?php echo e($itemdata->id); ?>">
+                                                        <?php elseif(isset($country)): ?>
+                                                            <a href="<?php echo e(URL::to($country.'/item-' . $itemdata->slug)); ?>">
+                                                                <?php else: ?>
+                                                                    <a href="<?php echo e(URL::to('item-' . $itemdata->slug)); ?>">
+                                                                        <?php endif; ?>
+                                                                        <img
+                                                                            src="<?php echo e(@helper::image_path($itemdata['item_image']->image_name)); ?>"
+                                                                            class="card-img-top border-0 rounded-0 rounded-top position-relative"
+                                                                            alt="dishes" height="190px">
 
-                                        <div class="col-12 col-lg-2-4 col-md-4 col-sm-12">
-                                            <div class="w-full" style="">
-                                                <div class="card  overflow-hidden h-100">
-                                                    <a href="<?php echo e(URL::to('item-' . $itemdata->slug)); ?>">
+                                                                    </a>
 
-                                                        <img
-                                                            src="<?php echo e(@helper::image_path($itemdata['item_image']->image_name)); ?>"
-                                                            class="card-img-top border-0 rounded-0 rounded-top position-relative"
-                                                            alt="dishes" height="190px">
+                                                                    <?php
+                                                                        if ($itemdata->is_top_deals == 1 && $topdeals != null) {
+                                                                            if (@$topdeals->offer_type == 1) {
+                                                                                if ($itemdata->item_price > @$topdeals->offer_amount) {
+                                                                                    $price = $itemdata->item_price - @$topdeals->offer_amount;
+                                                                                } else {
+                                                                                    $price = $itemdata->item_price;
+                                                                                }
+                                                                            } else {
+                                                                                $price = $itemdata->item_price - $itemdata->item_price * (@$topdeals->offer_amount / 100);
+                                                                            }
+                                                                            $original_price = $itemdata->item_price;
+                                                                            $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                                                                        } else {
+                                                                            $price = $itemdata->item_price;
+                                                                            $original_price = $itemdata->original_price;
+                                                                            $off = $itemdata->discount_percentage;
+                                                                        }
+                                                                    ?>
+                                                                    <div class="card-body pb-0 border-bottom">
+                                                                        <h5 class="item-card-title pb-3 fs-6 d-flex justify-content-between align-items-center">
+                                                                            <?php if(strtolower(@$categorydata->category_name) == strtolower('Pizza')): ?>
+                                                                                <a data-bs-toggle="modal"
+                                                                                   data-bs-target="#PizzaModal"
+                                                                                   class="flex-grow-1 cursor-pointer">
+                                                                                    <?php elseif(isset($country)): ?>
+                                                                                        <a href="<?php echo e(URL::to($country.'/item-' . $itemdata->slug)); ?>"
+                                                                                           class="flex-grow-1">
+                                                                                            <?php else: ?>
+                                                                                                <a href="<?php echo e(URL::to('item-' . $itemdata->slug)); ?>"
+                                                                                                   class="flex-grow-1">
+                                                                                                    <?php endif; ?>
+                                                                                                    <p class="item-card-title mb-0 line-2 fs-7">
+                                                                                                        <?php echo e($itemdata->item_name); ?>
 
-                                                    </a>
+                                                                                                    </p>
+                                                                                                </a>
+                                                                                                <div
+                                                                                                    class="d-flex gap-1">
+                                                                                                    <?php if($original_price > $price): ?>
+                                                                                                        <del
+                                                                                                            class="text-muted"><?php echo e(helper::currency_format($original_price)); ?></del>
+                                                                                                    <?php endif; ?>
+                                                                                                    <span><?php echo e(helper::currency_format($price)); ?></span>
 
-                                                    <?php
-                                                        if ($itemdata->is_top_deals == 1 && $topdeals != null) {
-                                                            if (@$topdeals->offer_type == 1) {
-                                                                if ($itemdata->item_price > @$topdeals->offer_amount) {
-                                                                    $price = $itemdata->item_price - @$topdeals->offer_amount;
-                                                                } else {
-                                                                    $price = $itemdata->item_price;
-                                                                }
-                                                            } else {
-                                                                $price = $itemdata->item_price - $itemdata->item_price * (@$topdeals->offer_amount / 100);
-                                                            }
-                                                            $original_price = $itemdata->item_price;
-                                                            $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                                                        } else {
-                                                            $price = $itemdata->item_price;
-                                                            $original_price = $itemdata->original_price;
-                                                            $off = $itemdata->discount_percentage;
-                                                        }
-                                                    ?>
-                                                    <div class="card-body pb-0 border-bottom">
-                                                        <h5 class="item-card-title pb-3 fs-6 d-flex justify-content-between align-items-center">
-                                                            <a href="<?php echo e(URL::to('item-' . $itemdata->slug)); ?>"
-                                                               class="flex-grow-1">
-                                                                <p class="item-card-title mb-0 line-2 fs-7">
-                                                                    <?php echo e($itemdata->item_name); ?>
+                                                                                                </div>
+                                                                        </h5>
 
-                                                                </p>
-                                                            </a>
-                                                            <div class="d-flex gap-1">
-                                                                <?php if($original_price > $price): ?>
-                                                                    <del
-                                                                        class="text-muted"><?php echo e(helper::currency_format($original_price)); ?></del>
-                                                                <?php endif; ?>
-                                                                <span><?php echo e(helper::currency_format($price)); ?></span>
-
-                                                            </div>
-                                                        </h5>
-
-                                                    </div>
+                                                                    </div>
 
 
-                                                    <?php if($off > 0): ?>
-                                                        <div
-                                                            class="offer-lable <?php echo e(session()->get('direction') == '2' ? 'rtl' : ''); ?>">
-                                                            <h5><?php echo e($off); ?>% <?php echo e(trans('labels.off')); ?></h5>
-                                                        </div>
-                                                    <?php endif; ?>
+                                                                    <?php if($off > 0): ?>
+                                                                        <div
+                                                                            class="offer-lable <?php echo e(session()->get('direction') == '2' ? 'rtl' : ''); ?>">
+                                                                            <h5><?php echo e($off); ?>
 
-                                                </div>
-                                                <div class="item-card-footer mt-2">
-                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                % <?php echo e(trans('labels.off')); ?></h5>
+                                                                        </div>
+                                                <?php endif; ?>
 
-                                                        <?php if($itemdata->is_cart == 1): ?>
-                                                            <div class="item-quantity py-1 px-5">
-                                                                <button type="button" class="btn btn-sm  fw-500"
-                                                                        onclick="removefromcart('<?php echo e(URL::to('/cart')); ?>','<?php echo e(trans('messages.remove_cartitem_note')); ?>','<?php echo e(trans('labels.goto_cart')); ?>')">
-                                                                    -
-                                                                </button>
-                                                                <input
-                                                                    class="fw-500 item-total-qty-<?php echo e($itemdata->slug); ?>"
-                                                                    type="text"
-                                                                    value="<?php echo e(helper::get_item_cart($itemdata->id)); ?>"
-                                                                    disabled/>
-                                                                <button class="btn btn-sm fw-500 border-0"
-                                                                        onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">
-                                                                    +
-                                                                </button>
-                                                            </div>
-                                                        <?php else: ?>
-                                                            <button
-                                                                class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-full float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->slug); ?>"
-                                                                onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')"
-                                                                style="width: 100%">
-                                                                Order Now
+                                            </div>
+                                            <div class="item-card-footer mt-2">
+                                                <div class="d-flex justify-content-between align-items-center">
 
-                                                                <i class="fa-solid fa-plus addon_modal_icon_<?php echo e($itemdata->slug); ?>"></i>
-                                                                <div
-                                                                    class="loader d-none addon_modal_loader_<?php echo e($itemdata->slug); ?>"></div>
+                                                    <?php if($itemdata->is_cart == 1): ?>
+                                                        <div class="item-quantity py-1 px-5">
+                                                            <button type="button" class="btn btn-sm  fw-500"
+                                                                    onclick="removefromcart('<?php echo e(URL::to('/cart')); ?>','<?php echo e(trans('messages.remove_cartitem_note')); ?>','<?php echo e(trans('labels.goto_cart')); ?>')">
+                                                                -
                                                             </button>
-                                                        <?php endif; ?>
-                                                    </div>
+                                                            <input
+                                                                class="fw-500 item-total-qty-<?php echo e($itemdata->slug); ?>"
+                                                                type="text"
+                                                                value="<?php echo e(helper::get_item_cart($itemdata->id)); ?>"
+                                                                disabled/>
+                                                            <button class="btn btn-sm fw-500 border-0"
+                                                                    onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <button
+                                                            class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-full float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->slug); ?>"
+                                                            onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')"
+                                                            style="width: 100%">
+                                                            Order Now
+
+                                                            <i class="fa-solid fa-plus addon_modal_icon_<?php echo e($itemdata->slug); ?>"></i>
+                                                            <div
+                                                                class="loader d-none addon_modal_loader_<?php echo e($itemdata->slug); ?>"></div>
+                                                        </button>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
-
                                         </div>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                                    </div>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </div>
-                            <h1>Welcome to Cheesy Bite – The Best Cheesy, Halal, and Stuffed Crust Pizza in <?php echo e($country); ?>!
-                            </h1>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    <?php else: ?>
-                        <?php echo $__env->make('web.nodata', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                    <?php endif; ?>
-                </div>
+                        <?php if(isset($htmlContent)): ?>
+                            <span class="county-details">
+                            <?php echo $htmlContent; ?>
+
+                        </span>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <?php echo $__env->make('web.nodata', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                <?php endif; ?>
+            </div>
         </section>
     <?php else: ?>
         <?php echo $__env->make('web.nodata', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
@@ -190,6 +214,40 @@
     </script>
 
     <style>
+        .county-details p {
+            color: #8e8e8e; /* Apply color to all paragraphs */
+        }
+
+        .county-details h1 {
+            color: #5e5e5e; /* Apply color to all h1 tags */
+        }
+
+        .county-details span {
+            color: #8e8e8e; /* Apply color to all span tags */
+        }
+
+        .county-details {
+            margin-top: 40px;
+            display: block; /* Ensures the content is block-level for better layout */
+            margin-bottom: 1em; /* Adds some space below the content */
+            font-family: 'Arial', sans-serif; /* Sets a clean, readable font */
+            line-height: 1.6; /* Increases line height for better readability */
+            color: #989898 !important; /* Sets the text color to a dark gray for contrast */
+            padding: 10px; /* Adds padding around the content for better spacing */
+            /*border: 1px solid #ddd; !* Adds a subtle border for structure *!*/
+            border-radius: 5px; /* Adds rounded corners for a more modern look */
+            /*background-color: #f9f9f9; !* Light background color to enhance readability *!*/
+        }
+
+
+        /* Optional: Add responsive styling if needed */
+        @media (max-width: 768px) {
+            .county-details {
+                font-size: 14px; /* Adjust font size for smaller screens */
+                padding: 8px; /* Reduce padding for smaller screens */
+            }
+        }
+
         @media (min-width: 1440px) {
             .col-lg-2-4 {
                 flex: 0 0 20%; /* Makes the columns take up 20% of the container on large screens */
@@ -267,6 +325,12 @@
             color: white;
         }
 
+        .btn.active {
+            background-color: #DE1616; /* Hover color for all buttons */
+            color: #fff; /* Optional: Change text color on hover */
+            border-color: #DE1616;
+        }
+
         .btn.btn-primary:hover {
             background-color: #DE1616; /* Hover color for all buttons */
             color: #fff; /* Optional: Change text color on hover */
@@ -318,6 +382,9 @@
         }
 
     </style>
+
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
 
 <?php $__env->stopSection(); ?>
 

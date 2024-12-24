@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class Item extends Model
 {
     protected $table = 'item';
-    protected $fillable = ['cat_id', 'subcat_id', 'item_name', 'slug', 'image', 'item_type', 'has_variation', 'attribute', 'price', 'original_price', 'addons_id', 'item_description', 'preparation_time', 'tax', 'avg_ratting', 'discount_percentage', 'item_status', 'is_featured', 'is_deleted', 'delivery_time'];
+    protected $fillable = ['cat_id', 'subcat_id', 'item_name', 'branch_ids','slug', 'image', 'item_type', 'has_variation', 'attribute', 'price', 'original_price', 'addons_id', 'item_description', 'preparation_time', 'tax', 'avg_ratting', 'discount_percentage', 'item_status', 'is_featured', 'is_deleted', 'delivery_time'];
 
     public function subcategory_info()
     {
@@ -29,5 +29,10 @@ class Item extends Model
     public function extras()
     {
         return $this->hasMany('App\Models\Extra', 'item_id', 'id')->select('id', 'name', 'price', 'item_id');
+    }
+
+    public function pricing()
+    {
+        return $this->hasMany(ProductSizeCrust::class);
     }
 }

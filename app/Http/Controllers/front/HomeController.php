@@ -108,6 +108,13 @@ class HomeController extends Controller
                 })
                 ->groupBy('order_details.item_id', 'item.id', 'cart.item_id')
                 ->orderByDesc('item_order_counter')
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->where('item.item_status', '1')
                 ->take(3)->get();
 
@@ -123,6 +130,13 @@ class HomeController extends Controller
                 })
                 ->groupBy('item.id', 'cart.item_id')
                 ->where('item.is_featured', '1')
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->where('item.item_status', '1')
                 ->orderBy('item.reorder_id')->take(8)->get();
 
@@ -159,7 +173,13 @@ class HomeController extends Controller
                         ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
                     });
                 })
-                ->where('item.item_status', '1') // Filter by product item status
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->select(
                     'top_deals.*',
                     'item.*',
@@ -181,6 +201,13 @@ class HomeController extends Controller
                 })
                 ->groupBy('item.id', 'cart.item_id')
                 ->inRandomOrder()
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->where('item.item_status', '1')
                 ->take(9)->get();
         } else {
@@ -194,6 +221,13 @@ class HomeController extends Controller
                 ->groupBy('order_details.item_id', 'item.id', 'cart.item_id')
                 ->orderByDesc('item_order_counter')
                 ->where('item.item_status', '1')
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->take(3)->get();
 
             $todayspecial = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
@@ -205,6 +239,13 @@ class HomeController extends Controller
                 ->groupBy('item.id', 'cart.item_id')
                 ->where('item.is_featured', '1')
                 ->where('item.item_status', '1')
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->orderBy('item.reorder_id')
                 ->take(8)->get();
 
@@ -233,7 +274,13 @@ class HomeController extends Controller
                         ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
                     });
                 })
-                ->where('item.item_status', '1') // Filter by product item status
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->select(
                     'top_deals.*',
                     'item.*',
@@ -250,6 +297,13 @@ class HomeController extends Controller
                 ->groupBy('item.id', 'cart.item_id')
                 ->inRandomOrder()
                 ->where('item.item_status', '1')
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->take(8)->get();
         }
 
@@ -268,6 +322,10 @@ class HomeController extends Controller
     public function categories(Request $request)
     {
         return view('web.categoryviewall');
+    }
+    public function categories_con(Request $request,$county)
+    {
+        return view('web.categoryviewall',compact('county'));
     }
 
     public function menu(Request $request)
@@ -319,11 +377,17 @@ class HomeController extends Controller
 
     public function location_update($id, $address_id)
     {
-        CustomerAddress::findOrFail($address_id)->update([
-            'address_id' => $id
-        ]);
+        $shipping_area = Shippingarea::findOrFail($id);
+        if($shipping_area)
+        {
+            Session::put('branch_id', $shipping_area->branch_id);
+            CustomerAddress::findOrFail($address_id)->update([
+                'address_id' => $id
+            ]);
 
-        return redirect()->to('/categories');
+            return redirect()->to('/categories');
+        }
+
     }
 
     public function rewards()

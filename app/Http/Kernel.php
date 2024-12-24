@@ -68,8 +68,9 @@ class Kernel extends HttpKernel
 
         'AdminAuth' => \App\Http\Middleware\AdminAuth::class,
         'ApiAuth' => \App\Http\Middleware\ApiAuth::class,
+        'SetUserLocation' =>\App\Http\Middleware\SetUserLocation::class,
         'UserMiddleware' => \App\Http\Middleware\UserMiddleware::class,
-        'MaintenanceMiddleware' => \App\Http\Middleware\MaintenanceMiddleware::class,  
-        'NoUserAuthMiddleware' => \App\Http\Middleware\NoUserAuthMiddleware::class,  
+        'MaintenanceMiddleware' => \App\Http\Middleware\MaintenanceMiddleware::class,
+        'NoUserAuthMiddleware' => \App\Http\Middleware\NoUserAuthMiddleware::class,
     ];
 }

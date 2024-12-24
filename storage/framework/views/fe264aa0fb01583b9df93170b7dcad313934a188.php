@@ -176,7 +176,7 @@
         <?php if(Session::has('error')): ?>
             toastr.error("<?php echo e(session('error')); ?>");
         <?php endif; ?>
-        // New Notification 
+        // New Notification
         var noticount = 0;
         (function noti() {
             $.ajax({
@@ -198,8 +198,8 @@
                             localStorage.setItem("count", response.count);
                             jQuery("#order-modal").modal('show');
                             var audio = new Audio(
-                                "<?php echo e(url(env('ASSETSPATHURL'))); ?>/admin-assets/notification/" + response
-                                .noti);
+                                "<?php echo e(asset('admin-assets/notification/')); ?>" + "/" + response.noti
+                            );
                             audio.play();
                         }
                     } else {

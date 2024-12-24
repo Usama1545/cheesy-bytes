@@ -5,6 +5,7 @@ namespace App\Http\Controllers\front;
 use App\Helpers\helper;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\CountySeo;
 use App\Models\CustomPizzaCrust;
 use App\Models\CustomPizzaSauce;
 use App\Models\CustomPizzaTopping;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use PhpOffice\PhpWord\IOFactory;
 
 class MenuController extends Controller
 {
@@ -43,6 +45,13 @@ class MenuController extends Controller
                         ->where('cart.buynow', '=', '0');
                 })
                 ->where('item.item_status', '1')
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->where('item.cat_id', @$categorydata->id)
                 ->groupBy('item.id') // Ensure proper grouping
                 ->orderBy('item.reorder_id')->get();
@@ -59,6 +68,13 @@ class MenuController extends Controller
                 ->where('item.item_status', '1')
                 ->where('item.cat_id', @$categorydata->id)
                 ->groupBy('item.id') // Ensure proper grouping
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->orderBy('item.reorder_id')
                 ->get();
         }
@@ -71,6 +87,8 @@ class MenuController extends Controller
 
     public function index_con($country,$category)
     {
+        $htmlContent = CountySeo::where('county', $country)->where('category', $category)->pluck('content')->first();
+
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $topdeals = helper::top_deals();
@@ -96,6 +114,13 @@ class MenuController extends Controller
                 })
                 ->where('item.item_status', '1')
                 ->where('item.cat_id', @$categorydata->id)
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->groupBy('item.id') // Ensure proper grouping
                 ->orderBy('item.reorder_id')->get();
         } else {
@@ -110,6 +135,13 @@ class MenuController extends Controller
                 })
                 ->where('item.item_status', '1')
                 ->where('item.cat_id', @$categorydata->id)
+                ->where(function($query) {
+                    $branchId = Session::get('branch_id');
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->groupBy('item.id') // Ensure proper grouping
                 ->orderBy('item.reorder_id')
                 ->get();
@@ -118,7 +150,7 @@ class MenuController extends Controller
             return $item->subcategory_info->subcategory_name ?? $item->category_info->category_name;
         });
 
-        return view('web.menu', compact('topdeals', 'categorydata', 'subcategories', 'getitemlist','country'));
+        return view('web.menu', compact('topdeals', 'categorydata', 'subcategories', 'getitemlist','country','htmlContent'));
     }
 
     public function getCrusts()
@@ -162,5 +194,22 @@ class MenuController extends Controller
         });
 
         return response()->json($sauces);
+    }
+
+    function fixFormatting($html)
+    {
+        // Normalize line breaks and whitespace issues
+        $html = preg_replace('/\s+/', ' ', $html);
+
+        // Fix broken words by looking for unnecessary line breaks or spaces
+        $html = preg_replace('/(\w+)\s*\n\s*(\w+)/', '$1 $2', $html);
+
+        // Replace colons followed by line breaks with proper spacing
+        $html = preg_replace('/:\s*\n\s*/', ': ', $html);
+
+        // Ensure proper paragraph formatting if needed
+        $html = preg_replace('/<p>(.*?)<\/p>/', '<p>$1</p>', $html);
+
+        return $html;
     }
 }

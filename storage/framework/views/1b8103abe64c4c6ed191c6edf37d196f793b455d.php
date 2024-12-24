@@ -27,9 +27,15 @@
             <?php $__currentLoopData = helper::get_categories(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $categorydata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="col-lg-2-4 col-md-4 col-sm-6 col-12">
                     <div class="category-wrapper mx-2">
-                        <a href="<?php echo e(URL::to('/menu/' . $categorydata->slug)); ?>">
-                            <img src="<?php echo e(helper::image_path($categorydata->image)); ?>" class="category-image" alt="category">
-                        </a>
+                        <?php if(isset($county)): ?>
+                            <a href="<?php echo e(URL::to($county.'/menu/' . $categorydata->slug)); ?>">
+                                <img src="<?php echo e(helper::image_path($categorydata->image)); ?>" class="category-image" alt="category">
+                            </a>
+                        <?php else: ?>
+                            <a href="<?php echo e(URL::to('/menu/' . $categorydata->slug)); ?>">
+                                <img src="<?php echo e(helper::image_path($categorydata->image)); ?>" class="category-image" alt="category">
+                            </a>
+                        <?php endif; ?>
                         <p class="my-2 text-start"><?php echo e($categorydata->category_name); ?></p>
                     </div>
                 </div>
@@ -51,7 +57,7 @@
 
         @media (min-width: 992px) {
             .col-lg-2-4 {
-                flex: 0 0 20%;  /* Makes the columns take up 20% of the container on large screens */
+                flex: 0 0 20%; /* Makes the columns take up 20% of the container on large screens */
                 max-width: 20%;
             }
         }

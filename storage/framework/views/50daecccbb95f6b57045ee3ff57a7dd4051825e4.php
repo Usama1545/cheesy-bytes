@@ -5,7 +5,7 @@
             <th>#</th>
             <th><?php echo e(trans('labels.name')); ?></th>
             <th><?php echo e(trans('labels.category')); ?></th>
-            <th><?php echo e(trans('labels.featured')); ?></th>
+
             <th><?php echo e(trans('labels.status')); ?></th>
             <th><?php echo e(trans('labels.created_date')); ?></th>
             <th><?php echo e(trans('labels.updated_date')); ?></th>
@@ -21,19 +21,19 @@
                 <td><img <?php if($item->item_type == 1): ?> src="<?php echo e(helper::image_path('veg.svg')); ?>" <?php else: ?> src="<?php echo e(helper::image_path('nonveg.svg')); ?>" <?php endif; ?>
                         class="item-type-img" alt=""> <?php echo e($item->item_name); ?></td>
                 <td><?php echo e(@$item['category_info']->category_name); ?></td>
-                <td>
-                    <?php if($item->is_featured == 1): ?>
-                        <a class="btn btn-sm btn-success square" tooltip="<?php echo e(trans('labels.active')); ?>"
-                            <?php if(env('Environment') == 'sendbox'): ?> onclick="myFunction()"
-                    <?php else: ?> onclick="StatusFeatured('<?php echo e($item->id); ?>','2','<?php echo e(URL::to('admin/item/featured')); ?>')" <?php endif; ?>><i
-                                class="fa-sharp fa-solid fa-check"></i></a>
-                    <?php else: ?>
-                        <a class="btn btn-sm btn-danger square" tooltip="<?php echo e(trans('labels.deactive')); ?>"
-                            <?php if(env('Environment') == 'sendbox'): ?> onclick="myFunction()"
-                    <?php else: ?> onclick="StatusFeatured('<?php echo e($item->id); ?>','1','<?php echo e(URL::to('admin/item/featured')); ?>')" <?php endif; ?>><i
-                                class="fa-sharp fa-solid fa-xmark"></i></a>
-                    <?php endif; ?>
-                </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <td>
                     <?php if($item->item_status == 1): ?>
                         <a class="btn btn-sm btn-success square" tooltip="<?php echo e(trans('labels.active')); ?>"

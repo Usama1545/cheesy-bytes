@@ -63,20 +63,19 @@
                                                             </div>
                                                             <div class="tbl_cart_product_caption">
                                                                 <h5 class="tbl_pr_title line-2 mb-1 fs-6">
-                                                                    <img @if ($cartitems->item_type == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
-                                                                        class="item-type-image" alt="">
                                                                     {{ $cartitems->item_name }}
                                                                 </h5>
                                                                 @if ($cartitems->addons_id != '' || $cartitems->extras_id != '')
                                                                     <small>
                                                                         <a class="text-muted fw-400 fs-7"
                                                                             href="javascript:void(0)"
-                                                                            onclick="showaddons('{{ $cartitems['addons_name'] }}','{{ $cartitems['addons_price'] }}','{{ $cartitems['extras_name'] }}','{{ $cartitems['extras_price'] }}','{{ $cartitems['item_name'] }}')">{{ trans('labels.customize') }}
+                                                                            onclick="showaddons('{{ $cartitems['addons_name'] }}','{{ $cartitems['addons_price'] }}','{{ $cartitems['extras_name'] }}','{{ $cartitems['extras_price'] }}','{{ $cartitems['dipping_name'] }}','{{ $cartitems['dipping_price'] }}','{{ $cartitems['item_name'] }}')">{{ trans('labels.customize') }}
                                                                         </a>
                                                                     </small>
                                                                     <br>
                                                                 @endif
                                                             </div>
+
                                                         </div>
                                                     </td>
                                                     @php

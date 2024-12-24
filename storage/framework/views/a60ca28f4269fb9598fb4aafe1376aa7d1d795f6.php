@@ -130,27 +130,27 @@
                             class="fa-solid fa-circle-small"></i><?php echo e(trans('labels.section-1')); ?></span>
                 </a>
             </li>
-            <li class="nav-item ps-4 mb-1">
-                <a class="nav-link rounded <?php echo e(request()->is('admin/bannersection-2*') ? 'active' : ''); ?>"
-                   aria-current="page" href="<?php echo e(URL::to('/admin/bannersection-2')); ?>">
-                    <span class="d-flex align-items-center multimenu-menu-indicator"><i
-                            class="fa-solid fa-circle-small"></i><?php echo e(trans('labels.section-2')); ?></span>
-                </a>
-            </li>
-            <li class="nav-item ps-4 mb-1">
-                <a class="nav-link rounded <?php echo e(request()->is('admin/bannersection-3*') ? 'active' : ''); ?>"
-                   aria-current="page" href="<?php echo e(URL::to('/admin/bannersection-3')); ?>">
-                    <span class="d-flex align-items-center multimenu-menu-indicator"><i
-                            class="fa-solid fa-circle-small"></i><?php echo e(trans('labels.section-3')); ?></span>
-                </a>
-            </li>
-            <li class="nav-item ps-4 mb-1">
-                <a class="nav-link rounded <?php echo e(request()->is('admin/bannersection-4*') ? 'active' : ''); ?>"
-                   aria-current="page" href="<?php echo e(URL::to('/admin/bannersection-4')); ?>">
-                    <span class="d-flex align-items-center multimenu-menu-indicator"><i
-                            class="fa-solid fa-circle-small"></i><?php echo e(trans('labels.section-4')); ?></span>
-                </a>
-            </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </ul>
     </li>
     <?php if(@helper::checkaddons('coupon')): ?>
@@ -270,13 +270,7 @@
             <i class="fa-solid fa-list-timeline"></i><span class="nav-text "><?php echo e(trans('labels.items')); ?></span>
         </a>
     </li>
-    <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : ''); ?>"
-        id="10">
-        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/custom_pizza*') ? 'active' : ''); ?>"
-           href="<?php echo e(URL::to('/admin/custom_pizza')); ?>" aria-expanded="false">
-            <i class="fa-solid fa-list-timeline"></i><span class="nav-text ">Custom Pizza</span>
-        </a>
-    </li>
+
     <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : ''); ?>"
         id="10">
         <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/topDeals*') ? 'active' : ''); ?>"
@@ -294,9 +288,47 @@
         </li>
     <?php endif; ?>
     <li class="nav-item mt-3">
+        <h6 class="text-muted mb-2 fs-7 text-uppercase">Pizza Management</h6>
+    </li>
+    <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : ''); ?>"
+        id="10">
+        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/custom_pizza*') ? 'active' : ''); ?>"
+           href="<?php echo e(URL::to('/admin/custom_pizza')); ?>" aria-expanded="false">
+            <i class="fa-solid fa-pizza-slice"></i><span class="nav-text ">Custom Pizza</span>
+        </a>
+    </li>
+    <li class="nav-item mb-2 fs-7 dropdown multimenu"
+        id="4">
+        <a class="nav-link collapsed rounded d-flex align-items-center justify-content-between dropdown-toggle mb-1"
+           href="#banners" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="banners">
+            <span class="d-flex"><i class="fa-solid fa-list-tree"></i><span
+                    class="multimenu-title">Size-Crust</span></span>
+        </a>
+        <ul class="collapse" id="banners">
+            <li class="nav-item ps-4 mb-1">
+                <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/pizza_crusts*') ? 'active' : ''); ?>"
+                   href="<?php echo e(URL::to('/admin/pizza_crusts')); ?>" aria-expanded="false">
+                    <i class="fa-solid fa-dollar-circle"></i><span class="nav-text ">Pizza Crusts</span>
+                </a>
+            </li>
+            <li class="nav-item ps-4 mb-1">
+                <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/sizes*') ? 'active' : ''); ?>"
+                   href="<?php echo e(URL::to('/admin/sizes')); ?>" aria-expanded="false">
+                    <i class="fa-solid fa-plus-minus"></i><span class="nav-text ">Sizes</span>
+                </a>
+            </li>
+            <li class="nav-item ps-4 mb-1">
+                <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/crusts*') ? 'active' : ''); ?>"
+                   href="<?php echo e(URL::to('/admin/crusts')); ?>" aria-expanded="false">
+                    <i class="fa-solid fa-plus-minus"></i><span class="nav-text ">Crusts</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    <li class="nav-item mt-3">
         <h6 class="text-muted mb-2 fs-7 text-uppercase"><?php echo e(trans('labels.restaurant_management')); ?></h6>
     </li>
-    <li class="nav-item mb-2 fs-7 "
+    <li class="nav-item mb-2 fs-7"
         id="11">
         <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/branches*') ? 'active' : ''); ?>"
            href="<?php echo e(URL::to('/admin/branches')); ?>" aria-expanded="false">

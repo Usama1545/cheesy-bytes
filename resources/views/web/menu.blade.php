@@ -23,16 +23,17 @@
         <section class="menu-section">
 
             <div class="container">
-                    <div class="card  w-100 mt-3" style="background-color: #D6B62B">
-                        <div class="d-flex flex-column flex-md-row justify-content-between mx-1 mx-md-5 my-1 align-items-center">
-                            <h4 class="my-3 text-uppercase fw-bold">START YOUR ORDER</h4>
-                            <div class="d-flex  flex-md-row align-items-center gap-2 mt-2 mt-md-0">
-                                <a href="{{ URL::to('/location?type=Delivery') }}" class="btn btn-secondary">Delivery</a>
-                                <span class="mx-1  text-sm text-uppercase ">- OR -</span>
-                                <a href="{{ URL::to('/location?type=Carryout') }}" class="btn btn-secondary">Carryout</a>
-                            </div>
+                <div class="card  w-100 mt-3" style="background-color: #D6B62B">
+                    <div
+                        class="d-flex flex-column flex-md-row justify-content-between mx-1 mx-md-5 my-1 align-items-center">
+                        <h4 class="my-3 text-uppercase fw-bold">START YOUR ORDER</h4>
+                        <div class="d-flex  flex-md-row align-items-center gap-2 mt-2 mt-md-0">
+                            <a href="{{ URL::to('/location?type=Delivery') }}" class="btn btn-secondary">Delivery</a>
+                            <span class="mx-1  text-sm text-uppercase ">- OR -</span>
+                            <a href="{{ URL::to('/location?type=Carryout') }}" class="btn btn-secondary">Carryout</a>
                         </div>
                     </div>
+                </div>
 
                 <div class="d-flex justify-content-between align-items-center w-100">
                     <div class="mx-0 mx-md-3">
@@ -61,123 +62,144 @@
                 </div>
 
 
+                @if (count($getitemlist) > 0)
+                    <div class="menu my-0">
+                        <div class="row mx-1 g-4 boxes">
+                            @foreach ($getitemlist as $subcategory => $groupItems)
+                                <div class="card " style="background-color: #D6B62B">
+                                    <h5 class="my-3 text-uppercase fw-bold"> {{ $subcategory }}</h5>
+                                </div>
 
-                    @if (count($getitemlist) > 0)
-                        <div class="menu my-0">
-                            <div class="row mx-1 g-4 boxes">
-                                @foreach ($getitemlist as $subcategory => $groupItems)
-                                    <div class="card " style="background-color: #D6B62B">
-                                        <h5 class="my-3 text-uppercase fw-bold"> {{ $subcategory }}</h5>
-                                    </div>
+                                @foreach ($groupItems as $itemdata)
 
-                                    @foreach ($groupItems as $itemdata)
+                                    <div class="col-12 col-lg-2-4 col-md-4 col-sm-12">
+                                        <div class="w-full" style="">
+                                            <div class="card  overflow-hidden h-100">
+                                                @if(strtolower(@$categorydata->category_name) == strtolower('Pizza'))
+                                                    <a data-bs-toggle="modal"
+                                                       data-bs-target="#PizzaModal"
+                                                       class="cursor-pointer"
+                                                       data-product-id="{{ $itemdata->id }}">
+                                                        @elseif(isset($country))
+                                                            <a href="{{ URL::to($country.'/item-' . $itemdata->slug) }}">
+                                                                @else
+                                                                    <a href="{{ URL::to('item-' . $itemdata->slug) }}">
+                                                                        @endif
+                                                                        <img
+                                                                            src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
+                                                                            class="card-img-top border-0 rounded-0 rounded-top position-relative"
+                                                                            alt="dishes" height="190px">
 
-                                        <div class="col-12 col-lg-2-4 col-md-4 col-sm-12">
-                                            <div class="w-full" style="">
-                                                <div class="card  overflow-hidden h-100">
-                                                    <a href="{{ URL::to('item-' . $itemdata->slug) }}">
+                                                                    </a>
 
-                                                        <img
-                                                            src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
-                                                            class="card-img-top border-0 rounded-0 rounded-top position-relative"
-                                                            alt="dishes" height="190px">
+                                                                    @php
+                                                                        if ($itemdata->is_top_deals == 1 && $topdeals != null) {
+                                                                            if (@$topdeals->offer_type == 1) {
+                                                                                if ($itemdata->item_price > @$topdeals->offer_amount) {
+                                                                                    $price = $itemdata->item_price - @$topdeals->offer_amount;
+                                                                                } else {
+                                                                                    $price = $itemdata->item_price;
+                                                                                }
+                                                                            } else {
+                                                                                $price = $itemdata->item_price - $itemdata->item_price * (@$topdeals->offer_amount / 100);
+                                                                            }
+                                                                            $original_price = $itemdata->item_price;
+                                                                            $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                                                                        } else {
+                                                                            $price = $itemdata->item_price;
+                                                                            $original_price = $itemdata->original_price;
+                                                                            $off = $itemdata->discount_percentage;
+                                                                        }
+                                                                    @endphp
+                                                                    <div class="card-body pb-0 border-bottom">
+                                                                        <h5 class="item-card-title pb-3 fs-6 d-flex justify-content-between align-items-center">
+                                                                            @if(strtolower(@$categorydata->category_name) == strtolower('Pizza'))
+                                                                                <a data-bs-toggle="modal"
+                                                                                   data-bs-target="#PizzaModal"
+                                                                                   class="flex-grow-1 cursor-pointer">
+                                                                                    @elseif(isset($country))
+                                                                                        <a href="{{ URL::to($country.'/item-' . $itemdata->slug) }}"
+                                                                                           class="flex-grow-1">
+                                                                                            @else
+                                                                                                <a href="{{ URL::to('item-' . $itemdata->slug) }}"
+                                                                                                   class="flex-grow-1">
+                                                                                                    @endif
+                                                                                                    <p class="item-card-title mb-0 line-2 fs-7">
+                                                                                                        {{ $itemdata->item_name }}
+                                                                                                    </p>
+                                                                                                </a>
+                                                                                                <div
+                                                                                                    class="d-flex gap-1">
+                                                                                                    @if ($original_price > $price)
+                                                                                                        <del
+                                                                                                            class="text-muted">{{ helper::currency_format($original_price) }}</del>
+                                                                                                    @endif
+                                                                                                    <span>{{ helper::currency_format($price) }}</span>
 
-                                                    </a>
+                                                                                                </div>
+                                                                        </h5>
 
-                                                    @php
-                                                        if ($itemdata->is_top_deals == 1 && $topdeals != null) {
-                                                            if (@$topdeals->offer_type == 1) {
-                                                                if ($itemdata->item_price > @$topdeals->offer_amount) {
-                                                                    $price = $itemdata->item_price - @$topdeals->offer_amount;
-                                                                } else {
-                                                                    $price = $itemdata->item_price;
-                                                                }
-                                                            } else {
-                                                                $price = $itemdata->item_price - $itemdata->item_price * (@$topdeals->offer_amount / 100);
-                                                            }
-                                                            $original_price = $itemdata->item_price;
-                                                            $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                                                        } else {
-                                                            $price = $itemdata->item_price;
-                                                            $original_price = $itemdata->original_price;
-                                                            $off = $itemdata->discount_percentage;
-                                                        }
-                                                    @endphp
-                                                    <div class="card-body pb-0 border-bottom">
-                                                        <h5 class="item-card-title pb-3 fs-6 d-flex justify-content-between align-items-center">
-                                                            <a href="{{ URL::to('item-' . $itemdata->slug) }}"
-                                                               class="flex-grow-1">
-                                                                <p class="item-card-title mb-0 line-2 fs-7">
-                                                                    {{ $itemdata->item_name }}
-                                                                </p>
-                                                            </a>
-                                                            <div class="d-flex gap-1">
-                                                                @if ($original_price > $price)
-                                                                    <del
-                                                                        class="text-muted">{{ helper::currency_format($original_price) }}</del>
-                                                                @endif
-                                                                <span>{{ helper::currency_format($price) }}</span>
-
-                                                            </div>
-                                                        </h5>
-
-                                                    </div>
+                                                                    </div>
 
 
-                                                    @if ($off > 0)
-                                                        <div
-                                                            class="offer-lable {{ session()->get('direction') == '2' ? 'rtl' : '' }}">
-                                                            <h5>{{ $off }}% {{ trans('labels.off') }}</h5>
-                                                        </div>
-                                                    @endif
+                                                                    @if ($off > 0)
+                                                                        <div
+                                                                            class="offer-lable {{ session()->get('direction') == '2' ? 'rtl' : '' }}">
+                                                                            <h5>{{ $off }}
+                                                                                % {{ trans('labels.off') }}</h5>
+                                                                        </div>
+                                                @endif
 
-                                                </div>
-                                                <div class="item-card-footer mt-2">
-                                                    <div class="d-flex justify-content-between align-items-center">
+                                            </div>
+                                            <div class="item-card-footer mt-2">
+                                                <div class="d-flex justify-content-between align-items-center">
 
-                                                        @if ($itemdata->is_cart == 1)
-                                                            <div class="item-quantity py-1 px-5">
-                                                                <button type="button" class="btn btn-sm  fw-500"
-                                                                        onclick="removefromcart('{{ URL::to('/cart') }}','{{ trans('messages.remove_cartitem_note') }}','{{ trans('labels.goto_cart') }}')">
-                                                                    -
-                                                                </button>
-                                                                <input
-                                                                    class="fw-500 item-total-qty-{{ $itemdata->slug }}"
-                                                                    type="text"
-                                                                    value="{{ helper::get_item_cart($itemdata->id) }}"
-                                                                    disabled/>
-                                                                <button class="btn btn-sm fw-500 border-0"
-                                                                        onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">
-                                                                    +
-                                                                </button>
-                                                            </div>
-                                                        @else
-                                                            <button
-                                                                class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-full float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
-                                                                onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')"
-                                                                style="width: 100%">
-                                                                Order Now
-
-                                                                <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
-                                                                <div
-                                                                    class="loader d-none addon_modal_loader_{{ $itemdata->slug }}"></div>
+                                                    @if ($itemdata->is_cart == 1)
+                                                        <div class="item-quantity py-1 px-5">
+                                                            <button type="button" class="btn btn-sm  fw-500"
+                                                                    onclick="removefromcart('{{ URL::to('/cart') }}','{{ trans('messages.remove_cartitem_note') }}','{{ trans('labels.goto_cart') }}')">
+                                                                -
                                                             </button>
-                                                        @endif
-                                                    </div>
+                                                            <input
+                                                                class="fw-500 item-total-qty-{{ $itemdata->slug }}"
+                                                                type="text"
+                                                                value="{{ helper::get_item_cart($itemdata->id) }}"
+                                                                disabled/>
+                                                            <button class="btn btn-sm fw-500 border-0"
+                                                                    onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                    @else
+                                                        <button
+                                                            class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-full float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
+                                                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')"
+                                                            style="width: 100%">
+                                                            Order Now
+
+                                                            <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
+                                                            <div
+                                                                class="loader d-none addon_modal_loader_{{ $itemdata->slug }}"></div>
+                                                        </button>
+                                                    @endif
                                                 </div>
                                             </div>
-
                                         </div>
-                                    @endforeach
+
+                                    </div>
                                 @endforeach
-                            </div>
-                            <h1>Welcome to Cheesy Bite – The Best Cheesy, Halal, and Stuffed Crust Pizza in {{ $country }}!
-                            </h1>
+                            @endforeach
                         </div>
-                    @else
-                        @include('web.nodata')
-                    @endif
-                </div>
+                        @if(isset($htmlContent))
+                            <span class="county-details">
+                            {!! $htmlContent !!}
+                        </span>
+                        @endif
+                    </div>
+                @else
+                    @include('web.nodata')
+                @endif
+            </div>
         </section>
     @else
         @include('web.nodata')
@@ -188,6 +210,40 @@
     </script>
 
     <style>
+        .county-details p {
+            color: #8e8e8e; /* Apply color to all paragraphs */
+        }
+
+        .county-details h1 {
+            color: #5e5e5e; /* Apply color to all h1 tags */
+        }
+
+        .county-details span {
+            color: #8e8e8e; /* Apply color to all span tags */
+        }
+
+        .county-details {
+            margin-top: 40px;
+            display: block; /* Ensures the content is block-level for better layout */
+            margin-bottom: 1em; /* Adds some space below the content */
+            font-family: 'Arial', sans-serif; /* Sets a clean, readable font */
+            line-height: 1.6; /* Increases line height for better readability */
+            color: #989898 !important; /* Sets the text color to a dark gray for contrast */
+            padding: 10px; /* Adds padding around the content for better spacing */
+            /*border: 1px solid #ddd; !* Adds a subtle border for structure *!*/
+            border-radius: 5px; /* Adds rounded corners for a more modern look */
+            /*background-color: #f9f9f9; !* Light background color to enhance readability *!*/
+        }
+
+
+        /* Optional: Add responsive styling if needed */
+        @media (max-width: 768px) {
+            .county-details {
+                font-size: 14px; /* Adjust font size for smaller screens */
+                padding: 8px; /* Reduce padding for smaller screens */
+            }
+        }
+
         @media (min-width: 1440px) {
             .col-lg-2-4 {
                 flex: 0 0 20%; /* Makes the columns take up 20% of the container on large screens */
@@ -265,6 +321,12 @@
             color: white;
         }
 
+        .btn.active {
+            background-color: #DE1616; /* Hover color for all buttons */
+            color: #fff; /* Optional: Change text color on hover */
+            border-color: #DE1616;
+        }
+
         .btn.btn-primary:hover {
             background-color: #DE1616; /* Hover color for all buttons */
             color: #fff; /* Optional: Change text color on hover */
@@ -316,5 +378,8 @@
         }
 
     </style>
+
+@endsection
+@section('script')
 
 @endsection

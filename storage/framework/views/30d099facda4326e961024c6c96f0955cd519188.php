@@ -117,6 +117,112 @@
     </div>
 </div>
 
+<div class="modal" id="PizzaModal" tabindex="-1" aria-labelledby="PizzaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="PizzaModalLabel"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body row">
+                <div class="col-md-7 border-end">
+                    <!-- Size Selection -->
+                    <div class="card mb-3">
+                        <div class="card-header" style="background: #D6B62B">Select Size</div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between flex-wrap gap-2 mx-5" id="pizzaSizesContainer">
+                                <!-- Dynamically loaded sizes will go here -->
+                            </div>
+                            <hr>
+                            <div class="card-body d-flex flex-wrap gap-2" id="pizzaCrustContainer">
+                                <!-- Dynamically loaded crusts will go here -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Crust Selection -->
+
+                    <div id="pizzaAddonsContainer"></div>
+
+                    <div class="card mb-3">
+                        <div class="card-header" style="background: #D6B62B">Select Dipping Sause</div>
+                        <div class="card-body">
+                            <?php $__currentLoopData = helper::getSides(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dipping): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="d-flex align-items-center gap-3 mb-3 pizza-dipping-item"
+                                     data-name="<?php echo e($dipping->name); ?>"
+                                     data-price="<?php echo e($dipping->price); ?>"
+                                     data-id="<?php echo e($dipping->id); ?>">
+                                    <!-- Dipping Image -->
+                                    <img src="<?php echo e(helper::image_path($dipping->image)); ?>"
+                                         alt="Dipping Sauce"
+                                         class="img-fluid rounded h-70px"
+                                         style="object-fit: cover;">
+
+                                    <!-- Dipping Name -->
+                                    <span class="flex-grow-1 text-sm"><?php echo e($dipping->name); ?></span>
+
+                                    <!-- Quantity Controls -->
+                                    <div class="d-flex align-items-center ms-auto">
+                                        <!-- Decrease Button -->
+                                        <button data-action="decrease"
+                                                class="btn btn-secondary bg-gray rounded-circle d-flex justify-content-center align-items-center"
+                                                style="width: 40px; height: 40px; font-size: 1.2rem; background: #a8a7a7; border-color: gray;">
+                                            -
+                                        </button>
+
+                                        <!-- Quantity Display -->
+                                        <span class="fw-semibold mx-3 quantity"
+                                              style="min-width: 30px; text-align: center;">0</span>
+
+                                        <!-- Increase Button -->
+                                        <button data-action="increase"
+                                                class="btn btn-primary rounded-circle d-flex justify-content-center align-items-center"
+                                                style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sauce Selection -->
+                <div class="col-md-5">
+                    <div id="myPizzaCard">
+                        <div class="card mb-3">
+                            <div class="card-header" id="PizzaModalLabel" style="background: #D6B62B">My Pizza</div>
+                            <div class="card-body">
+                                <div id="MyPizzaSummary" class="pizza-summary"></div>
+                                <hr style="margin: 10px 0; border: 1px solid #ddd;">
+                                <div class="d-flex align-items-center gap-3" style="font-size: 0.800rem;">
+                                    <span class="">Quantity:</span>
+                                    <button data-action="decrease_pizza_quantity"
+                                            class="btn btn-secondary rounded-circle d-flex justify-content-center align-items-center"
+                                            style="width: 40px; height: 40px; font-size: 1.5rem;background: #a8a7a7; border-color: gray;">
+                                        -
+                                    </button>
+                                    <span id="overall-pizza-quantity" class="fw-semibold"
+                                          style="min-width: 30px; text-align: center;">1</span>
+                                    <button data-action="increase_pizza_quantity"
+                                            class="btn btn-primary rounded-circle d-flex justify-content-center align-items-center"
+                                            style="width: 40px; height: 40px; font-size: 1.5rem;">
+                                        +
+                                    </button>
+                                </div>
+                                <button id="addToCartButton" class="btn btn-primary mt-3"
+                                        style="width: 100%;font-size: 15px">Add To Cart
+                                </button>
+                            </div>
+                        </div>
+                        <div id="img-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="modal" id="customPizzaModal" tabindex="-1" aria-labelledby="customPizzaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -167,7 +273,8 @@
                         <div class="card-header" style="background: #D6B62B">Select Dipping Sause</div>
                         <div class="card-body">
                             <?php $__currentLoopData = helper::getSides(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dipping): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="d-flex align-items-center gap-3 mb-3 dipping-item" data-name="<?php echo e($dipping->name); ?>">
+                                <div class="d-flex align-items-center gap-3 mb-3 dipping-item"
+                                     data-name="<?php echo e($dipping->name); ?>">
                                     <!-- Dipping Image -->
                                     <img src="<?php echo e(helper::image_path($dipping->image)); ?>"
                                          alt="Dipping Sauce"
@@ -213,13 +320,14 @@
                                     <h6>BAKE</h6>
                                     <div>
                                         <label class="text-sm" style="font-size: 11px">
-                                            <input type="radio" name="bake" class="form-check-input" value="well-done" >
+                                            <input type="radio" name="bake" class="form-check-input" value="well-done">
                                             Well Done
                                         </label>
                                     </div>
                                     <div>
                                         <label class="text-sm" style="font-size: 11px">
-                                            <input type="radio" name="bake" class="form-check-input" value="normal-bake" checked>
+                                            <input type="radio" name="bake" class="form-check-input" value="normal-bake"
+                                                   checked>
                                             Normal Bake
                                         </label>
                                     </div>
@@ -230,13 +338,15 @@
                                     <h6>SEASONING</h6>
                                     <div>
                                         <label class="text-sm" style="font-size: 11px">
-                                            <input type="radio" name="seasoning" class="form-check-input" value="garlic-seasoned-crust" checked>
+                                            <input type="radio" name="seasoning" class="form-check-input"
+                                                   value="garlic-seasoned-crust" checked>
                                             Garlic-Seasoned Crust
                                         </label>
                                     </div>
                                     <div>
                                         <label class="text-sm" style="font-size: 11px">
-                                            <input type="radio" name="seasoning" class="form-check-input" value="no-garlic-seasoned-crust" >
+                                            <input type="radio" name="seasoning" class="form-check-input"
+                                                   value="no-garlic-seasoned-crust">
                                             No Garlic-Seasoned Crust
                                         </label>
                                     </div>
@@ -247,13 +357,14 @@
                                     <h6>CUT</h6>
                                     <div>
                                         <label class="text-sm" style="font-size: 11px">
-                                            <input type="radio" name="cut" class="form-check-input" value="pie-cut" checked>
+                                            <input type="radio" name="cut" class="form-check-input" value="pie-cut"
+                                                   checked>
                                             Pie Cut
                                         </label>
                                     </div>
                                     <div>
                                         <label class="text-sm" style="font-size: 11px">
-                                            <input type="radio" name="cut" class="form-check-input" value="square-cut" >
+                                            <input type="radio" name="cut" class="form-check-input" value="square-cut">
                                             Square Cut
                                         </label>
                                     </div>
@@ -328,7 +439,7 @@
                             <form method="post" action="<?php echo e(route('subscribe')); ?>">
                                 <?php echo csrf_field(); ?>
                                 <label
-                                    class="text-black form-label fs-7 mb-1"><?php echo e(trans('labels.email')); ?></label>
+                                        class="text-black form-label fs-7 mb-1"><?php echo e(trans('labels.email')); ?></label>
                                 <div class="input-group mb-3">
                                     <input type="email" class="form-control border text-dark fw-500 bg-light"
                                            name="subscribe_email" placeholder="<?php echo e(trans('labels.email')); ?>"
@@ -430,7 +541,7 @@
                         <a class="btn btn-primary w-100 p-2" target="_blank" onclick="checkout()">
                             <i class="fa-solid fa-address-card"></i>
                             <span
-                                class="px-2"><?php echo e(trans('labels.continue_as_guest')); ?></span>
+                                    class="px-2"><?php echo e(trans('labels.continue_as_guest')); ?></span>
                         </a>
 
                     </div>
@@ -466,7 +577,7 @@
                                 <?php for($i = 5; $i > 0; $i = $i - 1): ?>
                                     <input type="radio" id="<?php echo e($i); ?>" name="rating"
                                            onclick="$('#ratting').val('<?php echo e($i); ?>')"
-                                        <?php echo e($i == 1 ? 'checked' : ''); ?>>
+                                            <?php echo e($i == 1 ? 'checked' : ''); ?>>
                                     <label for="<?php echo e($i); ?>"><i class="fa-solid fa-star fs-4"
                                                              aria-hidden="true"></i></label>
                                 <?php endfor; ?>
@@ -1016,7 +1127,7 @@
             dippingElement.style.marginBottom = '10px';
 
             dippingElement.innerHTML = `<span class="fw-bold text-sm" style="font-size: 12px">Dippings</span>:<span class="text-sm" style="font-size: 12px"> ${dippingName} </span>`;
-            if(dippingName) {
+            if (dippingName) {
                 pizzaSummaryElement.appendChild(dippingElement);
             }
 
@@ -1063,9 +1174,6 @@
             });
 
 
-
-
-
         }
 
         renderPizzaSummary();
@@ -1074,6 +1182,342 @@
     });
 
 </script>
+
+<script>
+    $(document).ready(function () {
+        let productId = null;
+        const selectedDippings = {}; // To track selected dippings and their quantities
+        let size_id = '';
+        const quantityValue = document.getElementById('overall-pizza-quantity');
+        const decreaseQuantityButton = document.querySelector('button[data-action="decrease_pizza_quantity"]');
+        const increaseQuantityButton = document.querySelector('button[data-action="increase_pizza_quantity"]');
+        let totalPrice = 0;
+        let basePrice = 0;
+        let details = {};
+
+        let pizzaQuantity = 1;
+
+        function updateQuantityDisplay() {
+            quantityValue.textContent = pizzaQuantity;
+            updatePriceSummary();
+        }
+
+        increaseQuantityButton.addEventListener('click', () => {
+            console.log('clicked');
+            pizzaQuantity++;
+            updateQuantityDisplay();
+        });
+
+        decreaseQuantityButton.addEventListener('click', () => {
+            if (pizzaQuantity > 1) {
+                pizzaQuantity--;
+                updateQuantityDisplay();
+            }
+        });
+
+
+        // Open modal and load product data
+        $(document).on('click', '[data-bs-target="#PizzaModal"]', function () {
+            productId = $(this).data('product-id'); // Fetch product ID
+            loadPizzaData(productId);
+        });
+
+        // Handle dipping quantity changes
+        $(document).on('click', '.pizza-dipping-item button[data-action]', function () {
+            const action = $(this).data('action');
+            const item = $(this).closest('.pizza-dipping-item');
+            const dippingId = item.data('id');
+            const dippingPrice = parseFloat(item.data('price'));
+            const quantityElement = item.find('.quantity');
+            let currentQuantity = parseInt(quantityElement.text(), 10);
+
+
+            if (action === 'increase') {
+                currentQuantity++;
+            } else if (action === 'decrease' && currentQuantity > 0) {
+                currentQuantity--;
+            }
+
+            quantityElement.text(currentQuantity);
+
+            if (currentQuantity > 0) {
+                selectedDippings[dippingId] = {
+                    price: dippingPrice,
+                    id: dippingId,
+                    quantity: currentQuantity,
+                };
+            } else {
+                delete selectedDippings[dippingId];
+            }
+
+            updatePriceSummary();
+        });
+
+        // Load product details
+        function loadPizzaData(itemId) {
+            $.ajax({
+                url: `/products/${itemId}/details`, // Replace with your API endpoint
+                method: 'GET',
+                success: function (response) {
+                    details = response.responce.item_detail;
+                    $('#pizzaSizesContainer').empty();
+                    $('#pizzaCrustContainer').empty();
+                    $('#PizzaDetailsSummary').empty();
+                    $('#pizzaAddonsContainer').empty();
+                    const itemCard = `
+                        <div class="card mb-3">
+                            <img
+                                src="${response.responce.item_detail.item_image.image_url}"
+                                class="card-img-top border-0 rounded-0 rounded-top position-relative"
+                                alt="${response.responce.item_detail.item_name}"
+                                height="190px">
+                        </div>
+                    `;
+                    $('#img-container').html(itemCard); //
+                    if (response) {
+                        basePrice = parseFloat(response.responce.item_detail.price || 0);
+                        $('#PizzaModalLabel').text(response.responce.item_detail.item_name);
+                        $('#MyPizzaSummary').html(`
+                            <div class="d-flex justify-content-between">
+                                <span id="PizzaName">${response.responce.item_detail.item_name}</span>
+                                <span id="PizzaPrice" class="text-muted">$${basePrice.toFixed(2)}</span>
+                            </div>
+                        `);
+
+                        loadSizesAndCrusts(response.responce.crust_data);
+                        loadAddonGroups(response.responce.item_detail.addons_group);
+                    }
+                },
+                error: function (err) {
+                    alert("Failed to load product details. Please try again.");
+                    console.error("Error loading product data:", err);
+                }
+            });
+        }
+
+        $(document).on('click', '#addToCartButton', function () {
+            const payload = buildAddToCartPayload();
+            console.log(payload);
+            $.ajax({
+                url: '/addpizzatocart',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                method: 'POST',
+                data: JSON.stringify(payload),
+                success: function (response) {
+                    alert('Item added to cart successfully!');
+                },
+                error: function (err) {
+                    console.error('Error adding item to cart:', err);
+                    alert('Failed to add item to cart. Please try again.');
+                }
+            });
+        });
+
+        // Build Payload for Add-to-Cart
+        function buildAddToCartPayload() {
+            const addons = [];
+            const extras = [];
+
+            // Gather selected addons
+            $('.addon-input:checked').each(function () {
+                const addonId = $(this).data('addon-id');
+                const addonName = $(this).closest('label').find('span:first').text();
+                const addonPrice = parseFloat($(this).data('price')).toFixed(2);
+
+                addons.push({
+                    id: addonId,
+                    name: addonName,
+                    price: addonPrice,
+                });
+            });
+
+            // Generate addons data
+            const addonsId = addons.map(addon => addon.id).join('|');
+            const addonsName = addons.map(addon => addon.name).join('|');
+            const addonsPrice = addons.map(addon => addon.price).join('|');
+            const selectedCrust = $('#pizzaCrustContainer input:checked');
+            let crust_id = selectedCrust.data('crust-id');
+
+            // Gather crust data
+            return {
+                slug: details.slug, // Replace with the server-side slug generation logic
+                item_name: details.item_name,
+                item_type: 1, // Assuming item type is fixed
+                image_name: details.item_image.image_name,
+                tax: '',
+                item_price: totalPrice,
+                qty: pizzaQuantity,
+                addons_id: addonsId,
+                addons_name: addonsName,
+                addons_price: addonsPrice,
+                size_id: size_id,
+                crust_id: crust_id,
+                dippings: selectedDippings,
+                extras_id: '', // Include extras if applicable
+                extras_name: '',
+                extras_price: '',
+                buynow: 0, // Assuming 0 for add-to-cart, 1 for buy now
+            };
+        }
+
+        // Load sizes and crusts
+        function loadSizesAndCrusts(crustData) {
+            crustData.forEach(size => {
+                const sizeButton = $(`
+                    <button type="button" class="btn round-button size-btn" data-size-id="${size.id}">
+                        ${size.label}
+                    </button>
+                `);
+                $('#pizzaSizesContainer').append(sizeButton);
+            });
+
+            if (crustData.length > 0) {
+                updateCrusts(crustData[0].crusts);
+            }
+
+            $('.size-btn').on('click', function () {
+                const selectedSizeId = $(this).data('size-id');
+                size_id = selectedSizeId;
+                const selectedSize = crustData.find(size => size.id === selectedSizeId);
+
+                $('.size-btn').removeClass('active');
+                $(this).addClass('active');
+                updateCrusts(selectedSize.crusts);
+            });
+        }
+
+        // Update crusts
+        function updateCrusts(crusts) {
+            const crustContainer = $('#pizzaCrustContainer').empty();
+
+            crusts.forEach(crust => {
+                const crustOption = $(`
+                    <label class="form-check-label w-100 d-flex justify-content-between align-items-center">
+                        <span>
+                            <input type="radio" name="crust" class="form-check-input crust-checkbox" data-crust-id="${crust.id}" data-price="${crust.price}">
+                            <span>${crust.name}</span>
+                        </span>
+                        <span>$${parseFloat(crust.price).toFixed(2)}</span>
+                    </label>
+                `);
+                crustOption.find('input').on('change', function () {
+                    updatePriceSummary();
+                });
+                crustContainer.append(crustOption);
+            });
+
+            crustContainer.find('input:first').prop('checked', true).trigger('change');
+        }
+
+        // Load addons
+        function loadAddonGroups(addonsGroup) {
+            const addonsContainer = $('#pizzaAddonsContainer'); // Addons container in the modal
+            addonsContainer.empty(); // Clear any previous content
+
+            addonsGroup.forEach(group => {
+                // Create a card for each addon group
+                const card = $(`
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background: #D6B62B">
+                    ${group.name}
+                    <span class="badge bg-info">${group.selection_type === 1 ? 'Required' : 'Optional'}</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Select ${group.selection_count === 1 ? 'one' : `up to ${group.max_count}`}</p>
+                    <div class="row gy-3" id="group-${group.id}-addons"></div>
+                </div>
+            </div>
+        `);
+
+                const addonsRow = card.find(`#group-${group.id}-addons`);
+                let selectedAddons = []; // Track selected addons for this group
+
+                const addons = Array.isArray(group.availableAddons)
+                    ? group.availableAddons
+                    : Object.values(group.availableAddons); // Handle both array and object formats
+
+                addons.forEach(addon => {
+                    const inputType = group.selection_count === 1 ? 'radio' : 'checkbox';
+
+                    // Create addon input with label
+                    const addonItem = $(`
+                <div class="col-12 col-md-12">
+                    <div class="form-check">
+                        <input
+                            type="${inputType}"
+                            class="form-check-input addon-input"
+                            id="addon-${addon.id}"
+                            name="addon-group-${group.id}"
+                            data-addon-id="${addon.id}"
+                            data-price="${addon.price}"
+                            ${group.selection_type === 1 ? 'required' : ''}
+                            ${selectedAddons.includes(addon.id) ? 'checked' : ''}
+                            ${inputType === 'checkbox' && selectedAddons.length >= group.max_count ? 'disabled' : ''}
+                        />
+                        <label class="form-check-label d-flex justify-content-between" for="addon-${addon.id}">
+                            <span>${addon.name}</span>
+                            <span class="text-muted">$${parseFloat(addon.price).toFixed(2)}</span>
+                        </label>
+                    </div>
+                </div>
+            `);
+
+                    addonsRow.append(addonItem);
+
+                    // Handle addon selection changes
+                    addonItem.find('input').on('change', function () {
+                        const addonId = parseInt($(this).data('addon-id'));
+                        const price = parseFloat($(this).data('price'));
+
+                        if (this.checked) {
+                            if (inputType === 'checkbox' && selectedAddons.length >= group.max_count) {
+                                this.checked = false;
+                                return;
+                            }
+                            selectedAddons.push(addonId);
+                        } else {
+                            selectedAddons = selectedAddons.filter(id => id !== addonId);
+                        }
+
+                        // Update the price summary dynamically
+                        updatePriceSummary();
+                    });
+                });
+
+                // Append the card to the container
+                addonsContainer.append(card);
+            });
+        }
+
+        // Update price summary
+        function updatePriceSummary() {
+            let totalAddonPrice = basePrice; // Start with the pizza's base price
+
+            // Add selected addons price
+            $('.addon-input:checked').each(function () {
+                totalAddonPrice += parseFloat($(this).data('price'));
+            });
+
+            // Add selected dippings price
+            Object.values(selectedDippings).forEach(dipping => {
+                totalAddonPrice += dipping.price * dipping.quantity;
+            });
+
+            // Add selected crust price
+            const selectedCrust = $('#pizzaCrustContainer input:checked');
+            if (selectedCrust.length) {
+                totalAddonPrice += parseFloat(selectedCrust.data('price'));
+            }
+            totalAddonPrice = totalAddonPrice * pizzaQuantity;
+            totalPrice = totalAddonPrice;
+            $('#PizzaPrice').text(`$${totalAddonPrice.toFixed(2)}`);
+        }
+    });
+</script>
+
 <?php if(@helper::checkaddons('age_verification')): ?>
     <?php if(@helper::getagedetails($vendordata->id)->age_verification_on_off == 1): ?>
         <script src="<?php echo e(url('resources/js/age.js')); ?>"></script>

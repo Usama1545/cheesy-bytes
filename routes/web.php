@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\admin\BranchController;
+use App\Http\Controllers\admin\CrustController;
 use App\Http\Controllers\admin\CustomPizzaController;
 use App\Http\Controllers\admin\DealController;
 use App\Http\Controllers\admin\DippingController;
+use App\Http\Controllers\admin\PizzaCrustController;
+use App\Http\Controllers\admin\SizeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\ItemController;
@@ -53,14 +56,15 @@ use App\Http\Controllers\Admin\WhyChooseUsController;
 // language
 Route::get('/language-{lang}', [LangController::class, 'change'])->name('language');
 Route::post('add-on/session/save', [AdminController::class, 'sessionsave']);
-Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], function () {
+Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware', 'SetUserLocation']], function () {
 	// home
 	Route::get('/', [HomeController::class, 'index'])->name('home');
 	Route::get('/direction', [HomeController::class, 'change_dir'])->name('change_dir');
-	Route::get('/categories', [HomeController::class, 'categories'])->name('categories');
-	Route::get('/location', [HomeController::class, 'location'])->name('location');
-	Route::post('/location/store', [HomeController::class, 'location_store'])->name('location_store');
-	Route::post('/location/update/{id}/{address_id}', [HomeController::class, 'location_update'])->name('location_update');
+    Route::get('/categories', [HomeController::class, 'categories'])->name('categories');
+    Route::get('{country}/categories', [HomeController::class, 'categories_con'])->name('category');
+    Route::get('/location', [HomeController::class, 'location'])->name('location');
+	Route::post('/location/store', [HomeController::class, 'location_store'])->name('location.store');
+	Route::post('/location/update/{id}/{address_id}', [HomeController::class, 'location_update'])->name('location.update');
 	// item
     Route::get('menu/{category}', [MenuController::class, 'index'])->name('menu');
     Route::get('{country}/menu/{category}', [MenuController::class, 'index_con'])->name('menu');
@@ -68,6 +72,8 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 	Route::get('/show-item', [WebItemController::class, 'showitem']);
 	Route::get('/show-deal-item', [WebItemController::class, 'showDealitem']);
 	Route::get('/item-{slug}', [WebItemController::class, 'itemdetails'])->name('itemdetails');
+    Route::get('/products/{Id}/details', [WebItemController::class, 'productdetails'])->name('productdetails');
+
 	Route::get('/search', [WebItemController::class, 'search'])->name('search');
 	Route::get('/view-all', [WebItemController::class, 'viewall'])->name('viewall');
 	Route::get('/reward', [HomeController::class, 'rewards'])->name('rewards');
@@ -109,6 +115,7 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 	Route::post('/cart/deleteitem', [CartController::class, 'deletecartitem']);
 	Route::post('/cart/qtyupdate', [CartController::class, 'qtyupdate']);
 	Route::post('addtocart', [CartController::class, 'addtocart']);
+	Route::post('addpizzatocart', [CartController::class, 'addpizzatocart']);
 
 	// checkout
 	Route::post('/isopenclose', [CheckoutController::class, 'isopenclose']);
@@ -338,6 +345,24 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::get('topDeals-{id}', [DealController::class, 'edititem']);
         Route::post('topDeals/delete', [DealController::class, 'delete']);
 
+        Route::get('sizes', [SizeController::class, 'index']);
+        Route::get('sizes/add', [SizeController::class, 'additem']);
+        Route::post('sizes/store', [SizeController::class, 'store']);
+        Route::post('sizes/update', [SizeController::class, 'update']);
+        Route::get('sizes-{id}', [SizeController::class, 'edititem']);
+        Route::post('sizes/delete', [SizeController::class, 'delete']);
+
+        Route::get('crusts', [CrustController::class, 'index']);
+        Route::get('crusts/add', [CrustController::class, 'additem']);
+        Route::post('crusts/store', [CrustController::class, 'store']);
+        Route::post('crusts/update', [CrustController::class, 'update']);
+        Route::get('crusts-{id}', [CrustController::class, 'edititem']);
+        Route::post('crusts/delete', [CrustController::class, 'delete']);
+
+        Route::get('pizza_crusts', [PizzaCrustController::class, 'index']);
+        Route::post('pizza_crusts/update', [PizzaCrustController::class, 'update']);
+        Route::get('pizza_crusts-{id}', [PizzaCrustController::class, 'edititem']);
+
 
         // payment
 		Route::get('payment', [PaymentController::class, 'index']);
@@ -485,4 +510,5 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 		Route::post('systemaddons/update', [SystemAddonsController::class, 'update']);
 	});
 	Route::get('logout', [AdminController::class, 'logout']);
+    Route::get('{country}/item-{slug}', [WebItemController::class, 'itemdetailsCon'])->name('itemdetails');
 });

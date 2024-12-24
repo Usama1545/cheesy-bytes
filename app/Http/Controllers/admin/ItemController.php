@@ -69,6 +69,7 @@ class ItemController extends Controller
         $item->subcat_id = $request->subcat_id == "" ? "" : $request->subcat_id;
         $item->preparation_time = $request->preparation_time;
         $item->addons_id = $request->addongroup_id != "" ? @implode(",", $request->addongroup_id) : null;
+        $item->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $item->item_name = $request->item_name;
         $item->slug = $this->getitemslug($request->item_name, '');
         $item->item_type = $request->item_type;
@@ -155,6 +156,7 @@ class ItemController extends Controller
         $item->subcat_id = $request->subcat_id == "" ? "" : $request->subcat_id;
         $item->preparation_time = $request->preparation_time;
         $item->addons_id = $request->addongroup_id != "" ? @implode(",", $request->addongroup_id) : null;
+        $item->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $item->item_type = $request->item_type;
         $item->has_extras = $request->has_extras;
         if ($request->original_price == "") {

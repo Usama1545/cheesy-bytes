@@ -66,8 +66,6 @@
                                                             </div>
                                                             <div class="tbl_cart_product_caption">
                                                                 <h5 class="tbl_pr_title line-2 mb-1 fs-6">
-                                                                    <img <?php if($cartitems->item_type == 1): ?> src="<?php echo e(helper::image_path('veg.svg')); ?>" <?php else: ?> src="<?php echo e(helper::image_path('nonveg.svg')); ?>" <?php endif; ?>
-                                                                        class="item-type-image" alt="">
                                                                     <?php echo e($cartitems->item_name); ?>
 
                                                                 </h5>
@@ -75,13 +73,14 @@
                                                                     <small>
                                                                         <a class="text-muted fw-400 fs-7"
                                                                             href="javascript:void(0)"
-                                                                            onclick="showaddons('<?php echo e($cartitems['addons_name']); ?>','<?php echo e($cartitems['addons_price']); ?>','<?php echo e($cartitems['extras_name']); ?>','<?php echo e($cartitems['extras_price']); ?>','<?php echo e($cartitems['item_name']); ?>')"><?php echo e(trans('labels.customize')); ?>
+                                                                            onclick="showaddons('<?php echo e($cartitems['addons_name']); ?>','<?php echo e($cartitems['addons_price']); ?>','<?php echo e($cartitems['extras_name']); ?>','<?php echo e($cartitems['extras_price']); ?>','<?php echo e($cartitems['dipping_name']); ?>','<?php echo e($cartitems['dipping_price']); ?>','<?php echo e($cartitems['item_name']); ?>')"><?php echo e(trans('labels.customize')); ?>
 
                                                                         </a>
                                                                     </small>
                                                                     <br>
                                                                 <?php endif; ?>
                                                             </div>
+
                                                         </div>
                                                     </td>
                                                     <?php

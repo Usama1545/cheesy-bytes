@@ -1,4 +1,8 @@
 @extends('admin.theme.default')
+@section('styles')
+    <link rel="stylesheet"
+          href="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/css/bootstrap/bootstrap-select.v1.14.0-beta2.min.css') }}">
+@endsection
 @section('content')
     @include('admin.breadcrumb')
     <div class="container-fluid">
@@ -13,24 +17,39 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="col-form-label"
-                                                for="">{{ trans('labels.select_addongroup') }}
+                                                   for="">{{ trans('labels.select_addongroup') }}
                                                 <span class="text-danger">*</span> </label>
                                             <select class="form-select" name="addongroup_id" required>
                                                 <option value="" hidden>{{ trans('labels.select') }}</option>
                                                 @foreach ($getaddongroup as $addongroup)
-                                                    <option value="{{ $addongroup->id }}">{{ $addongroup->name }}</option>
+                                                    <option
+                                                        value="{{ $addongroup->id }}">{{ $addongroup->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
+                                            <label for="getaddons_id"
+                                                   class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                            <select name="branch_ids[]" class="form-control selectpicker" multiple required
+                                                    data-live-search="true" id="getaddons_id">
+                                                @foreach (helper::get_branchs() as $branch)
+                                                    <option value="{{ $branch->id }}">
+                                                        {{ $branch->name.'-'.$branch->city }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
                                             <label class="col-form-label"
-                                                for="addons_name">{{ trans('labels.addons_name') }} <span
+                                                   for="addons_name">{{ trans('labels.addons_name') }} <span
                                                     class="text-danger">*</span> </label>
                                             <input type="text" class="form-control" name="name" id="addons_name"
-                                                required placeholder="{{ trans('labels.addons_name') }}"
-                                                value="{{ old('name') }}">
+                                                   required placeholder="{{ trans('labels.addons_name') }}"
+                                                   value="{{ old('name') }}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -40,16 +59,16 @@
                                             <div class="d-flex">
                                                 <div class="form-check-inline">
                                                     <input class="form-check-input get_price" type="radio" name="type"
-                                                        value="1" id="free" checked required>
+                                                           value="1" id="free" checked required>
                                                     <label class="form-check-label"
-                                                        for="free">{{ trans('labels.free') }}</label>
+                                                           for="free">{{ trans('labels.free') }}</label>
                                                 </div>
                                                 <div class="form-check-inline">
                                                     <input class="form-check-input get_price" type="radio" name="type"
-                                                        value="2" id="paid"
-                                                        {{ old('type') == 2 ? 'checked' : '' }} required>
+                                                           value="2" id="paid"
+                                                           {{ old('type') == 2 ? 'checked' : '' }} required>
                                                     <label class="form-check-label text-nowrap"
-                                                        for="paid">{{ trans('labels.paid') }}</label>
+                                                           for="paid">{{ trans('labels.paid') }}</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -59,16 +78,18 @@
                                             <label class="col-form-label" for="price">{{ trans('labels.price') }} <span
                                                     class="text-danger">*</span> </label>
                                             <input type="text" class="form-control" name="price" id="price"
-                                                placeholder="{{ trans('labels.price') }}" value="{{ old('price') }}"
-                                                required>
+                                                   placeholder="{{ trans('labels.price') }}" value="{{ old('price') }}"
+                                                   required>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
+                                <div
+                                    class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                     <a href="{{ URL::to('admin/addongroup') }}"
-                                        class="btn btn-danger">{{ trans('labels.cancel') }}</a>
+                                       class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                     <button class="btn btn-primary"
-                                        @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()" @else type="submit" @endif>{{ trans('labels.save') }}</button>
+                                            @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
+                                            @else type="submit" @endif>{{ trans('labels.save') }}</button>
                                 </div>
                             </form>
                         </div>
@@ -80,4 +101,18 @@
 @endsection
 @section('script')
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/addons.js') }}"></script>
+
+    <script>
+        var placehodername = "{{ trans('labels.name') }}";
+        var placeholderprice = "{{ trans('labels.price') }}";
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1/ckeditor.js"></script>
+    <script type="text/javascript">
+        CKEDITOR.replace('allergens');
+    </script>
+    <script
+        src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/bootstrap/bootstrap-select.v1.14.0-beta2.min.js') }}">
+    </script>
+    <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/additem.js') }}"></script>
 @endsection

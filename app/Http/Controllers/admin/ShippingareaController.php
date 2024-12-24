@@ -27,6 +27,7 @@ class ShippingareaController extends Controller
         $shippingarea->name = $request->name;
         $shippingarea->state_id = $request->state_id;
         $shippingarea->city = $request->city;
+        $shippingarea->branch_id = $request->branch_id;
         $shippingarea->delivery_charge = $request->delivery_charge;
         $shippingarea->save();
         return redirect('/admin/shippingarea')->with('success', trans('messages.success'));
@@ -36,6 +37,7 @@ class ShippingareaController extends Controller
         $shippingarea = Shippingarea::find($request->id);
         $shippingarea->name = $request->name;
         $shippingarea->state_id = $request->state_id;
+        $shippingarea->branch_id = $request->branch_id;
         $shippingarea->city = $request->city;
         $shippingarea->delivery_charge = $request->delivery_charge;
         $shippingarea->save();

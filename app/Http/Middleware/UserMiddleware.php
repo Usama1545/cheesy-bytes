@@ -18,7 +18,6 @@ class UserMiddleware
     public function handle($request, Closure $next)
     {
 
-
         helper::language();
 
         if (Auth::user() ){

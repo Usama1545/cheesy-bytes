@@ -77,6 +77,20 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="getaddons_id"
+                                                   class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                            <select name="branch_ids[]" class="form-control selectpicker" multiple required
+                                                    data-live-search="true" id="getaddons_id">
+                                                @foreach (helper::get_branchs() as $branch)
+                                                    <option value="{{ $branch->id }}">
+                                                        {{ $branch->name.'-'.$branch->city }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label class="col-form-label">{{ trans('labels.video_url') }}</label>
