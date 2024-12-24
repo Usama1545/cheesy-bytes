@@ -14,7 +14,7 @@ class CustomerAddress extends Model
         'session_id',
         'address_type',
         'address_id',
-        'state',
+        'state_id',
         'city',
         'zip',
         'address',
@@ -25,6 +25,6 @@ class CustomerAddress extends Model
 
     public function state()
     {
-        return $this->belongsTo(State::class, 'state','id');
+        return $this->belongsTo(State::class, 'state_id','id');
     }
 }

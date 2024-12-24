@@ -5,18 +5,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12 my-2 d-flex justify-content-end">
-                @if ($getdriver->count() > 0)
-                    @if ($orderdata->order_type == 1 && ($orderdata->status_type == 1 || $orderdata->status_type == 2))
-                        <select class="form-select w-25 mx-1" name="driver" id="driver" tooltip="assign deliveryman">
-                            <option value="0">{{ trans('labels.select') }}</option>
-                            @foreach ($getdriver as $driver)
-                                <option value="{{ $driver->id }}"
-                                    {{ $orderdata->driver_id == $driver->id ? 'selected' : '' }}>{{ $driver->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    @endif
-                @endif
+
 
                 @if ($orderdata->status_type == 1 || $orderdata->status_type == 2)
                     <button type="button" class="btn btn-dark dropdown-toggle px-4 py-2"
@@ -299,6 +288,86 @@
                                     <tr>
                                         <td><img src="{{ helper::image_path($orders->item_image) }}"
                                                  class="rounded h-50px" alt=""></td>
+                                        <td>
+                                            {{ $orders->item_name }}
+                                            @if(!is_null($orders->size) && !is_null($orders->crust))
+                                                ({{ $orders->size->name }} - {{ $orders->crust->name }})
+                                            @endif
+                                            <br>
+                                            @if ($orders['addons_id'] != '' || $orders['extras_id'] != '')
+                                                <small>
+                                                    <a class="text-muted fw-500" href="javascript:void(0)"
+                                                       onclick="showaddons('{{ $orders['addons_name'] }}','{{ $orders['addons_price'] }}','{{ $orders['extras_name'] }}','{{ $orders['extras_price'] }}','{{ $orders['item_name'] }}')">{{ trans('labels.customize') }}
+                                                    </a>
+                                                </small>
+                                            @endif
+                                            @if ($orders['dipping_quantity'] != '')
+                                                <small>
+                                                        <span class="text-muted fw-500" data-bs-toggle="modal"
+                                                              data-bs-target="#dippingModal"
+                                                        >Dipping
+                                                        </span>
+                                                </small>
+                                            @endif
+                                        </td>
+                                        <td class="text-end">
+                                            {{ helper::currency_format($orders->item_price) }}
+                                            @if ($addonstotal != 0)
+                                                <br><small class="text-muted">+
+                                                    {{ helper::currency_format($addonstotal) }}</small>
+                                            @endif
+                                        </td>
+                                        <td class="text-end">{{ $orders->qty }}</td>
+                                        <td class="text-end">
+                                            {{ helper::currency_format($total_price) }}</td>
+                                    </tr>
+                                    <div class="modal fade" id="dippingModal" tabindex="-1"
+                                         aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5"
+                                                        id="exampleModalLabel">{{ $orders->item_name }}
+                                                        - {{ $orders->crust->name }} -{{ $orders->size->name }}</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                </div>
+
+                                                <div class="modal-body">
+                                                    <div class="mt-2 p-2 border-bottom">
+                                                        <ul class="m-0 ps-2">
+
+                                                                <?php
+                                                                // Exploding dipping_name, quantity, and price if they are in a delimited format
+                                                                $dippingNames = explode('|', $orders['dipping_name']);
+                                                                $dippingQuantities = $orders['dipping_quantity'];
+                                                                $dippingPrices = $orders['dipping_price'];
+                                                                ?>
+
+                                                            @foreach($dippingNames as $key => $name)
+                                                                <li class="list-group-item fs-7 d-flex text-muted">
+                                                                    <span class="flex-grow-1">{{ $name }}</span>
+                                                                    <span class="ml-3">{{ $dippingQuantities[$key] }} ({{ $dippingQuantities[$key] * $dippingPrices[$key] }}$)</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+
+                                @foreach ($orderCustomdetails as $orders)
+                                    @php
+                                        $total_price =
+                                            $orders['item_price']*$orders['qty'];
+                                        $data[] = ['total_price' => $total_price];
+                                        $order_total = array_sum(array_column($data, 'total_price'));
+                                    @endphp
+                                    <tr>
+                                        <td><img src="{{ helper::image_path($orders->item_image) }}"
+                                                 class="rounded h-50px" alt=""></td>
                                         @if($orders->custom_pizza_id !== null)
                                             <td>
                                                 {{ $orders->item_name }} <br>
@@ -352,15 +421,26 @@
                                                 <div class="modal-body">
                                                     @if($orders->custom_pizza_id !== null)
 
-                                                            <?php $data = (new App\Helpers\helper)->getCustomPizzaDetails($orders->custom_pizza_id) ?>
+                                                        {{--                                                            <?php $data = (new App\Helpers\helper)->getCustomPizzaDetails($orders->custom_pizza_id) ?>--}}
                                                         <div class="mt-2 p-2 border-bottom" id="extras">
-                                                            <p class="m-0 fs-6 fw-500">Size: <small class="text-muted">{{ $data->size->label }}({{$data->size->name }}")</small></p>
-                                                            <p class="m-0 fs-6 fw-500">Special: <small class="text-muted">{{ $data->cut }} / {{ $data->bake }} / {{ $data->seasoning }}</small></p>
-                                                            <p class="m-0 fs-6 fw-500">Crust: <small class="text-muted">{{ $data->crust->name }}</small></p>
-                                                            <p class="m-0 fs-6 fw-500">Sauce: <small class="text-muted">{{ $data->sauce->name }}</small></p>
+                                                            <p class="m-0 fs-6 fw-500">Size: <small
+                                                                    class="text-muted">{{ $orders->custom_pizza->size->label }}
+                                                                    ({{$orders->custom_pizza->size->name }}")</small>
+                                                            </p>
+                                                            <p class="m-0 fs-6 fw-500">Special: <small
+                                                                    class="text-muted">{{ $orders->custom_pizza->cut }}
+                                                                    / {{ $orders->custom_pizza->bake }}
+                                                                    / {{ $orders->custom_pizza->seasoning }}</small>
+                                                            </p>
+                                                            <p class="m-0 fs-6 fw-500">Crust: <small
+                                                                    class="text-muted">{{ $orders->custom_pizza->crust->name }}</small>
+                                                            </p>
+                                                            <p class="m-0 fs-6 fw-500">Sauce: <small
+                                                                    class="text-muted">{{ $orders->custom_pizza->sauce->name }}</small>
+                                                            </p>
                                                             <p class="m-0 fs-6 fw-500">Toppings </p>
                                                             <ul class="m-0 ps-2" id="item-extras">
-                                                                @foreach($data->toppings as $topping)
+                                                                @foreach($orders->custom_pizza->toppings as $topping)
                                                                     <li class="list-group-item fs-7 d-flex  text-muted">
                                                                         <span
                                                                             class="flex-grow-1 ">{{ $topping->name }}</span>
@@ -373,7 +453,7 @@
                                                             </ul>
                                                             <p class="m-0 fs-6 fw-500">Dipping</p>
                                                             <ul class="m-0 ps-2" id="item-extras">
-                                                                @foreach($data->dipping as $dipping)
+                                                                @foreach($orders->custom_pizza->dipping as $dipping)
                                                                     <li class="list-group-item fs-7 d-flex  text-muted">
                                                                         <span
                                                                             class="flex-grow-1 ">{{ $dipping->name }}</span>
@@ -394,6 +474,8 @@
                                         </div>
                                     </div>
                                 @endforeach
+
+
                                 <tr>
                                     <td class="text-end" colspan="4">
                                         <p class="fw-400">{{ trans('labels.subtotal') }}</p>

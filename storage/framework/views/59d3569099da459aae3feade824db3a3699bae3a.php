@@ -303,6 +303,31 @@
                                             </span><br>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             <?php endif; ?>
+                            <?php if($orders['dipping_name'] != ''): ?>
+                                <p class="m-0 ">Dipping</p>
+                                    <?php
+                                    // Exploding dipping_name, quantity, and price if they are in a delimited format
+                                    $dippingNames = explode('|', $orders['dipping_name']);
+                                    $dippingQuantities = $orders['dipping_quantity'];
+                                    $dippingPrices = $orders['dipping_price'];
+                                    ?>
+                                <ul class="m-0 p-0" id="item-extras">
+
+                                    <?php $__currentLoopData = $dippingNames; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li class="list-group-item  d-flex  text-muted">
+                                            <small
+                                                class="flex-grow-1 "><?php echo e($name); ?></small>
+                                            <small
+                                                class=" px-3"><?php echo e($dippingQuantities[$key]); ?> </small>
+                                            <small
+                                                class="px-3"><?php echo e($dippingQuantities[$key] * $dippingPrices[$key]); ?>
+
+                                                $</small>
+                                        </li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </ul>
+                            <?php endif; ?>
+
                             <?php if($orders->custom_pizza_id != null): ?>
                                     <?php $data = (new App\Helpers\helper)->getCustomPizzaDetails($orders->custom_pizza_id) ?>
                                 <div class="mt-2 border-bottom" id="extras">
@@ -339,7 +364,7 @@
                                                 <small
                                                     class=" px-3"><?php echo e($dipping->pivot->quantity); ?>
 
-                                                    x <?php echo e($dipping->price); ?>$</small>
+                                                   </small>
                                                 <small
                                                     class="px-3"><?php echo e($dipping->pivot->quantity * $dipping->price); ?>
 

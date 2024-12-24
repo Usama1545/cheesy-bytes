@@ -49,12 +49,12 @@
                             <?php $__currentLoopData = $shipping; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ship): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <h5><?php echo e($ship->name ?? $ship->Address); ?></h5>
-                                        <?php echo e($ship->city. ' , ' .$ship->state->name); ?>
+                                        <h5><?php echo e($ship->name); ?></h5>
+                                        <?php echo e($ship->city. ' , ' .$ship->state->name. ' , '.($ship->address ? $ship->address : "")); ?>
 
                                     </div>
                                     <div>
-                                        <form action="<?php echo e(URL::to('/location/update/'.$ship->id.'/'.$address->id)); ?>" method="post">
+                                        <form action="<?php echo e(URL::to('/location/update/'.$ship->id.'/'.$address->id.'/'.$type)); ?>" method="post">
                                             <?php echo csrf_field(); ?>
                                             <button type="submit" class="btn btn-primary"><i class="fas fa-door-open"></i>Select</button>
                                         </form>

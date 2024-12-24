@@ -72,10 +72,9 @@
                                 </div>
 
                                 <?php $__currentLoopData = $groupItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $itemdata): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-
                                     <div class="col-12 col-lg-2-4 col-md-4 col-sm-12">
-                                        <div class="w-full" style="">
-                                            <div class="card  overflow-hidden h-100">
+                                        <div class="h-100 d-flex flex-column">
+                                            <div class="card overflow-hidden h-100 flex-grow-1">
                                                 <?php if(strtolower(@$categorydata->category_name) == strtolower('Pizza')): ?>
                                                     <a data-bs-toggle="modal"
                                                        data-bs-target="#PizzaModal"
@@ -90,7 +89,6 @@
                                                                             src="<?php echo e(@helper::image_path($itemdata['item_image']->image_name)); ?>"
                                                                             class="card-img-top border-0 rounded-0 rounded-top position-relative"
                                                                             alt="dishes" height="190px">
-
                                                                     </a>
 
                                                                     <?php
@@ -112,6 +110,7 @@
                                                                             $off = $itemdata->discount_percentage;
                                                                         }
                                                                     ?>
+
                                                                     <div class="card-body pb-0 border-bottom">
                                                                         <h5 class="item-card-title pb-3 fs-6 d-flex justify-content-between align-items-center">
                                                                             <?php if(strtolower(@$categorydata->category_name) == strtolower('Pizza')): ?>
@@ -137,37 +136,31 @@
                                                                                                             class="text-muted"><?php echo e(helper::currency_format($original_price)); ?></del>
                                                                                                     <?php endif; ?>
                                                                                                     <span><?php echo e(helper::currency_format($price)); ?></span>
-
                                                                                                 </div>
                                                                         </h5>
-
                                                                     </div>
 
-
                                                                     <?php if($off > 0): ?>
-                                                                        <div
-                                                                            class="offer-lable <?php echo e(session()->get('direction') == '2' ? 'rtl' : ''); ?>">
+                                                                        <div class="offer-label">
                                                                             <h5><?php echo e($off); ?>
 
                                                                                 % <?php echo e(trans('labels.off')); ?></h5>
                                                                         </div>
                                                 <?php endif; ?>
-
                                             </div>
+
                                             <div class="item-card-footer mt-2">
                                                 <div class="d-flex justify-content-between align-items-center">
-
                                                     <?php if($itemdata->is_cart == 1): ?>
                                                         <div class="item-quantity py-1 px-5">
-                                                            <button type="button" class="btn btn-sm  fw-500"
+                                                            <button type="button" class="btn btn-sm fw-500"
                                                                     onclick="removefromcart('<?php echo e(URL::to('/cart')); ?>','<?php echo e(trans('messages.remove_cartitem_note')); ?>','<?php echo e(trans('labels.goto_cart')); ?>')">
                                                                 -
                                                             </button>
-                                                            <input
-                                                                class="fw-500 item-total-qty-<?php echo e($itemdata->slug); ?>"
-                                                                type="text"
-                                                                value="<?php echo e(helper::get_item_cart($itemdata->id)); ?>"
-                                                                disabled/>
+                                                            <input class="fw-500 item-total-qty-<?php echo e($itemdata->slug); ?>"
+                                                                   type="text"
+                                                                   value="<?php echo e(helper::get_item_cart($itemdata->id)); ?>"
+                                                                   disabled/>
                                                             <button class="btn btn-sm fw-500 border-0"
                                                                     onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">
                                                                 +
@@ -175,11 +168,9 @@
                                                         </div>
                                                     <?php else: ?>
                                                         <button
-                                                            class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-full float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->slug); ?>"
-                                                            onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')"
-                                                            style="width: 100%">
+                                                            class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->slug); ?>"
+                                                            onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">
                                                             Order Now
-
                                                             <i class="fa-solid fa-plus addon_modal_icon_<?php echo e($itemdata->slug); ?>"></i>
                                                             <div
                                                                 class="loader d-none addon_modal_loader_<?php echo e($itemdata->slug); ?>"></div>
@@ -188,7 +179,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

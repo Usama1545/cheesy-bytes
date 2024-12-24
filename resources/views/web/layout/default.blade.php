@@ -728,6 +728,7 @@
                     if (modal) {
                         modal.hide();
                     }
+                    window.location.reload();
                 })
                 .catch(error => {
                     const alert = document.getElementById("errorAlert");
@@ -1300,11 +1301,13 @@
                 method: 'POST',
                 data: JSON.stringify(payload),
                 success: function (response) {
-                    alert('Item added to cart successfully!');
-                },
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('PizzaModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    window.location.reload();                },
                 error: function (err) {
                     console.error('Error adding item to cart:', err);
-                    alert('Failed to add item to cart. Please try again.');
                 }
             });
         });

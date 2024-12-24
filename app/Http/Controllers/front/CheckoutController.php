@@ -92,7 +92,7 @@ class CheckoutController extends Controller
         if (!$address) {
             $address = (object)[
                 'address_type' => '', // Default or empty value
-                'state' => null, // For the relationship
+                'state_id' => null, // For the relationship
                 'other_field' => '', // Add other fields as needed
             ];
         }
@@ -376,6 +376,11 @@ class CheckoutController extends Controller
                     $od->item_name = $cart->item_name;
                     $od->item_type = $cart->item_type;
                     $od->item_image = $cart->item_image;
+                    $od->crust_id = $cart->crust_id;
+                    $od->size_id = $cart->size_id;
+                    $od->dipping_quantity = $cart->dipping_quantity;
+                    $od->dipping_name = $cart->dipping_name;
+                    $od->dipping_price = $cart->dipping_price;
                     $od->tax = $cart->tax;
                     $od->qty = $cart->qty;
                     $od->item_price = $cart->item_price;

@@ -219,7 +219,7 @@
                 <tr align="center">
                     <td><?php echo e($orders->item_name); ?>
 
-                        [<?php echo e($orders->item_type == 1 ? trans('labels.veg') : trans('labels.nonveg')); ?>] <br>
+                         <br>
                         <?php
                             $addons_name = explode('| ', $orders->addons_name);
                             $addons_price = explode('| ', $orders->addons_price);

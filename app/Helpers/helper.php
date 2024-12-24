@@ -517,7 +517,8 @@ class helper
 
     public function getCustomPizzaDetails($id)
     {
-        return App\Models\CustomPizza::with('toppings','size','crust','dipping','sauce')->where('id', $id)->first();
+        $data =  App\Models\CustomPizza::with('toppings','size','crust','dipping','sauce')->where('id', $id)->first();
+        return $data;
     }
 
     public static function top_deals()

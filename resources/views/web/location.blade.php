@@ -50,11 +50,11 @@
                             @foreach($shipping as $ship)
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <h5>{{ $ship->name ?? $ship->Address }}</h5>
-                                        {{ $ship->city. ' , ' .$ship->state->name }}
+                                        <h5>{{ $ship->name  }}</h5>
+                                        {{ $ship->city. ' , ' .$ship->state->name. ' , '.($ship->address ? $ship->address : "") }}
                                     </div>
                                     <div>
-                                        <form action="{{ URL::to('/location/update/'.$ship->id.'/'.$address->id) }}" method="post">
+                                        <form action="{{ URL::to('/location/update/'.$ship->id.'/'.$address->id.'/'.$type) }}" method="post">
                                             @csrf
                                             <button type="submit" class="btn btn-primary"><i class="fas fa-door-open"></i>Select</button>
                                         </form>

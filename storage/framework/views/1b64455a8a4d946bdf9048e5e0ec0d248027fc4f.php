@@ -110,10 +110,12 @@
 
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="text"
-                                                    class="form-control rounded-2 p-3 delivery_pickup_date"
-                                                    name="delivery_date" value="<?php echo e(old('delivery_date')); ?>"
-                                                    id="delivery_dt" min="<?php echo date('Y-m-d'); ?>">
+                                                <input type="date"
+                                                       class="form-control rounded-2 p-3 delivery_pickup_date"
+                                                       name="delivery_date"
+                                                       value="<?php echo e(old('delivery_date')); ?>"
+                                                       id="delivery_dt"
+                                                       min="<?php echo e(date('Y-m-d')); ?>">
                                             </div>
                                             <div
                                                 class="col-sm-6 delivery-time <?php echo e(session()->get('direction') == '2' ? 'text-right' : ''); ?>">
@@ -241,7 +243,7 @@
                                             </label>
                                             <select class="form-control form-select" name="state_id" id="state">
                                                 <?php $__currentLoopData = $states; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $state): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <option value="<?php echo e($state->name); ?>" <?php echo e($address->state == $state->id ? 'selected' : ''); ?>><?php echo e($state->name); ?></option>
+                                                    <option value="<?php echo e($state->name); ?>" <?php echo e($address->state->id === $state->id ? 'selected' : ''); ?>><?php echo e($state->name); ?></option>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </select>
                                         </div>
@@ -261,7 +263,7 @@
                             <div class="card mb-3" id="pickupdiv">
                                 <div class="card-body">
                                     <div class="heading mb-2 border-bottom">
-                                        <h5><?php echo e(trans('labels.shippingarea')); ?></h5>
+                                        <h5>Branch to Pick from</h5>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
@@ -271,7 +273,9 @@
                                                 </option>
                                                 <?php $__currentLoopData = $branches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $area): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <option value="<?php echo e($area->id); ?>"
-                                                            data-charge="0"><?php echo e($area->name.','.$area->address.' '.$area->city.' '.$area->state->name); ?>
+                                                            <?php echo e($area->id == Session::get('branch_id') ? 'selected' : ''); ?>
+
+                                                            data-charge="0"><?php echo e($area->name.', '.$area->city.', '.$area->address); ?>
 
                                                     </option>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -638,18 +642,38 @@ unset($__errorArgs, $__bag); ?>
     <script>
         var select = "<?php echo e(trans('labels.select')); ?>";
         var dateFormat = "<?php echo e(helper::appdata()->date_format); ?>";
+        var today = new Date(); // Get today's date
         var placeholderFormat = dateFormat
+
             .replace(/Y/g, 'yyyy') // Full year
             .replace(/m/g, 'mm') // Month
             .replace(/d/g, 'dd'); // Day
 
         document.getElementById("delivery_dt").setAttribute("placeholder", placeholderFormat);
 
+        // Get today's date in the correct format
+        var formattedToday = today.toISOString().split('T')[0];
+
         flatpickr(".delivery_pickup_date", {
             dateFormat: dateFormat,
             enableTime: false,
             altInput: true,
             altFormat: dateFormat,
+            minDate: 'today',        // Set the minimum date
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deliveryDateInput = document.getElementById('delivery_dt');
+            const today = new Date().toISOString().split('T')[0];
+            deliveryDateInput.setAttribute('min', today);
+
+            // Optional: Prevent manual entry of past dates
+            deliveryDateInput.addEventListener('input', function () {
+                if (deliveryDateInput.value < today) {
+                    deliveryDateInput.value = today;
+                }
+            });
         });
     </script>
     <script>

@@ -64,7 +64,7 @@ Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware', 
     Route::get('{country}/categories', [HomeController::class, 'categories_con'])->name('category');
     Route::get('/location', [HomeController::class, 'location'])->name('location');
 	Route::post('/location/store', [HomeController::class, 'location_store'])->name('location.store');
-	Route::post('/location/update/{id}/{address_id}', [HomeController::class, 'location_update'])->name('location.update');
+	Route::post('/location/update/{id}/{address_id}/{type}', [HomeController::class, 'location_update'])->name('location.update');
 	// item
     Route::get('menu/{category}', [MenuController::class, 'index'])->name('menu');
     Route::get('{country}/menu/{category}', [MenuController::class, 'index_con'])->name('menu');

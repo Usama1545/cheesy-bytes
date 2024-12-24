@@ -106,10 +106,12 @@
                                                     {{ trans('labels.pickup_date') }}
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="text"
-                                                    class="form-control rounded-2 p-3 delivery_pickup_date"
-                                                    name="delivery_date" value="{{ old('delivery_date') }}"
-                                                    id="delivery_dt" min="@php echo date('Y-m-d'); @endphp">
+                                                <input type="date"
+                                                       class="form-control rounded-2 p-3 delivery_pickup_date"
+                                                       name="delivery_date"
+                                                       value="{{ old('delivery_date') }}"
+                                                       id="delivery_dt"
+                                                       min="{{ date('Y-m-d') }}">
                                             </div>
                                             <div
                                                 class="col-sm-6 delivery-time {{ session()->get('direction') == '2' ? 'text-right' : '' }}">
@@ -227,7 +229,7 @@
                                             </label>
                                             <select class="form-control form-select" name="state_id" id="state">
                                                 @foreach($states as $state)
-                                                    <option value="{{ $state->name }}" {{ $address->state == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
+                                                    <option value="{{ $state->name }}" {{ $address->state->id === $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -246,7 +248,7 @@
                             <div class="card mb-3" id="pickupdiv">
                                 <div class="card-body">
                                     <div class="heading mb-2 border-bottom">
-                                        <h5>{{ trans('labels.shippingarea') }}</h5>
+                                        <h5>Branch to Pick from</h5>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
@@ -255,7 +257,8 @@
                                                 </option>
                                                 @foreach ($branches as $area)
                                                     <option value="{{ $area->id }}"
-                                                            data-charge="0">{{ $area->name.','.$area->address.' '.$area->city.' '.$area->state->name }}
+                                                            {{ $area->id == Session::get('branch_id') ? 'selected' : '' }}
+                                                            data-charge="0">{{ $area->name.', '.$area->city.', '.$area->address }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -599,18 +602,38 @@
     <script>
         var select = "{{ trans('labels.select') }}";
         var dateFormat = "{{ helper::appdata()->date_format }}";
+        var today = new Date(); // Get today's date
         var placeholderFormat = dateFormat
+
             .replace(/Y/g, 'yyyy') // Full year
             .replace(/m/g, 'mm') // Month
             .replace(/d/g, 'dd'); // Day
 
         document.getElementById("delivery_dt").setAttribute("placeholder", placeholderFormat);
 
+        // Get today's date in the correct format
+        var formattedToday = today.toISOString().split('T')[0];
+
         flatpickr(".delivery_pickup_date", {
             dateFormat: dateFormat,
             enableTime: false,
             altInput: true,
             altFormat: dateFormat,
+            minDate: 'today',        // Set the minimum date
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deliveryDateInput = document.getElementById('delivery_dt');
+            const today = new Date().toISOString().split('T')[0];
+            deliveryDateInput.setAttribute('min', today);
+
+            // Optional: Prevent manual entry of past dates
+            deliveryDateInput.addEventListener('input', function () {
+                if (deliveryDateInput.value < today) {
+                    deliveryDateInput.value = today;
+                }
+            });
         });
     </script>
     <script>

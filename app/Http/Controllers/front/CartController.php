@@ -17,7 +17,7 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
-        if (Auth::user() && Auth::user()->type == 2) {
+        if (Auth::user()) {
             $getcartlist = Cart::where('user_id', Auth::user()->id)->where('buynow', 0)->orderByDesc('id')->get();
         } else {
             $getcartlist = Cart::where('session_id', Session::getId())->where('buynow', 0)->orderByDesc('id')->get();

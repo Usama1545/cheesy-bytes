@@ -348,10 +348,10 @@ class HomeController extends Controller
     public function location_store(Request $request)
     {
         $not_available = false;
-        $address = CustomerAddress::updateOrCreate(
+        $address = CustomerAddress::with('state')->updateOrCreate(
             [
                 'zip' => $request->zip,
-                'state' => $request->state_id,
+                'state_id' => $request->state_id,
                 'city' => $request->city,
                 'address_type' => $request->type,
                 'session_id' => auth()->check() ? null : Session::getId(),
@@ -371,23 +371,30 @@ class HomeController extends Controller
                 $shipping = Shippingarea::where('city', $request->city)->orWhere('state_id', $request->state_id)->with('state')->get();
             }
         }
-
-        return view('web.location', compact('not_available', 'shipping', 'address'));
+        $type = $request->type;
+        return view('web.location', compact('not_available', 'shipping', 'address','type'));
     }
 
-    public function location_update($id, $address_id)
+    public function location_update($id, $address_id, $type)
     {
-        $shipping_area = Shippingarea::findOrFail($id);
-        if($shipping_area)
-        {
-            Session::put('branch_id', $shipping_area->branch_id);
-            CustomerAddress::findOrFail($address_id)->update([
-                'address_id' => $id
-            ]);
-
-            return redirect()->to('/categories');
+        if($type === 'carryout') {
+            $branch = Branch::findOrFail($id);
+            if($branch)
+            {
+                Session::put('branch_id', $id);
+                return redirect()->to('/categories');
+            }
+        }else{
+            $shipping_area = Shippingarea::findOrFail($id);
+            if ($shipping_area) {
+                Session::put('branch_id', $shipping_area->branch_id);
+                CustomerAddress::findOrFail($address_id)->update([
+                    'address_id' => $id
+                ]);
+                return redirect()->to('/categories');
+            }
         }
-
+        return redirect()->to('/location');
     }
 
     public function rewards()

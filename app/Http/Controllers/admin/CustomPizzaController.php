@@ -247,6 +247,8 @@ class CustomPizzaController extends Controller
         $cart->item_price = helper::number_format($totalPrice);
         $cart->extras_price =  0;
         $cart->extras_total_price = 0;
+        $cart->buynow = 0;
+
 
         $cart->qty = $request->quantity;
         $cart->save();
