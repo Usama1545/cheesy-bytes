@@ -58,7 +58,7 @@
                                             <label for="price_edit_<?php echo e($index); ?>" class="col-form-label">
                                                 Price <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number" name="size_crusts[edit_<?php echo e($index); ?>][price]" class="form-control" value="<?php echo e($option['price']); ?>" placeholder="Price" required id="price_edit_<?php echo e($index); ?>">
+                                            <input type="number"    step="0.01"  name="size_crusts[edit_<?php echo e($index); ?>][price]" class="form-control" value="<?php echo e($option['price']); ?>" placeholder="Price" required id="price_edit_<?php echo e($index); ?>">
                                         </div>
                                     </div>
                                     <div class="col-12 col-lg-1 d-flex align-items-center">

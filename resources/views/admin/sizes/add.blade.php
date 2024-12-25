@@ -14,6 +14,12 @@
                                 <input type="text" class="form-control" name="name" value="{{ old('name') }}"
                                        placeholder="{{ trans('labels.name') }}" required>
                             </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Size<span class="text-danger"> *
+                                        </span></label>
+                                <input type="text" class="form-control" name="label" value="{{ old('label') }}"
+                                       placeholder="size" required>
+                            </div>
 
                             <div
                                 class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

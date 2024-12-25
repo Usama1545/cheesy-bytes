@@ -16,6 +16,7 @@
                                 <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Size</th>
                                     <th><?php echo e(trans('labels.action')); ?></th>
                                 </tr>
                                 </thead>
@@ -24,6 +25,7 @@
                                 <?php $__currentLoopData = $sizes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="row1" data-id="<?php echo e($item->id); ?>">
                                         <td><?php echo e($item->name); ?></td>
+                                        <td><?php echo e($item->label); ?></td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
                                                 <a class="btn btn-sm btn-info square" tooltip="<?php echo e(trans('labels.edit')); ?>"

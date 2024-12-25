@@ -131,7 +131,7 @@ class ItemController extends Controller
         $crusts = ProductSizeCrust::where('item_id', $id)->get();
 
         $groupedData = $crusts->groupBy(function ($item) {
-            return $item->size_id . '_' . $item->price; // Group by size_id and price
+            return $item->size_id; // Group by size_id and price
         })->map(function ($items) {
             $firstItem = $items->first();
             return [

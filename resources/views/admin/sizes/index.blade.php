@@ -16,6 +16,7 @@
                                 <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Size</th>
                                     <th>{{ trans('labels.action') }}</th>
                                 </tr>
                                 </thead>
@@ -24,6 +25,7 @@
                                 @foreach ($sizes as $item)
                                     <tr class="row1" data-id="{{ $item->id }}">
                                         <td>{{ $item->name }}</td>
+                                        <td>{{ $item->label }}</td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
                                                 <a class="btn btn-sm btn-info square" tooltip="{{ trans('labels.edit') }}"

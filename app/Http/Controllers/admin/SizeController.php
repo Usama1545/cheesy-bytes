@@ -29,6 +29,7 @@ class SizeController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
+            'label' => 'required|number'
         ]);
         Size::create($request->all());
 
@@ -56,6 +57,7 @@ class SizeController extends Controller
         $request->validate([
             'id' => 'required|exists:sizes,id',
             'name' => 'required|string',
+            'label' => 'required|string'
         ]);
         $deal = Size::findOrFail($request['id']);
 

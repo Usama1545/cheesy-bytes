@@ -15,6 +15,12 @@
                                 <input type="text" class="form-control" name="name" value="<?php echo e($sizes->name); ?>"
                                        placeholder="<?php echo e(trans('labels.name')); ?>" required>
                             </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Size<span class="text-danger"> *
+                                        </span></label>
+                                <input type="text" class="form-control" name="label" value="<?php echo e($sizes->label); ?>"
+                                       placeholder="Size" required>
+                            </div>
 
                             <div
                                 class="form-group <?php echo e(session()->get('direction') == '2' ? 'text-start' : 'text-end'); ?>">
