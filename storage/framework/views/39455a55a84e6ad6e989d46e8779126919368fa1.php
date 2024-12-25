@@ -49,18 +49,35 @@
                                     <!-- Existing Crust Options -->
                                     <?php $__currentLoopData = $getitem->crusts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="row data-amenities align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="form-group col-12 col-lg-4 col-md-4">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                                                 <input type="text" name="crust_name[]" class="form-control" placeholder="Name"
                                                        required value="<?php echo e($option->name); ?>">
                                             </div>
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="branch_id"
+                                                           class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                                    <select name="crust_branch[]" class="form-control selectpicker" required
+                                                            data-live-search="true" id="getaddons_id">
+                                                        <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <option value="<?php echo e($branch->id); ?>"
+                                                            <?php echo e($option->branch_id == $branch->id ? 'selected' : ''); ?>>
+                                                                <?php echo e($branch->name.'-'.$branch->city); ?>
+
+                                                            </option>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
                                                 <input type="number" name="crust_price[]" class="form-control"
                                                        placeholder="Price" required value="<?php echo e($option->price); ?>">
                                             </div>
-                                            <div class="col-12 col-lg-2 d-flex align-items-center">
+                                            <div class="col-12 col-lg-1 d-flex align-items-center">
                                                 <button type="button" class="btn btn-outline-danger deleteCrustOption">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
@@ -100,18 +117,34 @@
                                     <!-- Existing Crust Options -->
                                     <?php $__currentLoopData = $getitem->toppings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="row data-toppings align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="form-group col-12 col-lg-4 col-md-4">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                                                 <input type="text" name="topping_name[]" class="form-control" placeholder="Name"
                                                        required value="<?php echo e($option->name); ?>">
                                             </div>
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="branch_id"
+                                                           class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                                    <select name="topping_branch[]" class="form-control selectpicker" required
+                                                            data-live-search="true" id="getaddons_id">
+                                                        <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <option value="<?php echo e($branch->id); ?>"
+                                                                <?php echo e($option->branch_id == $branch->id ? 'selected' : ''); ?>>
+                                                                <?php echo e($branch->name.'-'.$branch->city); ?>
+
+                                                            </option>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
                                                 <input type="number" name="topping_price[]" class="form-control"
                                                        placeholder="Price" required value="<?php echo e($option->price); ?>">
                                             </div>
-                                            <div class="col-12 col-lg-2 d-flex align-items-center">
+                                            <div class="col-12 col-lg-1 d-flex align-items-center">
                                                 <button type="button" title="Add Topping"
                                                         class="btn btn-outline-danger deleteToppingOption">
                                                     <i class="fa fa-trash"></i>
@@ -145,18 +178,34 @@
                                     <!-- Existing Crust Options -->
                                     <?php $__currentLoopData = $getitem->sauces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="row data-sauces align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="form-group col-12 col-lg-4 col-md-4">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                                                 <input type="text" name="sauce_name[]" class="form-control" placeholder="Name"
                                                        required value="<?php echo e($option->name); ?>">
                                             </div>
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="branch_id"
+                                                           class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                                    <select name="sauce_branch[]" class="form-control selectpicker" required
+                                                            data-live-search="true" id="getaddons_id">
+                                                        <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <option value="<?php echo e($branch->id); ?>"
+                                                                <?php echo e($option->branch_id == $branch->id ? 'selected' : ''); ?>>
+                                                                <?php echo e($branch->name.'-'.$branch->city); ?>
+
+                                                            </option>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
                                                 <input type="number" name="sauce_price[]" class="form-control"
                                                        placeholder="Price" required value="<?php echo e($option->price); ?>">
                                             </div>
-                                            <div class="col-12 col-lg-2 d-flex align-items-center">
+                                            <div class="col-12 col-lg-1 d-flex align-items-center">
                                                 <button type="button" class="btn btn-outline-danger deleteSauceOption">
                                                     <i class="fa fa-trash"></i>
                                                 </button>

@@ -58,6 +58,8 @@ class CustomPizzaController extends Controller
             'price' => 'required|numeric',
             'crust_name' => 'array',
             'crust_name.*' => 'string|nullable',
+            'crust_branch' => 'array',
+            'crust_branch.*' => 'string|nullable',
             'crust_price' => 'array',
             'crust_price.*' => 'numeric|nullable',
             'crust_description' => 'array',
@@ -66,10 +68,14 @@ class CustomPizzaController extends Controller
             'topping_name.*' => 'string|nullable',
             'topping_price' => 'array',
             'topping_price.*' => 'numeric|nullable',
+            'topping_branch' => 'array',
+            'topping_branch.*' => 'numeric|nullable',
             'sauce_name' => 'array',
             'sauce_name.*' => 'string|nullable',
             'sauce_price' => 'array',
             'sauce_price.*' => 'numeric|nullable',
+            'sauce_branch' => 'array',
+            'sauce_branch.*' => 'numeric|nullable',
         ]);
 
         // Create the custom pizza (size corresponds to the main pizza)
@@ -85,6 +91,7 @@ class CustomPizzaController extends Controller
                     $crust = new CustomPizzaCrust();
                     $crust->size_id = $customPizza->id;
                     $crust->name = $name;
+                    $crust->branch_id = $request->crust_branch[$key];
                     $crust->price = $request->crust_price[$key];
                     $crust->description = $request->crust_description[$key] ?? null;
                     $crust->save();
@@ -99,6 +106,7 @@ class CustomPizzaController extends Controller
                     $topping = new CustomPizzaTopping();
                     $topping->size_id = $customPizza->id;
                     $topping->name = $name;
+                    $topping->branch_id = $request->topping_branch[$key];
                     $topping->price = $request->topping_price[$key];
                     $topping->save();
                 }
@@ -112,6 +120,7 @@ class CustomPizzaController extends Controller
                     $sauce = new CustomPizzaSauce();
                     $sauce->size_id = $customPizza->id;
                     $sauce->name = $name;
+                    $sauce->branch_id = $request->sauce_branch[$key];
                     $sauce->price = $request->sauce_price[$key];
                     $sauce->save();
                 }
@@ -128,6 +137,8 @@ class CustomPizzaController extends Controller
             'price' => 'required|numeric',
             'crust_name' => 'array',
             'crust_name.*' => 'string|nullable',
+            'crust_branch' => 'array',
+            'crust_branch.*' => 'string|nullable',
             'crust_price' => 'array',
             'crust_price.*' => 'numeric|nullable',
             'crust_description' => 'array',
@@ -136,10 +147,14 @@ class CustomPizzaController extends Controller
             'topping_name.*' => 'string|nullable',
             'topping_price' => 'array',
             'topping_price.*' => 'numeric|nullable',
+            'topping_branch' => 'array',
+            'topping_branch.*' => 'numeric|nullable',
             'sauce_name' => 'array',
             'sauce_name.*' => 'string|nullable',
             'sauce_price' => 'array',
             'sauce_price.*' => 'numeric|nullable',
+            'sauce_branch' => 'array',
+            'sauce_branch.*' => 'numeric|nullable',
         ]);
 
         $customPizza = CustomPizzaSize::find($request->id);
@@ -155,6 +170,7 @@ class CustomPizzaController extends Controller
                     $crust->size_id = $customPizza->id;
                     $crust->name = $name;
                     $crust->price = $request->crust_price[$key];
+                    $crust->branch_id = $request->crust_branch[$key];
                     $crust->description = $request->crust_description[$key] ?? null;
                     $crust->save();
                 }
@@ -168,6 +184,7 @@ class CustomPizzaController extends Controller
                     $topping = new CustomPizzaTopping();
                     $topping->size_id = $customPizza->id;
                     $topping->name = $name;
+                    $topping->branch_id = $request->topping_branch[$key];
                     $topping->price = $request->topping_price[$key];
                     $topping->save();
                 }
@@ -181,6 +198,7 @@ class CustomPizzaController extends Controller
                     $sauce = new CustomPizzaSauce();
                     $sauce->size_id = $customPizza->id;
                     $sauce->name = $name;
+                    $sauce->branch_id = $request->sauce_branch[$key];
                     $sauce->price = $request->sauce_price[$key];
                     $sauce->save();
                 }

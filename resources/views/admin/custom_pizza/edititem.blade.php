@@ -50,18 +50,34 @@
                                     <!-- Existing Crust Options -->
                                     @foreach ($getitem->crusts as $option)
                                         <div class="row data-amenities align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="form-group col-12 col-lg-4 col-md-4">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                                                 <input type="text" name="crust_name[]" class="form-control" placeholder="Name"
                                                        required value="{{ $option->name }}">
                                             </div>
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="branch_id"
+                                                           class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                                    <select name="crust_branch[]" class="form-control selectpicker" required
+                                                            data-live-search="true" id="getaddons_id">
+                                                        @foreach (helper::get_branchs() as $branch)
+                                                            <option value="{{ $branch->id }}"
+                                                            {{ $option->branch_id == $branch->id ? 'selected' : '' }}>
+                                                                {{ $branch->name.'-'.$branch->city }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
                                                 <input type="number" name="crust_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
-                                            <div class="col-12 col-lg-2 d-flex align-items-center">
+                                            <div class="col-12 col-lg-1 d-flex align-items-center">
                                                 <button type="button" class="btn btn-outline-danger deleteCrustOption">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
@@ -101,18 +117,33 @@
                                     <!-- Existing Crust Options -->
                                     @foreach ($getitem->toppings as $option)
                                         <div class="row data-toppings align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="form-group col-12 col-lg-4 col-md-4">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                                                 <input type="text" name="topping_name[]" class="form-control" placeholder="Name"
                                                        required value="{{ $option->name }}">
                                             </div>
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="branch_id"
+                                                           class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                                    <select name="topping_branch[]" class="form-control selectpicker" required
+                                                            data-live-search="true" id="getaddons_id">
+                                                        @foreach (helper::get_branchs() as $branch)
+                                                            <option value="{{ $branch->id }}"
+                                                                {{ $option->branch_id == $branch->id ? 'selected' : '' }}>
+                                                                {{ $branch->name.'-'.$branch->city }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
                                                 <input type="number" name="topping_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
-                                            <div class="col-12 col-lg-2 d-flex align-items-center">
+                                            <div class="col-12 col-lg-1 d-flex align-items-center">
                                                 <button type="button" title="Add Topping"
                                                         class="btn btn-outline-danger deleteToppingOption">
                                                     <i class="fa fa-trash"></i>
@@ -146,18 +177,33 @@
                                     <!-- Existing Crust Options -->
                                     @foreach ($getitem->sauces as $option)
                                         <div class="row data-sauces align-items-center mb-3">
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="form-group col-12 col-lg-4 col-md-4">
                                                 <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                                                 <input type="text" name="sauce_name[]" class="form-control" placeholder="Name"
                                                        required value="{{ $option->name }}">
                                             </div>
-                                            <div class="form-group col-12 col-lg-5 col-md-5">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="branch_id"
+                                                           class="col-form-label">Branch <span class="text-danger">*</span> </label>
+                                                    <select name="sauce_branch[]" class="form-control selectpicker" required
+                                                            data-live-search="true" id="getaddons_id">
+                                                        @foreach (helper::get_branchs() as $branch)
+                                                            <option value="{{ $branch->id }}"
+                                                                {{ $option->branch_id == $branch->id ? 'selected' : '' }}>
+                                                                {{ $branch->name.'-'.$branch->city }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
                                                 <input type="number" name="sauce_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
-                                            <div class="col-12 col-lg-2 d-flex align-items-center">
+                                            <div class="col-12 col-lg-1 d-flex align-items-center">
                                                 <button type="button" class="btn btn-outline-danger deleteSauceOption">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
@@ -210,32 +256,44 @@
 
             $('.add_additional_crust_option').on('click', function () {
                 if (crustAdded >= 10) {
-                    return false;
+                    return false; // Prevent adding more than 10 crust options
                 }
                 crustAdded++;
 
                 $("#additionalCrustOptions").append(`
             <div class="row data-amenities mb-3">
-                <div class="form-group col-12 col-lg-5 col-md-5">
+                <div class="form-group col-12 col-lg-4 col-md-4">
                     <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                     <input type="text" name="crust_name[]" class="form-control" placeholder="Name" required>
-                </div><div class="form-group col-12 col-lg-5 col-md-5">
-                    <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                    <input type="number" name="crust_price[]" class="form-control" placeholder="Price" required>
                 </div>
-
-
-                <div class="col-12 col-lg-2 d-flex align-items-center">
-                    <button type="button" class="btn btn-outline-danger deleteCrustOption">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-<div class="form-group col-12 col-lg-12 col-md-12">
-                    <label for="description" class="col-form-label">Description <span class="text-danger">*</span></label>
-                    <textarea name="crust_description[]" class="form-control" placeholder="Description" required></textarea>
-                </div>
+                <div class="form-group col-12 col-lg-4 col-md-4">
+                    <label for="branch_id" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                    <select name="crust_branch[]" class="form-control selectpicker" required
+                            data-live-search="true">
+                        @foreach (helper::get_branchs() as $branch)
+                <option value="{{ $branch->id }}">{{ $branch->name . '-' . $branch->city }}</option>
+                        @endforeach
+                </select>
             </div>
-        `);
+            <div class="form-group col-12 col-lg-3 col-md-4">
+                <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
+                <input type="number" name="crust_price[]" class="form-control" placeholder="Price" required>
+            </div>
+            <div class="col-12 col-lg-1 d-flex align-items-center">
+                <button type="button" class="btn btn-outline-danger deleteCrustOption">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+            <div class="form-group col-12">
+                <label for="description" class="col-form-label">Description <span class="text-danger">*</span></label>
+                <textarea name="crust_description[]" class="form-control" placeholder="Description" required></textarea>
+            </div>
+
+        </div>
+`);
+
+                // Reinitialize selectpicker for dynamically added elements
+                $('.selectpicker').selectpicker('refresh');
             });
 
             $(document).on('click', '.deleteCrustOption', function () {
@@ -249,25 +307,37 @@
 
         $(document).ready(function () {
             $('.add_additional_topping_option').on('click', function () {
-
-
                 $("#additionalToppingOptions").append(`
             <div class="row data-toppings mb-3">
-                <div class="form-group col-12 col-lg-5 col-md-5">
+                <div class="form-group col-12 col-lg-4 col-md-4">
                     <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
                     <input type="text" name="topping_name[]" class="form-control" placeholder="Name" required>
-                </div><div class="form-group col-12 col-lg-5 col-md-5">
-                    <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                    <input type="number" name="topping_price[]" class="form-control" placeholder="Price" required>
                 </div>
+                <div class="form-group col-12 col-lg-4 col-md-4">
+                    <label for="branch_id" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                    <select name="topping_branch[]" class="form-control selectpicker" required
+                            data-live-search="true">
+                        @foreach (helper::get_branchs() as $branch)
+                <option value="{{ $branch->id }}">
+                                {{ $branch->name . '-' . $branch->city }}
+                </option>
+@endforeach
+                </select>
+            </div>
+            <div class="form-group col-12 col-lg-3 col-md-4">
+                <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
+                <input type="number" name="topping_price[]" class="form-control" placeholder="Price" required>
+            </div>
+            <div class="col-12 col-lg-1 d-flex align-items-center">
+                <button type="button" class="btn btn-outline-danger deleteToppingOption">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+        </div>
+`);
 
-
-                <div class="col-12 col-lg-2 d-flex align-items-center">
-                    <button type="button" class="btn btn-outline-danger deleteToppingOption">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-        `);
+                // Refresh selectpicker for dynamically added dropdown
+                $('.selectpicker').selectpicker('refresh');
             });
 
             $(document).on('click', '.deleteToppingOption', function () {
@@ -275,29 +345,41 @@
             });
         });
 
+
         //for Sauces
 
         $(document).ready(function () {
             $('.add_additional_sauce_option').on('click', function () {
-
-
                 $("#additionalSauceOptions").append(`
             <div class="row data-sauces mb-3">
-                <div class="form-group col-12 col-lg-5 col-md-5">
-                    <label for="name" class="col-form-label">Name <span class="text-danger">*</span></label>
+                <div class="form-group col-12 col-lg-4 col-md-4">
+                    <label for="sauce_name" class="col-form-label">Name <span class="text-danger">*</span></label>
                     <input type="text" name="sauce_name[]" class="form-control" placeholder="Name" required>
-                </div><div class="form-group col-12 col-lg-5 col-md-5">
-                    <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                    <input type="number" name="sauce_price[]" class="form-control" placeholder="Price" required>
                 </div>
+                <div class="form-group col-12 col-lg-4 col-md-4">
+                    <label for="sauce_branch" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                    <select name="sauce_branch[]" class="form-control selectpicker" required data-live-search="true">
+                        @foreach (helper::get_branchs() as $branch)
+                <option value="{{ $branch->id }}">
+                                {{ $branch->name . '-' . $branch->city }}
+                </option>
+@endforeach
+                </select>
+            </div>
+            <div class="form-group col-12 col-lg-3 col-md-4">
+                <label for="sauce_price" class="col-form-label">Price <span class="text-danger">*</span></label>
+                <input type="number" name="sauce_price[]" class="form-control" placeholder="Price" required>
+            </div>
+            <div class="col-12 col-lg-1 d-flex align-items-center">
+                <button type="button" class="btn btn-outline-danger deleteSauceOption">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+        </div>
+`);
 
-
-                <div class="col-12 col-lg-2 d-flex align-items-center">
-                    <button type="button" class="btn btn-outline-danger deleteSauceOption">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-        `);
+                // Refresh selectpicker for newly added dropdown
+                $('.selectpicker').selectpicker('refresh');
             });
 
             $(document).on('click', '.deleteSauceOption', function () {
