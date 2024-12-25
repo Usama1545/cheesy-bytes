@@ -35,14 +35,18 @@ class DippingController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'price' => 'required|numeric',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'branch_id' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
-        $image = 'dipping-' . uniqid() . '.' . $validated['image']->getClientOriginalExtension();
-        $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/category', $image);
         $size = new Sides();
         $size->name = $validated['name'];
         $size->price = $validated['price'];
-        $size->image = $image;
+        $size->branch_id = $validated['branch_id'];
+        if (isset($validated['image'])) {
+            $image = 'category-' . uniqid() . '.' . $validated['image']->getClientOriginalExtension();
+            $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/category', $image);
+            $size->image = $image;
+        }
         $size->save();
 
         return redirect('admin/dipping')->with('success', 'pizza Dipping created successfully!');
@@ -54,24 +58,31 @@ class DippingController extends Controller
             'id' => 'required|numeric',
             'name' => 'required|string',
             'price' => 'required|numeric',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'branch_id' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
-        $image = 'dipping-' . uniqid() . '.' . $validated['image']->getClientOriginalExtension();
-        $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/category', $image);
         $size = Sides::findOrFail($validated['id']);
         $size->name = $validated['name'];
         $size->price = $validated['price'];
-        $size->image = $image;
-        $size->save();
+        $size->branch_id = $validated['branch_id'];
 
+        if (isset($validated['image'])) {
+
+            $image = 'category-' . uniqid() . '.' . $validated['image']->getClientOriginalExtension();
+            $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/category', $image);
+            $size->image = $image;
+        }
+
+        $size->save();
 
         return redirect('admin/dipping')->with('success', 'pizza Dipping Updated successfully!');
 
     }
+
     public function delete(Request $request)
     {
         $category = Sides::where('id', $request->id)->first();
-        if($category){
+        if ($category) {
             $category->delete();
             return 1;
         }

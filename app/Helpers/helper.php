@@ -512,7 +512,7 @@ class helper
 
     public static function getSides()
     {
-        return Sides::all();  // Fetch crusts based on sizeId
+        return Sides::where('branch_id',Session::get('branch_id'))->get();  // Fetch crusts based on sizeId
     }
 
     public function getCustomPizzaDetails($id)

@@ -279,7 +279,8 @@
                                     <img src="{{ helper::image_path($dipping->image) }}"
                                          alt="Dipping Sauce"
                                          class="img-fluid rounded h-70px"
-                                         style="object-fit: cover;">
+
+                                         style="object-fit: fill;width: 40px;height: 40px">
 
                                     <!-- Dipping Name -->
                                     <span class="flex-grow-1 text-sm">{{ $dipping->name }}</span>

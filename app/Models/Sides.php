@@ -9,5 +9,5 @@ class Sides extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','price'.'image'];
+    protected $fillable = ['name','price'.'image','branch_id'];
 }

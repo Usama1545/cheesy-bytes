@@ -17,10 +17,10 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="cat_id" class="col-form-label">Size
+                                            <label for="cat_id" class="col-form-label">Name
                                                 <span class="text-danger">*</span> </label>
                                             <input name="name" required class="form-control"
-                                                   value="<?php echo e(old('name')); ?>" placeholder="size">
+                                                   value="<?php echo e(old('name')); ?>" placeholder="name">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -34,18 +34,29 @@
 
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for=""><?php echo e(trans('labels.image')); ?>
+
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="image" accept="image/*" required>
+                                    </div>
+                                    <div class="form-group col-12 col-lg-6 col-md-6">
+                                        <label for="branch_id" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                                        <select name="branch_id" class="form-control selectpicker" required
+                                                data-live-search="true">
+                                            <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($branch->id); ?>"
+                                                ><?php echo e($branch->name . '-' . $branch->city); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label class="col-form-label" for=""><?php echo e(trans('labels.image')); ?>
 
-                                        <span class="text-danger">*</span> </label>
-                                    <input type="file" class="form-control" name="image" accept="image/*" required>
-                                </div>
 
                                 <div
                                     class="form-group <?php echo e(session()->get('direction') == '2' ? 'text-start' : 'text-end'); ?>">
-                                    <a href="<?php echo e(URL::to('admin/item')); ?>"
+                                    <a href="<?php echo e(URL::to('admin/dipping')); ?>"
                                        class="btn btn-danger"><?php echo e(trans('labels.cancel')); ?></a>
                                     <button class="btn btn-primary"
                                             <?php if(env('Environment') == 'sendbox'): ?> type="button" onclick="myFunction()"

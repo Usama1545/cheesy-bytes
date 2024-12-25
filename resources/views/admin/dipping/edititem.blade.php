@@ -11,7 +11,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <div id="privacy-policy-three" class="privacy-policy">
-                            <form method="post" action="{{ URL::to('admin/custom_pizza/update') }}" name="about" id="about"
+                            <form method="post" action="{{ URL::to('admin/dipping/update') }}" name="about" id="about"
                                   enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" class="form-control" id="id" name="id"
@@ -19,10 +19,10 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="cat_id" class="col-form-label">Size
+                                            <label for="cat_id" class="col-form-label">Name
                                                 <span class="text-danger">*</span> </label>
-                                            <input name="name" type="number" required class="form-control"
-                                                   value="{{ $getitem->name }}" placeholder="size">
+                                            <input name="name" required class="form-control"
+                                                   value="{{ $getitem->name }}" placeholder="name">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -36,18 +36,30 @@
 
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="">{{ trans('labels.image') }}
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="image" id="image"
+                                               accept="image/*">
+                                        <img src="{{ helper::image_path($getitem->image) }}" alt=""
+                                             class="img-fluid rounded h-50px mt-1">
+                                    </div>
+                                    <div class="form-group col-12 col-lg-6 col-md-6">
+                                        <label for="branch_id" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                                        <select name="branch_id" class="form-control selectpicker" multiple
+                                                data-live-search="true">
+                                            @foreach (helper::get_branchs() as $branch)
+                                                <option value="{{ $branch->id }}"
+                                                {{ $getitem->branch_id == $branch->id ? 'selected' : '' }}
+                                                >{{ $branch->name . '-' . $branch->city }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="col-form-label" for="">{{ trans('labels.image') }}
-                                        <span class="text-danger">*</span> </label>
-                                    <input type="file" class="form-control" name="image" id="image"
-                                           accept="image/*">
-                                    <img src="{{ helper::image_path($getitem->image) }}" alt=""
-                                         class="img-fluid rounded h-50px mt-1">
-                                </div>
+
                                 <div
                                     class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
-                                    <a href="{{ URL::to('admin/item') }}"
+                                    <a href="{{ URL::to('admin/dipping') }}"
                                        class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                     <button class="btn btn-primary"
                                             @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
