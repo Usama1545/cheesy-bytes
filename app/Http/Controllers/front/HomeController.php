@@ -93,10 +93,20 @@ class HomeController extends Controller
         $getfaqs = Faq::select("id", "title", "description")->orderBy('reorder_id')->get();
         $getblogs = Blogs::orderBy('reorder_id')->take('3')->get();
         $getwhychooseus = WhyChooseUs::orderBy('reorder_id')->get();
+        $branchId = Session::get('branch_id');
 
         if ($user_id != null) {
-            $topitemlist = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', 'order_details.qty as order_details_qty', DB::raw('count(order_details.item_id) as item_order_counter'), DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+            $topitemlist = Item::with('category_info', 'subcategory_info', 'item_image')
+                ->select('item.*', 'order_details.qty as order_details_qty',
+                    DB::raw('count(order_details.item_id) as item_order_counter'),
+                    DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'),
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('order_details', 'order_details.item_id', 'item.id')
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
                 ->leftJoin('favorite', function ($query) use ($user_id) {
                     $query->on('favorite.item_id', '=', 'item.id')
                         ->where('favorite.user_id', '=', $user_id);
@@ -108,7 +118,7 @@ class HomeController extends Controller
                 })
                 ->groupBy('order_details.item_id', 'item.id', 'cart.item_id')
                 ->orderByDesc('item_order_counter')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -118,10 +128,18 @@ class HomeController extends Controller
                 ->where('item.item_status', '1')
                 ->take(3)->get();
 
-            $todayspecial = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+            $todayspecial = Item::with('category_info', 'subcategory_info', 'item_image')
+                ->select('item.*',
+                    DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'),
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('favorite', function ($query) use ($user_id) {
                     $query->on('favorite.item_id', '=', 'item.id')
                         ->where('favorite.user_id', '=', $user_id);
+                })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
                 })
                 ->leftJoin('cart', function ($query) use ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')
@@ -130,7 +148,7 @@ class HomeController extends Controller
                 })
                 ->groupBy('item.id', 'cart.item_id')
                 ->where('item.is_featured', '1')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -173,7 +191,7 @@ class HomeController extends Controller
                         ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
                     });
                 })
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -189,10 +207,18 @@ class HomeController extends Controller
                 ->get();
 
 
-            $recommended = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+            $recommended = Item::with('category_info', 'subcategory_info', 'item_image')
+                ->select('item.*',
+                    DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'),
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('favorite', function ($query) use ($user_id) {
                     $query->on('favorite.item_id', '=', 'item.id')
                         ->where('favorite.user_id', '=', $user_id);
+                })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
                 })
                 ->leftJoin('cart', function ($query) use ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')
@@ -201,7 +227,7 @@ class HomeController extends Controller
                 })
                 ->groupBy('item.id', 'cart.item_id')
                 ->inRandomOrder()
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -211,8 +237,17 @@ class HomeController extends Controller
                 ->where('item.item_status', '1')
                 ->take(9)->get();
         } else {
-            $topitemlist = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', 'order_details.qty as order_details_qty', DB::raw('count(order_details.item_id) as item_order_counter'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+            $topitemlist = Item::with('category_info', 'subcategory_info', 'item_image')
+                ->select('item.*', 'order_details.qty as order_details_qty',
+                    DB::raw('count(order_details.item_id) as item_order_counter'),
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('order_details', 'order_details.item_id', 'item.id')
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
                 ->leftJoin('cart', function ($query) use ($session_id) {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.session_id', '=', $session_id)
@@ -221,7 +256,7 @@ class HomeController extends Controller
                 ->groupBy('order_details.item_id', 'item.id', 'cart.item_id')
                 ->orderByDesc('item_order_counter')
                 ->where('item.item_status', '1')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -230,16 +265,23 @@ class HomeController extends Controller
                 })
                 ->take(3)->get();
 
-            $todayspecial = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+            $todayspecial = Item::with('category_info', 'subcategory_info', 'item_image')
+                ->select('item.*',
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('cart', function ($query) use ($session_id) {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.session_id', '=', $session_id)
                         ->where('cart.buynow', '=', '0');
                 })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
                 ->groupBy('item.id', 'cart.item_id')
                 ->where('item.is_featured', '1')
                 ->where('item.item_status', '1')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -261,11 +303,15 @@ class HomeController extends Controller
 //                ->where('item.price', '>', $offer_price)
 //                ->orderBy('item.reorder_id')->take(10)->get();
             $topdealsproduct = TopDeals::with('product')
-            ->join('item', 'top_deals.product_id', '=', 'item.id')
+                ->join('item', 'top_deals.product_id', '=', 'item.id')
                 ->leftJoin('cart', function ($query) use ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.user_id', '=', $user_id)
                         ->where('cart.buynow', '=', '0');
+                })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
                 })
                 ->where(function ($query) use ($currentDateTime) {
                     $query->where('end_date', '>', $currentDateTime->toDateString()) // If end_date is in the future
@@ -274,7 +320,7 @@ class HomeController extends Controller
                         ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
                     });
                 })
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -288,16 +334,23 @@ class HomeController extends Controller
                 )->distinct() // Ensure distinct rows
                 ->get();
 
-            $recommended = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+            $recommended = Item::with('category_info', 'subcategory_info', 'item_image')
+                ->select('item.*',
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('cart', function ($query) use ($session_id) {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.session_id', '=', $session_id)
                         ->where('cart.buynow', '=', '0');
                 })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
                 ->groupBy('item.id', 'cart.item_id')
                 ->inRandomOrder()
                 ->where('item.item_status', '1')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
                     ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
@@ -323,9 +376,10 @@ class HomeController extends Controller
     {
         return view('web.categoryviewall');
     }
-    public function categories_con(Request $request,$county)
+
+    public function categories_con(Request $request, $county)
     {
-        return view('web.categoryviewall',compact('county'));
+        return view('web.categoryviewall', compact('county'));
     }
 
     public function menu(Request $request)
@@ -372,19 +426,18 @@ class HomeController extends Controller
             }
         }
         $type = $request->type;
-        return view('web.location', compact('not_available', 'shipping', 'address','type'));
+        return view('web.location', compact('not_available', 'shipping', 'address', 'type'));
     }
 
     public function location_update($id, $address_id, $type)
     {
-        if($type === 'carryout') {
+        if ($type === 'carryout') {
             $branch = Branch::findOrFail($id);
-            if($branch)
-            {
+            if ($branch) {
                 Session::put('branch_id', $id);
                 return redirect()->to('/categories');
             }
-        }else{
+        } else {
             $shipping_area = Shippingarea::findOrFail($id);
             if ($shipping_area) {
                 Session::put('branch_id', $shipping_area->branch_id);

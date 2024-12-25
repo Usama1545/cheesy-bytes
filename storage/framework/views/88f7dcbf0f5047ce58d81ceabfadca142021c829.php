@@ -83,21 +83,20 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="getaddons_id"
-                                                   class="col-form-label">Branch <span class="text-danger">*</span> </label>
-                                            <select name="branch_ids[]" class="form-control selectpicker" multiple required
-                                                    data-live-search="true" id="getaddons_id">
-                                                <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <option value="<?php echo e($branch->id); ?>">
-                                                        <?php echo e($branch->name.'-'.$branch->city); ?>
 
-                                                    </option>
-                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                            </select>
-                                        </div>
-                                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label class="col-form-label"><?php echo e(trans('labels.video_url')); ?></label>
@@ -108,6 +107,22 @@
                                     </div>
                                 </div>
 
+                                <div class="row">
+                                    <div class="d-flex justify-content-between align-items-center col-12 mb-3">
+                                        <label for="name" class="fw-bold col-form-label">Prices <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <button type="button" title="Add Price"
+                                                class="btn btn--primary add_additional_crust_option">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Placeholder for Adding New Crust Options -->
+                                    <div class="col-12">
+                                        <div id="additionalCrustOptions"></div>
+                                    </div>
+                                </div>
 
                                 <input class="form-check-input me-0" type="radio" name="item_type"
                                        id="veg" value="1" checked hidden
@@ -263,6 +278,53 @@
         src="<?php echo e(url(env('ASSETSPATHURL') . 'admin-assets/assets/js/bootstrap/bootstrap-select.v1.14.0-beta2.min.js')); ?>">
     </script>
     <script src="<?php echo e(url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/additem.js')); ?>"></script>
+    <script>
+        $(document).ready(function () {
+            let crustAdded = $('.data-amenities').length;
+
+            $('.add_additional_crust_option').on('click', function () {
+                if (crustAdded >= 10) {
+                    return false;
+                }
+                crustAdded++;
+
+                const uniqueIndex = `price_${crustAdded}`; // Unique identifier for each set
+
+                $("#additionalCrustOptions").append(`
+                <div class="row data-amenities mb-3" data-index="${uniqueIndex}">
+                    <div class="form-group col-12 col-lg-6 col-md-5">
+                        <label for="size_${uniqueIndex}" class="col-form-label">Size <span class="text-danger">*</span></label>
+                        <select name="prices[${uniqueIndex}][branch_id]" class="form-control selectpicker" required data-live-search="true" id="size_${uniqueIndex}">
+                        <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($branch->id); ?>">
+                                            <?php echo e($branch->name.'-'.$branch->city); ?>
+
+                </option>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+            </div>
+            <div class="form-group col-12 col-lg-5 col-md-5">
+                <label for="price_${uniqueIndex}" class="col-form-label">Price <span class="text-danger">*</span></label>
+                        <input type="number" name="prices[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
+                    </div>
+                    <div class="col-12 col-lg-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-outline-danger deleteCrustOption">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `);
+
+                // Refresh selectpicker for dynamically added selects
+                $('.selectpicker').selectpicker('refresh');
+            });
+
+            $(document).on('click', '.deleteCrustOption', function () {
+                $(this).closest('.data-amenities').remove();
+                crustAdded--;
+            });
+        });
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/item/additem.blade.php ENDPATH**/ ?>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Models\itemPrice;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\helper;
@@ -35,6 +36,7 @@ class ItemController extends Controller
         $getitem = $getitem->orderByDesc('item.id')->get();
         return view('admin.item.item', compact('getitem'));
     }
+
     public function additem()
     {
         $getcategory = Category::where('is_available', '1')->orderBy('reorder_id')->get();
@@ -47,9 +49,10 @@ class ItemController extends Controller
         $globalextras = GlobalExtras::where('is_available', 1)->orderBy('reorder_id')->get();
         return view('admin.item.additem', compact('getcategory', 'getaddongroup', 'getaddon', 'gettax', 'globalextras'));
     }
+
     public function edititem($id)
     {
-        $getitem = Item::with('extras')->find($id);
+        $getitem = Item::with('extras', 'prices')->find($id);
         $getitemimages = ItemImages::where('item_id', $id)->orderByDesc('id')->get();
         $getcategory = Category::where('is_available', '1')->orderBy('reorder_id')->get();
         $getsubcategory = Subcategory::where('cat_id', $getitem->cat_id)->where('is_available', '1')->orderBy('reorder_id')->get();
@@ -62,6 +65,7 @@ class ItemController extends Controller
         $globalextras = GlobalExtras::where('is_available', 1)->orderBy('reorder_id')->get();
         return view('admin.item.edititem', compact('getitem', 'getcategory', 'getsubcategory', 'getaddongroup', 'getaddon', 'gettax', 'globalextras', 'getitemimages'));
     }
+
     public function store(Request $request)
     {
         $item = new Item();
@@ -69,15 +73,17 @@ class ItemController extends Controller
         $item->subcat_id = $request->subcat_id == "" ? "" : $request->subcat_id;
         $item->preparation_time = $request->preparation_time;
         $item->addons_id = $request->addongroup_id != "" ? @implode(",", $request->addongroup_id) : null;
-        $item->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
+        $item->branch_ids = !empty($request->prices) && is_array($request->prices)
+            ? implode(",", array_column($request->prices, 'branch_id'))
+            : null;
         $item->item_name = $request->item_name;
         $item->slug = $this->getitemslug($request->item_name, '');
         $item->item_type = $request->item_type;
         $item->has_extras = $request->has_extras;
         if ($request->original_price == "") {
-            $discount =  0;
+            $discount = 0;
         } else {
-            $discount =  $request->original_price > 0 ? number_format(100 - ($request->price * 100) / $request->original_price, 1) : 0;
+            $discount = $request->original_price > 0 ? number_format(100 - ($request->price * 100) / $request->original_price, 1) : 0;
         }
         $item->price = helper::number_format($request->price);
         $item->original_price = helper::number_format($request->original_price == null ? 0 : $request->original_price);
@@ -99,6 +105,20 @@ class ItemController extends Controller
                     }
                 }
             }
+            foreach ($request->prices as $key => $priceData) {
+                // Ensure 'size' and 'price' keys exist in the current price data
+                if (isset($priceData['branch_id']) && isset($priceData['price'])) {
+                    ItemPrice::updateOrCreate(
+                        [
+                            'item_id' => $request->id,
+                            'branch_id' => $priceData['branch_id'], // Assuming 'size' refers to the branch ID
+                        ],
+                        [
+                            'price' => $priceData['price'],
+                        ]
+                    );
+                }
+            }
             foreach ($request->file('image') as $img) {
                 $itemimage = new ItemImages;
                 $image = 'item-' . uniqid() . '.' . $img->getClientOriginalExtension();
@@ -112,6 +132,7 @@ class ItemController extends Controller
             return redirect()->back()->with('error', trans('messages.wrong'));
         }
     }
+
     public function storeimages(Request $request)
     {
         $validation = Validator::make($request->all(), [
@@ -137,9 +158,10 @@ class ItemController extends Controller
             }
             $success_output = trans('messages.success');
         }
-        $output = array('error'     =>  $error_array, 'success'   =>  $success_output);
+        $output = array('error' => $error_array, 'success' => $success_output);
         echo json_encode($output);
     }
+
     public function showimage(Request $request)
     {
         $getitem = ItemImages::where('id', $request->id)->first();
@@ -148,6 +170,7 @@ class ItemController extends Controller
         }
         return response()->json(['ResponseCode' => 1, 'ResponseText' => trans('messages.success'), 'ResponseData' => $getitem], 200);
     }
+
     public function update(Request $request)
     {
         Cart::where('item_id', $request->id)->delete();
@@ -156,13 +179,30 @@ class ItemController extends Controller
         $item->subcat_id = $request->subcat_id == "" ? "" : $request->subcat_id;
         $item->preparation_time = $request->preparation_time;
         $item->addons_id = $request->addongroup_id != "" ? @implode(",", $request->addongroup_id) : null;
-        $item->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
+        $item->branch_ids = !empty($request->prices) && is_array($request->prices)
+            ? implode(",", array_column($request->prices, 'branch_id'))
+            : null;
         $item->item_type = $request->item_type;
         $item->has_extras = $request->has_extras;
+        foreach ($request->prices as $key => $priceData) {
+            // Ensure 'size' and 'price' keys exist in the current price data
+            if (isset($priceData['branch_id']) && isset($priceData['price'])) {
+                ItemPrice::updateOrCreate(
+                    [
+                        'item_id' => $request->id,
+                        'branch_id' => $priceData['branch_id'], // Assuming 'size' refers to the branch ID
+                    ],
+                    [
+                        'price' => $priceData['price'],
+                    ]
+                );
+            }
+        }
+
         if ($request->original_price == "") {
-            $discount =  0;
+            $discount = 0;
         } else {
-            $discount =  $request->original_price > 0 ? number_format(100 - ($request->price * 100) / $request->original_price, 1) : 0;
+            $discount = $request->original_price > 0 ? number_format(100 - ($request->price * 100) / $request->original_price, 1) : 0;
         }
         $item->price = helper::number_format($request->price);
         $item->original_price = helper::number_format($request->original_price == null ? 0 : $request->original_price);
@@ -198,6 +238,7 @@ class ItemController extends Controller
             return redirect()->back()->with('error', trans('messages.wrong'));
         }
     }
+
     public function reorder_item(Request $request)
     {
         $getitem = Item::all();
@@ -237,6 +278,7 @@ class ItemController extends Controller
         $output = array('error' => $error_array, 'success' => $success_output);
         echo json_encode($output);
     }
+
     public function getitemslug($item_name, $id)
     {
         $slug = Str::slug($item_name, '-');
@@ -251,6 +293,7 @@ class ItemController extends Controller
         }
         return $slug;
     }
+
     public function status(Request $request)
     {
         $UpdateDetails = Item::where('id', $request->id)->update(['item_status' => $request->status]);
@@ -261,6 +304,7 @@ class ItemController extends Controller
             return 0;
         }
     }
+
     public function delete(Request $request)
     {
         $updatedetails = Item::where('id', $request->id)->delete();
@@ -279,6 +323,7 @@ class ItemController extends Controller
             return 0;
         }
     }
+
     public function destroyimage(Request $request)
     {
         $getitemimages = ItemImages::where('item_id', $request->item_id)->count();
@@ -297,6 +342,7 @@ class ItemController extends Controller
             return 2;
         }
     }
+
     public function featured(Request $request)
     {
         $updatedata = Item::where('id', $request->id)->update(['is_featured' => $request->status]);
@@ -306,16 +352,19 @@ class ItemController extends Controller
             return 0;
         }
     }
+
     public function subcategories(Request $request)
     {
         $data = Subcategory::where('cat_id', $request->id)->orderBy('reorder_id')->where('is_available', 1)->get();
         return response()->json(['status' => 1, 'message' => trans('messages.success'), 'data' => $data], 200);
     }
+
     public function getextras()
     {
         $globalextras = GlobalExtras::where('is_available', 1)->orderBy('reorder_id')->get();
         return response()->json(['status' => 1, 'msg' => trans('messages.success'), 'responsdata' => $globalextras], 200);
     }
+
     public function deleteextras(Request $request)
     {
         $checkextracount = Extra::where('item_id', $request->item_id)->count();

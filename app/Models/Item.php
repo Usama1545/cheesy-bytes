@@ -31,6 +31,11 @@ class Item extends Model
         return $this->hasMany('App\Models\Extra', 'item_id', 'id')->select('id', 'name', 'price', 'item_id');
     }
 
+    public function prices()
+    {
+        return $this->hasMany(ItemPrice::class);
+    }
+
     public function pricing()
     {
         return $this->hasMany(ProductSizeCrust::class);
