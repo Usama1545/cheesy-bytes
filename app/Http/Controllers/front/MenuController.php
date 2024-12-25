@@ -166,7 +166,8 @@ class MenuController extends Controller
 
     public function getCrusts()
     {
-        $crusts = CustomPizzaCrust::all()->map(function ($crust) {
+        $branch_id = Session::get('branch_id');
+        $crusts = CustomPizzaCrust::where('branch_id',$branch_id)->get()->map(function ($crust) {
             return [
                 'id' => $crust->id,
                 'name' => $crust->name,
@@ -181,7 +182,8 @@ class MenuController extends Controller
 
     public function getToppings()
     {
-        $toppings = CustomPizzaTopping::all()->map(function ($topping) {
+        $branch_id = Session::get('branch_id');
+        $toppings = CustomPizzaTopping::where('branch_id',$branch_id)->get()->map(function ($topping) {
             return [
                 'id' => $topping->id,
                 'name' => $topping->name,
@@ -195,7 +197,8 @@ class MenuController extends Controller
 
     public function getSauces()
     {
-        $sauces = CustomPizzaSauce::all()->map(function ($sauce) {
+        $branch_id = Session::get('branch_id');
+        $sauces = CustomPizzaSauce::where('branch_id',$branch_id)->get()->map(function ($sauce) {
             return [
                 'id' => $sauce->id,
                 'name' => $sauce->name,
