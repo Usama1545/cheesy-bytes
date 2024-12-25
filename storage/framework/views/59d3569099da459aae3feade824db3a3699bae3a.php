@@ -281,7 +281,9 @@
                         <h6 class="m-0 fw-500 product-text-size">
                             <?php echo e($orders->item_name); ?>
 
-
+                            <?php if(!is_null($orders->size) && !is_null($orders->crust)): ?>
+                               <small> (<?php echo e($orders->size->name); ?> - <?php echo e($orders->crust->name); ?>)</small>
+                            <?php endif; ?>
                             <br>
                             <?php
                                 $addons_name = explode('| ', $orders->addons_name);

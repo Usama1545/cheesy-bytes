@@ -305,24 +305,30 @@
                                     <tr>
                                         <td><img src="<?php echo e(helper::image_path($orders->item_image)); ?>"
                                                  class="rounded h-50px" alt=""></td>
-                                            <td>
-                                                <?php echo e($orders->item_name); ?>(<?php echo e($orders->size->name); ?> -<?php echo e($orders->size->name); ?>) <br>
-                                                <?php if($orders['addons_id'] != '' || $orders['extras_id'] != ''): ?>
-                                                    <small>
-                                                        <a class="text-muted fw-500" href="javascript:void(0)"
-                                                           onclick="showaddons('<?php echo e($orders['addons_name']); ?>','<?php echo e($orders['addons_price']); ?>','<?php echo e($orders['extras_name']); ?>','<?php echo e($orders['extras_price']); ?>','<?php echo e($orders['item_name']); ?>')"><?php echo e(trans('labels.customize')); ?>
+                                        <td>
+                                            <?php echo e($orders->item_name); ?>
 
-                                                        </a>
-                                                    </small>
-                                                <?php endif; ?>
-                                                <?php if($orders['dipping_quantity'] != ''): ?>
-                                                    <small>
-                                                        <span class="text-muted fw-500" data-bs-toggle="modal" data-bs-target="#dippingModal"
-                                                           >Dipping
+                                            <?php if(!is_null($orders->size) && !is_null($orders->crust)): ?>
+                                                (<?php echo e($orders->size->name); ?> - <?php echo e($orders->crust->name); ?>)
+                                            <?php endif; ?>
+                                            <br>
+                                            <?php if($orders['addons_id'] != '' || $orders['extras_id'] != ''): ?>
+                                                <small>
+                                                    <a class="text-muted fw-500" href="javascript:void(0)"
+                                                       onclick="showaddons('<?php echo e($orders['addons_name']); ?>','<?php echo e($orders['addons_price']); ?>','<?php echo e($orders['extras_name']); ?>','<?php echo e($orders['extras_price']); ?>','<?php echo e($orders['item_name']); ?>')"><?php echo e(trans('labels.customize')); ?>
+
+                                                    </a>
+                                                </small>
+                                            <?php endif; ?>
+                                            <?php if($orders['dipping_quantity'] != ''): ?>
+                                                <small>
+                                                        <span class="text-muted fw-500" data-bs-toggle="modal"
+                                                              data-bs-target="#dippingModal"
+                                                        >Dipping
                                                         </span>
-                                                    </small>
-                                                <?php endif; ?>
-                                            </td>
+                                                </small>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-end">
                                             <?php echo e(helper::currency_format($orders->item_price)); ?>
 
@@ -335,17 +341,22 @@
                                         <td class="text-end">
                                             <?php echo e(helper::currency_format($total_price)); ?></td>
                                     </tr>
-                                    <div class="modal fade" id="dippingModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal fade" id="dippingModal" tabindex="-1"
+                                         aria-labelledby="exampleModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel"><?php echo e($orders->item_name); ?> - <?php echo e($orders->crust->name); ?> -<?php echo e($orders->size->name); ?></h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    <h1 class="modal-title fs-5"
+                                                        id="exampleModalLabel"><?php echo e($orders->item_name); ?>
+
+                                                        - <?php echo e($orders->crust->name); ?> -<?php echo e($orders->size->name); ?></h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
                                                 </div>
 
                                                 <div class="modal-body">
                                                     <div class="mt-2 p-2 border-bottom">
-                                                        <ul class="m-0 ps-2" >
+                                                        <ul class="m-0 ps-2">
 
                                                                 <?php
                                                                 // Exploding dipping_name, quantity, and price if they are in a delimited format
@@ -434,16 +445,19 @@
                                                 <div class="modal-body">
                                                     <?php if($orders->custom_pizza_id !== null): ?>
 
-
+                                                        
                                                         <div class="mt-2 p-2 border-bottom" id="extras">
                                                             <p class="m-0 fs-6 fw-500">Size: <small
                                                                     class="text-muted"><?php echo e($orders->custom_pizza->size->label); ?>
 
-                                                                    (<?php echo e($orders->custom_pizza->size->name); ?>")</small></p>
+                                                                    (<?php echo e($orders->custom_pizza->size->name); ?>")</small>
+                                                            </p>
                                                             <p class="m-0 fs-6 fw-500">Special: <small
                                                                     class="text-muted"><?php echo e($orders->custom_pizza->cut); ?>
 
-                                                                    / <?php echo e($orders->custom_pizza->bake); ?> / <?php echo e($orders->custom_pizza->seasoning); ?></small>
+                                                                    / <?php echo e($orders->custom_pizza->bake); ?>
+
+                                                                    / <?php echo e($orders->custom_pizza->seasoning); ?></small>
                                                             </p>
                                                             <p class="m-0 fs-6 fw-500">Crust: <small
                                                                     class="text-muted"><?php echo e($orders->custom_pizza->crust->name); ?></small>

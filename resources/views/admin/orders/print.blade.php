@@ -262,7 +262,9 @@
                     <td class="py-2">
                         <h6 class="m-0 fw-500 product-text-size">
                             {{ $orders->item_name }}
-
+                            @if(!is_null($orders->size) && !is_null($orders->crust))
+                               <small> ({{ $orders->size->name }} - {{ $orders->crust->name }})</small>
+                            @endif
                             <br>
                             @php
                                 $addons_name = explode('| ', $orders->addons_name);
