@@ -33,7 +33,7 @@ class Item extends Model
 
     public function prices()
     {
-        return $this->hasMany(ItemPrice::class);
+        return $this->hasMany('App\Models\ItemPrice','item_id','id');
     }
 
     public function pricing()
