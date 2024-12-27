@@ -9,4 +9,9 @@ class Size extends Model
 {
     use HasFactory;
     protected $fillable = ['name','label'];
+
+    public function pizzaPrices()
+    {
+        return $this->hasMany(PizzaPrice::class);
+    }
 }

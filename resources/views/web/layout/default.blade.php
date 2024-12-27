@@ -155,7 +155,7 @@
                                     <img src="{{ helper::image_path($dipping->image) }}"
                                          alt="Dipping Sauce"
                                          class="img-fluid rounded h-70px"
-                                         style="object-fit: cover;">
+                                         style="object-fit: fill;width:40px;height:40px">
 
                                     <!-- Dipping Name -->
                                     <span class="flex-grow-1 text-sm">{{ $dipping->name }}</span>
@@ -1187,6 +1187,7 @@
         const decreaseQuantityButton = document.querySelector('button[data-action="decrease_pizza_quantity"]');
         const increaseQuantityButton = document.querySelector('button[data-action="increase_pizza_quantity"]');
         let totalPrice = 0;
+        let sizePrice = 0;
         let basePrice = 0;
         let details = {};
 
@@ -1270,7 +1271,7 @@
                     `;
                     $('#img-container').html(itemCard); //
                     if (response) {
-                        basePrice = parseFloat(response.responce.item_detail.price || 0);
+                        // basePrice = parseFloat(response.responce.item_detail.price || 0);
                         $('#PizzaModalLabel').text(response.responce.item_detail.item_name);
                         $('#MyPizzaSummary').html(`
                             <div class="d-flex justify-content-between">
@@ -1362,27 +1363,34 @@
 
         // Load sizes and crusts
         function loadSizesAndCrusts(crustData) {
-            crustData.forEach(size => {
-                const sizeButton = $(`
-                    <button type="button" class="btn round-button size-btn" data-size-id="${size.id}">
-                        ${size.label}
-                    </button>
-                `);
-                $('#pizzaSizesContainer').append(sizeButton);
+            crustData.forEach((size, index) => {
+                const sizeContainer = $(`
+        <div class="size-container text-center">
+            <button type="button" class="btn round-button size-btn ${index === 0 ? 'active' : ''}" data-size-id="${size.id}">
+                ${size.label}
+            </button>
+            <span class="text-muted d-block">${size.name}</span>
+        </div>
+    `);
+                $('#pizzaSizesContainer').append(sizeContainer);
             });
 
             if (crustData.length > 0) {
+                sizePrice = parseFloat(crustData[0].size_price);
                 updateCrusts(crustData[0].crusts);
             }
 
             $('.size-btn').on('click', function () {
                 const selectedSizeId = $(this).data('size-id');
+
                 size_id = selectedSizeId;
                 const selectedSize = crustData.find(size => size.id === selectedSizeId);
-
+                sizePrice = parseFloat(selectedSize.size_price);
+                updatePriceSummary();
                 $('.size-btn').removeClass('active');
                 $(this).addClass('active');
                 updateCrusts(selectedSize.crusts);
+
             });
         }
 
@@ -1508,8 +1516,8 @@
             if (selectedCrust.length) {
                 totalAddonPrice += parseFloat(selectedCrust.data('price'));
             }
-            totalAddonPrice = totalAddonPrice * pizzaQuantity;
-            totalPrice = totalAddonPrice;
+            totalAddonPrice = totalAddonPrice * pizzaQuantity + sizePrice;
+            totalPrice = totalAddonPrice ;
             $('#PizzaPrice').text(`$${totalAddonPrice.toFixed(2)}`);
         }
     });

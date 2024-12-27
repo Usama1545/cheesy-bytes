@@ -15,6 +15,10 @@ return new class extends Migration
     {
         Schema::create('pizza_prices', function (Blueprint $table) {
             $table->id();
+            $table->unsignedInteger('item_id');
+            $table->unsignedInteger('size_id');
+            $table->unsignedInteger('branch_id');
+            $table->decimal('price',10, 2);
             $table->timestamps();
         });
     }

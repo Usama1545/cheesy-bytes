@@ -40,4 +40,9 @@ class Item extends Model
     {
         return $this->hasMany(ProductSizeCrust::class);
     }
+
+    public function pizzaPrices()
+    {
+        return $this->hasMany(PizzaPrice::class);
+    }
 }

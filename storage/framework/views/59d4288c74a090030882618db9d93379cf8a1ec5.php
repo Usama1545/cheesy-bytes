@@ -9,7 +9,7 @@
         <div class="col-12">
             <div class="card border-0 box-shadow">
                 <div class="card-body">
-                    <form action="<?php echo e(URL::to('/admin/pizza_crusts/update')); ?>" method="POST">
+                    <form action="<?php echo e(URL::to('/admin/pizza_sizes_price/update')); ?>" method="POST">
                         <?php echo csrf_field(); ?>
                         <div class="row">
                             <input type="hidden" name="id" value="<?php echo e($id); ?>">
@@ -17,18 +17,18 @@
                                 <label for="name" class="fw-bold col-form-label">Pizza Size and Crust<span
                                         class="text-danger">*</span></label>
                                 <button type="button" title="Add Topping"
-                                        class="btn btn--primary add_additional_crust_option">
+                                        class="btn btn--primary add_additional_price_option">
                                     <i class="fa fa-plus"></i>
                                 </button>
                             </div>
-                            <?php $__currentLoopData = $groupedData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="row data-amenities align-items-center mb-3" data-index="edit_<?php echo e($index); ?>">
+                            <?php $__currentLoopData = $sizes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="row price-amenities align-items-center mb-3" data-index="edit_<?php echo e($index); ?>">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="size_edit_<?php echo e($index); ?>" class="col-form-label">
+                                            <label for="size_<?php echo e($index); ?>" class="col-form-label">
                                                 Size <span class="text-danger">*</span>
                                             </label>
-                                            <select name="size_crusts[edit_<?php echo e($index); ?>][size]" class="form-control selectpicker" required data-live-search="true" id="size_edit_<?php echo e($index); ?>">
+                                            <select name="size_prices[edit_<?php echo e($index); ?>][size]" class="form-control selectpicker" required data-live-search="true" id="size_edit_<?php echo e($index); ?>">
                                                 <?php $__currentLoopData = helper::get_sizes(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <option value="<?php echo e($branch->id); ?>" <?php echo e($branch->id === $option['size_id'] ? 'selected' : ''); ?>>
                                                         <?php echo e($branch->name); ?>
@@ -43,9 +43,9 @@
                                             <label for="crust_edit_<?php echo e($index); ?>" class="col-form-label">
                                                 Crust <span class="text-danger">*</span>
                                             </label>
-                                            <select name="size_crusts[edit_<?php echo e($index); ?>][crusts][]" class="form-control selectpicker" multiple required data-live-search="true" id="crust_edit_<?php echo e($index); ?>">
-                                                <?php $__currentLoopData = helper::get_crusts(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $crust): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <option value="<?php echo e($crust->id); ?>" <?php echo e(in_array($crust->id, $option['crust_ids']) ? 'selected' : ''); ?>>
+                                            <select name="size_prices[edit_<?php echo e($index); ?>][branch_id]" class="form-control selectpicker" multiple required data-live-search="true" id="branch_edit_<?php echo e($index); ?>">
+                                                <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $crust): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($crust->id); ?>" <?php echo e($crust->id ===  $option['branch_id'] ? 'selected' : ''); ?>>
                                                         <?php echo e($crust->name); ?>
 
                                                     </option>
@@ -58,11 +58,11 @@
                                             <label for="price_edit_<?php echo e($index); ?>" class="col-form-label">
                                                 Price <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number"    step="0.01"  name="size_crusts[edit_<?php echo e($index); ?>][price]" class="form-control" value="<?php echo e($option['price']); ?>" placeholder="Price" required id="price_edit_<?php echo e($index); ?>">
+                                            <input type="number"    step="0.01"  name="size_prices[edit_<?php echo e($index); ?>][price]" class="form-control" value="<?php echo e($option['price']); ?>" placeholder="Price" required id="price_edit_<?php echo e($index); ?>">
                                         </div>
                                     </div>
                                     <div class="col-12 col-lg-1 d-flex align-items-center">
-                                        <button type="button" class="btn btn-outline-danger deleteCrustOption">
+                                        <button type="button" class="btn btn-outline-danger deletePriceOption">
                                             <i class="fa fa-trash"></i>
                                         </button>
                                     </div>
@@ -72,7 +72,7 @@
 
                             <!-- Placeholder for Adding New Crust Options -->
                             <div class="col-12">
-                                <div id="additionalCrustOptions"></div>
+                                <div id="additionalPriceOptions"></div>
                             </div>
                             <div
                                 class="form-group <?php echo e(session()->get('direction') == '2' ? 'text-start' : 'text-end'); ?>">
@@ -186,9 +186,6 @@
             let crustAdded = $('.data-amenities').length;
 
             $('.add_additional_crust_option').on('click', function () {
-                if (crustAdded >= 10) {
-                    return false;
-                }
                 crustAdded++;
 
                 const uniqueIndex = `crustOption_${crustAdded}`; // Unique identifier for each set
@@ -219,7 +216,7 @@
             </div>
             <div class="form-group col-12 col-lg-3 col-md-3">
                 <label for="price_${uniqueIndex}" class="col-form-label">Price <span class="text-danger">*</span></label>
-                        <input type="number" name="size_crusts[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
+                        <input type="number" step="0.01" name="size_crusts[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
                     </div>
                     <div class="col-12 col-lg-1 d-flex align-items-center">
                         <button type="button" class="btn btn-outline-danger deleteCrustOption">
@@ -239,7 +236,61 @@
             });
         });
     </script>
+    <script>
+        $(document).ready(function () {
+            let priceAdded = $('.price-amenities').length;
 
+            $('.add_additional_price_option').on('click', function () {
+                priceAdded++;
+
+                const uniqueIndex = `crustOption_${priceAdded}`; // Unique identifier for each set
+
+                $("#additionalPriceOptions").append(`
+                <div class="row data-amenities mb-3" data-index="${uniqueIndex}">
+                    <div class="form-group col-12 col-lg-4 col-md-4">
+                        <label for="size_${uniqueIndex}" class="col-form-label">Size <span class="text-danger">*</span></label>
+                        <select name="size_prices[${uniqueIndex}][size]" class="form-control selectpicker" required data-live-search="true" id="size_${uniqueIndex}">
+                        <?php $__currentLoopData = helper::get_sizes(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($branch->id); ?>">
+                                <?php echo e($branch->name); ?>
+
+                </option>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+            </div>
+            <div class="form-group col-12 col-lg-4 col-md-4">
+                <label for="crust_${uniqueIndex}" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                        <select name="size_prices[${uniqueIndex}][branch_id]" class="form-control selectpicker" required data-live-search="true" id="branch_${uniqueIndex}">
+                        <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($branch->id); ?>">
+                                <?php echo e($branch->name); ?>
+
+                </option>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+            </div>
+            <div class="form-group col-12 col-lg-3 col-md-3">
+                <label for="price_${uniqueIndex}" class="col-form-label">Price <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" name="size_prices[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
+                    </div>
+                    <div class="col-12 col-lg-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-outline-danger deletePriceOption">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `);
+
+                // Refresh selectpicker for dynamically added selects
+                $('.selectpicker').selectpicker('refresh');
+            });
+
+            $(document).on('click', '.deletePriceOption', function () {
+                $(this).closest('.price-amenities').remove();
+                priceAdded--;
+            });
+        });
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('admin.theme.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Usama yasin\PhpstormProjects\foodefy-93nulled\codecanyon-28563040-single-restaurant-food-ordering-website-and-delivery-boy-app-with-admin-panel\foodefy\resources\views/admin/pizza-pricing/edit.blade.php ENDPATH**/ ?>

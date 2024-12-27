@@ -361,6 +361,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 
         Route::get('pizza_crusts', [PizzaCrustController::class, 'index']);
         Route::post('pizza_crusts/update', [PizzaCrustController::class, 'update']);
+        Route::post('pizza_sizes_price/update', [PizzaCrustController::class, 'updateSizePrice']);
         Route::get('pizza_crusts-{id}', [PizzaCrustController::class, 'edititem']);
 
 

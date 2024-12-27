@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Crust;
 use App\Models\Item;
+use App\Models\PizzaPrice;
 use App\Models\ProductSizeCrust;
 use App\Models\Sides;
 use App\Models\Size;
@@ -18,11 +19,13 @@ class PizzaCrustController extends Controller
     public function index()
     {
         $category = Category::where('category_name', 'Pizza')->first();
-        $item = Item::orderBy('id', 'desc')->where('cat_id',$category->id)->get();
+        $item = Item::orderBy('id', 'desc')->where('cat_id', $category->id)->get();
         return view('admin.pizza-pricing.index', compact('item'));
     }
+
     public function edititem($id)
     {
+        $sizes = PizzaPrice::where('item_id', $id)->get();
         $crusts = ProductSizeCrust::where('item_id', $id)->get();
 
         $groupedData = $crusts->groupBy(function ($item) {
@@ -36,9 +39,8 @@ class PizzaCrustController extends Controller
             ];
         })->values()->toArray();
 
-        return view('admin.pizza-pricing.edit', compact('groupedData', 'id'));
+        return view('admin.pizza-pricing.edit', compact('groupedData', 'id', 'sizes'));
     }
-
 
 
     // Update an existing deal
@@ -63,6 +65,31 @@ class PizzaCrustController extends Controller
                     ]
                 );
             }
+        }
+
+//        $deal->update($request->all());
+
+        return redirect('admin/pizza_crusts')->with('success', 'Pizza Crust and Size Updated successfully!');
+    }
+
+    public function updateSizePrice(Request $request)
+    {
+        $data = $request->validate([
+            'id' => 'required|exists:item,id',
+            'size_prices' => 'required|array',
+        ]);
+        foreach ($data['size_prices'] as $size_crust) {
+            PizzaPrice::updateOrCreate(
+                [
+                    'item_id' => $data['id'],
+                    'size_id' => $size_crust['size'],
+                    'branch_id' => $size_crust['branch_id'],
+                ],
+                [
+                    // Values to update or insert
+                    'price' => $size_crust['price'],
+                ]
+            );
         }
 
 //        $deal->update($request->all());

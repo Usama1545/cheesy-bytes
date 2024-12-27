@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
+use App\Models\PizzaPrice;
 use App\Models\ProductSizeCrust;
 use App\Models\TopDeals;
 use Illuminate\Http\Request;
@@ -143,15 +144,21 @@ class ItemController extends Controller
         }
         $getitemdata['extras'] = Extra::where('item_id', $getitemdata->id)->get();
         $crusts = ProductSizeCrust::where('item_id', $id)->get();
+        $prices = PizzaPrice::where('item_id', $id)->where('branch_id', $branchId)->get();
 
         $groupedData = $crusts->groupBy(function ($item) {
-            return $item->size_id; // Group by size_id and price
-        })->map(function ($items) {
+            return $item->size_id; // Group by size_id
+        })->map(function ($items) use ($prices) {
             $firstItem = $items->first();
+
+            // Find the corresponding size price
+            $sizePrice = $prices->firstWhere('size_id', $firstItem->size_id);
+
             return [
                 'id' => $firstItem->size_id,
                 'name' => $firstItem->size->name, // Assuming a relationship with Size model
                 'label' => $firstItem->size->label, // Assuming a relationship with Size model
+                'size_price' => $sizePrice ? $sizePrice->price : null, // Add size price if available
 
                 'crusts' => $items->map(function ($item) {
                     return [
