@@ -50,6 +50,7 @@ class PizzaCrustController extends Controller
             'id' => 'required|exists:item,id',
             'size_crusts' => 'required|array',
         ]);
+        ProductSizeCrust::where('item_id', $data['id'])->delete();
         foreach ($data['size_crusts'] as $size_crust) {
             foreach ($size_crust['crusts'] as $crust) {
                 ProductSizeCrust::updateOrCreate(
@@ -78,6 +79,7 @@ class PizzaCrustController extends Controller
             'id' => 'required|exists:item,id',
             'size_prices' => 'required|array',
         ]);
+        PizzaPrice::where('item_id', $data['id'])->delete();
         foreach ($data['size_prices'] as $size_crust) {
             PizzaPrice::updateOrCreate(
                 [
