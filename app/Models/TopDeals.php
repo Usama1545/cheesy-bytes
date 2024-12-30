@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class TopDeals extends Model
 {
     use HasFactory;
-    protected $fillable = ['product_id','offer_type','offer_amount','start_date','end_date','start_time','end_time'];
+    protected $fillable = ['product_id','offer_type','offer_amount','start_date','end_date','start_time','end_time','size_id','products_id'];
     protected $table = 'top_deals';
     public function product()
     {

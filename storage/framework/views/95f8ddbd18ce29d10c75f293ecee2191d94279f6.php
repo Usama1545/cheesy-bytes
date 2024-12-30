@@ -25,13 +25,6 @@
                             </div>
                         </div>
                         <h5 class="item-card-title pb-3 fs-6 d-flex">
-                            <?php if($itemdata->item_type == 1): ?>
-                                <img src="<?php echo e(helper::image_path('veg.svg')); ?>" alt=""
-                                     class="<?php echo e(session()->get('direction') == '2' ? 'ms-1' : 'me-1'); ?>">
-                            <?php else: ?>
-                                <img src="<?php echo e(helper::image_path('nonveg.svg')); ?>" alt=""
-                                     class="<?php echo e(session()->get('direction') == '2' ? 'ms-1' : 'me-1'); ?>">
-                            <?php endif; ?>
                             <div class="d-flex align-items-center gap-1">
                                 <?php if(isset($county)): ?>
                                     <a href="<?php echo e(URL::to($county.'/item-' . $itemdata->slug)); ?>">
@@ -100,11 +93,31 @@
                                     </button>
                                     <input class="fw-500 item-total-qty-<?php echo e($itemdata->slug); ?>" type="text"
                                            value="<?php echo e(helper::get_item_cart($itemdata->id)); ?>" disabled/>
-                                    <button class="btn btn-sm fw-500 border-0"
-                                            onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">+
-                                    </button>
+                                        <?php if(strtolower($itemdata['category_info']->category_name) == 'pizza'): ?>
+                                            <a data-bs-toggle="modal"
+                                                data-bs-target="#PizzaModal"
+                                                class="btn btn-sm fw-500 border-0"
+                                               data-product-id="<?php echo e($itemdata->id); ?>">+</a>
+                                        <?php else: ?>
+                                        <button class="btn btn-sm fw-500 border-0"
+                                                onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">+
+                                        </button>
+                                        <?php endif; ?>
                                 </div>
                             <?php else: ?>
+                                <?php if(strtolower($itemdata['category_info']->category_name) == 'pizza'): ?>
+                                    <button
+                                        class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->slug); ?>"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#PizzaModal"
+                                        class="btn btn-sm fw-500 border-0"
+                                        data-product-id="<?php echo e($itemdata->id); ?>" >
+                                        <?php echo e(trans('labels.add')); ?>
+
+                                        <i class="fa-solid fa-plus addon_modal_icon_<?php echo e($itemdata->slug); ?>"></i>
+                                        <div class="loader d-none addon_modal_loader_<?php echo e($itemdata->slug); ?>"></div>
+                                    </button>
+                                <?php else: ?>
                                 <button
                                         class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_<?php echo e($itemdata->slug); ?>"
                                         onclick="showitem('<?php echo e($itemdata->slug); ?>','<?php echo e(URL::to('/show-item')); ?>')">
@@ -113,6 +126,7 @@
                                     <i class="fa-solid fa-plus addon_modal_icon_<?php echo e($itemdata->slug); ?>"></i>
                                     <div class="loader d-none addon_modal_loader_<?php echo e($itemdata->slug); ?>"></div>
                                 </button>
+                                <?php endif; ?>
                             <?php endif; ?>
     </div>
 </div>

@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Addons;
+use App\Models\AddonsGroup;
+use App\Models\Extra;
 use App\Models\Item;
 use App\Models\Sides;
+use Session;
 use App\Models\TopDeals;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DealController extends Controller
 {
@@ -114,4 +119,88 @@ class DealController extends Controller
         }
       return 0;
     }
+
+    public function dealDetails($id)
+    {
+        $branchId = Session::get('branch_id');
+        $user_id = Session::get('user_id'); // Ensure user_id is fetched correctly
+        $session_id = Session::getId();
+
+        // Fetch top deals by ID
+        $topDeals = TopDeals::where('id', $id)->pluck('product_ids')->first();
+        $productIds = explode(',', $topDeals); // Convert comma-separated string to array
+        if($user_id != null) {
+            // Fetch items grouped by category and belonging to the selected branch
+            $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')
+                ->select(
+                    'item.*',
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart')
+                )
+                ->where(function ($query) use ($branchId) {
+                    $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('branch_ids', 'like', "$branchId,%")    // Match start
+                    ->orWhere('branch_ids', 'like', "%,$branchId")    // Match end
+                    ->orWhere('branch_ids', '=', $branchId);           // Exact match
+                })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
+                ->leftJoin('cart', function ($query) use ($user_id) {
+                    $query->on('cart.item_id', '=', 'item.id')
+                        ->where('cart.user_id', '=', $user_id)
+                        ->where('cart.buynow', '=', '0');
+                })
+                ->whereIn('item.id', $productIds)
+                ->groupBy('item.cat_id')
+                ->get();
+
+
+        }else{
+            $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')
+                ->select(
+                    'item.*',
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'),
+                    DB::raw('(case when cart.item_id is null then 0 else cart.qty end) as cartQty')
+                )
+                ->where(function ($query) use ($branchId) {
+                    $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('branch_ids', 'like', "$branchId,%")    // Match start
+                    ->orWhere('branch_ids', 'like', "%,$branchId")    // Match end
+                    ->orWhere('branch_ids', '=', $branchId);           // Exact match
+                })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
+                ->leftJoin('cart', function ($query) use ($session_id) {
+                    $query->on('cart.item_id', '=', 'item.id')
+                        ->where('cart.session_id', '=', $session_id)
+                        ->where('cart.buynow', '=', '0');
+                })
+                ->whereIn('item.id', $productIds)
+                ->groupBy('item.cat_id')
+                ->get();
+            // Fetch addons grouped by addon groups
+        }
+
+        $groupedData = $getitemdata->groupBy(function ($item) {
+            return $item->category_info->category_name; // Assuming 'name' is the category name field
+        });
+        $topDeals = TopDeals::where('id', $id)->pluck('size_id')->first();
+
+        $result = $groupedData->map(function ($items, $categoryName) use ($topDeals,$id) {
+            return [
+                'category_name' => $categoryName,
+                'items' => $items,
+                'size_id' => $topDeals,
+                'deal_id' => $id,
+            ];
+        })->values();
+
+        return $result;
+    }
+
 }

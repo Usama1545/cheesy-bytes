@@ -87,7 +87,7 @@
 </main>
 
 <!-- Modal Item Details -->
-<div class="modal modalitemdetails" id="modalitemdetails" tabindex="-1" aria-labelledby="exampleModalLabel"
+<div class="modal modalitemdetails" id="modalitemdetails" tabindex="-1" style="z-index: 1052" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content" id="modalitem_body">
@@ -117,7 +117,24 @@
     </div>
 </div>
 
-<div class="modal" id="PizzaModal" tabindex="-1" aria-labelledby="PizzaModalLabel" aria-hidden="true">
+
+<!-- Deals Mix and Match model -->
+<div class="modal" id="DealModal" tabindex="-1" style="z-index: 1051" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="DealModelTitle" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header justify-content-between">
+                <h1 class="modal-title fs-5" id="itemDealTitle"></h1>
+                <button type="button" class="btn-close <?php echo e(session()->get('direction') == '2' ? 'm-0' : ''); ?>"
+                        data-bs-dismiss="modal" aria-label="Close" id="DealClose"></button>
+            </div>
+            <div class="modal-body">
+                <div class="item-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="PizzaModal" tabindex="-1" style="z-index: 1052" aria-labelledby="PizzaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -155,7 +172,7 @@
                                     <img src="<?php echo e(helper::image_path($dipping->image)); ?>"
                                          alt="Dipping Sauce"
                                          class="img-fluid rounded h-70px"
-                                         style="object-fit: cover;">
+                                         style="object-fit: fill;width:40px;height:40px">
 
                                     <!-- Dipping Name -->
                                     <span class="flex-grow-1 text-sm"><?php echo e($dipping->name); ?></span>
@@ -1190,6 +1207,8 @@
         let productId = null;
         const selectedDippings = {}; // To track selected dippings and their quantities
         let size_id = '';
+        let sizeId = null;
+        let dealId = null;
         const quantityValue = document.getElementById('overall-pizza-quantity');
         const decreaseQuantityButton = document.querySelector('button[data-action="decrease_pizza_quantity"]');
         const increaseQuantityButton = document.querySelector('button[data-action="increase_pizza_quantity"]');
@@ -1222,7 +1241,16 @@
         // Open modal and load product data
         $(document).on('click', '[data-bs-target="#PizzaModal"]', function () {
             productId = $(this).data('product-id'); // Fetch product ID
+            sizeId = $(this).data('size-id'); // Fetch size ID
+            dealId = $(this).data('deal-id'); // Fetch deal ID
             loadPizzaData(productId);
+            const DealOpened = sessionStorage.getItem('DealOpened');
+            if(DealOpened !== 'false') {
+                if (window.location.pathname === '/') {
+                $('#DealModal').addClass('show').css('display', 'block');
+                sessionStorage.setItem('DealOpened', 'true');
+                }
+            }
         });
 
         // Handle dipping quantity changes
@@ -1260,6 +1288,10 @@
         function loadPizzaData(itemId) {
             $.ajax({
                 url: `/products/${itemId}/details`, // Replace with your API endpoint
+                data: { // Data sent as query parameters
+                    dealId: dealId,
+                    sizeId: sizeId
+                },
                 method: 'GET',
                 success: function (response) {
                     details = response.responce.item_detail;
@@ -1528,6 +1560,177 @@
             $('#PizzaPrice').text(`$${totalAddonPrice.toFixed(2)}`);
         }
     });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const itemModal = new bootstrap.Modal(document.getElementById('DealModal'));
+        const storedProductId = sessionStorage.getItem('productId');
+        const storedproductTitle = sessionStorage.getItem('productTitle');
+
+        document.getElementById('itemDealTitle').innerText =storedproductTitle;
+
+        // Check if the modal was previously opened and the page was reloaded
+        if (sessionStorage.getItem('DealOpened') === 'true') {
+            if (window.location.pathname === '/') {
+                itemModal.show(); // Show the modal if previously opened and page is not hidden
+                fetchProductDetails(storedProductId);
+            }
+        }
+        $(document).on('click', '#DealClose', function () {
+            sessionStorage.setItem('DealOpened', 'false'); // Set the modalOpened flag to false when modal is closed
+            $('#DealModal').addClass('show').css('display', 'none');
+        })
+        // Listen for the modal close event to update localStorage
+        document.getElementById('DealModal').addEventListener('hidden.bs.modal', function () {
+            sessionStorage.setItem('DealOpened', 'true'); // Set the modalOpened flag to false when modal is closed
+        });
+
+        // Listen for modal triggers
+        document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = button.getAttribute('data-deal-id');
+                var productTitle = button.getAttribute('data-deal-title');
+
+                if (productId) {
+                    sessionStorage.setItem('productId', productId); // Store productId in session storage
+                    sessionStorage.setItem('productTitle', productTitle); // Store productId in session storage
+                    sessionStorage.setItem('DealOpened', 'true'); // Set the flag to true when modal is opened
+                } else {
+                    console.error('Product ID is missing for modal trigger.');
+                }
+            });
+        });
+
+        // Event listener to fetch and populate data when the modal is shown
+        var dealModal = document.getElementById('DealModal');
+        dealModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget; // Button that triggered the modal
+
+            var productId = button.getAttribute('data-deal-id');
+            var productTitle = button.getAttribute('data-deal-title');
+
+            // Use this id to populate or do something inside the modal
+            document.getElementById('itemDealTitle').innerText =productTitle;
+            if (productId) {
+
+                fetchProductDetails(productId); // Fetch the product details when modal is shown
+            } else {
+                console.error('Product ID is missing.');
+            }
+        });
+
+        // Example function to fetch product details
+        function fetchProductDetails(productId) {
+            fetch(`/deal-details/${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        console.error('No data found.');
+                        return;
+                    }
+
+                    // Clear existing items
+                    document.querySelector('.item-list').innerHTML = '';
+
+                    // Iterate over categories and items
+                    data.forEach(category => {
+                        const categoryContainer = document.createElement('div');
+                        categoryContainer.className = 'card mb-5';
+
+                        // Card Header
+                        const cardHeader = document.createElement('div');
+                        cardHeader.className = 'card-header bg-warning text-white text-uppercase fw-bold';
+                        cardHeader.textContent = category.category_name;
+                        categoryContainer.appendChild(cardHeader);
+
+                        // Create a container to wrap items
+                        const itemsContainer = document.createElement('div');
+                        itemsContainer.className = 'row';
+
+                        // Iterate over each item in the category
+                        category.items.forEach(item => {
+                            const itemContainer = document.createElement('div');
+                            itemContainer.className = 'col-12 col-lg-4 col-md-6 col-sm-12 m-2';
+
+                            const cardContainer = document.createElement('div');
+                            cardContainer.className = 'h-100 d-flex flex-column card';
+
+                            // Card Image
+                            const itemImageLink = document.createElement('a');
+                            itemImageLink.href = `URL_TO_ITEM_PAGE/item-${item.slug}`;
+                            const itemImage = document.createElement('img');
+                            itemImage.src = item.item_image.image_url;
+                            itemImage.className = 'card-img-top border-0 rounded-0 rounded-top position-relative';
+                            itemImage.style.height = '250px';
+                            itemImageLink.appendChild(itemImage);
+                            cardContainer.appendChild(itemImageLink);
+
+                            // Card Body
+                            const cardBody = document.createElement('div');
+                            cardBody.className = 'card-body pb-3';
+
+                            const itemTitle = document.createElement('h5');
+                            itemTitle.className = 'item-card-title fs-6 d-flex justify-content-between align-items-center text-black';
+                            const itemTitleLink = document.createElement('a');
+                            itemTitleLink.href = `URL_TO_ITEM_PAGE/item-${item.slug}`;
+                            itemTitleLink.className = 'text-black';
+                            itemTitleLink.textContent = item.item_name;
+                            itemTitle.appendChild(itemTitleLink);
+
+                            cardBody.appendChild(itemTitle);
+                            cardContainer.appendChild(cardBody);
+
+                            // Item Footer and Order Now Button
+                            const itemFooter = document.createElement('div');
+                            itemFooter.className = 'item-card-footer';
+                            const footerContent = document.createElement('div');
+                            footerContent.className = 'd-flex justify-content-between align-items-center';
+
+                            if (item.is_cart === 1) {
+                                // Display item quantity if it's already in cart
+                                const orderNowButton = document.createElement('button');
+                                orderNowButton.className = 'btn disabled btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_' + item.slug;
+                                orderNowButton.textContent = 'Added to Cart';
+                                footerContent.appendChild(orderNowButton);
+                            } else {
+                                if (category.category_name.toLowerCase() === 'pizza') {
+                                    // Create the anchor element
+                                    const pizzaModalLink = document.createElement('a');
+                                    pizzaModalLink.setAttribute('data-bs-toggle', 'modal');
+                                    pizzaModalLink.setAttribute('data-bs-target', '#PizzaModal');
+                                    pizzaModalLink.className = 'cursor-pointer btn btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center';
+                                    pizzaModalLink.textContent = 'Order Now';
+                                    pizzaModalLink.setAttribute('data-product-id', item.id);
+                                    pizzaModalLink.setAttribute('data-size-id', category.size_id);// Assuming `item.id` holds the product ID
+                                    pizzaModalLink.setAttribute('data-deal-id', category.deal_id);
+                                    // Append the anchor to the footer content
+                                    footerContent.appendChild(pizzaModalLink);
+                                } else {
+                                    // Show "Order Now" button for non-pizza categories
+                                    const orderNowButton = document.createElement('button');
+                                    orderNowButton.className = 'btn btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_' + item.slug;
+                                    orderNowButton.textContent = 'Order Now';
+                                    orderNowButton.addEventListener('click', () => showdealitem(item.slug,category.deal_id ,'<?php echo e(URL::to('/show-item')); ?>'));
+                                    footerContent.appendChild(orderNowButton);
+                                }
+                            }
+
+                            itemFooter.appendChild(footerContent);
+                            cardContainer.appendChild(itemFooter);
+                            itemContainer.appendChild(cardContainer);
+                            itemsContainer.appendChild(itemContainer);
+                        });
+
+                        categoryContainer.appendChild(itemsContainer);
+                        document.querySelector('.item-list').appendChild(categoryContainer);
+                    });
+                })
+                .catch(error => console.error('Error fetching product details:', error));
+        }
+    });
+
+
 </script>
 
 <?php if(@helper::checkaddons('age_verification')): ?>

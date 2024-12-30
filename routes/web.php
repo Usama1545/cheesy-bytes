@@ -91,7 +91,7 @@ Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware', 
 	Route::get('/ourteam', [WebOtherPagesController::class, 'ourteam'])->name('ourteam');
 	// reservation
 	Route::post('/reservation/store', [WebBookingsController::class, 'store']);
-
+    Route::get('deal-details/{id}',[DealController::class, 'dealDetails'])->name('dealDetails');
 	//subscribe
 	Route::post('/subscribe', [WebOtherPagesController::class, 'subscribe'])->name('subscribe');
 

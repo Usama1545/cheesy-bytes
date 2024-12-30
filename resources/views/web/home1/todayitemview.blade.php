@@ -2,29 +2,39 @@
     <div class="card rounded-4 h-100" style="border-color: var(--bs-primary)">
         <div class="d-flex align-items-center p-2 h-100">
             <div class="card-image card-second d-flex align-items-center col-auto position-relative">
-                <a href="{{ URL::to('item-' . $itemdata->product->slug) }}">
+                @if($itemdata->deal_type  != 1)
+                    <a href="{{ URL::to('item-' . $itemdata->product->slug)  }}">
+                        @else
+                            <a>
+                                @endif
                     <img src="{{ @helper::image_path($itemdata->product['item_image']->image_name) }}"
-                        class="card-img-top border-0 rounded-4" alt="dishes">
+                         class="card-img-top border-0 rounded-4" alt="dishes">
                 </a>
             </div>
             <div class="card-body py-0 {{ session()->get('direction') == '2' ? 'pe-3 ps-0' : 'ps-3 pe-0' }}">
 
                 @php
-
-                        if (@$itemdata->offer_type == 1) {
-                            if ($itemdata->product->price > @$itemdata->offer_amount) {
-                                $price = $itemdata->product->price - @$itemdata->offer_amount;
+                    if(@$itemdata->offer_type !== 1)
+                    {
+                            if (@$itemdata->offer_type == 1) {
+                                if ($itemdata->dealPrice > @$itemdata->offer_amount) {
+                                    $price = $itemdata->dealPrice - @$itemdata->offer_amount;
+                                } else {
+                                    $price = $itemdata->dealPrice;
+                                }
                             } else {
-                                $price = $itemdata->product->price;
+                                $price = $itemdata->dealPrice - $itemdata->dealPrice * (@$itemdata->offer_amount / 100);
                             }
-                        } else {
-                            $price = $itemdata->product->price - $itemdata->product->price * (@$itemdata->offer_amount / 100);
-                        }
-                        $original_price = $itemdata->product->price;
-                        $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-
+                            $original_price = $itemdata->dealPrice;
+                            $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                    }
+                    else{
+                        $price = $itemdata->dealPrice;
+                        $off= 0;
+                        $original_price =  $itemdata->product->original_price ?? $itemdata->offer_amount;
+                    }
                 @endphp
-                <!-- off lable -->
+                    <!-- off lable -->
                 @if ($off > 0)
                     <div class="offer-lable d-flex mb-1">
                         <h5>{{ $off }}% {{ trans('labels.off') }}</h5>
@@ -43,18 +53,23 @@
                 </div>
                 <h5 class="fs-6 mb-0 item-card-title d-flex text-h">
                     <div class="d-flex gap-1">
-                        <a href="{{ URL::to('item-' . $itemdata->product->slug) }}">
-                            <p class="item-card-title mb-0 line-2 fs-7">
-                                {{ $itemdata->product->item_name }}
-                            </p>
-                        </a>
-                        @if ($itemdata->product->item_allergens != null)
-                            <div type="button"
-                                onclick="itemsallergens('{{ $itemdata->product->id }}','{{ route('get_item_allergens') }}')">
-                                <div class="btn-info">
-                                    <i class="fa-solid fa-info"></i>
-                                </div>
-                            </div>
+                        @if($itemdata->deal_type  != 1)
+                            <a href="{{ URL::to('item-' . $itemdata->product->slug)  }}">
+                                @else
+                                    <a>
+
+                                    @endif
+                                        <p class="item-card-title mb-0 line-2 fs-7">
+                                            {{ $itemdata->product->item_name }}
+                                        </p>
+                                    </a>
+                                    @if ($itemdata->product->item_allergens != null)
+                                        <div type="button"
+                                             onclick="itemsallergens('{{ $itemdata->product->id }}','{{ route('get_item_allergens') }}')">
+                                            <div class="btn-info">
+                                                <i class="fa-solid fa-info"></i>
+                                            </div>
+                                        </div>
                         @endif
                     </div>
                 </h5>
@@ -72,20 +87,40 @@
                             @if ($itemdata->is_cart == 1)
                                 <div class="item-quantity py-1 px-5">
                                     <button type="button" class="btn btn-sm  fw-500"
-                                        onclick="removefromcart('{{ URL::to('/cart') }}','{{ trans('messages.remove_cartitem_note') }}','{{ trans('labels.goto_cart') }}')">-</button>
+                                            onclick="removefromcart('{{ URL::to('/cart') }}','{{ trans('messages.remove_cartitem_note') }}','{{ trans('labels.goto_cart') }}')">
+                                        -
+                                    </button>
                                     <input class="fw-500 item-total-qty-{{ $itemdata->product->slug }}" type="text"
-                                        value="{{ helper::get_item_cart($itemdata->product->id) }}" disabled />
+                                           value="{{ helper::get_item_cart($itemdata->product->id) }}" disabled/>
                                     <button class="btn btn-sm fw-500 border-0"
-                                        onclick="showitem('{{ $itemdata->product->slug }}','{{ URL::to('/show-item') }}')">+</button>
+                                            onclick="showitem('{{ $itemdata->product->slug }}','{{ URL::to('/show-item') }}')">
+                                        +
+                                    </button>
                                 </div>
                             @else
-                                <button
-                                    class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->product->slug }}"
-                                    onclick="showitem('{{ $itemdata->product->slug }}','{{ URL::to('/show-deal-item') }}')">
-                                    {{ trans('labels.add') }}
-                                    <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->product->slug }}"></i>
-                                    <div class="loader d-none addon_modal_loader_{{ $itemdata->product->slug }}"></div>
-                                </button>
+                                @if($itemdata->deal_type == 1)
+                                    <button
+                                        class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->product->slug }}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#DealModal"
+                                        data-deal-id="{{ $itemdata->deal_id }}"
+                                        data-deal-title="{{ $itemdata->product->item_name }}"
+                                    >
+                                        Select
+                                        <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->product->slug }}"></i>
+                                        <div
+                                            class="loader d-none addon_modal_loader_{{ $itemdata->product->slug }}"></div>
+                                    </button>
+                                @else
+                                    <button
+                                        class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->product->slug }}"
+                                        onclick="showitem('{{ $itemdata->product->slug }}','{{ URL::to('/show-deal-item') }}')">
+                                        {{ trans('labels.add') }}
+                                        <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->product->slug }}"></i>
+                                        <div
+                                            class="loader d-none addon_modal_loader_{{ $itemdata->product->slug }}"></div>
+                                    </button>
+                                @endif
                             @endif
                         </div>
                     </div>

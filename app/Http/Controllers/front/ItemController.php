@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
+use App\Models\itemPrice;
 use App\Models\PizzaPrice;
 use App\Models\ProductSizeCrust;
 use App\Models\TopDeals;
@@ -40,13 +41,18 @@ class ItemController extends Controller
             ->where('item.slug', '=', $request->slug)
             ->where('item.item_status', '1')
             ->first();
+        if(isset($request->deal_id))
+        {
+            $product_id = TopDeals::where('id', $request->deal_id)->first()->product_id;
+            $price = ItemPrice::where('item_id', $product_id)->where('branch_id',$branchId)->pluck('price')->first();
+        }
         $itemdata = array(
             "id" => $iteminfo->id,
             "slug" => $iteminfo->slug,
             "item_name" => $iteminfo->item_name,
             "item_type" => $iteminfo->item_type,
             "item_type_image" => $iteminfo->item_type == 1 ? helper::image_path("veg.svg") : helper::image_path("nonveg.svg"),
-            "price" => $iteminfo->item_price ?? $iteminfo->prices,
+            "price" => $price ?? $iteminfo->item_price ?? $iteminfo->prices,
             "video_url" => $iteminfo->video_url,
             "is_top_deals" => $iteminfo->is_top_deals,
             "tax" => $iteminfo->tax,
@@ -76,7 +82,6 @@ class ItemController extends Controller
                     ->where('favorite.user_id', '=', $user_id);
             })
             ->where('item.slug', '=', $request->slug)
-            ->where('item.item_status', '1')
             ->first();
         $deal = TopDeals::where('product_id', $iteminfo->id)->first();
         if ($deal->offer_type == 1) {
@@ -113,7 +118,7 @@ class ItemController extends Controller
         }
     }
 
-    public function productdetails($id)
+    public function productdetails($id,Request $request)
     {
         $branchId = Session::get('branch_id');
 
@@ -143,12 +148,20 @@ class ItemController extends Controller
             $addons_group->availableAddons = $getitemdata['addons']->where('addongroup_id', $addons_group->id);
         }
         $getitemdata['extras'] = Extra::where('item_id', $getitemdata->id)->get();
-        $crusts = ProductSizeCrust::where('item_id', $id)->get();
+        if(isset($request['dealId']) && isset($request['sizeId']))
+        {
+            $product_id = TopDeals::where('id', $request->dealId)->first()->product_id;
+            $dealprice = ItemPrice::where('item_id', $product_id)->where('branch_id',$branchId)->pluck('price')->first();
+
+            $crusts = ProductSizeCrust::where('item_id', $id)->where('size_id',$request['sizeId'])->get();
+        }else {
+            $crusts = ProductSizeCrust::where('item_id', $id)->get();
+        }
         $prices = PizzaPrice::where('item_id', $id)->where('branch_id', $branchId)->get();
 
         $groupedData = $crusts->groupBy(function ($item) {
             return $item->size_id; // Group by size_id
-        })->map(function ($items) use ($prices) {
+        })->map(function ($items) use ($prices,$dealprice) {
             $firstItem = $items->first();
 
             // Find the corresponding size price
@@ -158,7 +171,7 @@ class ItemController extends Controller
                 'id' => $firstItem->size_id,
                 'name' => $firstItem->size->name, // Assuming a relationship with Size model
                 'label' => $firstItem->size->label, // Assuming a relationship with Size model
-                'size_price' => $sizePrice ? $sizePrice->price : null, // Add size price if available
+                'size_price' => $dealprice ??  $sizePrice->price ?? null, // Add size price if available
 
                 'crusts' => $items->map(function ($item) {
                     return [
@@ -204,7 +217,6 @@ class ItemController extends Controller
                 })
                 ->groupBy('item.id', 'cart.item_id')
                 ->where('item.slug', '=', $request->slug)
-                ->where('item.item_status', '1')
                 ->first();
             $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $getitemdata->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
             $getitemdata['addons'] = Addons::select('id', 'addongroup_id', 'name', 'price')
@@ -253,7 +265,6 @@ class ItemController extends Controller
                 })
                 ->groupBy('item.id', 'cart.item_id')
                 ->where('item.slug', '=', $request->slug)
-                ->where('item.item_status', '1')
                 ->first();
             $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $getitemdata->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
             $getitemdata['addons'] = Addons::select('id', 'addongroup_id', 'branch_ids', 'name', 'price')
@@ -314,7 +325,6 @@ class ItemController extends Controller
                 })
                 ->groupBy('item.id', 'cart.item_id')
                 ->where('item.slug', '=', $request->slug)
-                ->where('item.item_status', '1')
                 ->first();
             $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $getitemdata->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
             $getitemdata['addons'] = Addons::select('id', 'addongroup_id', 'name', 'price')->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
@@ -364,7 +374,6 @@ class ItemController extends Controller
                 ->orderByDesc('item.id')
                 ->where('item.id', '!=', @$getitemdata->id)
                 ->where('item.cat_id', '=', @$getitemdata->cat_id)
-                ->where('item.item_status', '1')
                 ->take(3)->get();
         }
         $itemreviewdata = Ratting::with('user_info')->select('id', 'ratting', 'comment', 'item_id', 'user_id', 'created_at')->where('item_id', $getitemdata->id)->where('status', 1)->get();

@@ -202,7 +202,8 @@ class HomeController extends Controller
                     'top_deals.*',
                     'item.*',
                     'favorite.id as favorite_id', // Include favorite-related data
-                    'cart.id as cart_id' // Include cart-related data
+                    'cart.id as cart_id', // Include cart-related data
+                    'item_prices.price as dealPrice'
                 )->distinct() // Ensure distinct rows
                 ->get();
 
@@ -302,36 +303,38 @@ class HomeController extends Controller
 //                ->where('item.item_status', '1')
 //                ->where('item.price', '>', $offer_price)
 //                ->orderBy('item.reorder_id')->take(10)->get();
-            $topdealsproduct = TopDeals::with('product')
-                ->join('item', 'top_deals.product_id', '=', 'item.id')
-                ->leftJoin('cart', function ($query) use ($user_id) {
-                    $query->on('cart.item_id', '=', 'item.id')
-                        ->where('cart.user_id', '=', $user_id)
-                        ->where('cart.buynow', '=', '0');
-                })
+            $topdealsproduct = TopDeals::with('product') // Ensure 'product' is defined as a relationship in the TopDeals model
+            ->join('item', 'top_deals.product_id', '=', 'item.id') // Relating top_deals to item
+            ->leftJoin('cart', function ($query) use ($session_id) {
+                $query->on('cart.item_id', '=', 'item.id')
+                    ->where('cart.user_id', '=', $session_id)
+                    ->where('cart.buynow', '=', '0');
+            })
                 ->leftJoin('item_prices', function ($query) use ($branchId) {
-                    $query->on('item_prices.item_id', '=', 'item.id')
-                        ->where('item_prices.branch_id', '=', $branchId);
+                    $query->on('item_prices.item_id', '=', 'item.id') // Correctly associating item_prices with item
+                    ->where('item_prices.branch_id', '=', $branchId);
                 })
                 ->where(function ($query) use ($currentDateTime) {
                     $query->where('end_date', '>', $currentDateTime->toDateString()) // If end_date is in the future
-                    ->orWhere(function ($query) use ($currentDateTime) {
+                        ->orWhere(function ($query) use ($currentDateTime) {
                         $query->where('end_date', '=', $currentDateTime->toDateString()) // Check same day
                         ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
-                    });
+                        });
                 })
                 ->where(function ($query) {
                     $branchId = Session::get('branch_id');
-                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
-                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
-                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
-                    ->orWhere('item.branch_ids', '=', $branchId);
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%")
+                        ->orWhere('item.branch_ids', 'like', "$branchId,%")
+                        ->orWhere('item.branch_ids', 'like', "%,$branchId")
+                        ->orWhere('item.branch_ids', '=', $branchId);
                 })
                 ->select(
                     'top_deals.*',
+                    'top_deals.id as deal_id',
                     'item.*',
-                    'cart.id as cart_id' // Include cart-related data
-                )->distinct() // Ensure distinct rows
+                    'cart.id as cart_id',
+                    'item_prices.price as dealPrice'
+                )->distinct() // Ensuring unique rows
                 ->get();
 
             $recommended = Item::with('category_info', 'subcategory_info', 'item_image')

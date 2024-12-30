@@ -392,6 +392,40 @@ function showitem(slug, showurl) {
     })
 }
 
+function showdealitem(slug,deal_id, showurl) {
+    "use strict";
+    $('.addon_modal_' + slug).prop("disabled", true);
+    $('.addon_modal_icon_' + slug).addClass('d-none');
+    $('.addon_modal_loader_' + slug).removeClass('d-none');
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: showurl,
+        data: {
+            slug: slug,
+            deal_id: deal_id
+        },
+        method: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            $("#modalitem_body").html(response.output);
+            $("#modalitemdetails").modal('show');
+            getaddons(response.id);
+            $('.addon_modal_' + slug).prop("disabled", false);
+            $('.addon_modal_icon_' + slug).removeClass('d-none');
+            $('.addon_modal_loader_' + slug).addClass('d-none');
+        },
+        error: function () {
+            toastr.error(wrong);
+            $('.addon_modal_' + slug).prop("disabled", false);
+            $('.addon_modal_icon_' + slug).removeClass('d-none');
+            $('.addon_modal_loader_' + slug).addClass('d-none');
+        }
+    })
+}
+
+
 function getaddons(id) {
     "use strict";
 

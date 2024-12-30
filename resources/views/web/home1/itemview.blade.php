@@ -25,13 +25,6 @@
                             </div>
                         </div>
                         <h5 class="item-card-title pb-3 fs-6 d-flex">
-                            @if ($itemdata->item_type == 1)
-                                <img src="{{ helper::image_path('veg.svg') }}" alt=""
-                                     class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}">
-                            @else
-                                <img src="{{ helper::image_path('nonveg.svg') }}" alt=""
-                                     class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}">
-                            @endif
                             <div class="d-flex align-items-center gap-1">
                                 @if(isset($county))
                                     <a href="{{ URL::to($county.'/item-' . $itemdata->slug) }}">
@@ -98,11 +91,30 @@
                                     </button>
                                     <input class="fw-500 item-total-qty-{{ $itemdata->slug }}" type="text"
                                            value="{{ helper::get_item_cart($itemdata->id) }}" disabled/>
-                                    <button class="btn btn-sm fw-500 border-0"
-                                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">+
-                                    </button>
+                                        @if(strtolower($itemdata['category_info']->category_name) == 'pizza')
+                                            <a data-bs-toggle="modal"
+                                                data-bs-target="#PizzaModal"
+                                                class="btn btn-sm fw-500 border-0"
+                                               data-product-id="{{ $itemdata->id }}">+</a>
+                                        @else
+                                        <button class="btn btn-sm fw-500 border-0"
+                                                onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">+
+                                        </button>
+                                        @endif
                                 </div>
                             @else
+                                @if(strtolower($itemdata['category_info']->category_name) == 'pizza')
+                                    <button
+                                        class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#PizzaModal"
+                                        class="btn btn-sm fw-500 border-0"
+                                        data-product-id="{{ $itemdata->id }}" >
+                                        {{ trans('labels.add') }}
+                                        <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
+                                        <div class="loader d-none addon_modal_loader_{{ $itemdata->slug }}"></div>
+                                    </button>
+                                @else
                                 <button
                                         class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
                                         onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">
@@ -110,6 +122,7 @@
                                     <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
                                     <div class="loader d-none addon_modal_loader_{{ $itemdata->slug }}"></div>
                                 </button>
+                                @endif
                             @endif
     </div>
 </div>
