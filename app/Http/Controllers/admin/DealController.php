@@ -203,4 +203,95 @@ class DealController extends Controller
         return $result;
     }
 
+    public function dealIndex()
+    {
+        $deals = TopDeals::with('product')->where('deal_type',1)->orderBy('id', 'desc')->get();
+        return view('admin.deals.item', compact('deals'));
+    }
+
+    public function addDealitem()
+    {
+
+        return view('admin.deals.additem');
+    }
+
+    // Create a new deal
+    public function storeDeal(Request $request)
+    {
+        $validatedData = $request->validate([
+            'product_id' => 'required|exists:item,id',
+            'offer_type' => 'nullable|in:1,2',
+            'offer_amount' => 'nullable|numeric|min:0',
+            'start_date' => 'nullable|date',
+            'start_time' => 'required|date_format:H:i',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_time' => 'required|date_format:H:i',
+            'is_active' => 'boolean',
+            'product_ids' => 'required|array',
+            'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to the sizes table
+            'min_count' => 'required|numeric|min:1',
+        ]);
+
+        // Create a deal with default deal_type and formatted product_ids
+        $deal = TopDeals::create([
+            'product_id' => $validatedData['product_id'],
+            'offer_type' => $validatedData['offer_type'] ?? 1,
+            'offer_amount' => $validatedData['offer_amount'] ?? 0,
+            'start_date' => $validatedData['start_date'],
+            'start_time' => $validatedData['start_time'],
+            'end_date' => $validatedData['end_date'],
+            'end_time' => $validatedData['end_time'],
+            'is_active' => $validatedData['is_active'] ?? false,
+            'product_ids' => implode(',', $validatedData['product_ids']),
+            'size_id' => $validatedData['size_id'],
+            'min_count' => $validatedData['min_count'],
+            'deal_type' => 1, // Default deal_type
+        ]);
+
+        return redirect('admin/deals')->with('success', 'Deal created successfully!');
+    }
+    public function editDealitem($id)
+    {
+        $getitem = TopDeals::with('product')->findOrFail($id);
+
+        return view('admin.deals.edititem', compact('getitem'));
+    }
+    // Get a single deal
+    public function showDeal($id)
+    {
+        $deal = TopDeals::with('product')->findOrFail($id);
+        return response()->json($deal);
+    }
+
+    // Update an existing deal
+    public function updateDeal(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|exists:top_deals,id',
+            'product_id' => 'sometimes|required|exists:item,id',
+            'discount_type' => 'nullable|in:flat,percentage',
+            'offer_amount' => 'nullable|numeric|min:0',
+            'start_date' => 'required|date',
+            'start_time' => 'required|date_format:H:i:s',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_time' => 'required|date_format:H:i:s',
+            'is_active' => 'boolean',
+            'product_ids' => 'required|array',
+            'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to sizes table
+            'min_count' => 'required|numeric|min:1',
+        ]);
+        // Find the deal using validated ID
+        $deal = TopDeals::findOrFail($validatedData['id']);
+        $product_ids = implode(',', $validatedData['product_ids']);
+
+        // Update deal with merged attributes
+        $deal->update(array_merge(
+            $validatedData,
+            ['product_ids' => $product_ids]
+        ));
+        $deal->save();
+
+        return redirect('admin/deals')->with('success', 'Deal Updated successfully!');
+    }
+
 }

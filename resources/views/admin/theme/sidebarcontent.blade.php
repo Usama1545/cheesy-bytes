@@ -197,6 +197,7 @@
             </a>
         </li>
     @endif
+
     @if (Auth::user()->type != 1)
         @if (in_array('7', $modules) || in_array('8', $modules) || in_array('9', $modules) || in_array('10', $modules))
             <li class="nav-item mt-3">
@@ -266,13 +267,29 @@
             <i class="fa-solid fa-list-timeline"></i><span class="nav-text ">{{ trans('labels.items') }}</span>
         </a>
     </li>
-
-    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }}"
-        id="10">
-        <a class="nav-link rounded d-flex {{ request()->is('admin/topDeals*') ? 'active' : '' }}"
-           href="{{ URL::to('/admin/topDeals') }}" aria-expanded="false">
-            <i class="fa-solid fa-badge-percent"></i><span class="nav-text ">Deals</span>
-        </a>
+    <li class="nav-item mb-2 fs-7 dropdown multimenu"
+        id="4">
+    <a class="nav-link collapsed rounded d-flex align-items-center justify-content-between dropdown-toggle mb-1"
+       href="#deals" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="deals">
+            <span class="d-flex"><i class="fa-solid fa-badge-percent"></i><span
+                    class="multimenu-title">Deals</span></span>
+    </a>
+    <ul class="collapse" id="deals">
+        <li class="nav-item ps-4"
+            id="10">
+            <a class="nav-link rounded d-flex {{ request()->is('admin/topDeals*') ? 'active' : '' }}"
+               href="{{ URL::to('/admin/topDeals') }}" aria-expanded="false">
+                <i class="fa-solid fa-circle-small"></i><span class="nav-text ">Flat Deals</span>
+            </a>
+        </li>
+        <li class="nav-item ps-4"
+            id="7">
+            <a class="nav-link rounded d-flex {{ request()->is('admin/category*') ? 'active' : '' }}"
+               href="{{ URL::to('/admin/deals') }}" aria-expanded="false">
+                <i class="fa-sharp fa-solid fa-circle-small"></i><span class="nav-text ">Selective Deal</span>
+            </a>
+        </li>
+    </ul>
     </li>
     @if (@helper::checkaddons('product_review'))
         <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('29', $modules) == true ? '' : 'd-none') : '' }}"

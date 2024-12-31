@@ -345,6 +345,14 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::get('topDeals-{id}', [DealController::class, 'edititem']);
         Route::post('topDeals/delete', [DealController::class, 'delete']);
 
+
+        Route::get('deals', [DealController::class, 'dealIndex']);
+        Route::get('deals/add', [DealController::class, 'addDealitem']);
+        Route::post('deals/store', [DealController::class, 'storeDeal']);
+        Route::post('deals/update', [DealController::class, 'updateDeal']);
+        Route::get('deals-{id}', [DealController::class, 'editDealitem']);
+        Route::post('deals/delete', [DealController::class, 'delete']);
+
         Route::get('sizes', [SizeController::class, 'index']);
         Route::get('sizes/add', [SizeController::class, 'additem']);
         Route::post('sizes/store', [SizeController::class, 'store']);

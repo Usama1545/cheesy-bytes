@@ -120,6 +120,7 @@ class ItemController extends Controller
 
     public function productdetails($id,Request $request)
     {
+        $dealprice = null;
         $branchId = Session::get('branch_id');
 
         $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')->select('item.*',
