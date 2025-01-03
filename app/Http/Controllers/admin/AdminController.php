@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
 use Illuminate\Http\Request;
 use App\Helpers\helper;
 use App\Models\User;
@@ -29,6 +30,8 @@ class AdminController extends Controller
 {
     public function home(Request $request)
     {
+        $ordersbranch = $request->ordersbranch != "" ? $request->ordersbranch : Branch::first()->id;
+
         $gettotalcategory = Category::where('is_available', '1')->where('is_deleted', '2')->count();
         $getitems = Item::where('item_status', '1')->get();
         $addons = Addons::where('is_available', '1')->where('is_deleted', '2')->get();
@@ -36,13 +39,37 @@ class AdminController extends Controller
         $getusers = User::Where('type', '=', '2')->get();
         $getdriver = User::where('is_available', '1')->where('type', '3')->get();
         $getreview = Ratting::all();
+
         $getorderscount = Order::all();
         $getorderdetailscount = OrderDetails::all();
         $banners = Banner::all();
         $order_total = Order::where('status', '!=', '6')->where('status', '!=', '7')->sum('grand_total');
         $order_tax = Order::where('status', '!=', '6')->where('status', '!=', '7')->sum('tax_amount');
-        $getorders = Order::with('user_info')->select('order.*')->whereDate('created_at', Carbon::today())->get();
-
+        $getbranchorders = Order::with('user_info', 'branch')
+            ->select('order.*') // Correct table name for consistency
+            ->get()
+            ->groupBy('branch_id') // Group orders by branch_id
+            ->map(function ($orders, $branchId) {
+                return [
+                    'branch_name' => $orders->first()->branch->name ?? 'Unknown', // Get branch name or default to 'Unknown'
+                    'orders' => $orders->map(function ($order) {
+                        return [
+                            'id' => $order->id,
+                            'user_name' => $order->name, // Adjust as per your relationship
+                            'status' => $order->status,
+                            'status_type' => $order->status_type,
+                            'admin_notes' => $order->admin_notes,
+                            'order_number' => $order->order_number,
+                            'grand_total' => $order->grand_total,
+                            'order_type' => $order->order_type,
+                            'transaction_type' => $order->transaction_type,
+                            'payment_status' => $order->payment_status,
+                            'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+                        ];
+                    }),
+                ];
+            })
+            ->values();
         $topitems = Item::with('category_info', 'subcategory_info', 'item_image')->leftJoin('order_details', 'order_details.item_id', 'item.id')->whereNull('custom_pizza_id')
             ->select('item.id', 'item.cat_id', 'item.subcat_id', 'item.item_name', 'item.slug', DB::raw('count(order_details.item_id) as item_order_counter'))
             ->groupBy('order_details.item_id')
@@ -86,9 +113,11 @@ class AdminController extends Controller
 
         // EARNINGS-CHART-START
         $earningsyear = $request->earningsyear != "" ? $request->earningsyear : date('Y');
+        $earningsbranch = $request->earningsbranch != "" ? $request->earningsbranch : Branch::first()->id;
         $earnings_years = Order::select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->orderByDesc('created_at')->get();
         $reviewslist = Order::select(DB::raw("YEAR(created_at) as year"), DB::raw("MONTHNAME(created_at) as month_name"), DB::raw("SUM(grand_total) as grand_total"))
             ->whereYear('created_at', $earningsyear)
+            ->where('branch_id', $earningsbranch)
             ->whereNotIn('status', array(1, 6, 7))
             ->orderBy('created_at')
             ->groupBy(DB::raw("MONTHNAME(created_at)"))
@@ -110,7 +139,7 @@ class AdminController extends Controller
         if ($request->ajax()) {
             return response()->json(['orderlabels' => $orderlabels, 'deliverydata' => $deliverydata, 'pickupdata' => $pickupdata, 'userslabels' => $userslabels, 'userdata' => $userdata, 'earningslabels' => $earningslabels, 'earningsdata' => $earningsdata], 200);
         } else {
-            return view('admin.dashboard.home', compact('topitems', 'topusers', 'gettotalcategory', 'getitems', 'addons', 'getusers', 'banners', 'getreview', 'getorderscount', 'getorderdetailscount', 'order_total', 'order_tax', 'getpromocode', 'getorders', 'getdriver', 'order_years', 'orderlabels', 'deliverydata', 'pickupdata', 'user_years', 'userslabels', 'userdata', 'earnings_years', 'earningslabels', 'earningsdata'));
+            return view('admin.dashboard.home', compact('topitems', 'topusers', 'gettotalcategory', 'getitems', 'addons', 'getusers', 'banners', 'getreview', 'getorderscount', 'getorderdetailscount', 'order_total', 'order_tax', 'getpromocode', 'getbranchorders', 'getdriver', 'order_years', 'orderlabels', 'deliverydata', 'pickupdata', 'user_years', 'userslabels', 'userdata', 'earnings_years', 'earningslabels', 'earningsdata'));
         }
     }
     public function getorder()
