@@ -157,6 +157,7 @@
                         </div>
                     </div>
                     <!-- Crust Selection -->
+                    <div id="pizzaExtrasContainer"></div>
 
                     <div id="pizzaAddonsContainer"></div>
 
@@ -1208,6 +1209,10 @@
         let totalPrice = 0;
         let sizePrice = 0;
         let basePrice = 0;
+        let extras_id = '';
+        let extras_name = '';
+        let extras_price = '';
+        let selectedExtras = [];
         let details = {};
 
         let pizzaQuantity = 1;
@@ -1292,6 +1297,7 @@
                     $('#pizzaCrustContainer').empty();
                     $('#PizzaDetailsSummary').empty();
                     $('#pizzaAddonsContainer').empty();
+                    $('#pizzaExtrasContainer').empty();
                     const itemCard = `
                         <div class="card mb-3">
                             <img
@@ -1314,6 +1320,7 @@
 
                         loadSizesAndCrusts(response.responce.crust_data);
                         loadAddonGroups(response.responce.item_detail.addons_group);
+                        loadExtras(response.responce.item_detail.extras);
                     }
                 },
                 error: function (err) {
@@ -1386,9 +1393,9 @@
                 size_id: size_id,
                 crust_id: crust_id,
                 dippings: selectedDippings,
-                extras_id: '', // Include extras if applicable
-                extras_name: '',
-                extras_price: '',
+                extras_id: extras_id, // Include extras if applicable
+                extras_name: extras_name,
+                extras_price: extras_price,
                 buynow: 0, // Assuming 0 for add-to-cart, 1 for buy now
             };
         }
@@ -1529,6 +1536,83 @@
             });
         }
 
+        function loadExtras(extras) {
+            const extrasContainer = $('#pizzaExtrasContainer'); // Extras container
+            extrasContainer.empty(); // Clear previous content
+
+            let selectedIds = [];
+            let selectedNames = [];
+            let selectedPrices = [];
+
+            // Create the extras card
+            const card = $(`
+        <div class="card mb-3">
+            <div class="card-header" style="background: #D6B62B">Extras</div>
+            <div class="card-body">
+                <div class="row gy-3" id="extras-list"></div>
+            </div>
+        </div>
+    `);
+            const extrasRow = card.find('#extras-list');
+
+            extras.forEach(extra => {
+                // Create each extra checkbox
+                extrasRow.append(`
+            <div class="col-12 col-md-6">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input extra-input" id="extra-${extra.id}"
+                        data-id="${extra.id}" data-name="${extra.name}" data-price="${extra.price}"
+                        ${extra.is_default ? 'checked disabled' : ''} />
+                    <label class="form-check-label d-flex justify-content-between" for="extra-${extra.id}">
+                        <span>${extra.name}</span>
+                        <span class="text-muted">$${parseFloat(extra.price).toFixed(2)}</span>
+                    </label>
+                </div>
+            </div>
+        `);
+
+                // Collect default extras
+                if (extra.is_default) {
+                    selectedIds.push(extra.id);
+                    selectedNames.push(extra.name);
+                    selectedPrices.push(extra.price);
+                }
+            });
+
+            // Handle checkbox changes
+            extrasRow.on('change', '.extra-input', function () {
+                const { id, name, price } = $(this).data();
+                if (this.checked) {
+                    selectedIds.push(id);
+                    selectedNames.push(name);
+                    selectedPrices.push(price);
+                } else {
+                    selectedIds = selectedIds.filter(extraId => extraId != id);
+                    selectedNames = selectedNames.filter(extraName => extraName != name);
+                    selectedPrices = selectedPrices.filter(extraPrice => extraPrice != price);
+                }
+                selectedExtras = selectedPrices;
+                updateExtrasPayload(selectedIds, selectedNames, selectedPrices);
+                updatePriceSummary();
+
+            });
+
+            // Append card and initialize payload
+            extrasContainer.append(card);
+            updateExtrasPayload(selectedIds, selectedNames, selectedPrices);
+
+        }
+
+        function updateExtrasPayload(selectedIds, selectedNames, selectedPrices) {
+            $('#extras_id').val(selectedIds.join('|'));
+            $('#extras_name').val(selectedNames.join('|'));
+            $('#extras_price').val(selectedPrices.join('|'));
+            extras_id = selectedIds.join('| ');
+            extras_name = selectedNames.join('| ');
+            extras_price = selectedPrices.join('| ');
+
+        }
+
         // Update price summary
         function updatePriceSummary() {
             let totalAddonPrice = basePrice; // Start with the pizza's base price
@@ -1541,6 +1625,9 @@
             // Add selected dippings price
             Object.values(selectedDippings).forEach(dipping => {
                 totalAddonPrice += dipping.price * dipping.quantity;
+            });
+            Object.values(selectedExtras).forEach(extra => {
+                totalAddonPrice += extra ;
             });
 
             // Add selected crust price

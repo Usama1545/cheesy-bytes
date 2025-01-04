@@ -242,7 +242,8 @@
                                                     data-extras-price="<?php echo e($extras->price); ?>"
                                                     data-extras-name="<?php echo e($extras->name); ?>"
                                                     id="extras_<?php echo e($extras->id); ?>_<?php echo e($getitemdata['id']); ?>"
-                                                    name="extras_id_<?php echo e($getitemdata['id']); ?>">
+                                                    name="extras_id_<?php echo e($getitemdata['id']); ?>"
+                                                    <?php echo e($extras->is_default ? 'checked disabled' : ''); ?>>
                                                 <div
                                                     class="d-flex justify-content-between align-items-center w-100 text-black">
                                                     <label class="form-check-label cursor-pointer me-2 fs-7"

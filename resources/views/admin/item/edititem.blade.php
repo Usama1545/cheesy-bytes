@@ -208,7 +208,7 @@
                                             <div class="row mb-md-0 mb-2">
                                                 <input type="hidden" class="form-control" name="extras_id[]"
                                                     value="{{ $extras->id }}">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         @if ($key == 0)
                                                             <label class="col-form-label">{{ trans('labels.name') }}
@@ -219,7 +219,7 @@
                                                             placeholder="{{ trans('labels.name') }}" required>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-3">
                                                     <div class="form-group">
                                                         @if ($key == 0)
                                                             <label class="col-form-label">{{ trans('labels.price') }}
@@ -230,9 +230,42 @@
                                                                 class="form-control numbers_only extras_price"
                                                                 name="extras_price[]" value="{{ $extras->price }}"
                                                                 placeholder="{{ trans('labels.price') }}" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        @if ($key == 0)
+                                                            <label class="col-form-label">Branch Id
+                                                                <span class="text-danger"> * </span></label>
+                                                        @endif
+                                                        <div class="d-flex gap-2">
+                                                            <select name="extras_branch_id[]" class="form-control selectpicker" required data-live-search="true">
+                                                                @foreach (helper::get_branchs() as $branch)
+                                                                    <option value="{{ $branch->id }}" {{ $branch->id === $extras->branch_id ? 'selected' : '' }}>
+                                                                        {{ $branch->name.'-'.$branch->city }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="form-group">
+                                                        @if ($key == 0)
+                                                            <label class="col-form-label">Default
+                                                                <span class="text-danger"> * </span></label>
+                                                        @endif
+                                                            <input type="checkbox" class="form-check-input extras_name" name="extras_default[]" value="1" {{ $extras->is_default ? 'checked' : '' }}>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="form-group">
+                                                        <div class="d-flex gap-2">
                                                             @if (count($getitem['extras']) > 1)
                                                                 <button class="btn btn-danger px-3" type="button"
-                                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="deleteItemExtras('{{ $extras->id }}','{{ $getitem->id }}','{{ URL::to('admin/item/deleteextras') }}')" @endif>
+                                                                        @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="deleteItemExtras('{{ $extras->id }}','{{ $getitem->id }}','{{ URL::to('admin/item/deleteextras') }}')" @endif>
                                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                                 </button>
                                                             @endif
@@ -478,5 +511,7 @@
                 crustAdded--;
             });
         });
+        var branches = @json(helper::get_branchs());
+
     </script>
 @endsection

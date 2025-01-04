@@ -236,7 +236,8 @@
                                                     data-extras-price="{{ $extras->price }}"
                                                     data-extras-name="{{ $extras->name }}"
                                                     id="extras_{{ $extras->id }}_{{ $getitemdata['id'] }}"
-                                                    name="extras_id_{{ $getitemdata['id'] }}">
+                                                    name="extras_id_{{ $getitemdata['id'] }}"
+                                                    {{ $extras->is_default ? 'checked disabled' : '' }}>
                                                 <div
                                                     class="d-flex justify-content-between align-items-center w-100 text-black">
                                                     <label class="form-check-label cursor-pointer me-2 fs-7"

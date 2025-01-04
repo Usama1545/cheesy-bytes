@@ -178,6 +178,9 @@ class HomeController extends Controller
             ->leftJoin('favorite', function ($query) use ($user_id) {
                 $query->on('favorite.item_id', '=', 'item.id')
                     ->where('favorite.user_id', '=', $user_id);
+            })->leftJoin('item_prices', function ($query) use ($branchId) {
+                $query->on('item_prices.item_id', '=', 'item.id')
+                    ->where('item_prices.branch_id', '=', $branchId);
             })
                 ->leftJoin('cart', function ($query) use ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')

@@ -101,6 +101,8 @@ class ItemController extends Controller
                         $extras->item_id = $item->id;
                         $extras->name = $no;
                         $extras->price = $request->extras_price[$key];
+                        $extras->is_default = $request->extras_default[$key];
+                        $extras->branch_id = $request->extras_branch_id[$key];
                         $extras->save();
                     }
                 }
@@ -110,7 +112,7 @@ class ItemController extends Controller
                 if (isset($priceData['branch_id']) && isset($priceData['price'])) {
                     ItemPrice::updateOrCreate(
                         [
-                            'item_id' => $request->id,
+                            'item_id' => $item->id,
                             'branch_id' => $priceData['branch_id'], // Assuming 'size' refers to the branch ID
                         ],
                         [
@@ -217,15 +219,22 @@ class ItemController extends Controller
             if ($request->has_extras == 1 && $request->extras_name != "") {
                 $extras_id = $request->extras_id;
                 foreach ($request->extras_name as $key => $no) {
-                    if (@$no != "" && @$request->extras_price[$key] != "") {
+                    if (@$no != "" && @$request->extras_price[$key] != "" && @$request->extras_branch_id[$key] != "") {
                         if (@$extras_id[$key] == "") {
                             $extras = new Extra();
                             $extras->item_id = $item->id;
                             $extras->name = $no;
                             $extras->price = $request->extras_price[$key];
+                            $extras->is_default = $request->extras_default[$key];
+                            $extras->branch_id = $request->extras_branch_id[$key];
                             $extras->save();
                         } else if (@$extras_id[$key] != "") {
-                            Extra::where('id', @$extras_id[$key])->update(['name' => $request->extras_name[$key], 'price' => $request->extras_price[$key]]);
+                            Extra::where('id', @$extras_id[$key])->update([
+                                'name' => $request->extras_name[$key],
+                                'price' => $request->extras_price[$key],
+                                'is_default' =>  $request->extras_default[$key] ?? false,
+                                'branch_id' => $request->extras_branch_id[$key]
+                            ]);
                         }
                     }
                 }

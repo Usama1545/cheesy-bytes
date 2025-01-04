@@ -28,7 +28,7 @@ class Item extends Model
     }
     public function extras()
     {
-        return $this->hasMany('App\Models\Extra', 'item_id', 'id')->select('id', 'name', 'price', 'item_id');
+        return $this->hasMany('App\Models\Extra', 'item_id', 'id')->select('id', 'name', 'price', 'item_id','branch_id','is_default');
     }
 
     public function prices()

@@ -314,5 +314,7 @@
                 crustAdded--;
             });
         });
+        var branches = @json(helper::get_branchs());
+
     </script>
 @endsection

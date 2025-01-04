@@ -214,7 +214,7 @@
                                             <div class="row mb-md-0 mb-2">
                                                 <input type="hidden" class="form-control" name="extras_id[]"
                                                     value="<?php echo e($extras->id); ?>">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <?php if($key == 0): ?>
                                                             <label class="col-form-label"><?php echo e(trans('labels.name')); ?>
@@ -226,7 +226,7 @@
                                                             placeholder="<?php echo e(trans('labels.name')); ?>" required>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-3">
                                                     <div class="form-group">
                                                         <?php if($key == 0): ?>
                                                             <label class="col-form-label"><?php echo e(trans('labels.price')); ?>
@@ -238,9 +238,43 @@
                                                                 class="form-control numbers_only extras_price"
                                                                 name="extras_price[]" value="<?php echo e($extras->price); ?>"
                                                                 placeholder="<?php echo e(trans('labels.price')); ?>" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <?php if($key == 0): ?>
+                                                            <label class="col-form-label">Branch Id
+                                                                <span class="text-danger"> * </span></label>
+                                                        <?php endif; ?>
+                                                        <div class="d-flex gap-2">
+                                                            <select name="extras_branch_id[]" class="form-control selectpicker" required data-live-search="true">
+                                                                <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                    <option value="<?php echo e($branch->id); ?>" <?php echo e($branch->id === $extras->branch_id ? 'selected' : ''); ?>>
+                                                                        <?php echo e($branch->name.'-'.$branch->city); ?>
+
+                                                                    </option>
+                                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="form-group">
+                                                        <?php if($key == 0): ?>
+                                                            <label class="col-form-label">Default
+                                                                <span class="text-danger"> * </span></label>
+                                                        <?php endif; ?>
+                                                            <input type="checkbox" class="form-check-input extras_name" name="extras_default[]" value="1" <?php echo e($extras->is_default ? 'checked' : ''); ?>>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="form-group">
+                                                        <div class="d-flex gap-2">
                                                             <?php if(count($getitem['extras']) > 1): ?>
                                                                 <button class="btn btn-danger px-3" type="button"
-                                                                    <?php if(env('Environment') == 'sendbox'): ?> onclick="myFunction()" <?php else: ?> onclick="deleteItemExtras('<?php echo e($extras->id); ?>','<?php echo e($getitem->id); ?>','<?php echo e(URL::to('admin/item/deleteextras')); ?>')" <?php endif; ?>>
+                                                                        <?php if(env('Environment') == 'sendbox'): ?> onclick="myFunction()" <?php else: ?> onclick="deleteItemExtras('<?php echo e($extras->id); ?>','<?php echo e($getitem->id); ?>','<?php echo e(URL::to('admin/item/deleteextras')); ?>')" <?php endif; ?>>
                                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                                 </button>
                                                             <?php endif; ?>
@@ -491,6 +525,8 @@
                 crustAdded--;
             });
         });
+        var branches = <?php echo json_encode(helper::get_branchs(), 15, 512) ?>;
+
     </script>
 <?php $__env->stopSection(); ?>
 

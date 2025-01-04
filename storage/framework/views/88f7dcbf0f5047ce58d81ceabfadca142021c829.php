@@ -159,7 +159,7 @@
                                             <?php endif; ?>
                                             <button class="btn btn-secondary px-3 mb-sm-0 mb-2" type="button"
                                                     id="add_extra"
-                                                    onclick="extras_fields('<?php echo e(trans('labels.name')); ?>','<?php echo e(trans('labels.price')); ?>')">
+                                                    onclick="extras_fields('<?php echo e(trans('labels.name')); ?>','<?php echo e(trans('labels.price')); ?>','<?php echo e(trans('labels.price')); ?>')">
                                                 <i class="fa-sharp fa-solid fa-plus"></i></button>
                                         </div>
                                     </div>
@@ -324,6 +324,57 @@
                 crustAdded--;
             });
         });
+        var branches = <?php echo json_encode(helper::get_branchs(), 15, 512) ?>;
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            let crustAdded = $('.data-amenities').length;
+
+            $('.add_additional_crust_option').on('click', function () {
+                if (crustAdded >= 10) {
+                    return false;
+                }
+                crustAdded++;
+
+                const uniqueIndex = `price_${crustAdded}`; // Unique identifier for each set
+
+                $("#additionalCrustOptions").append(`
+                <div class="row data-amenities mb-3" data-index="${uniqueIndex}">
+                    <div class="form-group col-12 col-lg-6 col-md-5">
+                        <label for="size_${uniqueIndex}" class="col-form-label">Size <span class="text-danger">*</span></label>
+                        <select name="prices[${uniqueIndex}][branch_id]" class="form-control selectpicker" required data-live-search="true" id="size_${uniqueIndex}">
+                        <?php $__currentLoopData = helper::get_branchs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($branch->id); ?>">
+                                            <?php echo e($branch->name.'-'.$branch->city); ?>
+
+                </option>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+            </div>
+            <div class="form-group col-12 col-lg-5 col-md-5">
+                <label for="price_${uniqueIndex}" class="col-form-label">Price <span class="text-danger">*</span></label>
+                        <input type="number" name="prices[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
+                    </div>
+                    <div class="col-12 col-lg-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-outline-danger deleteCrustOption">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `);
+
+                // Refresh selectpicker for dynamically added selects
+                $('.selectpicker').selectpicker('refresh');
+            });
+
+            $(document).on('click', '.deleteCrustOption', function () {
+                $(this).closest('.data-amenities').remove();
+                crustAdded--;
+            });
+        });
+        var branches = <?php echo json_encode(helper::get_branchs(), 15, 512) ?>;
+
     </script>
 <?php $__env->stopSection(); ?>
 
