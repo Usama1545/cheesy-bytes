@@ -43,7 +43,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-10">
                                         <div class="form-group">
                                             <label class="col-form-label"
                                                    for="addons_name"><?php echo e(trans('labels.addons_name')); ?> <span
@@ -51,6 +51,19 @@
                                             <input type="text" class="form-control" name="name" id="addons_name"
                                                    required placeholder="<?php echo e(trans('labels.addons_name')); ?>"
                                                    value="<?php echo e(old('name')); ?>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label class="col-form-label">Default</label>
+                                            <div class="d-flex">
+                                                <div class="form-check-inline">
+                                                    <input type="checkbox" name="is_default"
+                                                           class="form-check-input" required>
+                                                    <label class="form-check-label"
+                                                           for="free">Default</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
