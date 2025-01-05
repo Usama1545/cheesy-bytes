@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\BranchController;
+use App\Http\Controllers\admin\CarrierController;
 use App\Http\Controllers\admin\CrustController;
 use App\Http\Controllers\admin\CustomPizzaController;
 use App\Http\Controllers\admin\DealController;
@@ -411,7 +412,17 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 		Route::get('branches-{id}', [BranchController::class, 'Edit']);
 		Route::post('branches/delete', [BranchController::class, 'delete']);
 		Route::post('branches/update-{id}', [BranchController::class, 'update']);
-		// tax
+
+        //carrier
+        Route::get('carrier', [CarrierController::class, 'index']);
+        Route::get('carrier/add', [CarrierController::class, 'add']);
+        Route::post('carrier/store', [CarrierController::class, 'store']);
+        Route::get('carrier-{id}', [CarrierController::class, 'edit']);
+        Route::post('carrier/delete', [CarrierController::class, 'delete']);
+        Route::post('carrier/update-{id}', [CarrierController::class, 'update']);
+        Route::post('carrier/reorder_category', [CarrierController::class, 'reorder_category']);
+
+        // tax
 		Route::get('tax', [TaxController::class, 'index']);
 		Route::get('tax/add', [TaxController::class, 'add']);
 		Route::post('tax/store', [TaxController::class, 'store']);

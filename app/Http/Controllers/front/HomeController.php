@@ -5,6 +5,7 @@ namespace App\Http\Controllers\front;
 use App\helpers\helper;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
+use App\Models\Carrier;
 use App\Models\CustomerAddress;
 use App\Models\Shippingarea;
 use App\Models\Slider;
@@ -408,6 +409,7 @@ class HomeController extends Controller
     public function location_store(Request $request)
     {
         $not_available = false;
+        $response = [];
         $address = CustomerAddress::with('state')->updateOrCreate(
             [
                 'zip' => $request->zip,
@@ -425,13 +427,40 @@ class HomeController extends Controller
             $shipping = Branch::where('city', $request->city)->orWhere('state_id', $request->state_id)->with('state')->get();
 
         } else {
-            $shipping = Shippingarea::where('city', $request->city)->where('state_id', $request->state_id)->with('state')->get();
+            $shipping = Branch::where('city', $request->city)->pluck('id')->toArray();
             if (!$shipping) {
                 $not_available = true;
-                $shipping = Shippingarea::where('city', $request->city)->orWhere('state_id', $request->state_id)->with('state')->get();
+                $shipping = Branch::where('city', $request->city)
+                    ->orWhere('state_id', $request->state_id)
+                    ->pluck('id')
+                    ->toArray();
+            }
+
+            $carriers = Carrier::whereIn('branch_id', $shipping)
+                ->with('branch') // Ensure branch relationship is loaded
+                ->get();
+
+            $groupedCarriers = $carriers->groupBy('branch_id');
+
+            foreach ($groupedCarriers as $branchId => $carriers) {
+                $branchName = $carriers->first()->branch->name ?? 'Unknown Branch';
+                $response[] = [
+                    'name' => $branchName,
+                    'carriers' => $carriers->map(function ($carrier) {
+                        return [
+                            'name' => $carrier->name,
+                            'image' => $carrier->image,
+                            'link' => $carrier->link,
+                        ];
+                    }),
+                ];
             }
         }
         $type = $request->type;
+        if($request->type === 'delivery')
+        {
+            return view('web.delivery', compact('not_available', 'response', 'address', 'type'));
+        }
         return view('web.location', compact('not_available', 'shipping', 'address', 'type'));
     }
 

@@ -4,7 +4,7 @@
 
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h3>Custom Pizzas</h3>
+            <h3>Branches</h3>
             <a href="branches/add" class="btn btn-primary">Add New <i class="fa fa-plus"></i></a>
         </div>
         <div class="row">

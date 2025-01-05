@@ -31,8 +31,10 @@ $(function () {
         $('.btn-orders-action').remove();
     }
     $('.zero-configuration').DataTable({
-        dom: 'Bfrtip',
+        dom: 'Blfrtip', // Updated to include 'l' for the length menu
         searching: location.href.includes('dashboard') ? false : true,
+        lengthMenu: [10, 25, 50, 100], // Show rows dropdown options
+        pageLength: 10,
         buttons: [{
             extend: 'excel',
             title: 'Single_Restaurant_Admin',

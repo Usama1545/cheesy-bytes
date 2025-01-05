@@ -353,6 +353,14 @@
                 class="nav-text ">Branches</span>
         </a>
     </li>
+    <li class="nav-item mb-2 fs-7"
+        id="11">
+        <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/carrier*') ? 'active' : ''); ?>"
+           href="<?php echo e(URL::to('/admin/carrier')); ?>" aria-expanded="false">
+            <i class="fa-solid fa-bicycle"></i><span
+                class="nav-text ">Carriers</span>
+        </a>
+    </li>
     <li class="nav-item mb-2 fs-7 <?php echo e(Auth::user()->type != 1 ? (in_array('11', $modules) == true ? '' : 'd-none') : ''); ?>"
         id="11">
         <a class="nav-link rounded d-flex <?php echo e(request()->is('admin/shippingarea*') ? 'active' : ''); ?>"
