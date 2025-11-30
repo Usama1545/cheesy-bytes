@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Models\itemPrice;
+
 
 class Item extends Model
 {
@@ -12,11 +14,11 @@ class Item extends Model
 
     public function subcategory_info()
     {
-        return $this->hasOne('App\Models\Subcategory', 'id', 'subcat_id')->select('subcategories.id', 'subcategories.subcategory_name', 'subcategories.slug');
+        return $this->hasOne('App\Models\Subcategory', 'id', 'subcat_id')->select('subcategories.id', 'subcategories.subcategory_name', 'subcategories.slug', 'subcategories.reorder_id');
     }
     public function category_info()
     {
-        return $this->hasOne('App\Models\Category', 'id', 'cat_id')->select('categories.id', 'categories.category_name', 'categories.slug', DB::raw("CONCAT('" . url(env('ASSETSPATHURL') . 'admin-assets/images/category/') . "/', image) AS image_url"));
+        return $this->hasOne('App\Models\Category', 'id', 'cat_id')->select('categories.id', 'categories.category_name', 'categories.slug', 'categories.reorder_id', DB::raw("CONCAT('" . url(env('ASSETSPATHURL') . 'admin-assets/images/category/') . "/', image) AS image_url"));
     }
     public function item_image()
     {
@@ -33,7 +35,7 @@ class Item extends Model
 
     public function prices()
     {
-        return $this->hasMany('App\Models\ItemPrice','item_id','id');
+        return $this->hasMany('App\Models\itemPrice','item_id','id');
     }
 
     public function pricing()
@@ -45,4 +47,16 @@ class Item extends Model
     {
         return $this->hasMany(PizzaPrice::class);
     }
+    
+    public function itemPrices()
+    {
+        return $this->hasMany(ItemPrice::class);
+    }
+    
+    
+    public function branches()
+    {
+        return $this->hasMany(Branch::class, 'id', 'branch_ids');
+    }
+
 }

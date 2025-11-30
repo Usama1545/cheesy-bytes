@@ -5,12 +5,12 @@
             <th>#</th>
             <th>{{ trans('labels.image') }}</th>
             <th>{{ trans('labels.title') }}</th>
+            <th>{{ trans('Branch') }}</th>
+
             <th>{{ trans('labels.category') }}</th>
             <th>{{ trans('labels.item') }}</th>
             <th>{{ trans('labels.description') }}</th>
             <th>{{ trans('labels.status') }}</th>
-            <th>{{ trans('labels.created_date') }}</th>
-            <th>{{ trans('labels.updated_date') }}</th>
             <th>{{ trans('labels.action') }}</th>
         </tr>
     </thead>
@@ -22,6 +22,9 @@
                 <td>@php echo $i++; @endphp</td>
                 <td><img src='{{ helper::image_path($slider->image) }}' class='img-fluid rounded h-50px'></td>
                 <td>{{ $slider->title }}</td>
+                <td>
+                    {{ $slider['branch']->name }}
+                </td>
                 <td>
                     @if ($slider->type == '1')
                         {{ @$slider['category_info']->category_name }}
@@ -48,14 +51,7 @@
                                 class="fa-sharp fa-solid fa-xmark"></i></a>
                     @endif
                 </td>
-                <td>
-                    {{ helper::date_format($slider->created_at) }} <br>
-                    {{ helper::time_format($slider->created_at) }}
-                </td>
-                <td>
-                    {{ helper::date_format($slider->updated_at) }} <br>
-                    {{ helper::time_format($slider->updated_at) }}
-                </td>
+
                 <td>
                     <div class="d-flex flex-wrap gap-1 ">
                         <a class="btn btn-sm btn-info square" tooltip="{{ trans('labels.edit') }}"

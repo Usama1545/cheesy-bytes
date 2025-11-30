@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Exports\ItemsPerBranchExport;
 use App\Models\itemPrice;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -10,36 +11,55 @@ use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Item;
 use App\Models\Addons;
+use App\Models\Branch;
+
 use App\Models\AddonsGroup;
 use App\Models\ItemImages;
 use App\Models\Cart;
 use App\Models\Extra;
 use App\Models\GlobalExtras;
 use App\Models\Tax;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Writer;
+use SplTempFileObject;
+use ZipArchive;
 
 class ItemController extends Controller
 {
     public function index(Request $request)
     {
-        $getitem = Item::with('category_info', 'subcategory_info', 'item_image')->select('item.*')->join('categories', 'item.cat_id', '=', 'categories.id')->where('categories.is_available', '1')->orderBy('item.reorder_id');
+        $getitem = Item::with('category_info', 'subcategory_info', 'item_image')
+            ->select('item.*')
+            ->join('categories', 'item.cat_id', '=', 'categories.id')
+            ->orderBy('item.reorder_id');
+
         if ($request->has('search') && $request->search != "") {
             $search = $request->search;
-            $getitem = $getitem->where(function ($query) use ($search) {
-                $query->where('item.item_name', 'like', '%' . $search . '%');
-            });
+            $getitem = $getitem->where('item.item_name', 'like', '%' . $search . '%');
         }
+
         if ($request->has('option') && $request->option != "") {
             $getitem = $getitem->where('item.item_type', $request->option == "veg" ? 1 : 2);
         }
+
         $getitem = $getitem->orderByDesc('item.id')->get();
+
+        // Manually fetch branch names
+        foreach ($getitem as $item) {
+            $item->branch_names = Branch::whereIn('id', explode(',', $item->branch_ids))
+                ->pluck('name')
+                ->implode(', ');
+        }
+
         return view('admin.item.item', compact('getitem'));
     }
 
     public function additem()
     {
-        $getcategory = Category::where('is_available', '1')->orderBy('reorder_id')->get();
+        $getcategory = Category::orderBy('reorder_id')->get();
         $getaddongroup = AddonsGroup::where('is_deleted', 2)->where('is_available', 1)->orderBy('reorder_id')->get();
         $getaddon = Addons::select('id', 'addongroup_id', 'name', 'price')->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
         foreach ($getaddongroup as $addons_group) {
@@ -52,9 +72,9 @@ class ItemController extends Controller
 
     public function edititem($id)
     {
-        $getitem = Item::with('extras', 'prices')->find($id);
+        $getitem = Item::with('extras','prices')->find($id);
         $getitemimages = ItemImages::where('item_id', $id)->orderByDesc('id')->get();
-        $getcategory = Category::where('is_available', '1')->orderBy('reorder_id')->get();
+        $getcategory = Category::orderBy('reorder_id')->get();
         $getsubcategory = Subcategory::where('cat_id', $getitem->cat_id)->where('is_available', '1')->orderBy('reorder_id')->get();
         $getaddongroup = AddonsGroup::where('is_deleted', 2)->where('is_available', 1)->orderBy('reorder_id')->get();
         $getaddon = Addons::select('id', 'addongroup_id', 'name', 'price')->where('is_deleted', 2)->where('is_available', 1)->orderByDesc('id')->get();
@@ -101,18 +121,19 @@ class ItemController extends Controller
                         $extras->item_id = $item->id;
                         $extras->name = $no;
                         $extras->price = $request->extras_price[$key];
-                        $extras->is_default = $request->extras_default[$key];
-                        $extras->branch_id = $request->extras_branch_id[$key];
+                         $extras->is_default = $request->extras_default[$key];
+                        $extras->branch_id =  $request->extras_branch_id[$key] != "" ? @implode(",", $request->extras_branch_id[$key]) : '';
                         $extras->save();
                     }
                 }
             }
+            if(isset($request->prices)){
             foreach ($request->prices as $key => $priceData) {
                 // Ensure 'size' and 'price' keys exist in the current price data
                 if (isset($priceData['branch_id']) && isset($priceData['price'])) {
-                    ItemPrice::updateOrCreate(
+                    itemPrice::updateOrCreate(
                         [
-                            'item_id' => $item->id,
+                            'item_id' =>$item->id,
                             'branch_id' => $priceData['branch_id'], // Assuming 'size' refers to the branch ID
                         ],
                         [
@@ -120,6 +141,7 @@ class ItemController extends Controller
                         ]
                     );
                 }
+            }
             }
             foreach ($request->file('image') as $img) {
                 $itemimage = new ItemImages;
@@ -186,18 +208,28 @@ class ItemController extends Controller
             : null;
         $item->item_type = $request->item_type;
         $item->has_extras = $request->has_extras;
-        foreach ($request->prices as $key => $priceData) {
-            // Ensure 'size' and 'price' keys exist in the current price data
-            if (isset($priceData['branch_id']) && isset($priceData['price'])) {
-                ItemPrice::updateOrCreate(
-                    [
-                        'item_id' => $request->id,
-                        'branch_id' => $priceData['branch_id'], // Assuming 'size' refers to the branch ID
-                    ],
-                    [
-                        'price' => $priceData['price'],
-                    ]
-                );
+        if (isset($request->prices)) {
+            // Get the branch IDs from the incoming request
+            $incomingBranchIds = collect($request->prices)->pluck('branch_id')->toArray();
+
+            // Delete prices for branches not in the incoming request
+            itemPrice::where('item_id', $request->id)
+                ->whereNotIn('branch_id', $incomingBranchIds)
+                ->delete();
+
+            // Update or create prices for incoming branches
+            foreach ($request->prices as $priceData) {
+                if (isset($priceData['branch_id']) && isset($priceData['price'])) {
+                    itemPrice::updateOrCreate(
+                        [
+                            'item_id' => $request->id,
+                            'branch_id' => $priceData['branch_id'],
+                        ],
+                        [
+                            'price' => $priceData['price'],
+                        ]
+                    );
+                }
             }
         }
 
@@ -219,23 +251,22 @@ class ItemController extends Controller
             if ($request->has_extras == 1 && $request->extras_name != "") {
                 $extras_id = $request->extras_id;
                 foreach ($request->extras_name as $key => $no) {
-                    if (@$no != "" && @$request->extras_price[$key] != "" && @$request->extras_branch_id[$key] != "") {
+                    if (@$no != "" && @$request->extras_branch_id[$key] != "") {
                         if (@$extras_id[$key] == "") {
                             $extras = new Extra();
                             $extras->item_id = $item->id;
                             $extras->name = $no;
                             $extras->price = $request->extras_price[$key];
-                            $extras->is_default = $request->extras_default[$key];
-                            $extras->branch_id = $request->extras_branch_id[$key];
+                             $extras->is_default = $request->extras_default[$key]?? false;
+                            $extras->branch_id = $request->extras_branch_id[$key] != "" ? @implode(",", $request->extras_branch_id[$key]) : '';
                             $extras->save();
                         } else if (@$extras_id[$key] != "") {
                             Extra::where('id', @$extras_id[$key])->update([
                                 'name' => $request->extras_name[$key],
                                 'price' => $request->extras_price[$key],
                                 'is_default' =>  $request->extras_default[$key] ?? false,
-                                'branch_id' => $request->extras_branch_id[$key]
-                            ]);
-                        }
+                                'branch_id' => $request->extras_branch_id[$key] != "" ? @implode(",", $request->extras_branch_id[$key]) : ''
+                            ]);                        }
                     }
                 }
             }
@@ -288,18 +319,21 @@ class ItemController extends Controller
         echo json_encode($output);
     }
 
-    public function getitemslug($item_name, $id)
+    public function getitemslug($item_name, $id = null)
     {
         $slug = Str::slug($item_name, '-');
-        $checkslug = Item::where('slug', $slug);
-        if ($id != "") {
-            $checkslug = $checkslug->where('id', '!=', $id);
+        $originalSlug = $slug;
+
+        $i = 1;
+        while (
+        Item::where('slug', $slug)
+            ->when($id, fn($query) => $query->where('id', '!=', $id))
+            ->exists()
+        ) {
+            $slug = $originalSlug . '-' . $i;
+            $i++;
         }
-        $checkslug = $checkslug->first();
-        if (!empty($checkslug)) {
-            $lastid = Item::select('id')->orderByDesc('id')->first();
-            $slug .= '-' . $lastid->id;
-        }
+
         return $slug;
     }
 
@@ -389,4 +423,70 @@ class ItemController extends Controller
             return 2;
         }
     }
+    public function export_csv()
+    {
+        $branches = Branch::all();
+        $filePaths = [];
+
+        // Ensure the exports directory exists
+        Storage::makeDirectory('exports');
+
+        foreach ($branches as $branch) {
+            $items = Item::whereRaw("FIND_IN_SET(?, branch_ids)", [$branch->id])
+                ->with(['category_info', 'item_images']) // use item_images (hasMany)
+                ->get();
+
+            if ($items->isEmpty()) continue;
+
+            // CSV headers
+            $csvData = [['Name', 'Category', 'Images', 'Price', 'Quantity']];
+
+            foreach ($items as $item) {
+                // Get all image URLs
+                $images = $item->item_images->pluck('image_url')->implode(', ');
+
+                $csvData[] = [
+                    $item->item_name,
+                    optional($item->category_info)->category_name,
+                    $images,
+                    optional($item->prices()->where('branch_id', $branch->id)->first())->price ?? 0,
+                    500,
+                ];
+            }
+
+            // Create and store CSV content
+            $filename = 'exports/branch_' . Str::slug($branch->name) . '.csv';
+            $csv = fopen('php://temp', 'r+');
+
+            foreach ($csvData as $row) {
+                fputcsv($csv, $row);
+            }
+
+            rewind($csv);
+            $csvContent = stream_get_contents($csv);
+            fclose($csv);
+
+            Storage::put($filename, $csvContent);
+            $filePaths[] = storage_path('app/' . $filename);
+        }
+
+        if (empty($filePaths)) {
+            return response()->json(['message' => 'No CSVs generated.']);
+        }
+
+        // Create ZIP of all CSVs
+        $zipFile = storage_path('app/exports/branches_export.zip');
+        $zip = new ZipArchive;
+
+        if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+            foreach ($filePaths as $filePath) {
+                $zip->addFile($filePath, basename($filePath));
+            }
+            $zip->close();
+        }
+
+        return response()->download($zipFile)->deleteFileAfterSend(true);
+    }
+
+
 }

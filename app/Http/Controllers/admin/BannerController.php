@@ -27,6 +27,7 @@ class BannerController extends Controller
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/banner', $image);
         $banner = new Banner;
         $banner->image = $image;
+                    $banner->branch_id = $request->branch_id;
         $banner->section = $request->section;
         if ($request->type == "1") {
             $banner->type = $request->type;
@@ -54,6 +55,7 @@ class BannerController extends Controller
     public function update(Request $request)
     {
         $banner = Banner::find($request->id);
+        $banner->branch_id = $request->branch_id;
         if ($request->type == "1") {
             $banner->type = $request->type;
             $banner->item_id = "";

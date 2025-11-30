@@ -22,6 +22,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+                    \App\Http\Middleware\RedirectLegacyUrls::class,
     ];
 
     /**
@@ -37,6 +38,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\RedirectLegacyUrls::class,
         ],
 
         'api' => [
@@ -64,13 +66,14 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'login' => Middleware\AuthMiddleware::class,
-
         'AdminAuth' => \App\Http\Middleware\AdminAuth::class,
         'ApiAuth' => \App\Http\Middleware\ApiAuth::class,
-        'SetUserLocation' =>\App\Http\Middleware\SetUserLocation::class,
         'UserMiddleware' => \App\Http\Middleware\UserMiddleware::class,
         'MaintenanceMiddleware' => \App\Http\Middleware\MaintenanceMiddleware::class,
+        'RedirectLegacyUrls' => \App\Http\Middleware\RedirectLegacyUrls::class,
         'NoUserAuthMiddleware' => \App\Http\Middleware\NoUserAuthMiddleware::class,
+        'SetUserLocation' =>\App\Http\Middleware\SetUserLocation::class,
+            'clearCacheOnHome' => \App\Http\Middleware\ClearCacheOnHome::class,
+
     ];
 }

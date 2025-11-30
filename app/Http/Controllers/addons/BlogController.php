@@ -12,20 +12,14 @@ class BlogController extends Controller
 {
     public function index(Request $request)
     {
-        if (@helper::checkaddons('blog')) {
             $getblogs = Blogs::orderBy('reorder_id')->get();
             return view('admin.blogs.index', compact('getblogs'));
-        } else {
-            abort(404);
-        }
+        
     }
     public function add()
     {
-        if (@helper::checkaddons('blog')) {
             return view('admin.blogs.add');
-        } else {
-            abort(404);
-        }
+        
     }
     public function store(Request $request)
     {
@@ -39,14 +33,11 @@ class BlogController extends Controller
         $blog->save();
         return redirect('admin/blogs')->with('success', trans('messages.success'));
     }
-    public function show(Request $request)
+    public function show($id)
     {
-        if (@helper::checkaddons('product_blogreview')) {
-            $blogdata = Blogs::find($request->id);
+            $blogdata = Blogs::find($id);
             return view('admin.blogs.edit', compact('blogdata'));
-        } else {
-            abort(404);
-        }
+        
     }
     public function update(Request $request)
     {
@@ -107,21 +98,17 @@ class BlogController extends Controller
     //front
     public function blogs(Request $request)
     {
-        if (@helper::checkaddons('blog')) {
+        
             $getblogs = Blogs::orderBy('reorder_id')->get();
             return view('web.blogs.blogs', compact('getblogs'));
-        } else {
-            abort(404);
-        }
+        
     }
     public function showblog(Request $request)
     {
-        if (@helper::checkaddons('blog')) {
+       
             $getblogdata = Blogs::where('slug', $request->slug)->first();
             $recentblogs = Blogs::orderBy('reorder_id')->take('3')->get();
             return view('web.blogs.blogdetails', compact('getblogdata', 'recentblogs'));
-        } else {
-            abort(404);
-        }
+       
     }
 }

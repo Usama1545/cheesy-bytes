@@ -29,20 +29,21 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::prefix('api')
+            Route::prefix(env('APP_DIR').'api')
                 ->middleware('api')
                 ->group(base_path('routes/api.php'));
 
             Route::middleware('web')
+            ->prefix(env('APP_DIR'))
                 ->group(base_path('routes/web.php'));
 
             // pos Route file
-            Route::prefix('admin/pos')
+            Route::prefix(env('APP_DIR').'admin/pos')
                 ->middleware('web')
                 ->group(base_path('routes/pos.php'));
 
             // otp Route file
-            Route::prefix('admin')->middleware('web')->group(base_path('routes/otp.php'));
+            Route::prefix(env('APP_DIR').'admin')->middleware('web')->group(base_path('routes/otp.php'));
 
             //toyyibpay
             Route::middleware('web')

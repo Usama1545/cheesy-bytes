@@ -254,7 +254,6 @@
                 request()->is('admin/sub-category') ||
                 request()->is('admin/promocode') ||
                 request()->is('admin/driver') ||
-                request()->is('admin/users') ||
                 request()->is('admin/blogs') ||
                 request()->is('admin/our-team') ||
                 request()->is('admin/tutorial') ||
@@ -263,9 +262,13 @@
                 request()->is('admin/roles') ||
                 request()->is('admin/employee') ||
                 request()->is('admin/store-review') ||
-                request()->is('admin/item') ||
                 request()->is('admin/zone'))
             <a href="{{ request()->url() . '/add' }}" class="btn btn-primary"><i class="fa-regular fa-plus"></i> {{ trans('labels.add_new') }}</a>
+        @endif
+        @if (request()->is('admin/item'))
+            <div>
+                <a href="{{ request()->url() . '/add' }}" class="btn btn-primary"><i class="fa-regular fa-plus"></i> {{ trans('labels.add_new') }}</a>
+                <a href="{{ request()->url() . '/export_csv' }}" class="btn btn-primary"><i class="fa-regular fa-download"></i> {{ trans('Csv Export') }}</a></div>
         @endif
         @if (@helper::checkaddons('custom_status'))
             @if (request()->is('admin/custom_status'))

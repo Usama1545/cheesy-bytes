@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class FooterFeatures extends Model
 {
     protected $table='footer_features';
-    protected $fillable=['id','icon','title','description'];
+    protected $fillable=['id','branch_id','title','description','number','email','address'];
 }

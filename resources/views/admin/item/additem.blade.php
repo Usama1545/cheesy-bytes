@@ -153,7 +153,7 @@
                                             @endif
                                             <button class="btn btn-secondary px-3 mb-sm-0 mb-2" type="button"
                                                     id="add_extra"
-                                                    onclick="extras_fields('{{ trans('labels.name') }}','{{ trans('labels.price') }}')">
+                                                    >
                                                 <i class="fa-sharp fa-solid fa-plus"></i></button>
                                         </div>
                                     </div>
@@ -284,7 +284,7 @@
                 $("#additionalCrustOptions").append(`
                 <div class="row data-amenities mb-3" data-index="${uniqueIndex}">
                     <div class="form-group col-12 col-lg-6 col-md-5">
-                        <label for="size_${uniqueIndex}" class="col-form-label">Size <span class="text-danger">*</span></label>
+                        <label for="size_${uniqueIndex}" class="col-form-label">Branch <span class="text-danger">*</span></label>
                         <select name="prices[${uniqueIndex}][branch_id]" class="form-control selectpicker" required data-live-search="true" id="size_${uniqueIndex}">
                         @foreach (helper::get_branchs() as $branch)
                 <option value="{{ $branch->id }}">
@@ -295,10 +295,10 @@
             </div>
             <div class="form-group col-12 col-lg-5 col-md-5">
                 <label for="price_${uniqueIndex}" class="col-form-label">Price <span class="text-danger">*</span></label>
-                        <input type="number" name="prices[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
+                        <input type="number" step="0.01" name="prices[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
                     </div>
                     <div class="col-12 col-lg-1 d-flex align-items-center">
-                        <button type="button" class="btn btn-outline-danger deleteCrustOption">
+                        <button type="button"  class="btn btn-outline-danger deleteCrustOption">
                             <i class="fa fa-trash"></i>
                         </button>
                     </div>
@@ -314,7 +314,93 @@
                 crustAdded--;
             });
         });
-        var branches = @json(helper::get_branchs());
+
+                $(document).ready(function () {
+            // Track the number of extras added
+            let extrasAdded = 0;
+            let branch_col = 0;
+            // Define branch options (assuming branches are passed to the script)
+            const branches = @json(helper::get_branchs());
+
+            const branchOptions = branches.map(branch => {
+                return `<option value="${branch.id}">${branch.name} - ${branch.city}</option>`;
+            }).join('');
+
+            // Handle add extra button click
+            $('#add_extra').on('click', function () {
+
+                extrasAdded++;
+
+                const uniqueIndex = `extra_${extrasAdded}`;
+
+                // Create extra fields dynamically
+                const extraFieldHtml = `
+            <div class="row mb-3 data-extra" data-index="${uniqueIndex}">
+                <!-- Name Field -->
+                <div class="form-group col-12 col-md-6">
+                    <label for="name_${uniqueIndex}" class="col-form-label">{{ trans('labels.name') }} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="extras_name[]" placeholder="{{ trans('labels.name') }}" required id="name_${uniqueIndex}">
+                </div>
+                <!-- Price Field -->
+                <div class="form-group d-none col-12 col-md-3">
+                    <label for="price_${uniqueIndex}" class="col-form-label">{{ trans('labels.price') }} <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" name="extras_price[]" value=0 placeholder="{{ trans('labels.price') }}" required id="price_${uniqueIndex}">
+                </div>
+                <!-- Branch Dropdown -->
+                <div class="form-group col-12 col-md-4">
+                    <label for="branch_${uniqueIndex}" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                    <select class="form-control selectpicker" name="extras_branch_id[${branch_col}][]" id="branch_${uniqueIndex}" multiple required data-live-search="true">
+                        ${branchOptions}
+                    </select>
+                </div>
+                <!-- Default Checkbox -->
+                <div class="form-group col-12 col-md-1 d-flex align-items-center">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="extras_default[]" value="1" id="default_${uniqueIndex}">
+                        <label class="form-check-label" for="extras_default[]">{{ trans('labels.default') }}</label>
+                    </div>
+                </div>
+                <!-- Remove Button -->
+                <div class="col-12 col-md-1 d-flex align-items-center">
+                    <button type="button" class="btn btn-outline-danger deleteExtra" data-index="${uniqueIndex}">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+branch_col++;
+                $('#more_extras_fields').append(extraFieldHtml);
+
+                // Refresh selectpicker for new dropdowns
+                $('.selectpicker').selectpicker('refresh');
+            });
+
+            // Handle removing extra fields
+            $(document).on('click', '.deleteExtra', function () {
+                const index = $(this).data('index');
+                $(`[data-index="${index}"]`).remove();
+                extrasAdded--;
+                branch_col--;
+            });
+
+            // Handle enabling/disabling extras section
+            $('.has_extras').on('change', function () {
+                if ($('#extras_yes').is(':checked')) {
+                    $('#extras').show();
+                } else {
+                    $('#extras').hide();
+                    $('#more_extras_fields').empty(); // Clear all extras fields
+                    extrasAdded = 0;
+                    branch_col = 0;
+                }
+            });
+
+            // Initial state: Hide extras if "no" is selected
+            if ($('#extras_no').is(':checked')) {
+                $('#extras').hide();
+            }
+        });
 
     </script>
 @endsection

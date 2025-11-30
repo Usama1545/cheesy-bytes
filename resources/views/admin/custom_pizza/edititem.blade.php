@@ -17,20 +17,28 @@
                                 <input type="hidden" class="form-control" id="id" name="id"
                                        value="{{ $getitem->id }}">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="cat_id" class="col-form-label">Size
                                                 <span class="text-danger">*</span> </label>
-                                            <input name="name" type="number" required class="form-control"
+                                            <input name="name" type="number" step="0.01" required class="form-control"
                                                    value="{{ $getitem->name }}" placeholder="size">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="cat_id" class="col-form-label">Label
+                                                <span class="text-danger">*</span> </label>
+                                            <input name="label" required class="form-control"
+                                                   value="{{ $getitem->label }}" placeholder="Label">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="subcat_id"
                                                    class="col-form-label">{{ trans('labels.price') }}<span
                                                     class="text-danger">*</span></label>
-                                            <input name="price" type="number" class="form-control" required
+                                            <input name="price" step=".01" type="number" class="form-control" required
                                                    value="{{ $getitem->price }}" placeholder="price">
 
 
@@ -74,7 +82,7 @@
                                             <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
-                                                <input type="number" name="crust_price[]" class="form-control"
+                                                <input type="number" step="0.01" name="crust_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
                                             <div class="col-12 col-lg-1 d-flex align-items-center">
@@ -82,12 +90,11 @@
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </div>
-                                            <div class="form-group col-12 col-lg-12 col-md-12">
+                                            <div class="form-group col-12 col-lg-12 col-md-12 d-none">
                                                 <label for="description" class="col-form-label">Description <span
                                                         class="text-danger">*</span></label>
                                                 <textarea name="crust_description[]" class="form-control"
-                                                          placeholder="Description"
-                                                          required>{{ $option->description }}</textarea>
+                                                          placeholder="Description">{{ $option->description }}</textarea>
                                             </div>
 
                                         </div>
@@ -140,7 +147,7 @@
                                             <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
-                                                <input type="number" name="topping_price[]" class="form-control"
+                                                <input type="number" step="0.01" name="topping_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
                                             <div class="col-12 col-lg-1 d-flex align-items-center">
@@ -200,7 +207,7 @@
                                             <div class="form-group col-12 col-lg-3 col-md-3">
                                                 <label for="price" class="col-form-label">Price <span
                                                         class="text-danger">*</span></label>
-                                                <input type="number" name="sauce_price[]" class="form-control"
+                                                <input type="number" step="0.01" name="sauce_price[]" class="form-control"
                                                        placeholder="Price" required value="{{ $option->price }}">
                                             </div>
                                             <div class="col-12 col-lg-1 d-flex align-items-center">
@@ -277,16 +284,16 @@
             </div>
             <div class="form-group col-12 col-lg-3 col-md-4">
                 <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                <input type="number" name="crust_price[]" class="form-control" placeholder="Price" required>
+                <input type="number" step="0.01" name="crust_price[]" class="form-control" placeholder="Price" required>
             </div>
             <div class="col-12 col-lg-1 d-flex align-items-center">
                 <button type="button" class="btn btn-outline-danger deleteCrustOption">
                     <i class="fa fa-trash"></i>
                 </button>
-            </div>
-            <div class="form-group col-12">
+            </div> 
+            <div class="form-group col-12  d-none">
                 <label for="description" class="col-form-label">Description <span class="text-danger">*</span></label>
-                <textarea name="crust_description[]" class="form-control" placeholder="Description" required></textarea>
+                <textarea name="crust_description[]" class="form-control" placeholder="Description" ></textarea>
             </div>
 
         </div>
@@ -326,7 +333,7 @@
             </div>
             <div class="form-group col-12 col-lg-3 col-md-4">
                 <label for="price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                <input type="number" name="topping_price[]" class="form-control" placeholder="Price" required>
+                <input type="number" step="0.01" name="topping_price[]" class="form-control" placeholder="Price" required>
             </div>
             <div class="col-12 col-lg-1 d-flex align-items-center">
                 <button type="button" class="btn btn-outline-danger deleteToppingOption">
@@ -368,7 +375,7 @@
             </div>
             <div class="form-group col-12 col-lg-3 col-md-4">
                 <label for="sauce_price" class="col-form-label">Price <span class="text-danger">*</span></label>
-                <input type="number" name="sauce_price[]" class="form-control" placeholder="Price" required>
+                <input type="number" step="0.01" name="sauce_price[]" class="form-control" placeholder="Price" required>
             </div>
             <div class="col-12 col-lg-1 d-flex align-items-center">
                 <button type="button" class="btn btn-outline-danger deleteSauceOption">

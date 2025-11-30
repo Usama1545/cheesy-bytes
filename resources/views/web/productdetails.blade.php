@@ -46,27 +46,22 @@
                             <div class="item-heading">
                                 @php
                                     if ($getitemdata->is_top_deals == 1 && $topdeals != null) {
-                                        if (@$topdeals->offer_type == 1) {
-                                            if ($getitemdata->item_price > @$topdeals->offer_amount) {
-                                                $price = $getitemdata->item_price - @$topdeals->offer_amount;
-                                            } else {
-                                                $price = $getitemdata->item_price;
-                                            }
-                                        } else {
-                                            $price =
-                                                $getitemdata->item_price -
-                                                $getitemdata->item_price * (@$topdeals->offer_amount / 100);
-                                        }
-                                        $original_price = $getitemdata->item_price;
-                                        $off =
-                                            $original_price > 0
-                                                ? number_format(100 - ($price * 100) / $original_price, 1)
-                                                : 0;
-                                    } else {
-                                        $price = $getitemdata->item_price;
-                                        $original_price = $getitemdata->original_price;
-                                        $off = $getitemdata->discount_percentage;
-                                    }
+                         if (@$topdeals->offer_type == 1) {
+                             if ($getitemdata->item_price > @$topdeals->offer_amount) {
+                                 $price = $getitemdata->item_price - @$topdeals->offer_amount;
+                             } else {
+                                 $price = $getitemdata->item_price;
+                             }
+                         } else {
+                             $price = $getitemdata->item_price - $getitemdata->item_price * (@$topdeals->offer_amount / 100);
+                         }
+                         $original_price = $getitemdata->item_price;
+                         $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                     } else {
+                         $price = $getitemdata->item_price;
+                         $original_price = $getitemdata->original_price;
+                         $off = $getitemdata->discount_percentage;
+                     }
                                 @endphp
                                 @if ($off > 0)
                                     <div class="my-2">
@@ -125,15 +120,7 @@
                                 @endif
                             @endif
 
-                            <div class="d-flex pb-2 border-bottom">
-                                <div class="col-auto">
-                                    @if ($getitemdata->tax != '' && $getitemdata->tax != 0)
-                                        <span class="text-danger float-end">{{ trans('labels.exclusive_taxes') }}</span>
-                                    @else
-                                        <span class="text-danger float-end">{{ trans('labels.inclusive_taxes') }}</span>
-                                    @endif
-                                </div>
-                            </div>
+
                             @if ($getitemdata->is_top_deals == 1 && $topdeals != null)
                                 <h5 class="mt-3">⏰ {{ trans('labels.hurry_up') }}</h5>
                                 <div class="product-detail-countdown d-flex border-bottom gap-2 my-3 pb-3" id="countdown">
@@ -149,6 +136,7 @@
                                                         'addongroup_id',
                                                         $addons_group->id,
                                                     );
+                                                    $addon_index = 0;
                                                 @endphp
                                                 @if ($availableAddons->isNotEmpty())
                                                     <div class="item-addons-list mt-3 border-bottom pb-3"
@@ -175,9 +163,11 @@
                                                                     {{ trans('labels.max') }}
                                                                     {{ $addons_group->max_count }}
                                                                 </span>
+
                                                             @endif
                                                         </div>
                                                         @foreach ($getitemdata['addons'] as $addons)
+
                                                             @if ($addons->addongroup_id == $addons_group->id)
                                                                 <div
                                                                     class="mx-2 {{ session()->get('direction') == '2' ? 'd-flex gap-2' : 'form-check' }}">
@@ -187,6 +177,8 @@
                                                                         } elseif ($addons_group->selection_count == 2) {
                                                                             $type = 'checkbox';
                                                                         }
+                                                                        $autoSelect = ($addons_group->selection_count == 1 && $addons_group->selection_type == 1 && $addon_index == 0) ? 'checked' : '';
+                                                                        $addon_index = 1;
                                                                     @endphp
                                                                     <input
                                                                         class="form-check-input cursor-pointer addons_chk_{{ $getitemdata['id'] }} {{ session()->get('direction') == '2' ? 'ms-0' : '' }}"
@@ -197,7 +189,8 @@
                                                                         data-addons-name="{{ $addons->name }}"
                                                                         onclick="getaddons('{{ $getitemdata['id'] }}')"
                                                                         name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
-                                                                        id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}">
+                                                                        id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}"
+                                                                        {{$autoSelect}} >
                                                                     <div
                                                                         class="d-flex justify-content-between w-100 {{ session()->get('direction') == '2' ? 'ps-2' : 'pe-2' }}">
                                                                         <label class="form-check-label cursor-pointer fs-7"
@@ -238,6 +231,7 @@
                                                     id="extras_{{ $extras->id }}_{{ $getitemdata['id'] }}"
                                                     name="extras_id_{{ $getitemdata['id'] }}"
                                                     {{ $extras->is_default ? 'checked disabled' : '' }}>
+
                                                 <div
                                                     class="d-flex justify-content-between align-items-center w-100 text-black">
                                                     <label class="form-check-label cursor-pointer me-2 fs-7"
@@ -266,6 +260,8 @@
                                 value="{{ $getitemdata['tax'] }}">
                             <input type="hidden" name="item_price" id="item_price_{{ $getitemdata['id'] }}"
                                 value="{{ $price }}">
+                            <input type="hidden" name="item_qty" id="item_qty_{{ $getitemdata['id'] }}" value="1">
+
                             <input type="hidden" name="request_url" id="request_url_{{ $getitemdata['slug'] }}"
                                 value="{{ request()->segments()[0] }}">
                             <input type="hidden" name="login_required" id="login_required_{{ $getitemdata['slug'] }}"
@@ -283,11 +279,11 @@
                                             </div>
                                             <div class="btn item-quantity">
                                                 <button class="btn btn-sm item-quantity-minus"
-                                                    onclick="changeqty('{{ $getitemdata['slug'] }}','minus')">-</button>
+                                                    onclick="changeqty('{{ $getitemdata['slug'] }}','{{ $getitemdata['id'] }}','minus')">-</button>
                                                 <input class="item-quantity-input" type="text" value="1"
                                                     readonly="" id="item_qty_{{ $getitemdata['slug'] }}">
                                                 <button class="btn btn-sm item-quantity-plus"
-                                                    onclick="changeqty('{{ $getitemdata['slug'] }}','plus')">+</button>
+                                                    onclick="changeqty('{{ $getitemdata['slug'] }}','{{ $getitemdata['id'] }}','plus')">+</button>
                                             </div>
                                         </div>
                                     </div>
@@ -733,5 +729,33 @@
             $("#reviewModal img").attr('src', $(this).attr('data-item-image'));
             $('#reviewModal').modal('show');
         });
+    </script>
+    <script>
+        function changeqty(item_slug,id, type) {
+            var qtys = parseInt($('#item_qty_' + item_slug).val());
+            if (type == "minus") {
+                qty = qtys - 1;
+            } else {
+                qty = qtys + 1;
+            }
+            if (qty >= "1") {
+                $('#item_qty_' + item_slug).val(qty);
+                $('#item_qty_' + id).val(qty);
+
+            }
+            console.log(id);
+            qtys = qty;
+            var item_price = parseFloat($('#item_price_' + id).val());
+            var addonstotal = 0;
+            var subtotal = 0;
+            var chk = document.querySelectorAll(".addons_chk_" + id + ":checked");
+            if (chk.length) {
+                chk.forEach(function (el) {
+                    addonstotal += parseFloat(el.getAttribute('data-addons-price'));
+                });
+            }
+            subtotal = (item_price + addonstotal) * qtys;
+            $('.subtotal_' + id).text(currency_format(subtotal));
+        }
     </script>
 @endsection

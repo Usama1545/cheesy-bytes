@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\addons;
 
+use App\Models\Item;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\helper;
@@ -31,10 +32,14 @@ class PromocodeController extends Controller
             $promocode->offer_amount = helper::number_format($request->offer_amount);
             $promocode->min_amount = helper::number_format($request->min_amount);
             $promocode->start_date = $request->start_date;
+            $promocode->start_time = $request->start_time;
+            $promocode->end_time = $request->end_time;
             $promocode->expire_date = $request->expire_date;
             $promocode->usage_type = $request->usage_type;
             $promocode->usage_limit = $request->usage_type == 1 ? $request->usage_limit : '';
             $promocode->description = $request->description;
+            $promocode->category_ids = $request->category_ids ? implode(',', $request->category_ids) : null;
+            $promocode->product_ids = $request->product_ids ? implode(',', $request->product_ids) : null;
             $promocode->is_available = '1';
             $promocode->save();
             return redirect('admin/promocode')->with('success', trans('messages.success'));
@@ -54,8 +59,12 @@ class PromocodeController extends Controller
         $promocode->offer_amount = helper::number_format($request->offer_amount);
         $promocode->min_amount = helper::number_format($request->min_amount);
         $promocode->start_date = $request->start_date;
+        $promocode->start_time = $request->start_time;
+        $promocode->end_time = $request->end_time;
         $promocode->expire_date = $request->expire_date;
         $promocode->usage_type = $request->usage_type;
+        $promocode->category_ids = $request->category_ids ? implode(',', $request->category_ids) : null;
+        $promocode->product_ids = $request->product_ids ? implode(',', $request->product_ids) : null;
         $promocode->usage_limit = $request->usage_type == 1 ? $request->usage_limit : '';
         $promocode->description = $request->description;
         $promocode->save();
@@ -90,5 +99,15 @@ class PromocodeController extends Controller
             }
         }
         return response()->json(['status' => 1, 'msg' => 'Update Successfully!!'], 200);
+    }
+
+    public function getProducts(Request $request)
+    {
+        $categoryIds = $request->input('category_ids', []);
+
+        // Fetch products associated with the selected categories
+        $products = Item::whereIn('cat_id', $categoryIds)->get(['id', 'item_name']);
+
+        return response()->json($products);
     }
 }

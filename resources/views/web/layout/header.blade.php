@@ -5,8 +5,12 @@
 
         <nav class="navbar navbar-expand-lg sticky-top p-0">
             <div class="container navbar-container">
-                <a class="navbar-brand" href="{{ route('home') }}">
+                <a class="navbar-brand" href="{{ helper::branch_route('home') }}">
                     <img class="img-resposive img-fluid" src="{{ asset('assets/images/logo.png') }}"
+                         alt="logo">
+                </a>
+                                <a class="d-md-none navbar-brand" href="{{ helper::branch_route('home') }}">
+                    <img class="img-resposive img-fluid" src="{{ asset('assets/images/halal.png') }}"
                          alt="logo">
                 </a>
                 <!-- language-btn -->
@@ -57,13 +61,19 @@
                         <!-- cart-btn -->
                         <div class="navbar-nav mx-auto header-head-box">
                             <a class="nav-link px-3 {{ request()->is('/') ? 'active' : '' }}"
-                               href="{{ route('home') }}">{{ trans('labels.home') }}</a>
+                               href="{{ helper::branch_route('home') }}">{{ trans('labels.home') }}</a>
+                               <a class="nav-link px-3 {{ request()->is('deals') ? 'active' : '' }}"
+                               href="{{ helper::branch_route('deals') }}">{{ trans('labels.deals') }}</a>
                             <a class="nav-link px-3 {{ request()->is('categories') || request()->is('*/categories') ? 'active' : '' }}"
-                               href="{{ route('categories') }}">{{ trans('labels.menu') }}</a>
+                               href="{{ helper::branch_route('categories') }}">{{ trans('labels.menu') }}</a>
                             <a class="nav-link px-3 {{ request()->is('reward') || request()->is('*/reward') ? 'active' : '' }}"
-                               href="{{ URL::to('reward') }} ">Rewards</a>
+                                href="#">Rewards</a>
+                                 <a class="nav-link px-3 {{ request()->is('catering') || request()->is('*/catering') ? 'active' : '' }}"
+                                href="{{ helper::branch_route('catering') }}">Catering</a>
+
+                                <!-- href="{{ helper::branch_route('reward') }} ">Rewards</a>-->
                             <a class="nav-link px-3 {{ request()->is('location')  || request()->is('*/location')   ? 'active' : '' }}"
-                               href="{{ URL::to('location') }} ">Location</a>
+                               href="{{ route('location') }} ">Location</a>
                             <div class="nav-link px-3">
                                 <div class="header-banner">
                                     <div class="header-banner-content">
@@ -97,23 +107,28 @@
                                 <input type="text" class="search-form" placeholder="{{ trans('labels.search_here') }}"
                                        required>
                                 @if (session()->get('direction') == '')
-                                    <a href="{{ route('search') }}" class="search-button">
+                                    <a href="{{ helper::branch_route('search') }}" class="search-button">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </a>
                                 @elseif (session()->get('direction') == '2')
-                                    <a href="{{ route('search') }}" class="search-button">
+                                    <a href="{{ helper::branch_route('search') }}" class="search-button">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </a>
                                 @else
-                                    <a href="{{ route('search') }}" class="search-button">
+                                    <a href="{{ helper::branch_route('search') }}" class="search-button">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </a>
                                 @endif
                             </div>
                             <div class="cart-area header-box">
-                                <a href="{{ route('cart') }}" class="text-white">
+                                <a href="{{ helper::branch_route('cart') }} " class="text-white">
                                     <i class="fa-solid fa-cart-shopping"></i>
                                     <span class="cart-badge">{{ helper::get_user_cart() }}</span>
+                                </a>
+                            </div>
+                            <div >
+                                <a href="#" class="text-white">
+                                    <img src="{{ asset('assets/images/halal.png') }}" alt="Halal" style="width: 50px;margin-top: 5px;margin-left:50px">
                                 </a>
                             </div>
                         </div>
@@ -124,17 +139,15 @@
 </header>
 <!-- header section end -->
 
-{{--<!-- offer btn start-->--}}
-{{--<div class="{{ session()->get('direction') == '2' ? 'rtl-buttons' : 'ltr-buttons' }}">--}}
-{{--    @if (@helper::checkaddons('coupon'))--}}
-{{--        @if (!empty(helper::getoffers()) && count(helper::getoffers()) > 0)--}}
-{{--            <button class="btn btn-primary offer-button" type="button" data-bs-toggle="offcanvas"--}}
-{{--                data-bs-target="#offcanvasOffer" aria-controls="offcanvasOffer">--}}
-{{--                <i class="fa-sharp fa-solid fa-badge-percent"></i> {{ trans('labels.offers') }}--}}
-{{--            </button>--}}
-{{--        @endif--}}
-{{--    @endif--}}
-{{--</div>--}}
+<!-- offer btn start-->
+<!--<div class="ltr-buttons">-->
+
+<!--           <button class="btn btn-primary offer-button" style="padding: 0px 40px 1px 1px !important;" type="button" data-bs-toggle="offcanvas"-->
+<!--                data-bs-target="" aria-controls="offcanvasOffer">-->
+<!--            <img src="{{ asset('assets/images/halal.png') }}" alt="Halal" style="width: 45px">-->
+<!--            </button>-->
+
+<!--</div>-->
 <div class="offer">
     <div class="offcanvas {{ session()->get('direction') == '2' ? 'offcanvas-start' : 'offcanvas-end' }}"
          tabindex="-1" id="offcanvasOffer" aria-labelledby="offcanvasOfferLabel">
@@ -205,19 +218,19 @@
     <div class="container">
         <ul class="d-flex justify-content-between align-items-center mb-0 gap-3">
             <li class="text-center">
-                <a href="{{ route('home') }}" class="{{ request()->is('/') ? 'active1' : '' }}">
+                <a href="{{ helper::branch_route('home') }}" class="{{ request()->is('/') ? 'active1' : '' }}">
                     <i class="fa-light fa-house"></i>
                     <p class="mb-0">{{ trans('labels.home') }}</p>
                 </a>
             </li>
             <li class="text-center">
-                <a href="{{ route('search') }}" class="{{ request()->is('search') ? 'active1' : '' }}">
-                    <i class="fa-light fa-magnifying-glass"></i>
-                    <p class="mb-0">{{ trans('labels.search') }}</p>
+                <a href="{{ helper::branch_route('deals') }}" class="{{ request()->is('deals') ? 'active1' : '' }}">
+                    <i class="fa-light fa-gift"></i>
+                    <p class="mb-0">{{ trans('labels.deals') }}</p>
                 </a>
             </li>
             <li class="text-center">
-                <a href="{{ route('cart') }}" class="{{ request()->is('cart') ? 'active1' : '' }}">
+                <a href="{{ helper::branch_route('cart') }}" class="{{ request()->is('cart') ? 'active1' : '' }}">
                     <div class="position-relative">
                         <i class="fa-light fa-bag-shopping"></i>
                         <span class="qut_counter">{{ helper::get_user_cart() }}</span>
@@ -226,7 +239,7 @@
                 </a>
             </li>
             <li class="text-center">
-                <a href="{{ route('categories') }}"
+                <a href="{{ helper::branch_route('categories') }}"
                    class="{{ request()->is('categories') ? 'active1' : '' }}">
                     <i class="fa-light fa-file"></i>
                     <p class="mb-0">Menu</p>

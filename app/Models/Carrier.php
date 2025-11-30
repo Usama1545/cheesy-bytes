@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Carrier extends Model
 {
     use HasFactory;
-     protected $fillable = ['branch_id','link','name','image','reorder_id'];
+     protected $fillable = ['branch_id','link','name','description','image','reorder_id'];
 
      public function branch()
      {

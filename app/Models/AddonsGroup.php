@@ -16,4 +16,12 @@ class AddonsGroup extends Model
     {
         return $this->hasOne('App\Models\Item', 'id', 'item_id');
     }
+    
+    public function availableAddons()
+    {
+        return $this->hasMany(Addons::class, 'addongroup_id', 'id')
+            ->where('is_deleted', 2)
+            ->where('is_available', 1)
+            ->orderByDesc('id');
+    }
 }

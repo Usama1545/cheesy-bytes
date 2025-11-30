@@ -33,6 +33,7 @@ class SliderController extends Controller
         $slider = new Slider;
         $slider->image = $image;
         $slider->title = $request->title;
+        $slider->branch_id = $request->branch_id;
         $slider->description = $request->description;
         if ($request->type == "1") {
             $slider->type = $request->type;
@@ -70,6 +71,7 @@ class SliderController extends Controller
             $slider->image = $image;
             $slider->save();
         }
+        $slider->branch_id = $request->branch_id;
         $slider->title = $request->title;
         $slider->description = $request->description;
         if ($request->type == "1") {

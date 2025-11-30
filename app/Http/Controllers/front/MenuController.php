@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\CountySeo;
 use App\Models\CustomPizzaCrust;
 use App\Models\CustomPizzaSauce;
+use App\Models\Branch;
 use App\Models\CustomPizzaTopping;
 use App\Models\Subcategory;
 use App\Models\Item;
@@ -89,7 +90,9 @@ class MenuController extends Controller
                 ->orderBy('item.reorder_id')
                 ->get();
         }
-        $getitemlist = $getitemlist->groupBy(function ($item) {
+       $getitemlist = $getitemlist->sortBy(function ($item) {
+            return $item->subcategory_info->reorder_id ?? PHP_INT_MAX;
+        })->groupBy(function ($item) {
             return $item->subcategory_info->subcategory_name ?? $item->category_info->category_name;
         });
 
@@ -98,8 +101,9 @@ class MenuController extends Controller
 
     public function index_con($country,$category)
     {
-        $htmlContent = CountySeo::where('county', $country)->where('category', $category)->pluck('content')->first();
-
+        $branchId = Session::get('branch_id');
+        $branch = Branch::find($branchId);
+        $htmlContent = CountySeo::where('county', $branch->slug)->where('category', $category)->pluck('content')->first();
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $topdeals = helper::top_deals();
@@ -107,16 +111,23 @@ class MenuController extends Controller
         $categorydata = Category::where('slug', $category)->where('is_available', 1)->where('is_deleted', 2)->first();
         $subcategories = Subcategory::where('cat_id', @$categorydata->id)->where('is_available', 1)->where('is_deleted', 2)->get();
 
+        $branchId = Session::get('branch_id');
 
         if ($user_id != null) {
-            $getitemlist = Item::with('category_info', 'subcategory_info', 'item_image')
-                ->select('item.*',
-                    DB::raw('MAX(case when favorite.item_id is null then 0 else 1 end) as is_favorite'),
-                    DB::raw('MAX(case when item.price is null then 0 else item.price end) as item_price'),
-                    DB::raw('MAX(case when cart.item_id is null then 0 else 1 end) as is_cart'))
+            $getitemlist = Item::with('category_info', 'subcategory_info', 'item_image', 'prices')
+                ->select(
+                    'item.*',
+                    DB::raw('MAX(CASE WHEN favorite.item_id IS NULL THEN 0 ELSE 1 END) AS is_favorite'),
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
+                    DB::raw('MAX(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart')
+                )
                 ->leftJoin('favorite', function ($query) use ($user_id) {
                     $query->on('favorite.item_id', '=', 'item.id')
                         ->where('favorite.user_id', '=', $user_id);
+                })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
                 })
                 ->leftJoin('cart', function ($query) use ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')
@@ -124,7 +135,6 @@ class MenuController extends Controller
                         ->where('cart.buynow', '=', '0');
                 })
                 ->where('item.item_status', '1')
-                ->where('item.cat_id', @$categorydata->id)
                 ->where(function($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
@@ -132,20 +142,26 @@ class MenuController extends Controller
                     ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
                     ->orWhere('item.branch_ids', '=', $branchId);
                 })
+                ->where('item.cat_id', @$categorydata->id)
                 ->groupBy('item.id') // Ensure proper grouping
                 ->orderBy('item.reorder_id')->get();
         } else {
             $getitemlist = Item::with('category_info', 'subcategory_info', 'item_image')
                 ->select('item.*',
-                    DB::raw('MAX(case when item.price is null then 0 else item.price end) as item_price'),
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
                     DB::raw('MAX(case when cart.item_id is null then 0 else 1 end) as is_cart'))
                 ->leftJoin('cart', function ($query) use ($session_id) {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.session_id', '=', $session_id)
                         ->where('cart.buynow', '=', '0');
                 })
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
                 ->where('item.item_status', '1')
                 ->where('item.cat_id', @$categorydata->id)
+                ->groupBy('item.id') // Ensure proper grouping
                 ->where(function($query) {
                     $branchId = Session::get('branch_id');
                     $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
@@ -153,13 +169,15 @@ class MenuController extends Controller
                     ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
                     ->orWhere('item.branch_ids', '=', $branchId);
                 })
-                ->groupBy('item.id') // Ensure proper grouping
                 ->orderBy('item.reorder_id')
                 ->get();
         }
-        $getitemlist = $getitemlist->groupBy(function ($item) {
+        $getitemlist = $getitemlist->sortBy(function ($item) {
+            return $item->subcategory_info->reorder_id ?? PHP_INT_MAX;
+        })->groupBy(function ($item) {
             return $item->subcategory_info->subcategory_name ?? $item->category_info->category_name;
         });
+
 
         return view('web.menu', compact('topdeals', 'categorydata', 'subcategories', 'getitemlist','country','htmlContent'));
     }

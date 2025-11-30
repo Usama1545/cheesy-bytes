@@ -18,6 +18,8 @@
                                     <th>Product</th>
                                     <th>Selective Product</th>
                                     <th>Offer Amount</th>
+                                                                        <th>Order</th>
+
                                     <th>Start Date /Time</th>
                                     <th>End Date / Time</th>
                                     <th>{{ trans('labels.action') }}</th>
@@ -27,9 +29,11 @@
                                 @php $i = 1; @endphp
                                 @foreach ($deals as $item)
                                     <tr class="row1" data-id="{{ $item->id }}">
-                                        <td>{{ $item->product->item_name }}</td>
+                                        <td>{{ $item->product->item_name ?? '' }}</td>
                                         <td>{{ $item->min_count }}  </td>
                                         <td>{{ $item->offer_amount }}</td>
+                                                                                <td>{{ $item->order }}</td>
+
                                         <td>
                                             {{ helper::date_format($item->start_date) }} <br>
                                             {{ helper::time_format($item->start_time) }}

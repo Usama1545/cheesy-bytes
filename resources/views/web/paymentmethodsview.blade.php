@@ -5,7 +5,7 @@
     @foreach ($getpaymentmethods as $key => $pmdata)
         @php
             // Check if the current $pmdata is a system addon and activated
-            if ($pmdata->payment_type == '1' || $pmdata->payment_type == '2' || $pmdata->payment_type == '4') {
+            if ($pmdata->payment_type == '1' || $pmdata->payment_type == '2' || $pmdata->payment_type == '15') {
                 $systemAddonActivated = true;
             } else {
                 $systemAddonActivated = false;
@@ -22,9 +22,15 @@
                     data-payment-type="{{ $transaction_type }}" value="{{ $transaction_type }}"
                     data-currency="{{ $pmdata->currency }}" {{ $i++ == 0 ? 'checked' : '' }}>
                 <div class="payment-gateway mb-0 justify-content-between">
+                    @if(in_array($transaction_type, [15])) 
+                    <span> <img src="{{ helper::image_path($pmdata->image) }}" class="{{ session()->get('direction') == '2' ? 'ms-2' : 'me-2' }}" style="width:300px;height: 50px;" alt="">
+                        {{ ucfirst($pmdata->payment_name) }}
+                    </span>
+                    @else
                     <span> <img src="{{ helper::image_path($pmdata->image) }}" class="{{ session()->get('direction') == '2' ? 'ms-2' : 'me-2' }}" alt="">
                         {{ ucfirst($pmdata->payment_name) }}
                     </span>
+                    @endif
                     <div class="d-flex gap-2">
                         @if ($transaction_type == 2)
                             <span class="text-end text-muted">{{ helper::currency_format(Auth::user()->wallet) }}</span>
@@ -35,7 +41,7 @@
                 </div>
             </label>
         @endif
-        @if (in_array($transaction_type, [3, 4, 5, 6]))
+        @if (in_array($transaction_type, [3, 15, 5, 6]))
             @if ($transaction_type == 3)
                 <input type="hidden" name="razorpaykey" id="razorpaykey" value="{{ $pmdata->public_key }}">
             @endif
@@ -49,11 +55,13 @@
                 <input type="hidden" name="paystackkey" id="paystackkey" value="{{ $pmdata->public_key }}">
             @endif
         @endif
-        @if ($transaction_type == 4)
-            <form action="" method="" id="payment-form" class="d-none">
-                <div class="my-3" id="card-element"></div>
-            </form>
-        @endif
+{{--        @if ($transaction_type == 4)--}}
+{{--            <form action="" method="" id="payment-form" class="d-none">--}}
+{{--                <div id="payment-request-button"></div>--}}
+
+{{--                <div class="my-3" id="card-element"></div>--}}
+{{--            </form>--}}
+{{--        @endif--}}
     @endforeach
     @if (!in_array(4, array_column($getpaymentmethods->toArray(), 'id')))
         <input type="hidden" name="stripekey" id="stripekey" value="">

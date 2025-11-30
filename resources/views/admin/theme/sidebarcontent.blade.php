@@ -89,6 +89,20 @@
             <i class="fa-solid fa-cart-shopping"></i><span class="nav-text ">{{ trans('labels.orders') }}</span>
         </a>
     </li>
+    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('15', $modules) == true ? '' : 'd-none') : '' }}"
+        id="11">
+        <a class="nav-link rounded d-flex {{ request()->is('admin/bookings*') ? 'active' : '' }}"
+           href="{{ URL::to('/admin/bookings') }}" aria-expanded="false">
+            <i class="fa-solid fa-table"></i>
+            <span class="nav-text">Catering Bookings
+                @if(@helper::getBookingCount() > 0)
+
+        <span class="badge bg-danger ms-2">{{ @helper::getBookingCount() }}</span>
+                @endif
+    </span>
+        </a>
+
+    </li>
     <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('2', $modules) == true ? '' : 'd-none') : '' }}"
         id="2">
         <a class="nav-link rounded d-flex {{ request()->is('admin/report*') ? 'active' : '' }}"
@@ -197,7 +211,6 @@
             </a>
         </li>
     @endif
-
     @if (Auth::user()->type != 1)
         @if (in_array('7', $modules) || in_array('8', $modules) || in_array('9', $modules) || in_array('10', $modules))
             <li class="nav-item mt-3">
@@ -267,9 +280,10 @@
             <i class="fa-solid fa-list-timeline"></i><span class="nav-text ">{{ trans('labels.items') }}</span>
         </a>
     </li>
+
     <li class="nav-item mb-2 fs-7 dropdown multimenu"
         id="4">
-    <a class="nav-link collapsed rounded d-flex align-items-center justify-content-between dropdown-toggle mb-1"
+    <a class="nav-link collapsed rounded {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }} d-flex align-items-center justify-content-between dropdown-toggle mb-1"
        href="#deals" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="deals">
             <span class="d-flex"><i class="fa-solid fa-badge-percent"></i><span
                     class="multimenu-title">Deals</span></span>
@@ -280,6 +294,20 @@
             <a class="nav-link rounded d-flex {{ request()->is('admin/topDeals*') ? 'active' : '' }}"
                href="{{ URL::to('/admin/topDeals') }}" aria-expanded="false">
                 <i class="fa-solid fa-circle-small"></i><span class="nav-text ">Flat Deals</span>
+            </a>
+        </li>
+        <li class="nav-item ps-4"
+            id="10">
+            <a class="nav-link rounded d-flex {{ request()->is('admin/bogoDeals*') ? 'active' : '' }}"
+               href="{{ URL::to('/admin/bogoDeals') }}" aria-expanded="false">
+                <i class="fa-solid fa-circle-small"></i><span class="nav-text ">Bogo Deals</span>
+            </a>
+        </li>
+        <li class="nav-item ps-4"
+            id="10">
+            <a class="nav-link rounded d-flex {{ request()->is('admin/bmsmDeals*') ? 'active' : '' }}"
+               href="{{ URL::to('/admin/bmsmDeals') }}" aria-expanded="false">
+                <i class="fa-solid fa-circle-small"></i><span class="nav-text ">BmSm Deals</span>
             </a>
         </li>
         <li class="nav-item ps-4"
@@ -300,7 +328,7 @@
             </a>
         </li>
     @endif
-    <li class="nav-item mt-3">
+    <li class="nav-item mt-3 {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }}">
         <h6 class="text-muted mb-2 fs-7 text-uppercase">Pizza Management</h6>
     </li>
     <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }}"
@@ -310,7 +338,7 @@
             <i class="fa-solid fa-pizza-slice"></i><span class="nav-text ">Custom Pizza</span>
         </a>
     </li>
-    <li class="nav-item mb-2 fs-7 dropdown multimenu"
+    <li class="nav-item mb-2 fs-7 dropdown multimenu {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }}"
         id="4">
         <a class="nav-link collapsed rounded d-flex align-items-center justify-content-between dropdown-toggle mb-1"
            href="#banners" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="banners">
@@ -338,10 +366,10 @@
             </li>
         </ul>
     </li>
-    <li class="nav-item mt-3">
+    <li class="nav-item mt-3 {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }}">
         <h6 class="text-muted mb-2 fs-7 text-uppercase">{{ trans('labels.restaurant_management') }}</h6>
     </li>
-    <li class="nav-item mb-2 fs-7"
+    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }}"
         id="11">
         <a class="nav-link rounded d-flex {{ request()->is('admin/branches*') ? 'active' : '' }}"
            href="{{ URL::to('/admin/branches') }}" aria-expanded="false">
@@ -349,7 +377,7 @@
                 class="nav-text ">Branches</span>
         </a>
     </li>
-    <li class="nav-item mb-2 fs-7"
+     <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('10', $modules) == true ? '' : 'd-none') : '' }}"
         id="11">
         <a class="nav-link rounded d-flex {{ request()->is('admin/carrier*') ? 'active' : '' }}"
            href="{{ URL::to('/admin/carrier') }}" aria-expanded="false">
@@ -399,6 +427,13 @@
         <a class="nav-link rounded d-flex {{ request()->is('admin/users*') ? 'active' : '' }}"
            href="{{ URL::to('/admin/users') }}" aria-expanded="false">
             <i class="fa-solid fa-users"></i><span class="nav-text ">{{ trans('labels.customers') }}</span>
+        </a>
+    </li>
+    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('17', $modules) == true ? '' : 'd-none') : '' }}"
+        id="17">
+        <a class="nav-link rounded d-flex {{ request()->is('admin/employee*') ? 'active' : '' }}"
+           href="{{ URL::to('/admin/employee') }}" aria-expanded="false">
+            <i class="fa-solid fa-users"></i><span class="nav-text ">{{ trans('labels.employee') }}</span>
         </a>
     </li>
 
@@ -488,10 +523,24 @@
             {{--                </a>--}}
             {{--            </li>--}}
             <li class="nav-item ps-4 mb-1">
+                <a class="nav-link rounded {{ request()->is('admin/choose_us*') ? 'active' : '' }}"
+                    aria-current="page" href="{{ URL::to('/admin/choose_us') }}">
+                    <span class="d-flex align-items-center multimenu-menu-indicator"><i
+                            class="fa-solid fa-circle-small"></i>{{ trans('labels.why_choose_us') }}</span>
+                </a>
+            </li>
+            <li class="nav-item ps-4 mb-1">
                 <a class="nav-link rounded {{ request()->is('admin/faq*') ? 'active' : '' }}" aria-current="page"
                    href="{{ URL::to('/admin/faq') }}">
                     <span class="d-flex align-items-center multimenu-menu-indicator"><i
                             class="fa-solid fa-circle-small"></i>{{ trans('labels.faq') }}</span>
+                </a>
+            </li>
+             <li class="nav-item ps-4 mb-1">
+                <a class="nav-link rounded {{ request()->is('admin/gallery*') ? 'active' : '' }}"
+                   aria-current="page" href="{{ URL::to('/admin/gallery') }}">
+                                <span class="d-flex align-items-center multimenu-menu-indicator"><i
+                                        class="fa-solid fa-circle-small"></i>{{ trans('labels.gallery') }}</span>
                 </a>
             </li>
 
@@ -534,13 +583,7 @@
             {{--            </div>--}}
             {{--        </a>--}}
             {{--    </li>--}}
-            {{--    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('24', $modules) == true ? '' : 'd-none') : '' }}"--}}
-            {{--        id="24">--}}
-            {{--        <a class="nav-link rounded d-flex {{ request()->is('admin/clear-cache*') ? 'active' : '' }}"--}}
-            {{--            href="{{ URL::to('/admin/clear-cache') }}" aria-expanded="false">--}}
-            {{--            <i class="fa fa-refresh"></i><span class="nav-text ">{{ trans('labels.clear_cache') }}</span>--}}
-            {{--        </a>--}}
-            {{--    </li>--}}
+
         </ul>
 
     </li>
@@ -550,6 +593,12 @@
            href="{{ URL::to('/admin/settings') }}" aria-expanded="false">
             <i class="fa-solid fa-gears"></i><span
                 class="nav-text ">{{ trans('labels.general_settings') }}</span>
+        </a>
+    </li>
+    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('24', $modules) == true ? '' : 'd-none') : '' }}" id="24">
+        <a class="nav-link rounded d-flex {{ request()->is('admin/clear-cache*') ? 'active' : '' }}"
+           href="{{ URL::to('/admin/clear-cache') }}" aria-expanded="false">
+          <i class="fa fa-refresh"></i><span class="nav-text ">{{ trans('labels.clear_cache') }}</span>
         </a>
     </li>
 </ul>

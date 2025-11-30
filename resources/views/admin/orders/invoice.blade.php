@@ -73,6 +73,12 @@
                                                 @endif
                                             </p>
                                         </li>
+                                        <li class="list-group-item px-0 fs-7 fw-400 d-flex justify-content-between align-items-center">
+                                            Branch
+                                            <p class="text-muted">
+                                                {{ $orderdata->branch->name}}
+                                            </p>
+                                        </li>
 
                                         @if (in_array($orderdata->transaction_type, [3, 4, 5, 6, 7, 8, 9, 10]))
                                             <li class="list-group-item px-0 fs-7 fw-400 d-flex justify-content-between align-items-center">
@@ -273,6 +279,7 @@
                                 <tbody>
                                 @php
                                     $data = [];
+                                    $addonstotal = 0;
                                 @endphp
                                 @foreach ($ordersdetails as $orders)
                                     @php
@@ -283,13 +290,14 @@
                                             $orders['qty'];
                                         $data[] = ['total_price' => $total_price];
                                         $order_total = array_sum(array_column(@$data, 'total_price'));
-                                        $addonstotal = $orders->addons_total_price + $orders->extras_total_price;
+                                        $addonstotal = $orders->addons_total_price + $orders->extras_total_price ?? 0;
                                     @endphp
                                     <tr>
                                         <td><img src="{{ helper::image_path($orders->item_image) }}"
                                                  class="rounded h-50px" alt=""></td>
                                         <td>
                                             {{ $orders->item_name }}
+
                                             @if(!is_null($orders->size) && !is_null($orders->crust))
                                                 ({{ $orders->size->name }} - {{ $orders->crust->name }})
                                             @endif
@@ -328,7 +336,7 @@
                                                 <div class="modal-header">
                                                     <h1 class="modal-title fs-5"
                                                         id="exampleModalLabel">{{ $orders->item_name }}
-                                                        - {{ $orders->crust->name }} -{{ $orders->size->name }}</h1>
+                                                        - {{ $orders->crust?->name }} -{{ $orders->size?->name }}</h1>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                             aria-label="Close"></button>
                                                 </div>
@@ -347,7 +355,6 @@
                                                             @foreach($dippingNames as $key => $name)
                                                                 <li class="list-group-item fs-7 d-flex text-muted">
                                                                     <span class="flex-grow-1">{{ $name }}</span>
-                                                                    <span class="ml-3">{{ $dippingQuantities[$key] }} ({{ $dippingQuantities[$key] * $dippingPrices[$key] }}$)</span>
                                                                 </li>
                                                             @endforeach
                                                         </ul>
@@ -397,7 +404,7 @@
                                         @endif
                                         <td class="text-end">
                                             {{ helper::currency_format($orders->item_price) }}
-                                            @if ($addonstotal != 0)
+                                            @if (isset($addonstotal) && $addonstotal != 0)
                                                 <br><small class="text-muted">+
                                                     {{ helper::currency_format($addonstotal) }}</small>
                                             @endif
@@ -424,23 +431,22 @@
                                                         {{--                                                            <?php $data = (new App\Helpers\helper)->getCustomPizzaDetails($orders->custom_pizza_id) ?>--}}
                                                         <div class="mt-2 p-2 border-bottom" id="extras">
                                                             <p class="m-0 fs-6 fw-500">Size: <small
-                                                                    class="text-muted">{{ $orders->custom_pizza->size->label }}
-                                                                    ({{$orders->custom_pizza->size->name }}")</small>
+                                                                    class="text-muted">{{ $orders->custom_pizza?->size->label }}
+                                                                    ({{$orders->custom_pizza?->size->name }}")</small>
                                                             </p>
                                                             <p class="m-0 fs-6 fw-500">Special: <small
-                                                                    class="text-muted">{{ $orders->custom_pizza->cut }}
-                                                                    / {{ $orders->custom_pizza->bake }}
-                                                                    / {{ $orders->custom_pizza->seasoning }}</small>
+                                                                    class="text-muted">{{ $orders->custom_pizza?->cut }}
+                                                                    / {{ $orders->custom_pizza?->bake }}
+                                                                    / {{ $orders->custom_pizza?->seasoning }}</small>
                                                             </p>
                                                             <p class="m-0 fs-6 fw-500">Crust: <small
-                                                                    class="text-muted">{{ $orders->custom_pizza->crust->name }}</small>
+                                                                    class="text-muted">{{ $orders->custom_pizza?->crust->name }}</small>
                                                             </p>
-                                                            <p class="m-0 fs-6 fw-500">Sauce: <small
-                                                                    class="text-muted">{{ $orders->custom_pizza->sauce->name }}</small>
-                                                            </p>
+
+                                                            @if(isset($orders->custom_pizza->toppings))
                                                             <p class="m-0 fs-6 fw-500">Toppings </p>
                                                             <ul class="m-0 ps-2" id="item-extras">
-                                                                @foreach($orders->custom_pizza->toppings as $topping)
+                                                                @foreach($orders->custom_pizza?->toppings as $topping)
                                                                     <li class="list-group-item fs-7 d-flex  text-muted">
                                                                         <span
                                                                             class="flex-grow-1 ">{{ $topping->name }}</span>
@@ -450,9 +456,28 @@
                                                                             class=" px-3">{{ $topping->pivot->quantity }}</span>
                                                                     </li>
                                                                 @endforeach
+
                                                             </ul>
+                                                            @endif
+                                                            @if($orders->custom_pizza?->sauces)
+                                                                <p class="m-0 fs-6 fw-500">Extra Toppings:</p>
+                                                                <ul class="m-0 ps-2" id="item-extras">
+                                                                    @foreach($orders->custom_pizza?->sauces as $topping)
+                                                                        <li class="list-group-item fs-7 d-flex  text-muted">
+                                                                    <span
+                                                                        class="flex-grow-1 ">{{ $topping->name }}</span>
+                                                                            <span
+                                                                                class="ml-3">{{ $topping->pivot->side }}</span>
+                                                                            <span
+                                                                                class=" px-3">{{ $topping->pivot->quantity }}</span>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @endif
+                                                             @if(isset($orders->custom_pizza?->dipping))
                                                             <p class="m-0 fs-6 fw-500">Dipping</p>
                                                             <ul class="m-0 ps-2" id="item-extras">
+
                                                                 @foreach($orders->custom_pizza->dipping as $dipping)
                                                                     <li class="list-group-item fs-7 d-flex  text-muted">
                                                                         <span
@@ -464,7 +489,9 @@
                                                                             class="px-3">{{ $dipping->pivot->quantity * $dipping->price }}$</span>
                                                                     </li>
                                                                 @endforeach
+
                                                             </ul>
+                                                             @endif
                                                         </div>
                                                     @endif
 

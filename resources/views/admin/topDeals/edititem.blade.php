@@ -18,7 +18,7 @@
                                        value="{{ $getitem->id }}">
                                 <div class="row">
 
-                                    <div class="form-group col-md-12">
+                                    <div class="form-group col-md-6">
                                         <label class="form-label">Products</label>
                                         <div class="dropdown bootstrap-select show-tick form-control w-100">
                                             <select class="form-control selectpicker w-100" name="product_id"
@@ -42,6 +42,18 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="form-label">Size
+                                            <span class="text-danger"> *</span></label>
+                                        <select class="form-control selectpicker w-100" name="size_id"
+                                                data-live-search="true">
+                                            @foreach(helper::get_sizes() as $item)
+                                                <option value="{{ $item->id }}" {{ $item->id == $getitem->size_id ? 'selected' : '' }}>
+                                                    {{ $item->name.'('.$item->label.')' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
 
                                     <div class="col-sm-6 form-group" id="start_date">
@@ -92,7 +104,12 @@
                                         <input type="text" class="form-control numbers_only" name="offer_amount" value="{{ $getitem->offer_amount }}"
                                                placeholder="Discount" required="">
                                     </div>
-
+<div class="col-sm-6 form-group" id="end_time">
+                                        <label class="form-label">Order
+                                            <span class="text-danger"> *</span></label>
+                                        <input type="number" class="form-control" value="{{ $getitem->order }}" name="order"
+                                               required="">
+                                    </div>
 
                                     <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                         <a href="{{ URL::to('admin/item') }}" class="btn btn-danger">{{ trans('labels.cancel') }}</a>

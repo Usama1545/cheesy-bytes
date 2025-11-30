@@ -42,7 +42,7 @@
                             <i class="fa-solid fa-pen-to-square"></i></a>
                         <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.delete') }}"
                             href="javascript:void(0)"
-                            @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="Delete('{{ $category->id }}','{{ URL::to('admin/category/delete') }}')" @endif>
+                            @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="Delete('{{ $category->id }}','{{ URL::to('admin/carrier/delete') }}')" @endif>
                             <i class="fa fa-trash"></i></a>
                     </div>
                 </td>

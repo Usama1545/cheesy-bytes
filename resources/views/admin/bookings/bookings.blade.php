@@ -16,7 +16,7 @@
                                 <th>{{trans('labels.guests')}}</th>
                                 <th>{{trans('labels.reservation_type')}}</th>
                                 <th>{{trans('labels.message')}}</th>
-                                <th>{{trans('labels.table_number')}}</th>
+{{--                                <th>{{trans('labels.table_number')}}</th>--}}
                                 <th>{{trans('labels.action')}}</th>
                             </tr>
                         </thead>
@@ -31,7 +31,7 @@
                                 <td>{{$booking->guests}}</td>
                                 <td>{{$booking->reservation_type}} </td>
                                 <td>{{Str::limit($booking->special_request,100)}}</td>
-                                <td>{{$booking->status == 2 ? $booking->table_number : '--'}}</td>
+{{--                                <td>{{$booking->status == 2 ? $booking->table_number : '--'}}</td>--}}
                                 <td>
                                     <div class="d-flex flex-wrap gap-1">
                                         @if($booking->status == 1)
@@ -71,9 +71,9 @@
                         <input type="hidden" class="form-control" id="bookingid" name="bookingid" readonly="">
                         <input type="text" class="form-control" id="booking_number" name="booking_number" readonly="" placeholder="{{ trans('labels.booking_number') }}">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group d-none">
                         <label for="category_id" class="col-form-label">{{ trans('labels.table_number') }}</label>
-                        <input type="tel" class="form-control" name="table_number" placeholder="{{trans('labels.table_number')}}" id="table_number" required="required">
+                        <input type="tel" class="form-control" name="table_number" placeholder="{{trans('labels.table_number')}}" id="table_number" value="0">
                         <span class="table_error text-danger"></span>
                     </div>
                 </div>

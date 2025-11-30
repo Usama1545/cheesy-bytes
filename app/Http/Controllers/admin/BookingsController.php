@@ -13,7 +13,17 @@ class BookingsController extends Controller
 {
     public function bookings(Request $request)
     {
-        $getbookings = Bookings::orderByDesc('id')->get();
+        $user = auth()->user();
+        if($user->branch_id)
+        {
+            Bookings::where('branch_id',$user->branch_id)->update([
+                'read_at' => now()
+            ]);
+            $getbookings = Bookings::where('branch_id',$user->branch_id)->orderByDesc('id')->get();
+        }
+        else {
+            $getbookings = Bookings::orderByDesc('id')->get();
+        }
         return view('admin.bookings.bookings', compact('getbookings'));
     }
     public function bookingstatus(Request $request)
@@ -37,13 +47,7 @@ class BookingsController extends Controller
                 $body = 'Your booking request <b>' . $request->id . '</b> has been rejected.';
                 $reservationdata->table_number = NULL;
             }
-            // send-email
-            $emaildata = helper::emailconfigration();
-            Config::set('mail', $emaildata);
-            $data = ['name' => $reservationdata->name, 'logo' => helper::image_path(helper::appdata()->logo), 'email' => $reservationdata->email, 'mymessage' => $body, 'title' => $title];
-            Mail::send('email.reservation_response', $data, function ($message) use ($data) {
-                $message->to($data['email'])->subject($data['title']);
-            });
+        
             $reservationdata->status = $request->status;
             if ($reservationdata->save()) {
                 return response()->json(["status" => 1, "message" => trans('messages.success')], 200);

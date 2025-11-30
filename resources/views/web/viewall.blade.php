@@ -34,9 +34,7 @@
                 </div>
             </div>
         </div>
-
-    @endif
-    <div class="container mt-2" >
+        <div class="container mt-2" >
         @if ($_GET['type'] == 'topdeals')
             <div class="countdown" id="topdeals">
                 <div class="countdown-counter rounded-3 mb-5 p-3" id="countdown"></div>
@@ -59,6 +57,9 @@
             </div>
         </div>
     </div>
+
+    @endif
+    
 
 
 @endsection

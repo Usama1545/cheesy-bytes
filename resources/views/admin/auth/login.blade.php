@@ -116,30 +116,9 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-secondary w-100 py-2 my-3" type="submit">{{ trans('labels.signin') }}</button>
+                        <button class="btn btn-secondary w-100 py-2 my-3" type="submit" id="login-btn">{{ trans('labels.signin') }}</button>
 
-                        @if (env('Environment') == 'sendbox')
-                        <hr>
-                        <p class="text-center text-danger">Explore with <b class="text-white">FREE</b> addons</p>
 
-                        <div class="d-flex">
-                            <button class="btn btn-secondary w-100 mt-2 mb-3 padding mx-2" id="admin_free_addon_login">Admin login</button>
-                        </div>
-
-                        <p class="text-center text-danger">Explore with <b class="text-white">ALL</b> addons</p>
-
-                        <div class="d-flex">
-                            <button class="btn btn-secondary w-100 mt-2 mb-3 padding mx-2" id="all-addon">Admin login</button>
-                        </div>
-
-                        <p class="text-center text-danger"><b class="text-white">Demo Themes</b></p>
-
-                        <div class="d-flex">
-                            <a href="http://localhost/single-restaurant/?theme_id=1" target="_blank" class="btn btn-secondary w-100 mt-2 mb-3 padding mx-2">Theme - 1 (Included)</a>
-                            <a href="http://localhost/single-restaurant/?theme_id=2" target="_blank" class="btn btn-secondary w-100 mt-2 mb-3 padding mx-2">Theme - 2 (Addon)</a>
-                            <a href="http://localhost/single-restaurant/?theme_id=3" target="_blank" class="btn btn-secondary w-100 mt-2 mb-3 padding mx-2">Theme - 3 (Addon)</a>
-                        </div>
-                        @endif
                     </form>
                 </div>
             </div>
@@ -158,6 +137,25 @@
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/jquery/jquery.min.js') }}"></script><!-- jQuery JS -->
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/bootstrap/bootstrap.bundle.min.js') }}"></script><!-- Bootstrap JS -->
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/toastr/toastr.min.js') }}"></script><!-- Toastr JS -->
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            function enableAudio() {
+                if (audioContext.state === "suspended") {
+                    audioContext.resume().then(() => {
+                        console.log("Audio enabled after login.");
+                    }).catch(error => {
+                        console.error("Error enabling audio:", error);
+                    });
+                }
+            }
+    
+            // Attach to login button
+            document.getElementById("login-btn").addEventListener("click", enableAudio);
+        });
+    </script>
+
     <script>
         toastr.options = {
             "closeButton": true,

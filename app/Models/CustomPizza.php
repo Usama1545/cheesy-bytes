@@ -36,5 +36,11 @@ class CustomPizza extends Model
         return $this->belongsTo(CustomPizzaSauce::class, 'sauce_id');
     }
 
+    public function sauces()
+    {
+        return $this->belongsToMany(CustomPizzaSauce::class, 'custom_pizza_selected_sauces', 'pizza_id', 'sauce_id')
+            ->withPivot('side', 'quantity');
+    }
+
 
 }

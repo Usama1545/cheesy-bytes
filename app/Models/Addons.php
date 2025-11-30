@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Addons extends Model
 {
     protected $table = 'addons';
-    protected $fillable = ['addongroup_id', 'name', 'price','branch_ids'];
+    protected $fillable = ['addongroup_id', 'name', 'price','branch_ids','product_id'];
 
     public function category()
     {
@@ -16,6 +16,11 @@ class Addons extends Model
 
     public function item()
     {
-        return $this->hasOne('App\Models\Item', 'id', 'item_id');
+        return $this->hasOne('App\Models\Item', 'id', 'product_id');
+    }
+
+    public function crusts()
+    {
+        return $this->hasMany(ProductSizeCrust::class, 'item_id', 'product_id');
     }
 }

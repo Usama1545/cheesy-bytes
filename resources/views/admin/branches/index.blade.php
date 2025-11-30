@@ -18,7 +18,10 @@
                                     <th>Name</th>
                                     <th>State</th>
                                     <th>City</th>
+                                    <th>status</th>
                                     <th>Zip Code</th>
+
+                                    <th>Printer</th>
                                     <th>{{ trans('labels.action') }}</th>
                                 </tr>
                                 </thead>
@@ -27,12 +30,26 @@
                                 @foreach ($getitem as $item)
                                     <tr class="row1" data-id="{{ $item->id }}">
                                         <td>{{ $item->name }}</td>
-                                        <td>{{ $item->state->name }}</td>
+                                        <td>{{ $item->state?->name }}</td>
                                         <td>
                                             {{ $item->city }} <br>
                                         </td>
+                                         <td>
+                                            @if ($item->is_available == 1)
+                                                <a class="btn btn-sm btn-success square" tooltip="{{ trans('labels.active') }}"
+                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="StatusUpdate('{{ $item->id }}','2','{{ URL::to('admin/branch/status') }}')" @endif><i
+                                                        class="fa-sharp fa-solid fa-check"></i></a>
+                                            @else
+                                                <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.deactive') }}"
+                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="StatusUpdate('{{ $item->id }}','1','{{ URL::to('admin/branch/status') }}')" @endif><i
+                                                        class="fa-sharp fa-solid fa-xmark"></i></a>
+                                            @endif
+                                        </td>
                                         <td>
                                             {{ $item->zip }}
+                                        </td>
+                                        <td>
+                                            {{ $item->printer_id }} <br>
                                         </td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
@@ -40,7 +57,7 @@
                                                    href="{{ URL::to('admin/branches-' . $item->id) }}"> <i class="fa-solid fa-pen-to-square"></i></a>
                                                 <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.delete') }}"
                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()"
-                                                   @else onclick="Delete('{{ $item->id }}','{{ URL::to('admin/custom_pizza/delete') }}')" @endif>
+                                                   @else onclick="Delete('{{ $item->id }}','{{ URL::to('admin/branches/delete') }}')" @endif>
                                                     <i class="fa fa-trash"></i></a>
                                             </div>
                                         </td>
@@ -57,6 +74,8 @@
 
 @endsection
 @section('script')
+    <script src="{{url(env('ASSETSPATHURL').'admin-assets/assets/js/custom/banner.js') }}"></script>
+
     <script>
         function Delete(id, deleteurl) {
             "use strict";

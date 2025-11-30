@@ -51,6 +51,7 @@ class PizzaCrustController extends Controller
             'size_crusts' => 'required|array',
         ]);
         ProductSizeCrust::where('item_id', $data['id'])->delete();
+
         foreach ($data['size_crusts'] as $size_crust) {
             foreach ($size_crust['crusts'] as $crust) {
                 ProductSizeCrust::updateOrCreate(
@@ -96,7 +97,7 @@ class PizzaCrustController extends Controller
 
 //        $deal->update($request->all());
 
-        return redirect('admin/pizza_crusts')->with('success', 'Pizza Crust and Size Updated successfully!');
+        return back()->with('success','Pizza Crust and Size Updated successfully!');
     }
 
 }

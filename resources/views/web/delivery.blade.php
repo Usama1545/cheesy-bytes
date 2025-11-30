@@ -26,40 +26,27 @@
                 <h3 class="mx-3">Delivery RESULTS</h3>
 
                 <div class="card-body">
-                    @if(!$not_available)
-                        <div class="card  mx-auto">
-                            <div class="card-header d-flex justify-content-between align-items-center"
-                                 style="background: #D6B62B">
-                                <span class="fw-bold">YOUR DELIVERY STORE</span>
-                                <span class="ms-auto fw-bold text-sm" style="font-size: 10px">based on your provided address</span>
-                            </div>
-                            <div class="card-body">
-                                <span style="color: red">Sorry we don’t currently offer delivery to your location but we’ve displayed nearby carryout stores below.</span><br>
-                                <a href="{{ URL::to('/location') }}" class="btn btn-primary mt-3">Change Location</a>
-                            </div>
-                        </div>
-                    @endif
+                    @if(!empty($response) && count($response) > 0)
+                    @foreach($response as $ship)
 
                     <div class="card mt-3 mx-auto">
                         <div class="card-header d-flex justify-content-between align-items-center"
                              style="background: #D6B62B">
                             <span
-                                class="fw-bold">Stores near: {{ $address->address ? $address->address.'-'.$address->city : ($address->street_address ? $address->street_address.'-'.$address->city : $address->city.'-'.$address->state->name) }}</span>
+                                class="fw-bold">Delivery Providers - {{ $ship['name'] }}</span>
                         </div>
                         <div class="card-body">
-                            @foreach($response as $ship)
                                 <div class="mb-4">
-                                    <!-- Branch Name -->
-                                    <h5 class="text-primary fw-bold border-bottom pb-2">
-                                        <i class="fa-solid fa-building"></i> {{ $ship['name'] }}
-                                    </h5>
-
                                     <!-- Carriers List -->
                                     @foreach($ship['carriers'] as $carrier)
                                         <div class="d-flex align-items-center justify-content-between py-2 px-3 bg-light rounded mb-2">
                                             <div>
                                                 <h6 class="mb-1 text-secondary">
-                                                    <i class="fa-solid fa-truck"></i> {{ $carrier['name'] }}
+                                                    <img src="{{ helper::image_path($carrier['image']) }}" alt="{{ $carrier['name'] }}" class="img-fluid rounded h-50px mt-1" style="height: 45px">
+                                                     {{ $carrier['name'] }}
+                                                     @if(isset($carrier['description']) && $carrier['description'] !== "")
+                                                        <small>({{ $carrier['description'] }} )</small>
+                                                     @endif
                                                 </h6>
                                             </div>
                                             <div>
@@ -70,10 +57,13 @@
                                         </div>
                                     @endforeach
                                 </div>
-                            @endforeach
-                        </div>
 
+                        </div>
                     </div>
+                    @endforeach
+                    @else
+                    No Delivery Providers found for Selected Branch
+                    @endif
                 </div>
             </div>
         </div>

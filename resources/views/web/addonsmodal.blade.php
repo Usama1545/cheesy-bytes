@@ -31,12 +31,6 @@
                     </div>
                 </div>
 
-                @if ($itemdata['tax'] != '' && $itemdata['tax'] != 0)
-                    <span class="text-danger fs-7">{{ trans('labels.exclusive_taxes') }}</span>
-                @else
-                    <span class="text-danger fs-7">{{ trans('labels.inclusive_taxes') }}</span>
-                @endif
-
             </div>
         </div>
     </div>
@@ -164,6 +158,9 @@
         <input type="hidden" name="addongroup" id="addongroup_{{ $itemdata['id'] }}"
             data-addongroup_val="{{ $itemdata['addons_group'] }}">
         <input type="hidden" name="slug" id="slug_{{ $itemdata['id'] }}" value="{{ $itemdata['slug'] }}">
+        <input type="hidden" name="deal_id" id="deal_id_{{ $itemdata['id'] }}"
+            value="{{ $itemdata['deal_id'] }}">
+        <input type="hidden" name="deal_category_id" value="{{ $itemdata['deal_category_id'] ?? '' }}">
         <input type="hidden" name="item_name" id="item_name_{{ $itemdata['id'] }}"
             value="{{ $itemdata['item_name'] }}">
         <input type="hidden" name="item_type" id="item_type_{{ $itemdata['id'] }}"
@@ -172,6 +169,7 @@
             value="{{ $itemdata['image_name'] }}">
         <input type="hidden" name="tax" id="item_tax_{{ $itemdata['id'] }}" value="{{ $itemdata['tax'] }}">
         <input type="hidden" name="item_price" id="item_price_{{ $itemdata['id'] }}" value="{{ $price }}">
+        <input type="hidden" name="item_qty" id="item_qty_{{ $itemdata['id'] }}" value="1">
         <input type="hidden" name="login_required" id="login_required_{{ $itemdata['slug'] }}"
             value="{{ helper::appdata()->login_required }}">
         <input type="hidden" name="checklogin" id="checklogin_{{ $itemdata['slug'] }}"
@@ -187,11 +185,11 @@
             <div class="col-sm-2">
                 <div class="item-quantity py-2 w-100">
                     <button class="btn btn-sm fw-500 p-0 fs-6"
-                        onclick="changeqty('{{ $itemdata['slug'] }}','minus')">-</button>
+                        onclick="changeqty('{{ $itemdata['slug'] }}','{{ $itemdata['id'] }}','minus')">-</button>
                     <input type="text" class="p-0" name="number" value="1"
                         id="item_qty_{{ $itemdata['slug'] }}" readonly="">
                     <button class="btn btn-sm fw-500 p-0 fs-6"
-                        onclick="changeqty('{{ $itemdata['slug'] }}','plus')">+</button>
+                        onclick="changeqty('{{ $itemdata['slug'] }}','{{ $itemdata['id'] }}','plus')">+</button>
                 </div>
             </div>
             <div class="col-sm-5">
@@ -260,3 +258,31 @@
         </div>
     </div>
 </div>
+<script>
+    function changeqty(item_slug, id, type) {
+        var qtys = parseInt($('#item_qty_' + item_slug).val());
+        if (type == "minus") {
+            qty = qtys - 1;
+        } else {
+            qty = qtys + 1;
+        }
+        if (qty >= "1") {
+            $('#item_qty_' + item_slug).val(qty);
+            $('#item_qty_' + id).val(qty);
+
+        }
+        console.log(id);
+        qtys = qty;
+        var item_price = parseFloat($('#item_price_' + id).val());
+        var addonstotal = 0;
+        var subtotal = 0;
+        var chk = document.querySelectorAll(".addons_chk_" + id + ":checked");
+        if (chk.length) {
+            chk.forEach(function(el) {
+                addonstotal += parseFloat(el.getAttribute('data-addons-price'));
+            });
+        }
+        subtotal = (item_price + addonstotal) * qtys;
+        $('.subtotal_' + id).text(currency_format(subtotal));
+    }
+</script>

@@ -5,8 +5,9 @@ namespace App\Http\Controllers\front;
 use App\helpers\helper;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
-use App\Models\Carrier;
+use App\Models\Cart;
 use App\Models\CustomerAddress;
+use App\Models\Carrier;
 use App\Models\Shippingarea;
 use App\Models\Slider;
 use App\Models\Item;
@@ -24,6 +25,7 @@ use App\Models\WhyChooseUs;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Session;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,6 +33,7 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
+                $branchId = Session::get('branch_id');
         $currentDateTime = now(); // Get the current date and time
         $topdeals = helper::top_deals();
         $offer_price = 0;
@@ -40,8 +43,8 @@ class HomeController extends Controller
         $getgalleries = Gallery::select('image', DB::raw("CONCAT('" . url(env('ASSETSPATHURL') . 'admin-assets/images/about') . "/', image) AS image_url"))->orderByDesc('id')->get();
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
-        $sliders = Slider::with('item_info', 'category_info')->where('is_available', 1)->orderByDesc('id')->get();
-        $bannerlist = Banner::with('item_info', 'category_info')->where('is_available', 1)->orderBy('reorder_id')->get();
+        $sliders = Slider::with('item_info', 'category_info')->where('is_available', 1)->where('branch_id', $branchId)->orderByDesc('id')->get();
+        $bannerlist = Banner::with('item_info', 'category_info')->where('is_available', 1)->where('branch_id', $branchId)->orderBy('reorder_id')->get();
         $banners = array();
         $banners['topbanners'] = array();
         $banners['bannersection1'] = array();
@@ -94,7 +97,6 @@ class HomeController extends Controller
         $getfaqs = Faq::select("id", "title", "description")->orderBy('reorder_id')->get();
         $getblogs = Blogs::orderBy('reorder_id')->take('3')->get();
         $getwhychooseus = WhyChooseUs::orderBy('reorder_id')->get();
-        $branchId = Session::get('branch_id');
 
         if ($user_id != null) {
             $topitemlist = Item::with('category_info', 'subcategory_info', 'item_image')
@@ -174,44 +176,7 @@ class HomeController extends Controller
 //                ->where('item.item_status', '1')
 //                ->where('item.price', '>', $offer_price)
 //                ->orderBy('item.reorder_id')->take(8)->get();
-            $topdealsproduct = TopDeals::with('product') // Ensure the product relationship is defined in TopDeals
-            ->join('item', 'top_deals.product_id', '=', 'item.id') // Join with the product table
-            ->leftJoin('favorite', function ($query) use ($user_id) {
-                $query->on('favorite.item_id', '=', 'item.id')
-                    ->where('favorite.user_id', '=', $user_id);
-            })->leftJoin('item_prices', function ($query) use ($branchId) {
-                $query->on('item_prices.item_id', '=', 'item.id')
-                    ->where('item_prices.branch_id', '=', $branchId);
-            })
-                ->leftJoin('cart', function ($query) use ($user_id) {
-                    $query->on('cart.item_id', '=', 'item.id')
-                        ->where('cart.user_id', '=', $user_id)
-                        ->where('cart.buynow', '=', '0');
-                })
-                ->where(function ($query) use ($currentDateTime) {
-                    $query->where('end_date', '>', $currentDateTime->toDateString()) // If end_date is in the future
-                    ->orWhere(function ($query) use ($currentDateTime) {
-                        $query->where('end_date', '=', $currentDateTime->toDateString()) // Check same day
-                        ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
-                    });
-                })
-                ->where(function ($query) {
-                    $branchId = Session::get('branch_id');
-                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
-                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
-                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
-                    ->orWhere('item.branch_ids', '=', $branchId);
-                })
-                ->select(
-                    'top_deals.*',
-                    'item.*',
-                    'favorite.id as favorite_id', // Include favorite-related data
-                    'cart.id as cart_id', // Include cart-related data
-                    'item_prices.price as dealPrice'
-                )->distinct() // Ensure distinct rows
-                ->get();
-
-
+            $topdealsproduct = helper::getTopDeals();
             $recommended = Item::with('category_info', 'subcategory_info', 'item_image')
                 ->select('item.*',
                     DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'),
@@ -307,39 +272,7 @@ class HomeController extends Controller
 //                ->where('item.item_status', '1')
 //                ->where('item.price', '>', $offer_price)
 //                ->orderBy('item.reorder_id')->take(10)->get();
-            $topdealsproduct = TopDeals::with('product') // Ensure 'product' is defined as a relationship in the TopDeals model
-            ->join('item', 'top_deals.product_id', '=', 'item.id') // Relating top_deals to item
-            ->leftJoin('cart', function ($query) use ($session_id) {
-                $query->on('cart.item_id', '=', 'item.id')
-                    ->where('cart.user_id', '=', $session_id)
-                    ->where('cart.buynow', '=', '0');
-            })
-                ->leftJoin('item_prices', function ($query) use ($branchId) {
-                    $query->on('item_prices.item_id', '=', 'item.id') // Correctly associating item_prices with item
-                    ->where('item_prices.branch_id', '=', $branchId);
-                })
-                ->where(function ($query) use ($currentDateTime) {
-                    $query->where('end_date', '>', $currentDateTime->toDateString()) // If end_date is in the future
-                        ->orWhere(function ($query) use ($currentDateTime) {
-                        $query->where('end_date', '=', $currentDateTime->toDateString()) // Check same day
-                        ->where('end_time', '>', $currentDateTime->toTimeString()); // Check if end_time is later
-                        });
-                })
-                ->where(function ($query) {
-                    $branchId = Session::get('branch_id');
-                    $query->where('item.branch_ids', 'like', "%,$branchId,%")
-                        ->orWhere('item.branch_ids', 'like', "$branchId,%")
-                        ->orWhere('item.branch_ids', 'like', "%,$branchId")
-                        ->orWhere('item.branch_ids', '=', $branchId);
-                })
-                ->select(
-                    'top_deals.*',
-                    'top_deals.id as deal_id',
-                    'item.*',
-                    'cart.id as cart_id',
-                    'item_prices.price as dealPrice'
-                )->distinct() // Ensuring unique rows
-                ->get();
+            $topdealsproduct = helper::getTopDeals();
 
             $recommended = Item::with('category_info', 'subcategory_info', 'item_image')
                 ->select('item.*',
@@ -402,43 +335,52 @@ class HomeController extends Controller
 
     public function location()
     {
-        $states = State::all();
+        $states = State::orderByDesc('created_at')->get();
         return view('web.restaurant', compact('states'));
     }
 
-    public function location_store(Request $request)
+   public function location_store(Request $request)
     {
-        $not_available = false;
         $response = [];
-        $address = CustomerAddress::with('state')->updateOrCreate(
-            [
-                'zip' => $request->zip,
-                'state_id' => $request->state_id,
-                'city' => $request->city,
-                'address_type' => $request->type,
-                'session_id' => auth()->check() ? null : Session::getId(),
-                'user_id' => auth()->check() ? auth()->id() : null,
-            ],
-            [
-                'address' => $request->street_address ?? $request->address ?? null,
-            ]
-        );
         if ($request->type === 'carryout') {
-            $shipping = Branch::where('city', $request->city)->orWhere('state_id', $request->state_id)->with('state')->get();
-
+           $shipping = Branch::where('is_available',1)->orderBy('created_at','asc')->get();
         } else {
-            $shipping = Branch::where('city', $request->city)->pluck('id')->toArray();
-            if (!$shipping) {
-                $not_available = true;
-                $shipping = Branch::where('city', $request->city)
-                    ->orWhere('state_id', $request->state_id)
-                    ->pluck('id')
-                    ->toArray();
-            }
+            $shipping = Branch::where('is_available',1)->orderBy('created_at','asc')->get();
 
-            $carriers = Carrier::whereIn('branch_id', $shipping)
-                ->with('branch') // Ensure branch relationship is loaded
-                ->get();
+//            $carriers = Carrier::with('branch')->get();
+//
+//            $groupedCarriers = $carriers->groupBy('branch_id');
+//
+//            foreach ($groupedCarriers as $branchId => $carriers) {
+//                $branchName = $carriers->first()->branch->name ?? 'Unknown Branch';
+//                $response[] = [
+//                    'name' => $branchName,
+//                    'carriers' => $carriers->map(function ($carrier) {
+//                        return [
+//                            'name' => $carrier->name,
+//                            'image' => $carrier->image,
+//                            'link' => $carrier->link,
+//                        ];
+//                    }),
+//                ];
+//            }
+        }
+        $type = $request->type;
+        if($request->type === 'delivery')
+        {
+            return view('web.deliveryBranch', compact( 'shipping', 'type'));
+        }
+        return view('web.location', compact('shipping',  'type'));
+    }
+
+    public function delivery_providers($id)
+    {
+
+            $response = [];
+
+            $shipping = Branch::FindOrFail($id);
+
+            $carriers = Carrier::with('branch')->where('branch_id',$id)->get();
 
             $groupedCarriers = $carriers->groupBy('branch_id');
 
@@ -449,39 +391,37 @@ class HomeController extends Controller
                     'carriers' => $carriers->map(function ($carrier) {
                         return [
                             'name' => $carrier->name,
+                            'description' => $carrier->description,
                             'image' => $carrier->image,
                             'link' => $carrier->link,
                         ];
                     }),
                 ];
             }
-        }
-        $type = $request->type;
-        if($request->type === 'delivery')
-        {
-            return view('web.delivery', compact('not_available', 'response', 'address', 'type'));
-        }
-        return view('web.location', compact('not_available', 'shipping', 'address', 'type'));
+            $type="delivery";
+            return view('web.delivery', compact( 'response', 'type'));
     }
-
-    public function location_update($id, $address_id, $type)
+    
+    public function location_update($id)
     {
-        if ($type === 'carryout') {
-            $branch = Branch::findOrFail($id);
-            if ($branch) {
-                Session::put('branch_id', $id);
-                return redirect()->to('/categories');
+        $branch = Branch::findOrFail($id);
+
+        if ($branch) {
+            $sessionId = Session::getId();
+
+            if (Auth::check()) {
+                Cart::where('user_id', auth()->id())->delete();
+            } else {
+                Cart::where('session_id', $sessionId)->delete();
             }
-        } else {
-            $shipping_area = Shippingarea::findOrFail($id);
-            if ($shipping_area) {
-                Session::put('branch_id', $shipping_area->branch_id);
-                CustomerAddress::findOrFail($address_id)->update([
-                    'address_id' => $id
-                ]);
-                return redirect()->to('/categories');
-            }
+
+            Session::forget('branch_id');
+            Session::put('branch_id', $id);
+
+            $branchName = $branch->slug;
+            return redirect()->to("/{$branchName}/deals");
         }
+
         return redirect()->to('/location');
     }
 

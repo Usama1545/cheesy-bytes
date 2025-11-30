@@ -31,6 +31,8 @@ class CarrierController extends Controller
         $category = new Carrier;
         $category->image = $image;
         $category->name = $request->category_name;
+                $category->description = $request->category_description;
+
         $category->branch_id = $request->branch_id;
         $category->link = $request->link;
         $category->save();
@@ -59,6 +61,7 @@ class CarrierController extends Controller
             $category->save();
         }
         $category->name = $request->category_name;
+        $category->description = $request->category_description;
         $category->branch_id = $request->branch_id;
         $category->link = $request->link;
 

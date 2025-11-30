@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Bookings extends Model
 {
     use HasFactory;
+    
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }

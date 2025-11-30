@@ -50,7 +50,7 @@
                                         <div class="dropdown bootstrap-select show-tick form-control w-100">
                                             <select class="form-control selectpicker  w-100" multiple name="product_ids[]"
                                                     data-live-search="true">
-                                                @foreach(helper::getItems() as $item)
+                                                @foreach(helper::getItems(false) as $item)
                                                     <option value="{{ $item->id }}"
                                                         {{ in_array($item->id, $selected) ? 'selected' : '' }}>
                                                         {{ $item->item_name }}
@@ -103,10 +103,12 @@
                                     <div class="form-group col-md-6">
                                         <label class="form-label">Size
                                             <span class="text-danger"> *</span></label>
-                                        <select class="form-control selectpicker w-100" name="size_id"
+                                        <select class="form-control selectpicker w-100 multiple" multiple name="size_id[]"
                                                 data-live-search="true">
+                                            <?php $selected = explode(',', $getitem->size_id); ?>
+
                                             @foreach(helper::get_sizes() as $item)
-                                                <option value="{{ $item->id }}" {{ $item->id === $getitem->size_id ? 'selected' : '' }}>
+                                                <option value="{{ $item->id }}" {{ in_array($item->id, $selected) ? 'selected' : '' }}>
                                                     {{ $item->name.'('.$item->label.')' }}
                                                 </option>
                                             @endforeach
@@ -118,7 +120,18 @@
                                         <input type="number" class="form-control" value="{{ $getitem->min_count }}" name="min_count"
                                                required="">
                                     </div>
-
+                                     <div class="form-group col-md-6">
+                                        <label class="form-label">Price
+                                            <span class="text-danger"> *</span></label>
+                                        <input type="text" class="form-control numbers_only" name="offer_amount"
+                                               placeholder="Price" value="{{ $getitem->offer_amount }}" required="">
+                                    </div>
+                                     <div class="col-sm-6 form-group" id="end_time">
+                                        <label class="form-label">Order
+                                            <span class="text-danger"> *</span></label>
+                                        <input type="number" class="form-control" value="{{ $getitem->order }}" name="order"
+                                               required="">
+                                    </div>
                                     <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                         <a href="{{ URL::to('admin/deals') }}" class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                         <button class="btn btn-primary"

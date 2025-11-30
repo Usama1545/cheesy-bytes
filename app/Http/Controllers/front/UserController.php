@@ -22,11 +22,9 @@ class UserController extends Controller
     public function register()
     {
         if (@helper::checkaddons('customer_login')) {
-            if (helper::appdata()->login_required == 1) {
+            
                 return view('web.auth.register');
-            } else {
-                abort(404);
-            }
+          
         } else {
             abort(404);
         }
@@ -295,15 +293,11 @@ class UserController extends Controller
     }
     public function login(Request $request)
     {
-        if (@helper::checkaddons('customer_login')) {
-            if (helper::appdata()->login_required == 1) {
+
+           
                 return view('web.auth.login');
-            } else {
-                abort(404);
-            }
-        } else {
-            abort(404);
-        }
+            
+        
     }
 
     public function checklogin(Request $request)

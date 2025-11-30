@@ -23,6 +23,13 @@
                                                value="{{ $catdata->name }}" required>
                                     </div>
                                     <div class="col-md-6">
+                                        <label class="col-form-label" for="">Description
+                                           </label>
+                                        <input type="text" class="form-control" name="category_description"
+                                               placeholder="description"
+                                               value="{{ $catdata->description }}" >
+                                    </div>
+                                    <div class="col-md-6">
                                         <label class="col-form-label" for="">Branch
                                             <span class="text-danger">*</span> </label>
                                             <?php $selected = $catdata->branch_id; ?>
@@ -36,6 +43,13 @@
                                                 @endforeach
                                             </select>
                                     </div>
+                                     <div class="col-md-6">
+                                        <label class="col-form-label" for="">Link
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="text" class="form-control" name="link"
+                                               placeholder="Link"
+                                               value="{{ $catdata->link }}" required>
+                                    </div>
                                     <div class="col-md-6">
                                         <label class="col-form-label" for="">{{ trans('labels.image') }}
                                             <span class="text-danger">*</span> </label>
@@ -44,13 +58,7 @@
                                         <img src="{{ helper::image_path($catdata->image) }}" alt=""
                                              class="img-fluid rounded h-50px mt-1">
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="col-form-label" for="">Link
-                                            <span class="text-danger">*</span> </label>
-                                        <input type="text" class="form-control" name="link"
-                                               placeholder="Link"
-                                               value="{{ $catdata->link }}" required>
-                                    </div>
+                                   
                                 </div>
                                 <div
                                     class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

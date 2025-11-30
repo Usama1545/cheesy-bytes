@@ -4,7 +4,7 @@
 
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h3>Dipping</h3>
+            <h3>Deals</h3>
             <a href="topDeals/add" class="btn btn-primary">Add New <i class="fa fa-plus"></i></a>
         </div>
         <div class="row">
@@ -18,6 +18,8 @@
                                     <th>Product</th>
                                     <th>Offer Type</th>
                                     <th>Offer Amount</th>
+                                                                        <th>Order</th>
+
                                     <th>Start Date /Time</th>
                                     <th>End Date / Time</th>
                                     <th>{{ trans('labels.action') }}</th>
@@ -27,9 +29,11 @@
                                 @php $i = 1; @endphp
                                 @foreach ($deals as $item)
                                     <tr class="row1" data-id="{{ $item->id }}">
-                                        <td>{{ $item->product->item_name }}</td>
+                                        <td>{{ $item->product->item_name ?? '' }}</td>
                                         <td>{{ $item->offer_type === 1 ? 'Flat Price' : "Percentage" }}</td>
                                         <td>{{ $item->offer_amount }}</td>
+                                                                                <td>{{ $item->order }}</td>
+
                                         <td>
                                             {{ helper::date_format($item->start_date) }} <br>
                                             {{ helper::time_format($item->start_time) }}

@@ -33,5 +33,5 @@
         </div>
     </section>
 
-    @include('web.subscribeform')
+    <!--@include('web.subscribeform')-->
 @endsection

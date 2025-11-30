@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class itemPrice extends Model
 {
     use HasFactory;
+    
     protected $table = 'item_prices';
+    
     protected $fillable = ['item_id', 'price','branch_id'];
 
     public function product()

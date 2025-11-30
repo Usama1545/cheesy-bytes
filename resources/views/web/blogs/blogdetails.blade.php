@@ -61,6 +61,6 @@
                 </div>
             </div>
         </section>
-        @include('web.subscribeform')
+        <!--@include('web.subscribeform')-->
     @endif
 @endsection

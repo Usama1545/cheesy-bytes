@@ -15,11 +15,18 @@
                                 @csrf
                                 <div class="row mb-4">
                                     <div class="col-md-6">
-                                        <label class="col-form-label" for="">{{ trans('labels.category') }}
+                                        <label class="col-form-label" for="">Name
                                             <span class="text-danger">*</span> </label>
                                         <input type="text" class="form-control" name="category_name"
-                                            placeholder="{{ trans('labels.category') }}" value="{{ old('category_name') }}"
+                                            placeholder="Carrier Name" value="{{ old('category_name') }}"
                                             required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="">Description
+                                           </label>
+                                        <input type="text" class="form-control" name="category_description"
+                                               placeholder="description"
+                                               value="{{ old('category_description') }}" >
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -37,17 +44,18 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="col-form-label" for="">{{ trans('labels.image') }}
-                                            <span class="text-danger">*</span> </label>
-                                        <input type="file" class="form-control" name="image" accept="image/*" required>
-                                    </div>
-                                    <div class="col-md-6">
                                         <label class="col-form-label" for="">Link
                                             <span class="text-danger">*</span> </label>
                                         <input type="text" class="form-control" name="link"
                                                placeholder="link" value="{{ old('link') }}"
                                                required>
                                     </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="">{{ trans('labels.image') }}
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="image" accept="image/*" required>
+                                    </div>
+
                                 </div>
                                 <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                     <a href="{{ URL::to('admin/carrier') }}"

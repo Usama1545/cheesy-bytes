@@ -7,7 +7,7 @@
             <th>{{ trans('labels.category') }}</th>
 {{--            <th>{{ trans('labels.featured') }}</th>--}}
             <th>{{ trans('labels.status') }}</th>
-            <th>{{ trans('labels.created_date') }}</th>
+            <th>{{ trans('Branches') }}</th>
             <th>{{ trans('labels.updated_date') }}</th>
             <th>{{ trans('labels.action') }}</th>
         </tr>
@@ -47,10 +47,8 @@
                             <i class="fa-sharp fa-solid fa-xmark"></i></a>
                     @endif
                 </td>
-                <td>
-                    {{ helper::date_format($item->created_at) }} <br>
-                    {{ helper::time_format($item->created_at) }}
-                </td>
+               <td>{{ $item->branch_names ?: 'N/A' }}</td>
+
                 <td>
                     {{ helper::date_format($item->updated_at) }} <br>
                     {{ helper::time_format($item->updated_at) }}

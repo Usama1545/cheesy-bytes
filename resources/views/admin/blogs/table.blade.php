@@ -31,7 +31,7 @@
                 <td>
                     <div class="d-flex flex-wrap gap-1">
                         <a class="btn btn-sm btn-info square" tooltip="{{ trans('labels.edit') }}"
-                            href="{{ URL::to('admin/blogs-' . $blog->id) }}">
+                            href="{{ URL::to('admin/blogs/' . $blog->id) }}">
                             <i class="fa-solid fa-pen-to-square"></i></a>
                         <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.delete') }}"
                             @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="Delete('{{ $blog->id }}','{{ URL::to('admin/blogs/delete') }}')" @endif><i

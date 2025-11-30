@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Branch;
+use App\Models\PrintJob;
 use Illuminate\Http\Request;
 use App\Helpers\helper;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\Branch;
 use App\Models\Addons;
 use App\Models\Ratting;
 use App\Models\OrderDetails;
@@ -19,12 +20,16 @@ use App\Models\Settings;
 use App\Models\Time;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Carbon\Carbon;
 use DateTime;
 use Session;
+use Illuminate\Console\Command;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class AdminController extends Controller
 {
@@ -39,14 +44,40 @@ class AdminController extends Controller
         $getusers = User::Where('type', '=', '2')->get();
         $getdriver = User::where('is_available', '1')->where('type', '3')->get();
         $getreview = Ratting::all();
+        $getorders = Order::where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->get();
 
-        $getorderscount = Order::all();
+        $getorderscount = Order::where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->get();
         $getorderdetailscount = OrderDetails::all();
         $banners = Banner::all();
-        $order_total = Order::where('status', '!=', '6')->where('status', '!=', '7')->sum('grand_total');
-        $order_tax = Order::where('status', '!=', '6')->where('status', '!=', '7')->sum('tax_amount');
-        $getbranchorders = Order::with('user_info', 'branch')
-            ->select('order.*') // Correct table name for consistency
+        $order_total = Order::where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->where('status', '!=', '6')->where('status', '!=', '7')->sum('grand_total');
+        $order_tax = Order::where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->where('status', '!=', '6')->where('status', '!=', '7')->sum('tax_amount');
+        $getbranchorders = Order::with('user_info', 'branch')->whereDate('created_at', Carbon::today())
+            ->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->select('order.*') // Correct table name for consistency
             ->get()
             ->groupBy('branch_id') // Group orders by branch_id
             ->map(function ($orders, $branchId) {
@@ -88,12 +119,32 @@ class AdminController extends Controller
 
         // ORDER-CHART-START
         $year = $request->getyear != "" ? $request->getyear : date('Y');
-        $order_years = Order::select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->orderByDesc('created_at')->get();
-        $orderlabels = Order::select(DB::raw("MONTHNAME(created_at) as month_name"))->whereYear('created_at', $year)->orderBy('created_at')->groupBy(DB::raw("MONTHNAME(created_at)"))->pluck('month_name');
+        $order_years = Order::select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->orderByDesc('created_at')->get();
+        $orderlabels = Order::select(DB::raw("MONTHNAME(created_at) as month_name"))->whereYear('created_at', $year)->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->orderBy('created_at')->groupBy(DB::raw("MONTHNAME(created_at)"))->pluck('month_name');
         $deliverydata = $pickupdata = array();
         foreach ($orderlabels as $monthname) {
-            $deliverydata[] = Order::whereYear('created_at', $year)->where('order_type', 1)->orderBy('created_at')->where(DB::raw("MONTHNAME(created_at)"), $monthname)->count();
-            $pickupdata[] = Order::whereYear('created_at', $year)->where('order_type', 2)->orderBy('created_at')->where(DB::raw("MONTHNAME(created_at)"), $monthname)->count();
+            $deliverydata[] = Order::whereYear('created_at', $year)->where('order_type', 1)->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->orderBy('created_at')->where(DB::raw("MONTHNAME(created_at)"), $monthname)->count();
+            $pickupdata[] = Order::whereYear('created_at', $year)->where('order_type', 2)->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->orderBy('created_at')->where(DB::raw("MONTHNAME(created_at)"), $monthname)->count();
         }
         // ORDER-CHART-END
 
@@ -114,10 +165,20 @@ class AdminController extends Controller
         // EARNINGS-CHART-START
         $earningsyear = $request->earningsyear != "" ? $request->earningsyear : date('Y');
         $earningsbranch = $request->earningsbranch != "" ? $request->earningsbranch : Branch::first()->id;
-        $earnings_years = Order::select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->orderByDesc('created_at')->get();
+        $earnings_years = Order::select(DB::raw("YEAR(created_at) as year"))->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->groupBy(DB::raw("YEAR(created_at)"))->orderByDesc('created_at')->get();
         $reviewslist = Order::select(DB::raw("YEAR(created_at) as year"), DB::raw("MONTHNAME(created_at) as month_name"), DB::raw("SUM(grand_total) as grand_total"))
             ->whereYear('created_at', $earningsyear)
-            ->where('branch_id', $earningsbranch)
+            ->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->where('branch_id', $earningsbranch)
             ->whereNotIn('status', array(1, 6, 7))
             ->orderBy('created_at')
             ->groupBy(DB::raw("MONTHNAME(created_at)"))
@@ -142,12 +203,323 @@ class AdminController extends Controller
             return view('admin.dashboard.home', compact('topitems', 'topusers', 'gettotalcategory', 'getitems', 'addons', 'getusers', 'banners', 'getreview', 'getorderscount', 'getorderdetailscount', 'order_total', 'order_tax', 'getpromocode', 'getbranchorders', 'getdriver', 'order_years', 'orderlabels', 'deliverydata', 'pickupdata', 'user_years', 'userslabels', 'userdata', 'earnings_years', 'earningslabels', 'earningsdata'));
         }
     }
-    public function getorder()
+
+     public function getorder()
     {
-        $todayorders = Order::with('user_info')->whereDate('created_at', Carbon::today())->where('is_notification', '=', '1')->count();
+        $user = auth()->user();
+    
+        $todayorders = Order::with('user_info')
+            ->whereDate('created_at', Carbon::today());
+    
+        // If user belongs to a branch, filter by their branch_id
+        if ($user->branch_id !== null) {
+            $todayorders->where('branch_id', $user->branch_id);
+        }
+    
+        // Filter orders: exclude unpaid prebookings
+        $todayorders->where(function ($query) {
+            $query->where('transaction_type', '!=', 15) // Include non-prebookings
+                  ->orWhere(function ($subQuery) {
+                      $subQuery->where('transaction_type', 15)
+                               ->where('payment_status', 2); // Include only paid prebookings
+                  });
+        });
+    
+        $orderCount = $todayorders->count();
+    
         $data = Settings::first();
-        $noti = $data->notification_tune;
-        return response()->json(['count' => $todayorders, 'noti' => $noti]);
+        $noti = $data->notification_tune ?? null;
+
+
+        return response()->json(['count' => $orderCount, 'noti' => $noti]);
+    }
+
+
+
+    public function printOrders()
+    {
+        $printJobs = PrintJob::where('status', 'pending')
+                            ->whereHas('order', function($query) {
+                                $query->where(function($query) {
+                                    // Orders with payment_type 15 and payment_status 2
+                                    $query->where('transaction_type', 15)
+                                          ->where('payment_status', 2);
+                                })
+                                ->orWhere(function($query) {
+                                    // Orders with payment_type not equal to 15 (ignore payment_status)
+                                    $query->where('transaction_type', '!=', 15);
+                                });
+                            })
+                            ->get();
+    
+        foreach ($printJobs as $job) {
+            $this->printRecipt($job);
+        }
+    }
+    
+   public function printRecipt($job)
+    {
+        $order = $job->order;
+        $printNodeApiKey =  $job->mac_id;
+
+        $orderdata = Order::with('user_info', 'driver_info')->find( $job->order_id);
+        $ordersdetails = OrderDetails::where('order_details.order_id', $job->order_id)
+            ->where('custom_pizza_id',null)
+            ->with('size','crust')
+            ->get();
+        $orderCustomdetails = OrderDetails::where('order_details.order_id', $job->order_id)
+            ->whereNotNull('custom_pizza_id')
+            ->with('custom_pizza.toppings', 'custom_pizza.size', 'custom_pizza.crust', 'custom_pizza.sauce', 'custom_pizza.dipping')
+            ->get();
+
+        $content = $this->formatContent($orderdata,$ordersdetails,$orderCustomdetails);
+        $formattedText = nl2br(e($content));
+
+        // Generate PDF with Dompdf
+        $pdf = Pdf::loadHTML('<pre>' . $formattedText . '</pre>');
+
+         $pdfPath = storage_path('app/public/invoice_' . $job->order_id . '.pdf');
+         file_put_contents($pdfPath, $pdf->output());
+
+
+        $printerId = $job->printer_id;
+
+        if (!$printerId) {
+            return response()->json(['error' => 'Printer not found'], 400);
+        }
+        $response = Http::withBasicAuth($printNodeApiKey, '')
+            ->post('https://api.printnode.com/printjobs', [
+                "printerId" => $printerId,
+                "title" => "Order Receipt",
+                "contentType" => "raw_base64",
+                "content" => base64_encode($content),
+                "source" => "CheesyBite App"
+            ]);
+
+
+
+        if ($response->failed()) {
+            $job->update(['status' => 'failed']);
+        } else {
+            $job->update(['status' => 'printed']);
+        }
+    }
+    private function centerText($text, $width)
+    {
+        $padding = max(0, floor(($width - strlen($text)) / 2));
+        return str_repeat(' ', $padding) . $text;
+    }
+    public function formatContent($orderdata,$ordersdetails,$orderCustomdetails)
+    {
+        $order_total = 0;
+        $qty = 0;
+        $width = 20;
+
+        // Start building the receipt
+        $receipt = $this->centerText("CHEESY BITE", $width) . "\n";
+        $receipt .= $this->centerText("Takeaway", $width) . "\n\n";
+
+        $receipt .= $this->centerText("Name: {$orderdata->name}", $width) . "\n";
+        $receipt .= $this->centerText("Email: {$orderdata->email}", $width) . "\n";
+        $receipt .= $this->centerText("Mobile: {$orderdata->mobile}", $width) . "\n";
+        $receipt .= $this->centerText("Address: {$orderdata->address}", $width) . "\n";
+        $receipt .= $this->centerText("Order Number: {$orderdata->order_number}", $width) . "\n";
+        $receipt .= $this->centerText("Order Date: " . date('M d, Y', strtotime($orderdata->created_at)), $width) . "\n";
+        $receipt .= $this->centerText("Pickup Date: " . date('M d, Y', strtotime($orderdata->delivery_date)), $width) . "\n";
+        $receipt .= $this->centerText("Pickup Time: {$orderdata->delivery_time}", $width) . "\n";
+        $receipt .= $this->centerText("Pickup Location: {$orderdata->branch->name}", $width) . "\n\n";
+
+        $receipt .= str_repeat("-", $width) . "\n";
+
+        $receipt .= "#  Product Details";
+        $receipt .= str_repeat("-", $width) . "\n";
+
+
+        foreach ($ordersdetails as $key => $orders) {
+            $line_total = ($orders->item_price + $orders->addons_total_price + $orders->extras_total_price) * $orders->qty;
+            $order_total += $line_total;
+            $qty += $orders->qty;
+
+            $receipt .= ($key + 1) . ". {$orders->item_name}\n";
+
+            if (!is_null($orders->size) && !is_null($orders->crust)) {
+                $receipt .= "   ({$orders->size->name} - {$orders->crust->name})\n";
+            }
+
+            if (!empty($orders->addons_id) || !empty($orders->extras_id)) {
+    $toppings = "";
+    $addons = "";
+
+    // Process Addons
+    $addons_name = explode('| ', $orders->addons_name);
+    $addons_price = explode('| ', $orders->addons_price);
+
+    foreach ($addons_name as $index => $addon) {
+        if (trim($addon) === '') continue; // Skip empty values
+
+        $price = helper::currency_format($addons_price[$index]  ?? 0);
+        if (!isset($addons_price[$index]) || $addons_price[$index] == 0) {
+            $toppings .= "   - {$addon}: {$price}\n";
+        } else {
+            $addons .= "   - {$addon}: {$price}\n";
+        }
+    }
+
+    // Process Extras (Merged into Addons/Toppings)
+    $extras_name = explode('| ', $orders->extras_name);
+    $extras_price = explode('| ', $orders->extras_price);
+
+    foreach ($extras_name as $index => $extra) {
+        if (trim($extra) === '' ) continue; // Skip empty values
+
+        $price = helper::currency_format($extras_price[$index] ?? 0);
+        if (!isset($extras_price[$index]) || $extras_price[$index] == 0) {
+            $toppings .= "   - {$extra}: {$price}\n";
+        } else {
+            $addons .= "   - {$extra}: {$price}\n";
+        }
+    }
+
+    // Append sections only if they have content
+    if (!empty($toppings)) {
+        $receipt .= "   Toppings:\n" . $toppings;
+    }
+    if (!empty($addons)) {
+        $receipt .= "   Addons:\n" . $addons;
+    }
+}
+
+
+
+            $receipt .= "   Price: " . helper::currency_format($orders->item_price) . "\n";
+            $receipt .= "   Category: " . $orders->items->category_info->category_name . "\n";
+            $receipt .= "   Sub Category: " . ($orders->items->subcategory_info->subcategory_name ?? "") . "\n";
+
+            $receipt .= "   Qty: {$orders->qty}\n";
+            $receipt .= "   Line Total: " . helper::currency_format($line_total) . "\n";
+            $receipt .= str_repeat("-", $width) . "\n";
+        }
+
+        foreach ($orderCustomdetails as $key => $orders) {
+            $line_total = ($orders->item_price + $orders->addons_total_price + $orders->extras_total_price) * $orders->qty;
+            $order_total += $line_total;
+            $qty += $orders->qty;
+
+            $receipt .= ($key + 1) . ". {$orders->item_name}\n";
+
+            if (!is_null($orders->size) && !is_null($orders->crust)) {
+                $receipt .= "   ({$orders->size->name} - {$orders->crust->name})\n";
+            }
+
+            if (!is_null($orders->custom_pizza)) {
+                // Adding size, cut, bake, and seasoning details
+                $receipt .= "   Size: {$orders->custom_pizza->size->name} ({$orders->custom_pizza->size->label})\n";
+                // $receipt .= "   Special: {$orders->custom_pizza->cut} / {$orders->custom_pizza->bake} / {$orders->custom_pizza->seasoning}\n";
+                $receipt .= "   Crust: {$orders->custom_pizza->crust->name}\n";
+//                $receipt .= "   Sauce: {$orders->custom_pizza->sauce->name}\n";
+
+                // Adding Toppings details
+                if (isset($orders->custom_pizza->toppings)) {
+                    $receipt .= "   Toppings:\n";
+                    foreach ($orders->custom_pizza->toppings as $topping) {
+                        $receipt .= "   - {$topping->name} ({$topping->pivot->side}) x {$topping->pivot->quantity}\n";
+                    }
+                }
+
+                if (isset($orders->custom_pizza->sauces)) {
+                    $receipt .= "   Extra Toppings:\n";
+                    foreach ($orders->custom_pizza->sauces as $topping) {
+                        $receipt .= "   - {$topping->name} ({$topping->pivot->side}) x {$topping->pivot->quantity}\n";
+                    }
+                }
+
+                // Adding Dipping details
+                if (isset($orders->custom_pizza->dipping)) {
+                    $receipt .= "   Dipping:\n";
+                    foreach ($orders->custom_pizza->dipping as $dipping) {
+                        $receipt .= "   - {$dipping->name} x {$dipping->pivot->quantity} @ " . helper::currency_format($dipping->price) . " each\n";
+                    }
+                }
+            }
+
+            // Addons
+           if (!empty($orders->addons_id) || !empty($orders->extras_id)) {
+    $toppings = "";
+    $addons = "";
+
+    // Process Addons
+    $addons_name = explode('| ', $orders->addons_name);
+    $addons_price = explode('| ', $orders->addons_price);
+
+    foreach ($addons_name as $index => $addon) {
+        if (trim($addon) === '') continue; // Skip empty values
+
+        $price = helper::currency_format($addons_price[$index]  ?? 0);
+        if (!isset($addons_price[$index]) || $addons_price[$index] == 0) {
+            $toppings .= "   - {$addon}: {$price}\n";
+        } else {
+            $addons .= "   - {$addon}: {$price}\n";
+        }
+    }
+
+    // Process Extras (Merged into Addons/Toppings)
+    $extras_name = explode('| ', $orders->extras_name);
+    $extras_price = explode('| ', $orders->extras_price);
+
+    foreach ($extras_name as $index => $extra) {
+        if (trim($extra) === '') continue; // Skip empty values
+
+        $price = helper::currency_format($extras_price[$index]  ?? 0);
+        if (!isset($extras_price[$index]) || $extras_price[$index] == 0) {
+            $toppings .= "   - {$extra}: {$price}\n";
+        } else {
+            $addons .= "   - {$extra}: {$price}\n";
+        }
+    }
+
+    // Append sections only if they have content
+    if (!empty($toppings)) {
+        $receipt .= "   Toppings:\n" . $toppings;
+    }
+    if (!empty($addons)) {
+        $receipt .= "   Addons:\n" . $addons;
+    }
+}
+
+
+
+            $receipt .= "   Price: " . helper::currency_format($orders->item_price) . "\n";
+            $receipt .= "   Category: Custom Pizza \n";
+
+            $receipt .= "   Qty: {$orders->qty}\n";
+            $receipt .= "   Line Total: " . helper::currency_format($line_total) . "\n";
+            $receipt .= str_repeat("-", $width) . "\n";
+        }
+        $receipt .= str_repeat("-", $width) . "\n";
+            $receipt .= "Customer Note: " . $orderdata->order_notes . "\n";
+        $receipt .= str_repeat("-", $width) . "\n";
+
+
+        $discount = $orderdata->discount_amount ?? 0;
+        $receipt .= "Subtotal: " . helper::currency_format($order_total) . "\n";
+        $receipt .= "Discount: " . helper::currency_format($discount) . "\n";
+        $tax = explode('|', $orderdata->tax_amount);
+        $tax_name = explode('|', $orderdata->tax_name);
+        if ($orderdata->tax_amount != null && $orderdata->tax_name != null) {
+            foreach ($tax as $key => $tax_value) {
+                $receipt .= $tax_name[$key] . " =" .helper::currency_format($tax_value) ;
+
+            }
+        }
+
+        $receipt .= "Tip: " . helper::currency_format($orderdata->tip) . "\n";
+        $receipt .= "Total Amount: " . helper::currency_format($orderdata->grand_total) . "\n";
+    
+
+        $receipt .= str_repeat("-", $width) . "\n";
+        $receipt .= "Thank you for your order!\n";
+        $receipt .= str_repeat("-", $width) . "\n";
+        return $receipt;
     }
     public function login()
     {

@@ -8,6 +8,7 @@ class Category extends Model
 {
     protected $table = 'categories';
     protected $fillable = ['category_name', 'image','branch_ids'];
+    protected $appends = ['image_url'];
 
     public function category_info()
     {
@@ -24,4 +25,14 @@ class Category extends Model
             ->orWhere('item.branch_ids', '=', $branchId);
         });
     }
+
+    public function getImageUrlAttribute()
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return url(env('ASSETSPATHURL') . 'admin-assets/images/category/'.$this->image);
+    }
+
 }

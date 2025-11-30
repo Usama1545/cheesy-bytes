@@ -182,7 +182,7 @@
                 class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
                 {{ trans('labels.order_date') }} :
                 <small
-                    class="fw-500 text-uppercase fs-10 text-center text-dark line-1">{{ @helper::date_format($orderdata->created_at) }}
+                    class="fw-500 text-uppercase fs-10 text-center text-dark line-1">{{ $orderdata->created_at }}
                 </small>
             </p>
         </div>
@@ -193,7 +193,7 @@
                     {{ $orderdata->order_type == '1' ? trans('labels.delivery_date') : trans('labels.pickup_date') }}
                     :
                     <small class="fw-500 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ @helper::date_format($orderdata->delivery_date) }}
+                        {{ $orderdata->delivery_date }}
                     </small>
                 </div>
             @endif
@@ -262,6 +262,7 @@
                     <td class="py-2">
                         <h6 class="m-0 fw-500 product-text-size">
                             {{ $orders->item_name }}
+
                             @if(!is_null($orders->size) && !is_null($orders->crust))
                                <small> ({{ $orders->size->name }} - {{ $orders->crust->name }})</small>
                             @endif
@@ -282,7 +283,7 @@
                             @if ($orders->extras_id != '')
                                 @foreach ($extras_name as $key => $val)
                                     <span class="text-muted">{{ $extras_name[$key] }} :
-                                                <span>{{ helper::currency_format($extras_price[$key]) }}</span>
+                                                <span>{{ helper::currency_format($extras_price[$key] ?? 0) }}</span>
                                             </span><br>
                                 @endforeach
                             @endif
@@ -317,13 +318,26 @@
                                             ({{$data->size->name }}")</small></p>
                                     <p class="m-0 ">Special: <small class="text-muted">{{ $data->cut }}
                                             / {{ $data->bake }} / {{ $data->seasoning }}</small></p>
-                                    <p class="m-0 ">Crust: <small class="text-muted">{{ $data->crust->name }}</small>
+                                    <p class="m-0 ">Crust: <small class="text-muted">{{ $data->crust?->name }}</small>
                                     </p>
-                                    <p class="m-0 ">Sauce: <small class="text-muted">{{ $data->sauce->name }}</small>
+                                    <!--<p class="m-0 ">Sauce: <small class="text-muted">{{ $data->sauce?->name }}</small>-->
                                     </p>
                                     <p class="m-0 ">Toppings </p>
                                     <ul class="m-0 p-0" id="item-extras">
                                         @foreach($data->toppings as $topping)
+                                            <li class="list-group-item  d-flex  text-muted">
+                                                <small
+                                                    class="flex-grow-1 ">{{ $topping->name }}</small>
+                                                <small
+                                                    class="ml-3">{{ $topping->pivot->side }}</small>
+                                                <small
+                                                    class=" px-3">{{ $topping->pivot->quantity }}</small>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <p class="m-0 ">Extra Toppings </p>
+                                    <ul class="m-0 p-0" id="item-extras">
+                                        @foreach($data->sauces as $topping)
                                             <li class="list-group-item  d-flex  text-muted">
                                                 <small
                                                     class="flex-grow-1 ">{{ $topping->name }}</small>

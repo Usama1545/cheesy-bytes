@@ -19,14 +19,14 @@
                                         class="text-danger"> * </span></label>
                                 <input type="text" class="form-control" name="state"
                                        value="{{ old('state') }}"
-                                       placeholder="state" required>
+                                       placeholder="state" >
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="form-label">city<span
                                         class="text-danger"> * </span></label>
                                 <input type="text" class="form-control " name="city"
                                        value="{{ old('city') }}"
-                                       placeholder="city" required>
+                                       placeholder="city" >
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="form-label">Zip<span
@@ -41,6 +41,32 @@
                                 <input type="text" class="form-control " name="address"
                                        value="{{ old('address') }}"
                                        placeholder="address" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Printer Name<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="printer_id"
+                                       placeholder="Printer Name" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Print node api<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="mac_id"
+                                       placeholder="Print node api" required>
+                            </div>
+                            <hr />
+
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Public Key<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="public_key"
+                                       placeholder="Printer Name" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Secret Key<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="secret_key"
+                                       placeholder="Print node api" required>
                             </div>
                             <div
                                 class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

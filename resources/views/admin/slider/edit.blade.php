@@ -12,12 +12,26 @@
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-6">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for=""
+                                                       class="col-form-label">Branch <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="branch_id" class="form-control" required id="branch_id">
+                                                    @foreach (helper::get_branchs() as $branch)
+                                                        <option value="{{ $branch->id }}" {{ $branch->id == $getslider->branch_id ? 'selected' : '' }}>
+                                                            {{ $branch->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                         <div class="form-group">
                                             <label class="col-form-label" for="">{{ trans('labels.title') }} <span
                                                     class="text-danger">*</span> </label>
                                             <input type="text" class="form-control" name="title"
                                                 placeholder="{{ trans('labels.title') }}" value="{{ $getslider->title }}"
-                                                required>
+                                                >
                                         </div>
                                         <div class="form-group">
                                             <label class="col-form-label" for="type">{{ trans('labels.type') }}</label>
@@ -56,7 +70,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        
+
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">

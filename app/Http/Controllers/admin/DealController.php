@@ -3,22 +3,21 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Addons;
-use App\Models\AddonsGroup;
-use App\Models\Extra;
+use App\Models\BmsmDealProduct;
+use App\Models\DealCategory;
+use App\Models\DealItem;
 use App\Models\Item;
-use App\Models\Sides;
-use Session;
 use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Session;
 
 class DealController extends Controller
 {
     // List all deals
     public function index()
     {
-        $deals = TopDeals::with('product')->orderBy('id', 'desc')->get();
+        $deals = TopDeals::with('product')->whereNot('deal_type', 1)->whereNot('deal_type', 3)->orderBy('id', 'desc')->get();
         return view('admin.topDeals.item', compact('deals'));
     }
 
@@ -33,6 +32,7 @@ class DealController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:item,id',
+            'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to the sizes table
             'offer_type' => 'required|in:1,2',
             'offer_amount' => 'required|numeric|min:0',
             'start_date' => 'required|date',
@@ -40,18 +40,32 @@ class DealController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'end_time' => 'required|date_format:H:i',
             'is_active' => 'boolean',
+            'order' => 'required|numeric|min:1'
         ]);
+
 
         $deal = TopDeals::create($request->all());
 
+        $slug = Item::find($request->product_id)->slug;
+        $slugexists = TopDeals::where('slug', $slug)->exists();
+        if ($slugexists) {
+            $slug = $slug . '-' .$deal->id;
+        }
+
+        $deal->update([
+            'slug' => $slug,
+        ]);
+
         return redirect('admin/topDeals')->with('success', 'Deal created successfully!');
     }
+
     public function edititem($id)
     {
         $getitem = TopDeals::with('product')->findOrFail($id);
 
         return view('admin.topDeals.edititem', compact('getitem'));
     }
+
     // Get a single deal
     public function show($id)
     {
@@ -62,23 +76,46 @@ class DealController extends Controller
     // Update an existing deal
     public function update(Request $request)
     {
-
         $request->validate([
             'id' => 'required|exists:top_deals,id',
+            'size_id' => 'required|exists:sizes,id',
             'product_id' => 'sometimes|required|exists:item,id',
             'discount_type' => 'sometimes|required|in:flat,percentage',
             'offer_amount' => 'sometimes|required|numeric|min:0',
             'start_date' => 'required|date',
-            'start_time' => 'required|date_format:H:i:s',
+            'start_time' => 'required',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'end_time' => 'required|date_format:H:i:s',
+            'end_time' => 'required',
             'is_active' => 'boolean',
+            'order' => 'required|numeric|min:1'
         ]);
-        $deal = TopDeals::findOrFail($request['id']);
 
-        $deal->update($request->all());
+        $deal = TopDeals::findOrFail($request->id);
 
-        return redirect('admin/topDeals')->with('success', 'Deal Updated successfully!');    }
+        // Generate slug from product
+        if ($request->filled('product_id')) {
+            $slug = Item::findOrFail($request->product_id)->slug;
+
+            // Check if slug exists in another deal (exclude current deal)
+            $slugExists = TopDeals::where('slug', $slug)
+                ->where('id', '!=', $deal->id)
+                ->exists();
+
+            if ($slugExists) {
+                $slug = $slug . '-' . $deal->id;
+            }
+
+            $request->merge(['slug' => $slug]);
+        }
+
+        $deal->update($request->only([
+            'size_id', 'product_id', 'discount_type', 'offer_amount',
+            'start_date', 'start_time', 'end_date', 'end_time',
+            'is_active', 'order', 'slug'
+        ]));
+
+        return redirect('admin/topDeals')->with('success', 'Deal updated successfully!');
+    }
 
     // Delete a deal
     public function destroy($id)
@@ -110,14 +147,15 @@ class DealController extends Controller
 
         return response()->json($deals);
     }
+
     public function delete(Request $request)
     {
         $category = TopDeals::where('id', $request->id)->first();
-        if($category){
+        if ($category) {
             $category->delete();
             return 1;
         }
-      return 0;
+        return 0;
     }
 
     public function dealDetails($id)
@@ -125,87 +163,333 @@ class DealController extends Controller
         $branchId = Session::get('branch_id');
         $user_id = Session::get('user_id'); // Ensure user_id is fetched correctly
         $session_id = Session::getId();
+        $topDealData = TopDeals::where('id', $id)->first();
 
         // Fetch top deals by ID
         $topDeals = TopDeals::where('id', $id)->pluck('product_ids')->first();
         $productIds = explode(',', $topDeals); // Convert comma-separated string to array
-        if($user_id != null) {
-            // Fetch items grouped by category and belonging to the selected branch
-            $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')
-                ->select(
-                    'item.*',
-                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
-                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart')
-                )
-                ->where(function ($query) use ($branchId) {
-                    $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
-                    ->orWhere('branch_ids', 'like', "$branchId,%")    // Match start
-                    ->orWhere('branch_ids', 'like', "%,$branchId")    // Match end
-                    ->orWhere('branch_ids', '=', $branchId);           // Exact match
-                })
-                ->leftJoin('item_prices', function ($query) use ($branchId) {
-                    $query->on('item_prices.item_id', '=', 'item.id')
-                        ->where('item_prices.branch_id', '=', $branchId);
-                })
-                ->leftJoin('cart', function ($query) use ($user_id) {
+        $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'pizzaPrices', 'item_image')
+            ->select(
+                'item.*',
+                DB::raw("
+                CASE
+                    WHEN category_info.category_name = 'pizza' THEN (
+                        SELECT pp.price
+                        FROM pizza_prices AS pp
+                        WHERE FIND_IN_SET(pp.size_id, '$topDealData->size_id')
+                            AND pp.item_id = item.id
+                            AND pp.branch_id = $branchId
+                        ORDER BY pp.price ASC -- Adjust based on your preference (MIN, MAX, etc.)
+                        LIMIT 1
+                    )
+                    ELSE MAX(
+                        CASE WHEN item_prices.branch_id = $branchId
+                        THEN COALESCE(item_prices.price, 0) ELSE 0 END
+                    )
+                END AS item_price
+            "),
+                DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart'),
+                DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE cart.qty END) AS cartQty')
+
+            )
+            ->leftJoin('categories as category_info', 'category_info.id', '=', 'item.cat_id')
+            ->where(function ($query) use ($branchId) {
+                $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                ->orWhere('item.branch_ids', 'like', "$branchId,%")    // Match start
+                ->orWhere('item.branch_ids', 'like', "%,$branchId")    // Match end
+                ->orWhere('item.branch_ids', '=', $branchId);          // Exact match
+            })
+            ->leftJoin('item_prices', function ($query) use ($branchId) {
+                $query->on('item_prices.item_id', '=', 'item.id')
+                    ->where('item_prices.branch_id', '=', $branchId);
+            })
+            ->leftJoin('cart', function ($query) use ($session_id, $user_id) {
+                if ($user_id) {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.user_id', '=', $user_id)
                         ->where('cart.buynow', '=', '0');
-                })
-                ->whereIn('item.id', $productIds)
-                ->groupBy('item.cat_id')
-                ->get();
-
-
-        }else{
-            $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')
-                ->select(
-                    'item.*',
-                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"),
-                    DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'),
-                    DB::raw('(case when cart.item_id is null then 0 else cart.qty end) as cartQty')
-                )
-                ->where(function ($query) use ($branchId) {
-                    $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
-                    ->orWhere('branch_ids', 'like', "$branchId,%")    // Match start
-                    ->orWhere('branch_ids', 'like', "%,$branchId")    // Match end
-                    ->orWhere('branch_ids', '=', $branchId);           // Exact match
-                })
-                ->leftJoin('item_prices', function ($query) use ($branchId) {
-                    $query->on('item_prices.item_id', '=', 'item.id')
-                        ->where('item_prices.branch_id', '=', $branchId);
-                })
-                ->leftJoin('cart', function ($query) use ($session_id) {
+                } else {
                     $query->on('cart.item_id', '=', 'item.id')
                         ->where('cart.session_id', '=', $session_id)
                         ->where('cart.buynow', '=', '0');
-                })
-                ->whereIn('item.id', $productIds)
-                ->groupBy('item.cat_id')
-                ->get();
-            // Fetch addons grouped by addon groups
-        }
+                }
+            })
+            ->where(function ($query) use ($productIds) {
+                $query->whereIn('item.id', $productIds);
+            })
+            ->groupBy('item.id') // Ensure unique rows per item
+            ->get();
 
-        $groupedData = $getitemdata->groupBy(function ($item) {
-            return $item->category_info->category_name; // Assuming 'name' is the category name field
+        // Sort by subcategory_info.reorder_id and group by subcategory_name or category_name
+        $getitemdata = $getitemdata->sortBy(function ($item) {
+            return $item->subcategory_info->reorder_id ?? PHP_INT_MAX; // Default to max value if reorder_id is not set
         });
-        $topDeals = TopDeals::where('id', $id)->pluck('size_id')->first();
 
-        $result = $groupedData->map(function ($items, $categoryName) use ($topDeals,$id) {
+        // Group by subcategory_name or category_name if subcategory_name is not available
+        $groupedData = $getitemdata->groupBy(function ($item) {
+            return $item->category_info->category_name;
+        });
+
+        // Final result formatting
+        $result = $groupedData->map(function ($items, $name) use ($topDealData, $id) {
             return [
-                'category_name' => $categoryName,
+                'category_name' => $name,
                 'items' => $items,
-                'size_id' => $topDeals,
+                'size_id' => $topDealData->size_id,
                 'deal_id' => $id,
+                'deal_type' => $topDealData->deal_type,
             ];
         })->values();
 
         return $result;
     }
 
+    public function bogoDealDetails($branch, $slug)
+    {
+        try {
+        $branchId = Session::get('branch_id');
+        $user_id = Session::get('user_id');
+        $session_id = Session::getId();
+        $id = TopDeals::where('slug', $slug)->pluck('id')->first();
+
+        $topDealData = TopDeals::with('product')->findOrFail($id);
+        $dealType = $topDealData->deal_type;
+        $dealSizeID = $topDealData->size_id ?? 1;
+
+        $dealCategories = collect();
+        $productIds = [];
+        $dealItems = DealItem::where('deal_id', $id)->get()->keyBy('item_id');
+
+        if ($dealType == 3) {
+            // BOGO Deal
+            $productIds = $dealItems->pluck('item_id')->toArray();
+
+          $dealCategories = DealCategory::where('deal_id', $id)
+                ->with([
+                    'category',
+                    'dealItem' => function ($dealItemQ) use ($branchId) {
+                        $dealItemQ->whereHas('item', function ($q) use ($branchId) {
+                            $q->whereRaw("FIND_IN_SET(?, item.branch_ids)", [$branchId])
+                            ->where(function ($subQ) use ($branchId) {
+                                $subQ->whereHas('itemPrices', function ($sub) use ($branchId) {
+                                    $sub->where('branch_id', $branchId);
+                                })
+                                ->orWhereHas('pizzaPrices', function ($sub) use ($branchId) {
+                                    // This needs to be handled differently - see alternative below
+                                    $sub->where('branch_id', $branchId)
+                                        ->where('price', '>', 0);
+                                });
+                            });
+                        })
+                        ->with([
+                            'item' => function ($q) use ($branchId) {
+                                $q->whereRaw("FIND_IN_SET(?, item.branch_ids)", [$branchId])
+                                ->with([
+                                    'itemPrices' => function ($sub) use ($branchId) {
+                                        $sub->where('branch_id', $branchId);
+                                    },
+                                    'pizzaPrices' => function ($sub) use ($branchId) {
+                                        $sub->where('branch_id', $branchId);
+                                        // Size filtering will be done after data is loaded
+                                    }
+                                ]);
+                            }
+                        ]);
+                    }
+                ])
+                ->get()
+                ->map(function ($dealCategory) use ($branchId) {
+                    // Filter pizzaPrices based on the dealCategory's size_id
+                    if ($dealCategory->dealItem) {
+                        $dealCategory->dealItem->each(function ($dealItem) use ($dealCategory, $branchId) {
+                            if ($dealItem->item && $dealItem->item->pizzaPrices) {
+                                $dealItem->item->pizzaPrices = $dealItem->item->pizzaPrices->filter(function ($pizzaPrice) use ($dealCategory, $branchId) {
+                                    return $pizzaPrice->branch_id == $branchId && 
+                                        $pizzaPrice->size_id == $dealCategory->size_id;
+                                });
+                            }
+                        });
+                    }
+                    return $dealCategory;
+                })
+                ->sortBy(fn($categoryMeta) => $categoryMeta->is_free ? 1 : 0);
+
+        } elseif ($dealType == 4) {
+            // BMSM Deal
+            $productIds = BmsmDealProduct::where('deal_id', $id)->pluck('item_id')->toArray();
+
+        } elseif ($dealType == 1) {
+            // Selective Deal
+            $productIds = explode(',', $topDealData->product_ids);
+        }
+
+        // Get item IDs used in other deals for current user/session
+        $cartItemIdsFromOtherDeals = DB::table('cart')
+            ->join('top_deals', 'cart.deal_id', '=', 'top_deals.id')
+            ->where('cart.deal_id', '!=', $id)
+            ->when($user_id, fn($q) => $q->where('cart.user_id', $user_id),
+                fn($q) => $q->where('cart.session_id', $session_id)
+            )
+            ->pluck('cart.item_id')
+            ->toArray();
+        $getitemdata = Item::whereRaw("FIND_IN_SET(?, item.branch_ids)", [$branchId])
+        ->with('category_info', 'subcategory_info', 'item_images', 'pizzaPrices', 'item_image')
+        ->select(
+            'item.*',
+            DB::raw("
+                CASE 
+                    WHEN category_info.category_name = 'pizza' 
+                    THEN (
+                        SELECT pp.price 
+                        FROM pizza_prices AS pp 
+                        WHERE FIND_IN_SET(pp.size_id, '$dealSizeID') 
+                        AND pp.item_id = item.id 
+                        AND pp.branch_id = $branchId 
+                        ORDER BY pp.price ASC 
+                        LIMIT 1
+                    ) 
+                    ELSE MAX(item_prices.price) 
+                END AS item_price
+            "),
+            DB::raw('(CASE WHEN cart.item_id IS NULL OR cart.item_id IN (' . implode(',', $cartItemIdsFromOtherDeals ?: [0]) . ') THEN 0 ELSE 1 END) AS is_cart'),
+            DB::raw('(CASE WHEN cart.item_id IS NULL OR cart.item_id IN (' . implode(',', $cartItemIdsFromOtherDeals ?: [0]) . ') THEN 0 ELSE cart.qty END) AS cartQty')
+        )
+        ->leftJoin('categories as category_info', 'category_info.id', '=', 'item.cat_id')
+        ->leftJoin('item_prices', function ($query) use ($branchId) {
+            $query->on('item_prices.item_id', '=', 'item.id')
+                ->where('item_prices.branch_id', '=', $branchId);
+        })
+        ->leftJoin('cart', function ($query) use ($session_id, $user_id) {
+            $query->on('cart.item_id', '=', 'item.id')
+                ->where('cart.buynow', '=', '0');
+            if ($user_id) {
+                $query->where('cart.user_id', '=', $user_id);
+            } else {
+                $query->where('cart.session_id', '=', $session_id);
+            }
+        })
+        ->whereIn('item.id', $productIds)
+        ->where(function ($q) use ($branchId, $dealSizeID) {
+            $q->whereExists(function ($sub) use ($branchId) {
+                $sub->select(DB::raw(1))
+                    ->from('item_prices')
+                    ->whereRaw('item_prices.item_id = item.id')
+                    ->where('item_prices.branch_id', $branchId);
+            })
+            ->orWhereExists(function ($sub) use ($branchId, $dealSizeID) {
+                $sub->select(DB::raw(1))
+                    ->from('pizza_prices')
+                    ->whereRaw('pizza_prices.item_id = item.id')
+                    ->where('pizza_prices.branch_id', $branchId)
+                    ->whereRaw("FIND_IN_SET(pizza_prices.size_id, '$dealSizeID')");
+            });
+        })
+        ->groupBy('item.id')
+        ->get();
+
+        // Group items by category name (not just cat_id)
+        $getitemdata = $getitemdata->map(function ($item) use ($dealItems) {
+            $dealMeta = $dealItems->get($item->id);
+            $item->deal_meta = [
+                'is_free'    => $dealMeta->is_free ?? 0,
+                'is_required'=> $dealMeta->is_required ?? 0,
+                'quantity'   => $dealMeta->quantity ?? 1,
+                'deal_cat_id'=> $dealMeta->deal_category_id ?? null,
+            ];
+            return $item;
+        });
+
+        // 4. Now group by deal category (not just category name)
+        $groupedData = $getitemdata->groupBy(fn($item) => $item->deal_meta['deal_cat_id'] ?? 'uncategorized');
+
+
+        $result = collect();
+
+        if ($dealType == 3) {
+            // BOGO
+            $dealCategories = $dealCategories->sortBy(function ($categoryMeta) {
+                return $categoryMeta->is_free ? 1 : 0;
+            });
+            
+            foreach ($dealCategories as $catId => $categoryMeta) {
+                $catId = $categoryMeta->id;
+                $categoryName = optional($categoryMeta->category)->category_name ?? 'Unknown';
+
+                // items should match by cat_id + maybe size_id if relevant
+                $items = $categoryMeta->dealItem->map(function ($dealItem) use ($categoryMeta) {
+                    $item = $dealItem->item;
+
+                    // pick pizzaPrice (matching size_id) else itemPrice
+                    $price = null;
+
+                    if ($item->pizzaPrices->isNotEmpty()) {
+                        $pizzaPrice = $item->pizzaPrices
+                            ->where('size_id', $categoryMeta->size_id)
+                            ->first();
+                        $price = $pizzaPrice?->price;
+                    }
+
+                    if (is_null($price) && $item->itemPrices->isNotEmpty()) {
+                        $itemPrice = $item->itemPrices->first();
+                        $price = $itemPrice?->price;
+                    }
+
+                    // Dynamically append custom attributes
+                    $item->final_price = $price ?? 0;
+                    $item->pizza_size = $categoryMeta->size_id;
+
+                    return $item; // still an Eloquent model
+                });
+
+
+                $result->push([
+                    'category_id'   => $catId,
+                    'category_name' => $categoryName,
+                    'items'         => $items,
+                    'size_id'       => $categoryMeta->size_id,   // ✅ now per-rule
+                    'offer_type'    => $topDealData->offer_type,
+                    'offer_amount'  => $topDealData->offer_amount,
+                    'deal_id'       => $id,
+                    'deal_type'     => $dealType,
+                    'category_meta' => [
+                        'max'        => $categoryMeta->quantity,
+                        'is_free'    => $categoryMeta->is_free,
+                        'is_required'=> $categoryMeta->is_required, // ✅ include required flag
+                        'unique'     => $categoryMeta->unique_products,
+                    ],
+                ]);
+            }
+
+            // dd($result);
+            return view('web.deal-details', compact('result'));
+
+        } else {
+            // BMSM or Selective
+            foreach ($groupedData as $categoryName => $items) {
+                $result->push([
+                    'category_id' => null,
+                    'category_name' => $topDealData->product->item_name,
+                    'items' => $items->values(),
+                    'size_id' => $topDealData->size_id,
+                    'offer_type' => $topDealData->offer_type,
+                    'offer_amount' => $topDealData->offer_amount,
+                    'deal_id' => $id,
+                    'deal_type' => $dealType,
+                    'category_meta' => null,
+                ]);
+            }
+            return view('web.bmsm-deal-details', compact('result'));
+        }
+        } catch (\Exception $e) 
+        {
+            dd($e);
+        }
+    }
+
+
     public function dealIndex()
     {
-        $deals = TopDeals::with('product')->where('deal_type',1)->orderBy('id', 'desc')->get();
+        $deals = TopDeals::with('product')->where('deal_type', 1)->orderBy('id', 'desc')->get();
         return view('admin.deals.item', compact('deals'));
     }
 
@@ -230,6 +514,8 @@ class DealController extends Controller
             'product_ids' => 'required|array',
             'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to the sizes table
             'min_count' => 'required|numeric|min:1',
+            'order' => 'required|numeric|min:1'
+
         ]);
 
         // Create a deal with default deal_type and formatted product_ids
@@ -243,19 +529,23 @@ class DealController extends Controller
             'end_time' => $validatedData['end_time'],
             'is_active' => $validatedData['is_active'] ?? false,
             'product_ids' => implode(',', $validatedData['product_ids']),
-            'size_id' => $validatedData['size_id'],
+            'size_id' => implode(',', $validatedData['size_id']),
             'min_count' => $validatedData['min_count'],
             'deal_type' => 1, // Default deal_type
+            'order' => $validatedData['order'],
+
         ]);
 
         return redirect('admin/deals')->with('success', 'Deal created successfully!');
     }
+
     public function editDealitem($id)
     {
         $getitem = TopDeals::with('product')->findOrFail($id);
 
         return view('admin.deals.edititem', compact('getitem'));
     }
+
     // Get a single deal
     public function showDeal($id)
     {
@@ -272,22 +562,25 @@ class DealController extends Controller
             'discount_type' => 'nullable|in:flat,percentage',
             'offer_amount' => 'nullable|numeric|min:0',
             'start_date' => 'required|date',
-            'start_time' => 'required|date_format:H:i:s',
+            'start_time' => 'required',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'end_time' => 'required|date_format:H:i:s',
+            'end_time' => 'required',
             'is_active' => 'boolean',
             'product_ids' => 'required|array',
             'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to sizes table
             'min_count' => 'required|numeric|min:1',
+            'order' => 'required|numeric|min:1'
+
         ]);
         // Find the deal using validated ID
         $deal = TopDeals::findOrFail($validatedData['id']);
         $product_ids = implode(',', $validatedData['product_ids']);
+        $size_ids = implode(',', $validatedData['size_id']);
 
         // Update deal with merged attributes
         $deal->update(array_merge(
             $validatedData,
-            ['product_ids' => $product_ids]
+            ['product_ids' => $product_ids, 'size_id' => $size_ids]
         ));
         $deal->save();
 

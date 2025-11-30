@@ -26,6 +26,7 @@ class AddonsController extends Controller
         $addons = new Addons();
         $addons->addongroup_id = $request->addongroup_id;
         $addons->name = $request->name;
+        $addons->product_id = $request->product_id;
         $addons->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $addons->price = helper::number_format($request->type == 1 ? 0 : $request->price);
         $addons->save();
@@ -42,6 +43,7 @@ class AddonsController extends Controller
         $addons = Addons::find($request->id);
         $addons->addongroup_id = $request->addongroup_id;
         $addons->name = $request->name;
+        $addons->product_id = $request->product_id;
         $addons->branch_ids = $request->branch_ids != "" ? @implode(",", $request->branch_ids) : null;
         $addons->price = helper::number_format($request->type == 1 ? 0 : $request->price);
         $addons->save();

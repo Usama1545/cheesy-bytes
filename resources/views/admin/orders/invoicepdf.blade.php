@@ -208,7 +208,12 @@
                 @endphp
                 <tr align="center">
                     <td>{{ $orders->item_name }}
+                    
                          <br>
+                          <p> category:  {{ $orders->items->category_info->category_name }} </p>
+                          @if(isset($orders->items->subcategory_info->subcategory_name) && !is_null($orders->items->subcategory_info->subcategory_name))
+                        <p>  sub-category:  {{ $orders->items->subcategory_info->subcategory_name }}</p>
+                        @endif
                         @php
                             $addons_name = explode('| ', $orders->addons_name);
                             $addons_price = explode('| ', $orders->addons_price);
@@ -225,7 +230,7 @@
                         @if ($orders->extras_id != '')
                             @foreach ($extras_name as $key => $val)
                                 <small class="text-muted">{{ $extras_name[$key] }} :
-                                    <span>{{ helper::currency_format($extras_price[$key]) }}</span>
+                                    <span>{{ helper::currency_format($extras_price[$key] ?? 0) }}</span>
                                 </small><br>
                             @endforeach
                         @endif

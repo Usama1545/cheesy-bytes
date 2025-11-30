@@ -7,6 +7,8 @@
             <th>{{ trans('labels.user_info') }}</th>
             <th>{{ trans('labels.order_type') }}</th>
             <th>{{ trans('labels.payment_type') }}</th>
+            <th>Tip </th>
+            <th>Order Amount</th>
             <th>{{ trans('labels.grand_total') }}</th>
             <th>{{ trans('labels.status') }}</th>
             <th>{{ trans('labels.action') }}</th>
@@ -60,6 +62,8 @@
                             {{ trans('labels.paid') }}</small>
                     @endif
                 </td>
+                <td>{{ helper::currency_format($orderdata->tip) }}</td>
+                <td>{{ helper::currency_format($orderdata->grand_total - $orderdata->tip) }}</td>
                 <td>{{ helper::currency_format($orderdata->grand_total) }}</td>
                 <td>
                     @if ($orderdata->status_type == 1)
@@ -87,6 +91,10 @@
                         <a href="{{ URL::to('admin/generatepdf/' . $orderdata->id) }}" class="btn btn-warning square"
                             tooltip="Download PDF">
                             <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                        </a>
+                        <a href="{{ URL::to('admin/deleteOrder/' . $orderdata->id) }}" class="btn btn-warning square"
+                            tooltip="Delete Order">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
                         </a>
                         @if ($orderdata->transaction_type == 1 && $orderdata->payment_status == 1 && $orderdata->status_type == 3)
                             <a class="btn btn-sm btn-info square" tooltip="Payment Status"

@@ -413,4 +413,26 @@ class SettingController extends Controller
         }
         return redirect('admin/settings')->with('success', trans('messages.success'));
     }
+    
+    public function settings_footer(Request $request){
+        $data = $request->validate([
+            'branch_id' => 'required',
+            'title' => 'required',
+            'description' => 'required',
+            'address' => 'required',
+            'number' => 'required',
+            'email' => 'required',
+        ]);
+
+        FooterFeatures::updateOrCreate([
+            'branch_id' => $data['branch_id'],
+        ],[
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'address' => $data['address'],
+            'number' => $data['number'],
+            'email' => $data['email'],
+        ]);
+        return redirect('admin/settings')->with('success', trans('messages.success'));
+    }
 }

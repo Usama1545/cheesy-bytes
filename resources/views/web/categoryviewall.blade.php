@@ -10,7 +10,7 @@
                     <ol class="breadcrumb">
                         <li
                             class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
-                            <a class="text-dark fw-600" href="{{ URL::to('/') }}">{{ trans('labels.home') }}</a>
+                            <a class="text-dark fw-600" href="{{ helper::branch_route('home') }}">{{ trans('labels.home') }}</a>
                         </li>
                         <li
                             class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active">
@@ -31,7 +31,7 @@
                                 <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category">
                             </a>
                         @else
-                            <a href="{{ URL::to('/menu/' . $categorydata->slug) }}">
+                            <a href="{{ helper::branch_route('menu', ['category' => $categorydata->slug]) }}">
                                 <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category">
                             </a>
                         @endif
@@ -49,10 +49,20 @@
         }
 
         .category-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Ensures the image covers the entire space */
+            width: 230px;
+            height: 230px;
+            object-fit: fill; /* Ensures the image fits without cropping */
+            margin: 0 auto; /* Center the image horizontally */
         }
+
+        @media (max-width: 576px) { /* Adjust this breakpoint as needed */
+            .category-image {
+                width: 100%;
+                height: 100%;
+                object-fit: fill; /* Ensures the image covers the entire space */
+            }
+        }
+
 
         @media (min-width: 992px) {
             .col-lg-2-4 {

@@ -25,5 +25,6 @@ Route::group(['namespace' => 'admin', 'prefix' => 'admin'], function () {
         Route::post('promocode/status', [PromocodeController::class, 'status']);
         Route::post('promocode/delete', [PromocodeController::class, 'destroy']);
         Route::post('promocode/reorder_promocode', [PromocodeController::class, 'reorder_promocode']);
+                Route::post('promocode/get-products', [PromocodeController::class, 'getProducts'])->name('get.products');
     });
 });

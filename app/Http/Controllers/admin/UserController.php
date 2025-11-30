@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $getusers = User::where('type', '2')->where('is_deleted', 2)->orderBydesc('id')->get();
+        $branch_id = $request->branch_id;
+        $getusers = User::where('type', '2')->where('branch_id', $branch_id)->where('is_deleted', 2)->orderBydesc('id')->get();
         return view('admin.users.users', compact('getusers'));
     }
     public function add_customers()
@@ -162,6 +163,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'mobile' => 'required|unique:users,mobile',
+            'branch_id' => 'required',
             'password' => 'required',
             'role' => 'required',
         ], [
@@ -172,6 +174,7 @@ class UserController extends Controller
             "mobile.required" => trans('messages.mobile_required'),
             "mobile.unique" => trans('messages.mobile_exist'),
             "password.required" => trans('messages.password_required'),
+            "branch_id.required" => "Please select branch",
             "role.required" => trans('messages.role_selection_required'),
         ]);
         if ($validator->fails()) {
@@ -184,6 +187,7 @@ class UserController extends Controller
             $employee->password = Hash::make($request->password);
             $employee->profile_image = 'unknown.png';
             $employee->role_id = $request->role;
+            $employee->branch_id = $request->branch_id;
             $employee->type = 4;
             $employee->save();
             return redirect('admin/employee')->with('success', trans('messages.success'));
@@ -201,6 +205,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $request->id,
             'mobile' => 'required|unique:users,mobile,' . $request->id,
+            'branch_id' => 'required',
             'role' => 'required',
         ], [
             "name.required" => trans('messages.name_required'),
@@ -209,6 +214,7 @@ class UserController extends Controller
             "email.unique" => trans('messages.email_exist'),
             "mobile.required" => trans('messages.mobile_required'),
             "mobile.unique" => trans('messages.mobile_exist'),
+            "branch_id.required" => "Please select branch",
             "role.required" => trans('messages.role_selection_required'),
         ]);
         if ($validator->fails()) {
@@ -219,6 +225,7 @@ class UserController extends Controller
             $employeedata->email = $request->email;
             $employeedata->mobile = $request->mobile;
             $employeedata->role_id = $request->role;
+            $employeedata->branch_id = $request->branch_id;
             $employeedata->save();
             return redirect('admin/employee')->with('success', trans('messages.success'));
         }

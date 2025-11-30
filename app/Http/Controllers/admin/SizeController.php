@@ -29,7 +29,7 @@ class SizeController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'label' => 'required|number'
+            'label' => 'required|integer'
         ]);
         Size::create($request->all());
 

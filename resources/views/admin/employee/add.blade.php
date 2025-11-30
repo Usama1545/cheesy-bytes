@@ -76,7 +76,24 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+
+                                            <label class="col-form-label">Branch Id
+                                                <span class="text-danger"> * </span></label>
+                                            <div class="d-flex gap-2">
+                                                <select name="branch_id" class="form-control selectpicker" required>
+                                                    @foreach (helper::get_branchs() as $branch)
+                                                        <option value="{{ $branch->id }}">
+                                                            {{ $branch->name.'-'.$branch->city }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                     <a href="{{ URL::to('admin/employee') }}"
                                         class="btn btn-danger">{{ trans('labels.cancel') }}</a>

@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Model;
 class Banner extends Model
 {
     protected $table='banner';
-    protected $fillable=['image'];
+    protected $fillable=['image','branch_id'];
     public function item_info(){
         return $this->hasOne('App\Models\Item','id','item_id')->select('id','item_name','slug');
     }

@@ -10,7 +10,8 @@
                     <ol class="breadcrumb">
                         <li
                             class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
-                            <a class="text-dark fw-600" href="{{ URL::to('/') }}">{{ trans('labels.home') }}</a>
+                            <a class="text-dark fw-600"
+                                href="{{ helper::branch_route('home') }}">{{ trans('labels.home') }}</a>
                         </li>
                         <li
                             class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
@@ -24,7 +25,7 @@
     <section>
         <div class="container mt-5">
             <div class="menu-section menu-section-header">
-                <form action="{{ URL::to('/search') }}" method="get">
+                <form action="{{ helper::branch_route('search') }}" method="get">
                     <div class="form-group">
                         <div class="input-group input-group-lg gap-sm-3 gap-2">
                             <input type="text" class="form-control rounded" name="itemname"

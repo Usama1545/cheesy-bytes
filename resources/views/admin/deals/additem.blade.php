@@ -46,7 +46,7 @@
                                     <div class="dropdown bootstrap-select show-tick form-control w-100">
                                         <select class="form-control selectpicker  w-100" multiple name="product_ids[]"
                                                 data-live-search="true">
-                                            @foreach(helper::getItems() as $item)
+                                            @foreach(helper::getItems(false) as $item)
                                                 <option value="{{ $item->id }}">
                                                     {{ $item->item_name }}
                                                 </option>
@@ -99,7 +99,7 @@
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Size
                                         <span class="text-danger"> *</span></label>
-                                    <select class="form-control selectpicker w-100" name="size_id"
+                                    <select class="form-control selectpicker w-100" multiple name="size_id[]"
                                             data-live-search="true">
                                         @foreach(helper::get_sizes() as $item)
                                             <option value="{{ $item->id }}">
@@ -115,7 +115,18 @@
                                            required="">
                                 </div>
 
-
+                                 <div class="form-group col-md-6">
+                                        <label class="form-label">Price
+                                            <span class="text-danger"> *</span></label>
+                                        <input type="text" class="form-control numbers_only" name="offer_amount"
+                                               placeholder="Price" required="">
+                                    </div>
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Order
+                                        <span class="text-danger"> *</span></label>
+                                    <input type="text" class="form-control numbers_only" name="order"
+                                           placeholder="Order By" >
+                                </div>
 
                                 <div
                                     class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

@@ -19,15 +19,15 @@
                                 <label class="form-label">State<span
                                         class="text-danger"> * </span></label>
                                 <input type="text" class="form-control" name="state"
-                                       value="{{ $branch->state->name }}"
-                                       placeholder="state" required>
+                                       value="{{ $branch->state?->name ?? '' }}"
+                                       placeholder="state" >
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="form-label">city<span
                                         class="text-danger"> * </span></label>
                                 <input type="text" class="form-control " name="city"
                                        value="{{ $branch->city }}"
-                                       placeholder="city" required>
+                                       placeholder="city" >
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="form-label">Zip<span
@@ -36,13 +36,42 @@
                                        value="{{ $branch->zip }}"
                                        placeholder="zip" required>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group col-md-6">
                                 <label class="form-label">Address<span
                                         class="text-danger"> * </span></label>
                                 <input type="text" class="form-control " name="address"
                                        value="{{ $branch->address }}"
                                        placeholder="address" required>
                             </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Printer Name<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="printer_id"
+                                       value="{{ $branch->printer_id }}"
+                                       placeholder="Printer Name" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Print node api<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="mac_id"
+                                 value="{{ $branch->mac_id }}"
+                                       placeholder="Print node api" required>
+                            </div>
+                            <hr />
+
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Public Key<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="public_key" value="{{ $branch->paymentMethod->public_key ?? '' }}"
+                                       placeholder="Printer Name" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Secret Key<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="secret_key" value="{{ $branch->paymentMethod->secret_key ?? '' }}"
+                                       placeholder="Print node api" required>
+                            </div>
+
                             <div
                                 class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                 <a href="{{ URL::to('admin/branches') }}"

@@ -53,17 +53,16 @@
                                             <h5>{{ trans('labels.order_type') }}</h5>
                                         </div>
                                         <div class="col-12 d-flex gap-3">
-                                            @if ($getsettings->pickup_delivery == 1)
-                                                <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type" value="1" id="delivery"
-                                                        {{ $address->address_type === 'delivery' ? 'checked' : ($address->address_type === 'carryout' ? '' : 'checked')  }}>
-                                                    <label class="form-check-label fs-7 fw-500" for="delivery">
-                                                        {{ trans('labels.delivery') }}
-                                                    </label>
-                                                </div>
+{{--                                                <div class="form-check form-check-inline mb-0">--}}
+{{--                                                    <input class="form-check-input" type="radio" name="order_type" value="1" id="delivery"--}}
+{{--                                                        {{ $address->address_type === 'delivery' ? 'checked' : ($address->address_type === 'carryout' ? '' : 'checked')  }}>--}}
+{{--                                                    <label class="form-check-label fs-7 fw-500" for="delivery">--}}
+{{--                                                        {{ trans('labels.delivery') }}--}}
+{{--                                                    </label>--}}
+{{--                                                </div>--}}
                                                 <div class="form-check form-check-inline mb-0">
                                                     <input class="form-check-input" type="radio" name="order_type"
-                                                        value="2" id="pickup" {{ $address->address_type === 'carryout' ? 'checked' : '' }}>
+                                                        value="2" id="pickup"  checked>
                                                     <label class="form-check-label fs-7 fw-500" for="pickup">
                                                         {{ trans('labels.take_away') }}
                                                     </label>
@@ -84,7 +83,6 @@
 {{--                                                        {{ trans('labels.take_away') }}--}}
 {{--                                                    </label>--}}
 {{--                                                </div>--}}
-                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -132,6 +130,17 @@
                                                     </option>
                                                 </select>
                                             </div>
+                                            <div class="col-12">
+                                                <div class="alert alert-info text-center shadow-sm rounded">
+                                                    <h4 class="mb-1">Branch Selected</h4>
+                                                    <p class="mb-0">
+                                                        You’ve selected <strong>{{ (new App\Helpers\helper)->getBranch()->name }}</strong>
+                                                        as your pickup location for carryout.
+                                                        <br>
+                                                        <a href="{{ route('location') }}" class="text-primary" style="font-size: 13px">Change Branch</a>
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -176,6 +185,14 @@
                                                 placeholder="{{ trans('labels.mobile') }}"
                                                 value="{{ Auth::user() && Auth::user()->type == 2 ? Auth::user()->mobile : old('mobile') }}"
                                                 required>
+                                        </div>
+                                         <div class="col-md-12 mb-3">
+                                            <label for="mobile" class="form-label">{{ trans('labels.address') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <textarea type="text" class="form-control" name="address" id="new_address" rows="6"
+                                                placeholder="{{ trans('labels.address') }}"
+                                                required>{{ Auth::user() && Auth::user()->type == 2 ? Auth::user()->address : old('address') }}</textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -228,9 +245,11 @@
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <select class="form-control form-select" name="state_id" id="state">
+                                                {{-- 
                                                 @foreach($states as $state)
                                                     <option value="{{ $state->name }}" {{ $address->state->id === $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
                                                 @endforeach
+                                                --}}
                                             </select>
                                         </div>
 
@@ -245,47 +264,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card mb-3" id="pickupdiv">
-                                <div class="card-body">
-                                    <div class="heading mb-2 border-bottom">
-                                        <h5>Branch to Pick from</h5>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <select name="delivery_area" id="pickup_area" class="form-select">
-                                                <option value="" data-charge="0">{{ trans('labels.select') }}
-                                                </option>
-                                                @foreach ($branches as $area)
-                                                    <option value="{{ $area->id }}"
-                                                            {{ $area->id == Session::get('branch_id') ? 'selected' : '' }}
-                                                            data-charge="0">{{ $area->name.', '.$area->city.', '.$area->address }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card mb-3" id="shipping_area">
-                                <div class="card-body">
-                                    <div class="heading mb-2 border-bottom">
-                                        <h5>{{ trans('labels.shippingarea') }}</h5>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <select name="delivery_area" id="shipping_delivery_area" class="form-select">
-                                                <option value="" data-charge="0">{{ trans('labels.select') }}
-                                                </option>
-                                                @foreach ($shippingarea as $area)
-                                                    <option value="{{ $area->id }}"
-                                                        data-charge="{{ $area->delivery_charge }}">{{ $area->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
                             <div class="payment-option mb-3 border">
                                 <div class="heading mb-2 border-bottom">
                                     <h2>{{ trans('labels.choose_payment') }}</h2>
@@ -358,10 +337,15 @@
                                         } else {
                                             $discount_amount = 0;
                                         }
-                                        if (session()->has('addressdata')) {
-                                            $grand_total = $order_total - $discount_amount + $totalcarttax;
+                                        if (!empty($discount['totalCartDiscount'])) {
+                                            $discount_offer = $discount['totalCartDiscount'];
                                         } else {
-                                            $grand_total = $order_total - $discount_amount + $totalcarttax;
+                                            $discount_offer = 0;
+                                        }
+                                        if (session()->has('addressdata')) {
+                                            $grand_total = ($order_total - $discount_amount) - $discount_offer + $totalcarttax;
+                                        } else {
+                                            $grand_total = ($order_total - $discount_amount) - $discount_offer + $totalcarttax;
                                         }
                                     @endphp
 
@@ -375,6 +359,17 @@
                                             </div>
                                         </div>
                                     @endif
+                                    @if ($discount_offer > 0)
+                                        <div class="row justify-content-between align-items-center">
+                                            <div class="col-auto"><span>BMSM Offer Discount
+                                                </span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span>- {{ helper::currency_format($discount_offer) }}</span>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     @php
                                         $totalcarttax = 0;
                                     @endphp
@@ -415,6 +410,12 @@
                             <!-- special-instruction -->
                             <div class="special-instruction mb-3 border">
                                 <label class="form-label mb-3 border-bottom pb-2 w-100"
+                                       for="tip">Tip</label>
+                                <input type="number" class="form-control" name="tip" id="tip"
+                                          placeholder="Tip">
+                            </div>
+                            <div class="special-instruction mb-3 border">
+                                <label class="form-label mb-3 border-bottom pb-2 w-100"
                                     for="order_notes">{{ trans('labels.special_instruction') }}</label>
                                 <textarea class="form-control" name="order_notes" id="order_notes" rows="3"
                                     placeholder="{{ trans('labels.special_instruction') }}"></textarea>
@@ -431,6 +432,7 @@
                 <input type="hidden" name="sub_total" id="sub_total" value="{{ $order_total }}">
                 <input type="hidden" name="discount" id="discount" value="{{ $discount_amount }}">
                 <input type="hidden" name="totaltaxamount" id="totaltaxamount" value="{{ $totalcarttax }}">
+                <input type="hidden" name="totalOfferDiscount" id="totalOfferDiscount" value="{{ $discount_offer }}">
                 <input type="hidden" name="tax" id="tax" value="{{ implode('|', $taxArr['rate']) }}">
                 <input type="hidden" name="tax_name" id="tax_name" value="{{ implode('|', $taxArr['tax']) }}">
                 <input type="hidden" name="shipping_charge" id="shipping_charge" value="">
@@ -446,7 +448,7 @@
                 <input type="hidden" name="paymentsuccess" id="paymentsuccess"
                     value="{{ URL::to('/paymentsuccess') }}">
                 <input type="hidden" name="paymentfail" id="paymentfail" value="{{ URL::to('/paymentfail') }}">
-                <input type="hidden" name="continueurl" id="continueurl" value="{{ URL::to('/') }}">
+                <input type="hidden" name="continueurl" id="continueurl" value="{{ helper::branch_route('home') }}">
                 <input type="hidden" name="environment" id="environment" value="{{ env('Environment') }}">
                 <input type="hidden" name="myfatoorahurl" id="myfatoorahurl" value="{{ URL::to('/myfatoorah') }}">
                 <input type="hidden" name="mercadopagourl" id="mercadopagourl"
@@ -591,15 +593,13 @@
     </div>
 @endsection
 @section('scripts')
-    <script src="https://checkout.stripe.com/v2/checkout.js"></script>
-    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://checkout.flutterwave.com/v3.js"></script>
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/checkout.js') }}"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script>
+     <script>
         var select = "{{ trans('labels.select') }}";
         var dateFormat = "{{ helper::appdata()->date_format }}";
         var today = new Date(); // Get today's date
@@ -614,56 +614,31 @@
         // Get today's date in the correct format
         var formattedToday = today.toISOString().split('T')[0];
 
-        flatpickr(".delivery_pickup_date", {
-            dateFormat: dateFormat,
-            enableTime: false,
-            altInput: true,
-            altFormat: dateFormat,
-            minDate: 'today',        // Set the minimum date
-        });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const deliveryDateInput = document.getElementById('delivery_dt');
-            const today = new Date().toISOString().split('T')[0];
-            deliveryDateInput.setAttribute('min', today);
 
-            // Optional: Prevent manual entry of past dates
-            deliveryDateInput.addEventListener('input', function () {
-                if (deliveryDateInput.value < today) {
-                    deliveryDateInput.value = today;
-                }
-            });
+   <script>
+    var serverTime = "{{ now()->format('Y-m-d') }}"; // Get server-side date
+    document.addEventListener('DOMContentLoaded', function () {
+        const deliveryDateInput = document.getElementById('delivery_dt');
+
+        // Ensure min date is set to server time
+        deliveryDateInput.setAttribute('min', serverTime);
+
+        // Prevent past dates
+        deliveryDateInput.addEventListener('input', function () {
+            if (deliveryDateInput.value < serverTime) {
+                deliveryDateInput.value = serverTime;
+            }
         });
-    </script>
+    });
+</script>
+
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const pickupRadio = document.getElementById("pickup");
             const deliveryRadio = document.getElementById("delivery");
-            const pickupDiv = document.getElementById("pickupdiv");
-            const addressDiv = document.getElementById("addressdiv");
 
-            // Function to toggle display
-            function togglePickupCard() {
-                if (pickupRadio.checked) {
-                    pickupDiv.style.display = "block";
-                } else {
-                    pickupDiv.style.display = "none";
-                }
-            }
-            function toggleAddressCard() {
-                if (deliveryRadio.checked) {
-                    pickupDiv.style.display = "none";
-                }
-            }
-
-            // Initial check on page load
-            togglePickupCard();
-            toggleAddressCard();
-
-            // Listen for changes to the radio button
-            pickupRadio.addEventListener("change", togglePickupCard);
-            deliveryRadio.addEventListener("change", toggleAddressCard);
         });
     </script>
 @endsection

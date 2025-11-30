@@ -45,7 +45,24 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="product_id"
+                                                   class="col-form-label">Product <span class="text-danger">*</span> </label>
+                                            <select class="form-control selectpicker w-100" name="product_id"
+                                                    data-live-search="true">
+                                                <option value="">
+                                                    Select Product
+                                                </option>
+                                                @foreach(helper::getItems(true) as $item)
+                                                    <option value="{{ $item->id }}" {{ $addonsdata->product_id ==  $item->id ? 'selected' : '' }}>
+                                                        {{ $item->item_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="col-form-label"
                                                 for="addons_name">{{ trans('labels.addons_name') }} <span

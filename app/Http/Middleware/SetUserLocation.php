@@ -2,49 +2,54 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Branch;
-use App\Models\State;
 use Closure;
 use Illuminate\Http\Request;
-use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Log;
-use Session;
+use App\Models\Branch;
+use Illuminate\Support\Facades\Session;
 
 class SetUserLocation
 {
     public function handle(Request $request, Closure $next)
     {
-        if ($request->routeIs('location') || $request->routeIs('location.store')|| $request->routeIs('location.update') || $request->routeIs('admin.*'))  {
+        // Bypass routes that shouldn’t use branch logic
+        if (
+            $request->routeIs('location') ||
+            $request->routeIs('location.store') ||
+            $request->routeIs('location.update') ||
+            $request->routeIs('admin.*')
+        ) {
             return $next($request);
         }
-        if (!Session::has('branch_id')) {
-            $ip = $request->ip();
-            $ip = $ip != '127.0.0.1' ? trim($ip) : '8.8.8.8'; // Use real IP unless local machine, then fallback
-            if (empty($ip)) {
-                return [
-                    'country' => 'United States',
-                    'countryCode' => 'USD',
-                    'location' => ['country' => ['name' => 'United States', 'code' => 'USD']]
-                ];
-            };
-            $url = env('IP_REG_SERVICE', false) ? "https://api.ipregistry.co/$ip?key=2rlvhidta7b5cmcg" : "http://ip-api.com/json/$ip"; // API URL selection
-            $response = (new Client())->get($url);
-            $response = json_decode($response->getBody(), true); // Decode the JSON response
-            $state = State::where('name', $response['region'])->first(); // Find state by name
 
-            if ($state) {
-                $branch = Branch::where('state_id', $state->id)->first(); // Find branch by state ID
+        // Extract the first URL segment (potential branch slug)
+        $urlSegments = $request->segments();
+        $branchSlug = $urlSegments[0] ?? null;
 
-                if ($branch) {
-                    Session::put('branch_id', $branch->id); // Store branch ID in session
-                } else {
-                    // If branch not found, redirect to location page
-                    return redirect()->route('location');
-                }
+        // 🟢 CASE 1: URL includes a potential branch slug
+        if ($branchSlug) {
+            $branch = Branch::where('slug', $branchSlug)->first();
+
+            if ($branch) {
+                // Valid branch → store it in session
+                Session::put('branch_id', $branch->id);
+                return $next($request);
             } else {
-                return redirect()->route('location'); // Redirect if state not found
+                // Invalid branch → redirect to locations page (301)
+                return redirect()->route('location', [], 301);
             }
         }
-        return $next($request);
+
+        // 🟡 CASE 2: No branch slug in URL
+        // If the session already has a branch, we could redirect to that branch’s slug
+        if (Session::has('branch_id')) {
+            $branch = Branch::find(Session::get('branch_id'));
+            if ($branch) {
+                $newUrl = url("{$branch->slug}/" . ltrim($request->getRequestUri(), '/'));
+                return redirect($newUrl, 301);
+            }
+        }
+
+        // 🚫 Otherwise, no branch found → redirect to location selector
+        return redirect()->route('location', [], 301);
     }
 }

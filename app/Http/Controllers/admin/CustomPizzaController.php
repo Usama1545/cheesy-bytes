@@ -6,6 +6,7 @@ use App\Models\CustomPizza;
 use App\Models\CustomPizzaCrust;
 use App\Models\CustomPizzaSauce;
 use App\Models\CustomPizzaSelectedDipping;
+use App\Models\CustomPizzaSelectedSauces;
 use App\Models\CustomPizzaSelectedTopping;
 use App\Models\CustomPizzaSize;
 use App\Models\CustomPizzaTopping;
@@ -55,6 +56,7 @@ class CustomPizzaController extends Controller
         // Validate the incoming request
         $validated = $request->validate([
             'name' => 'required|string',
+            'label' => 'required|string',
             'price' => 'required|numeric',
             'crust_name' => 'array',
             'crust_name.*' => 'string|nullable',
@@ -82,6 +84,7 @@ class CustomPizzaController extends Controller
         $customPizza = new CustomPizzaSize();
         $customPizza->name = $validated['name'];
         $customPizza->price = $validated['price'];
+        $customPizza->label = $validated['label'];
         $customPizza->save();
 
         // Add crusts
@@ -134,6 +137,7 @@ class CustomPizzaController extends Controller
         $validated = $request->validate([
             'id' => 'required|numeric',
             'name' => 'required|string',
+            'label' => 'required|string',
             'price' => 'required|numeric',
             'crust_name' => 'array',
             'crust_name.*' => 'string|nullable',
@@ -160,6 +164,7 @@ class CustomPizzaController extends Controller
         $customPizza = CustomPizzaSize::find($request->id);
         $customPizza->name = $validated['name'];
         $customPizza->price = $validated['price'];
+        $customPizza->label = $validated['label'];
         $customPizza->save();
 
         $customPizza->crusts()->delete();
@@ -215,78 +220,98 @@ class CustomPizzaController extends Controller
         $crustPrice = $request->crust['price'] ?? 0;
         $totalPrice = $sizePrice + $saucePrice + $crustPrice;
 
-
-        $pizza = CustomPizza::create([
-            'bake' => $request->bake,
-            'cut' => $request->cut,
-            'seasoning' => $request->seasoning,
-            'size_id' => $request->size['id'],
-            'sauce_id' => $request->sauce['id'],
-            'crust_id' => $request->crust['id'],
-        ]);
-        foreach ($request->toppings as $topping) {
-            $toppingData = CustomPizzaTopping::findOrFail($topping['topping_id']);
-            $toppingPrice = $toppingData->price ?? 0;  // Ensure there's a price for the topping
-            $totalPrice += $toppingPrice;  // Add topping price to total price
-
-            CustomPizzaSelectedTopping::create([
-                'topping_id' => $topping['topping_id'],
-                'side' => $topping['side'],
-                'quantity' => $topping['quantity'] ?? 'normal',
-                'pizza_id' => $pizza->id,
+        try {
+            $pizza = CustomPizza::create([
+                'bake' => $request->bake,
+                'cut' => $request->cut,
+                'seasoning' => $request->seasoning,
+                'size_id' => $request->size['id'],
+                'sauce_id' => $request->sauce['id'] ?? 0,
+                'crust_id' => $request->crust['id'],
             ]);
-        }
-        foreach ($request->selectedDippings as $dippingData) {
-            $dipping = Sides::where('name', $dippingData['name'])->first();
-            $dippingPrice = $dipping->price ?? 0;  // Ensure there's a price for the dipping
-            $totalPrice += $dippingPrice;
-            if ($dipping) {
-                CustomPizzaSelectedDipping::create([
-                    'dipping_id' => $dipping->id,
-                    'quantity' => $dippingData['quantity'],
+
+            foreach ($request->toppings as $topping) {
+                $toppingData = CustomPizzaTopping::findOrFail($topping['topping_id']);
+                $toppingPrice = $toppingData->price ?? 0;  // Ensure there's a price for the topping
+                $totalPrice += $toppingPrice;  // Add topping price to total price
+
+                CustomPizzaSelectedTopping::create([
+                    'topping_id' => $topping['topping_id'],
+                    'side' => $topping['side'],
+                    'quantity' => $topping['quantity'] ?? 'normal',
                     'pizza_id' => $pizza->id,
                 ]);
             }
+
+            foreach ($request->sauce as $topping) {
+                $toppingData = CustomPizzaSauce::findOrFail($topping['topping_id']);
+                $toppingPrice = $toppingData->price ?? 0;  // Ensure there's a price for the topping
+                $totalPrice += $toppingPrice;  // Add topping price to total price
+
+                CustomPizzaSelectedSauces::create([
+                    'sauce_id' => $topping['topping_id'],
+                    'side' => $topping['side'],
+                    'quantity' => $topping['quantity'] ?? 'normal',
+                    'pizza_id' => $pizza->id,
+                ]);
+            }
+
+            foreach ($request->selectedDippings as $dippingData) {
+                $dipping = Sides::where('name', $dippingData['name'])->first();
+                $dippingPrice = $dipping->price ?? 0;  // Ensure there's a price for the dipping
+                $totalPrice += $dippingPrice;
+                if ($dipping) {
+                    CustomPizzaSelectedDipping::create([
+                        'dipping_id' => $dipping->id,
+                        'quantity' => $dippingData['quantity'],
+                        'pizza_id' => $pizza->id,
+                    ]);
+                }
+            }
+
+
+            $cart = new Cart();
+            if (Auth::user()) {
+                $cart->user_id = Auth::user()->id;
+                $cart->session_id = "";
+            } else {
+                $cart->user_id = "";
+                $cart->session_id = Session::getId();
+            }
+
+            $cart->custom_pizza_id = $pizza->id;
+            $cart->item_name = $request->size['label'] . ' - ' . $request->crust['name'];
+            $cart->item_type = 2;
+            $cart->item_image = 'item-6742283c7c0ff.png';
+            $cart->item_price = helper::number_format($totalPrice);
+            $cart->extras_price = 0;
+            $cart->extras_total_price = 0;
+            $cart->buynow = 0;
+
+
+            $cart->qty = $request->quantity;
+            $cart->save();
+
+            if (Auth::user()) {
+                $total_count = Cart::where('user_id', Auth::user()->id)->count();
+            } else {
+                $oldsessionid = Session::getId();
+                Session::put('oldsessionid', $oldsessionid);
+                $total_count = Cart::where('session_id', Session::getId())->where('buynow', 0)->count();
+            }
+            session()->forget('discount_data');
+            return response()->json(['status' => 1, 'message' => trans('messages.success'), 'data' => $total_count, 'total_item_count' => helper::get_item_cart($pizza->id)], 200);
+        } catch (\Exception $e)
+        {
+            dd($e->getMessage());
         }
-
-        $cart = new Cart();
-        if (Auth::user()) {
-            $cart->user_id = Auth::user()->id;
-            $cart->session_id = "";
-        } else {
-            $cart->user_id = "";
-            $cart->session_id = Session::getId();
-        }
-
-        $cart->custom_pizza_id = $pizza->id;
-        $cart->item_name = $request->size['label'] . ' - ' . $request->crust['name'];
-        $cart->item_type = 2;
-        $cart->item_image = 'item-6742283c7c0ff.png';
-        $cart->item_price = helper::number_format($totalPrice);
-        $cart->extras_price =  0;
-        $cart->extras_total_price = 0;
-        $cart->buynow = 0;
-
-
-        $cart->qty = $request->quantity;
-        $cart->save();
-
-        if (Auth::user()) {
-            $total_count = Cart::where('user_id', Auth::user()->id)->count();
-        } else {
-            $oldsessionid = Session::getId();
-            Session::put('oldsessionid', $oldsessionid);
-            $total_count = Cart::where('session_id', Session::getId())->where('buynow', 0)->count();
-        }
-        session()->forget('discount_data');
-        return response()->json(['status' => 1, 'message' => trans('messages.success'), 'data' => $total_count, 'total_item_count' => helper::get_item_cart($pizza->id)], 200);
-
 
     }
+
     public function delete(Request $request)
     {
         $category = CustomPizzaSize::where('id', $request->id)->first();
-        if($category){
+        if ($category) {
             $category->delete();
             return 1;
         }

@@ -129,10 +129,10 @@
                                     </div>
                                     @foreach ($getitem['prices'] as $index => $option)
                                         <div class="row data-amenities align-items-center mb-3 col-12" data-index="edit_{{ $index }}">
-                                            <div class="col-md-5">
+                                            <div class="col-md-6 col-lg-6">
                                                 <div class="form-group">
                                                     <label for="size_edit_{{ $index }}" class="col-form-label">
-                                                        Size <span class="text-danger">*</span>
+                                                        Branch <span class="text-danger">*</span>
                                                     </label>
                                                     <select name="prices[edit_{{ $index }}][branch_id]" class="form-control selectpicker" required data-live-search="true" id="size_edit_{{ $index }}">
                                                         @foreach (helper::get_branchs() as $branch)
@@ -151,7 +151,7 @@
                                                     <input type="number"    step="0.01"  name="prices[edit_{{ $index }}][price]" class="form-control" value="{{ $option['price'] }}" placeholder="Price" required id="price_edit_{{ $index }}">
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-lg-2 d-flex align-items-center">
+                                            <div class="col-12 col-lg-1 d-flex align-items-center">
                                                 <button type="button" class="btn btn-outline-danger deleteCrustOption">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
@@ -199,16 +199,16 @@
                                                     {{ trans('labels.add_global_extras') }}</button>
                                             @endif
                                             <button class="btn btn-secondary px-3 mb-sm-0 mb-2" type="button" id="add_extra"
-                                                onclick="more_editextras_fields('{{ trans('labels.name') }}','{{ trans('labels.price') }}')">
+                                                >
                                                 <i class="fa-sharp fa-solid fa-plus"></i> </button>
                                         </div>
                                     </div>
                                     <div id="extras">
                                         @foreach ($getitem['extras'] as $key => $extras)
-                                            <div class="row mb-md-0 mb-2">
+                                            <div class="row extra_rows mb-md-0 mb-2">
                                                 <input type="hidden" class="form-control" name="extras_id[]"
                                                     value="{{ $extras->id }}">
-                                                <div class="col-md-4">
+                                                <div class="col-md-6">
                                                     <div class="form-group">
                                                         @if ($key == 0)
                                                             <label class="col-form-label">{{ trans('labels.name') }}
@@ -219,7 +219,7 @@
                                                             placeholder="{{ trans('labels.name') }}" required>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-6 d-none">
                                                     <div class="form-group">
                                                         @if ($key == 0)
                                                             <label class="col-form-label">{{ trans('labels.price') }}
@@ -233,16 +233,18 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         @if ($key == 0)
                                                             <label class="col-form-label">Branch Id
                                                                 <span class="text-danger"> * </span></label>
                                                         @endif
-                                                        <div class="d-flex gap-2">
-                                                            <select name="extras_branch_id[]" class="form-control selectpicker" required data-live-search="true">
+                                                         <div class="d-flex gap-2">
+                                                            <?php $selected = explode(',', $extras->branch_id); ?>
+                                                            <select name="extras_branch_id[{{ $key }}][]" class="form-control selectpicker" multiple required data-live-search="true">
                                                                 @foreach (helper::get_branchs() as $branch)
-                                                                    <option value="{{ $branch->id }}" {{ $branch->id === $extras->branch_id ? 'selected' : '' }}>
+                                                                    <option value="{{ $branch->id }}"
+                                                                        {{ in_array($branch->id, $selected) ? 'selected' : '' }}>
                                                                         {{ $branch->name.'-'.$branch->city }}
                                                                     </option>
                                                                 @endforeach
@@ -263,12 +265,12 @@
                                                 <div class="col-md-1">
                                                     <div class="form-group">
                                                         <div class="d-flex gap-2">
-                                                            @if (count($getitem['extras']) > 1)
+
                                                                 <button class="btn btn-danger px-3" type="button"
-                                                                        @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="deleteItemExtras('{{ $extras->id }}','{{ $getitem->id }}','{{ URL::to('admin/item/deleteextras') }}')" @endif>
+                                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="deleteItemExtras('{{ $extras->id }}','{{ $getitem->id }}','{{ URL::to('admin/item/deleteextras') }}')" @endif>
                                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                                 </button>
-                                                            @endif
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -276,7 +278,7 @@
                                             <span class="hiddenextrascount d-none">{{ $key }}</span>
                                         @endforeach
                                         <div id="global-extras"></div>
-                                        <div id="more_editextras_fields"></div>
+                                        <div id="more_extras_fields"></div>
                                     </div>
                                 </div>
 
@@ -481,7 +483,7 @@
                 $("#additionalCrustOptions").append(`
                 <div class="row data-amenities mb-3" data-index="${uniqueIndex}">
                     <div class="form-group col-12 col-lg-6 col-md-5">
-                        <label for="size_${uniqueIndex}" class="col-form-label">Size <span class="text-danger">*</span></label>
+                        <label for="size_${uniqueIndex}" class="col-form-label">Branch <span class="text-danger">*</span></label>
                         <select name="prices[${uniqueIndex}][branch_id]" class="form-control selectpicker" required data-live-search="true" id="size_${uniqueIndex}">
                         @foreach (helper::get_branchs() as $branch)
                             <option value="{{ $branch->id }}">
@@ -492,7 +494,7 @@
                     </div>
                     <div class="form-group col-12 col-lg-5 col-md-5">
                         <label for="price_${uniqueIndex}" class="col-form-label">Price <span class="text-danger">*</span></label>
-                        <input type="number" name="prices[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
+                        <input type="number" step="0.01" name="prices[${uniqueIndex}][price]" class="form-control" placeholder="Price" required id="price_${uniqueIndex}">
                     </div>
                     <div class="col-12 col-lg-1 d-flex align-items-center">
                         <button type="button" class="btn btn-outline-danger deleteCrustOption">
@@ -511,7 +513,93 @@
                 crustAdded--;
             });
         });
-        var branches = @json(helper::get_branchs());
+        $(document).ready(function () {
+            // Track the number of extras added
+            let branch_col = $('.extra_rows').length;
+            let extrasAdded = $('.extra_rows').length;
+
+            // Define branch options (assuming branches are passed to the script)
+            const branches = @json(helper::get_branchs());
+
+            const branchOptions = branches.map(branch => {
+                return `<option value="${branch.id}">${branch.name} - ${branch.city}</option>`;
+            }).join('');
+
+            // Handle add extra button click
+            $('#add_extra').on('click', function () {
+
+                extrasAdded++;
+
+                const uniqueIndex = `extra_${extrasAdded}`;
+
+                // Create extra fields dynamically
+                const extraFieldHtml = `
+            <div class="row mb-3 data-extra" data-index="${uniqueIndex}">
+                <!-- Name Field -->
+                <div class="form-group col-12 col-md-6">
+                    <label for="name_${uniqueIndex}" class="col-form-label">{{ trans('labels.name') }} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="extras_name[]" placeholder="{{ trans('labels.name') }}" required id="name_${uniqueIndex}">
+                </div>
+                <!-- Price Field -->
+                <div class="form-group d-none col-12 col-md-3">
+                    <label for="price_${uniqueIndex}" class="col-form-label">{{ trans('labels.price') }} <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" name="extras_price[]" value=0 placeholder="{{ trans('labels.price') }}" required id="price_${uniqueIndex}">
+                </div>
+                <!-- Branch Dropdown -->
+                <div class="form-group col-12 col-md-4">
+                    <label for="branch_${uniqueIndex}" class="col-form-label">Branch <span class="text-danger">*</span></label>
+                    <select class="form-control selectpicker" name="extras_branch_id[${branch_col}][]" id="branch_${uniqueIndex}" multiple required data-live-search="true">
+                        ${branchOptions}
+                    </select>
+                </div>
+                <!-- Default Checkbox -->
+                <div class="form-group col-12 col-md-1 d-flex align-items-center">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="extras_default[]" value="1" id="default_${uniqueIndex}">
+                        <label class="form-check-label" for="extras_default[]">{{ trans('labels.default') }}</label>
+                    </div>
+                </div>
+                <!-- Remove Button -->
+                <div class="col-12 col-md-1 d-flex align-items-center">
+                    <button type="button" class="btn btn-outline-danger deleteExtra" data-index="${uniqueIndex}">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+branch_col++;
+                $('#more_extras_fields').append(extraFieldHtml);
+
+                // Refresh selectpicker for new dropdowns
+                $('.selectpicker').selectpicker('refresh');
+            });
+
+            // Handle removing extra fields
+            $(document).on('click', '.deleteExtra', function () {
+                const index = $(this).data('index');
+                $(`[data-index="${index}"]`).remove();
+                extrasAdded--;
+                branch_col--;
+            });
+
+            // Handle enabling/disabling extras section
+            $('.has_extras').on('change', function () {
+                if ($('#extras_yes').is(':checked')) {
+                    $('#extras').show();
+                } else {
+                    $('#extras').hide();
+                    $('#more_extras_fields').empty(); // Clear all extras fields
+                    extrasAdded = 0;
+                    branch_col = 0;
+                }
+            });
+
+            // Initial state: Hide extras if "no" is selected
+            if ($('#extras_no').is(':checked')) {
+                $('#extras').hide();
+            }
+        });
 
     </script>
 @endsection

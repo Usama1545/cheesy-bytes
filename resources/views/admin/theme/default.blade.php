@@ -130,6 +130,8 @@
             <!-- ASSIGN-DRIVER-MODAL-END -->
             <footer class="py-3 text-center bg-white fixed-bottom border-top">{{ helper::appdata()->copyright }}
             </footer>
+            <button id="enableSound" style="display: none;">Enable Sound</button>
+
         </div>
     </main>
     @include('admin.theme.script')
@@ -141,38 +143,75 @@
         @endforeach
     @endif
     <script type="text/javascript">
-        let are_you_sure = "{{ trans('messages.are_you_sure') }}";
-        let yes = "{{ trans('messages.yes') }}";
-        let no = "{{ trans('messages.no') }}";
-        let wrong = "{{ trans('messages.wrong') }}";
-        let cannot_delete = "{{ trans('messages.cannot_delete') }}";
-        let last_image = "{{ trans('messages.last_image') }}";
-        let record_safe = "{{ trans('messages.record_safe') }}";
-        let select = "{{ trans('labels.select') }}";
-        let variation = "{{ trans('labels.variation') }}";
-        let enter_variation = "{{ trans('labels.variation') }}";
-        let product_price = "{{ trans('labels.product_price') }}";
-        let enter_product_price = "{{ trans('labels.product_price') }}";
-        let sale_price = "{{ trans('labels.sale_price') }}";
-        let enter_sale_price = "{{ trans('labels.sale_price') }}";
+    let are_you_sure = "{{ trans('messages.are_you_sure') }}";
+    let yes = "{{ trans('messages.yes') }}";
+    let no = "{{ trans('messages.no') }}";
+    let wrong = "{{ trans('messages.wrong') }}";
+    let cannot_delete = "{{ trans('messages.cannot_delete') }}";
+    let last_image = "{{ trans('messages.last_image') }}";
+    let record_safe = "{{ trans('messages.record_safe') }}";
+    let select = "{{ trans('labels.select') }}";
+    let variation = "{{ trans('labels.variation') }}";
+    let enter_variation = "{{ trans('labels.variation') }}";
+    let product_price = "{{ trans('labels.product_price') }}";
+    let enter_product_price = "{{ trans('labels.product_price') }}";
+    let sale_price = "{{ trans('labels.sale_price') }}";
+    let enter_sale_price = "{{ trans('labels.sale_price') }}";
 
-        function currency_format(price) {
-            if ("{{ @helper::appdata()->currency_position }}" == 1) {
-                return "{{ @helper::appdata()->currency }}" + parseFloat(price).toFixed(2);
-            } else {
-                return parseFloat(price).toFixed(2) + "{{ @helper::appdata()->currency }}";
+    function currency_format(price) {
+        if ("{{ @helper::appdata()->currency_position }}" == 1) {
+            return "{{ @helper::appdata()->currency }}" + parseFloat(price).toFixed(2);
+        } else {
+            return parseFloat(price).toFixed(2) + "{{ @helper::appdata()->currency }}";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let isAudioEnabled = false;
+
+        function enableAudio() {
+            if (audioContext.state === "suspended") {
+                audioContext.resume().then(() => {
+                    console.log("Audio enabled");
+                    isAudioEnabled = true;
+                });
             }
         }
+
+        // Listen for user interaction to enable autoplay
+        document.addEventListener("click", enableAudio, { once: true });
+        document.addEventListener("keydown", enableAudio, { once: true });
+        document.addEventListener("scroll", enableAudio, { once: true });
+
+        // If tab is inactive, ensure audio starts when it becomes active
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                enableAudio();
+            }
+        });
+
+        function playNotificationSound(audioFile) {
+            let audio = new Audio(audioFile);
+            audio.play().then(() => {
+                console.log("Sound played successfully.");
+            }).catch(error => {
+                console.error("Audio play error:", error);
+            });
+        }
+
         toastr.options = {
             "closeButton": true,
             "progressBar": true
-        }
+        };
+
         @if (Session::has('success'))
             toastr.success("{{ session('success') }}");
         @endif
         @if (Session::has('error'))
             toastr.error("{{ session('error') }}");
         @endif
+
         // New Notification
         var noticount = 0;
         (function noti() {
@@ -181,32 +220,35 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 url: "{{ url('admin/getorder') }}",
-                method: 'GET', //Get method,
+                method: 'GET',
                 dataType: "json",
                 success: function(response) {
-                    noticount = localStorage.getItem("count");
+                    noticount = localStorage.getItem("count") || 0;
+
                     if (response.count > 9) {
                         $('#notificationcount').text(response.count + "+");
                     } else {
                         $('#notificationcount').text(response.count);
                     }
-                    if (response.count != 0) {
-                        if (noticount != response.count) {
-                            localStorage.setItem("count", response.count);
-                            jQuery("#order-modal").modal('show');
-                            var audio = new Audio(
-                                "{{ asset('admin-assets/notification/') }}" + "/" + response.noti
-                            );
-                            audio.play();
-                        }
+
+                    if (response.count != 0 && noticount != response.count) {
+                        localStorage.setItem("count", response.count);
+                        jQuery("#order-modal").modal('show');
+
+                        let audioFile = "{{ asset('admin-assets/notification/') }}" + "/" + response.noti;
+                        console.log("New Order Detected. Playing Sound:", audioFile);
+                        playNotificationSound(audioFile);
                     } else {
                         localStorage.setItem("count", response.count);
                     }
-                    setTimeout(noti, 5000);
+
+                    setTimeout(noti, 30000);
                 }
             });
         })();
-    </script>
+    });
+</script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/common.js') }}"></script><!-- Common JS -->
     @yield('script')
