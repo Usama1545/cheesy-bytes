@@ -8,6 +8,8 @@ use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\DealController;
+use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\UserController;
 
 Route::post('/print-job/{jobId}/acknowledge', [PrintController::class, 'acknowledgePrintJob']);
 Route::get('/fetch-job', [PrintController::class, 'fetchPrintJob']);
@@ -22,35 +24,6 @@ Route::get('/config', function () {
     return 'Config cached successfully!';
 });
 
-Route::get('fix-slug', function () {
-    $items = Item::orderBy('id')->get();
-    $existingSlugs = [];
-
-    foreach ($items as $item) {
-        $baseSlug = Str::slug($item->item_name);
-        $slug = $baseSlug;
-        $i = 1;
-
-        // Ensure uniqueness
-        while (
-            Item::where('slug', $slug)->where('id', '!=', $item->id)->exists() ||
-            in_array($slug, $existingSlugs)
-        ) {
-            $slug = $baseSlug . '-' . $i;
-            $i++;
-        }
-
-        // Only update if slug actually changed
-        if ($item->slug !== $slug) {
-            $item->slug = $slug;
-            $item->save();
-            $existingSlugs[] = $slug;
-        }
-    }
-
-    return redirect()->back()->with('success', trans('messages.success') . ' - Slugs fixed.');
-});
-
 Route::get('branches', [SiteController::class, 'branches']);
 Route::get('home-items', [SiteController::class, 'homeItems']);
 Route::get('categories', [SiteController::class, 'categories']);
@@ -60,4 +33,26 @@ Route::get('pizza-item-details/{slug}', [SiteController::class, 'pizzadetails'])
 Route::get('deals', [DealController::class, 'deals']);
 Route::get('/show-deal-item/{slug}', [DealController::class, 'showDealitem']);
 Route::get('deal-items/{dealId}', [DealController::class, 'dealItems']);
+
+// Public User Routes (No Authentication Required)
+Route::post('/register', [UserController::class, 'create']);
+Route::post('/verify-otp', [UserController::class, 'verifyotp']);
+Route::post('/resend-otp', [UserController::class, 'resendotp']);
+Route::post('/login', [UserController::class, 'checklogin']);
+Route::post('/forgot-password', [UserController::class, 'sendpass']);
+
+// Protected User Routes (Authentication Required)
+// Using auth:sanctum for token-based API authentication
+Route::middleware(['auth:sanctum'])->group(function () {
+    
+Route::get('favoriteItems', [FavoriteController::class, 'index']);
+Route::post('managefavorite', [FavoriteController::class, 'toggle']);
+    Route::get('/profile', [UserController::class, 'getProfile']);
+    Route::post('/profile/update', [UserController::class, 'editprofile']);
+    Route::get('/profile/send-email-status', [UserController::class, 'send_email_status']);
+    Route::get('/refer-earn', [UserController::class, 'referearn']);
+    Route::post('/changepassword', [UserController::class, 'updatepassword']);
+    Route::post('/logout', [UserController::class, 'logout']);
+});
+
 
