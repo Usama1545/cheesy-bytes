@@ -185,6 +185,13 @@ class helper
         }
     }
 
+    public static function toPipeString($value) {
+        if (is_array($value)) {
+            return implode('|', array_filter($value, fn($v) => $v !== null && $v !== ''));
+        }
+        return $value ?: null;
+    }
+
     public static function referral($email, $name, $toname, $referralmessage)
     {
         $data = ['title' => trans('labels.referral_earning'), 'email' => $email, 'name' => $name, 'toname' => $toname, 'logo' => helper::image_path(@helper::appdata()->logo), 'referralmessage' => $referralmessage];

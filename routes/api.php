@@ -25,9 +25,11 @@ Route::get('/config', function () {
 });
 
 Route::get('branches', [SiteController::class, 'branches']);
-Route::get('home-items', [SiteController::class, 'homeItems']);
-Route::get('categories', [SiteController::class, 'categories']);
-Route::get('category-items/{slug}', [SiteController::class, 'categoryItems']);
+Route::get('home-items', [SiteController::class, 'homeItems'])
+    ->middleware('auth:sanctum');
+
+Route::get('categories', [SiteController::class, 'categories']);Route::get('categories', [SiteController::class, 'categories']);
+Route::get('category-items/{slug}', [SiteController::class, 'categoryItems'])->middleware('auth:sanctum');
 Route::get('item-details/{slug}', [SiteController::class, 'ItemDetails']);
 Route::get('pizza-item-details/{slug}', [SiteController::class, 'pizzadetails']);
 Route::get('deals', [DealController::class, 'deals']);
@@ -40,6 +42,11 @@ Route::post('/verify-otp', [UserController::class, 'verifyotp']);
 Route::post('/resend-otp', [UserController::class, 'resendotp']);
 Route::post('/login', [UserController::class, 'checklogin']);
 Route::post('/forgot-password', [UserController::class, 'sendpass']);
+Route::post('add-to-cart', [SiteController::class, 'addToCart']);
+Route::post('add-pizza-cart', [SiteController::class, 'addPizzaToCart']);
+Route::post('get-cart-items', [SiteController::class, 'getCartItems']);
+Route::post('update-cart-item', [SiteController::class, 'updateCartItem']);
+Route::post('remove-cart-item', [SiteController::class, 'removeCartItem']);
 
 // Protected User Routes (Authentication Required)
 // Using auth:sanctum for token-based API authentication

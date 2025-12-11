@@ -9,7 +9,6 @@ use App\Models\user;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Models\DealItem;
 use App\Models\itemPrice;
 use App\Models\PizzaPrice;
 use App\Models\ProductSizeCrust;
@@ -23,7 +22,6 @@ use App\Models\Category;
 use App\Models\AddonsGroup;
 use App\Models\Extra;
 use App\Models\DealCategory;
-use App\Models\Ratting;
 use Illuminate\Support\Facades\Hash;
 
 class SiteController extends Controller
@@ -37,7 +35,9 @@ class SiteController extends Controller
     public function homeItems(Request $request)
     {
         $branchId = $request->branch_id;
-
+        $user = auth()->user();
+        $userId = Auth::id();
+        // dd($userId);
         if (!$branchId) {
             return response()->json([
                 'status'  => false,
@@ -45,7 +45,6 @@ class SiteController extends Controller
             ], 400);
         }
 
-        $userId    = Auth::id();
         $sessionId = $request->header('X-Session-Id'); // optional fallback for guests
 
         /* -----------------------------
