@@ -27,4 +27,9 @@ class Order extends Model
         return $this->hasOne(Shippingarea::class, 'id', 'delivery_area');
     }
 
+    public function items()
+    {
+        return $this->hasMany(OrderDetails::class, 'order_id', 'id');
+    }
+
 }

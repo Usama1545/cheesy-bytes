@@ -8,7 +8,7 @@ use App\Helpers\sms_helper;
 use App\Models\User;
 use App\Models\Cart;
 use App\Models\OTPConfiguration;
-use App\Models\SystemAddons;
+use App\Models\Order;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -599,6 +599,73 @@ class UserController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Logged out successfully'
+        ]);
+    }
+
+    public function getOrders(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+        $getorders = Order::with('user_info', 'items')->where('user_id', $user->id)->get();
+
+        $getorders = $getorders->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'branch_id' => $order->branch_id,
+                'status' => $order->status,
+                'grand_total' => (float)$order->grand_total,
+                'discount_amount' => (float)$order->discount_amount,
+                'tax_amount' => (float)$order->tax_amount,
+                'tip' => (float)$order->tip,
+                'payment_status' => $order->payment_status == 2 ? 'paid' : 'unpaid',
+                'payment_method' => $order->transaction_type == 15 ? 'card' : ($order->transaction_type == 1 ? 'cod' : 'unknown'),
+                'order_notes' => $order->order_notes,
+                'pickup_date' => $order->delivery_date,
+                'pickup_time' => $order->delivery_time,
+                'created_at' => $order->created_at,
+                'updated_at' => $order->updated_at,
+                'items' => $order->items->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'item_id' => $item->item_id,
+                        'item_name' => $item->item_name,
+                        'item_image' => json_decode($item->item_image, true)['image_url'] ?? null,
+                        'quantity' => (int)$item->qty,
+                        'unit_price' => (float)$item->item_price,
+                        'item_total' => ((float)$item->item_price + (float)$item->addons_total_price) * (int)$item->qty,
+                        'addons' => $item->addons_id ? array_map(function($id, $name, $price) {
+                            return [
+                                'id' => $id,
+                                'name' => $name,
+                                'price' => (float)$price
+                            ];
+                        }, 
+                        explode('|', $item->addons_id),
+                        explode('|', $item->addons_name),
+                        explode('|', $item->addons_price)) : [],
+                        'addons_total' => (float)$item->addons_total_price,
+                        'special_instructions' => $item->special_instructions
+                    ];
+                }),
+                'summary' => [
+                    'subtotal' => (float)$order->grand_total - (float)$order->tax_amount - (float)$order->delivery_charge - (float)$order->tip + (float)$order->discount_amount,
+                    'tax' => (float)$order->tax_amount,
+                    'discount' => (float)$order->discount_amount,
+                    'delivery_charge' => (float)$order->delivery_charge,
+                    'tip' => (float)$order->tip,
+                    'grand_total' => (float)$order->grand_total
+                ]
+            ];
+        });
+        return response()->json([
+            'status' => true,
+            'data' => $getorders
         ]);
     }
 

@@ -453,6 +453,11 @@ class helper
         return Payment::select('environment', 'public_key', 'secret_key', 'currency')->where('branch_id', $branchId)->where('payment_type', '=', 15)->where('is_available', 1)->first();
     }
 
+    public static function branch_stripe_data($branchId)
+    {
+        return Payment::select('environment', 'public_key', 'secret_key', 'currency')->where('branch_id', $branchId)->where('payment_type', '=', 15)->where('is_available', 1)->first();
+    }
+
     public static function branch_route($name, $parameters = [], $absolute = true)
     {
         $parameters['branch'] = request()->segment(1); // Add the branch slug dynamically
@@ -466,6 +471,108 @@ class helper
         } else {
             return 0;
         }
+    }
+
+    public static function calculateCouponDiscount($cartData, $code, $userId = null)
+    {
+        $currentDate = date('Y-m-d');
+        $currentTime = Carbon::now()->format('H:i:s');
+
+        $checkoffercode = Promocode::where('offer_code', $code)
+            ->where('is_available', 1)
+            ->first();
+
+        if (!$checkoffercode) {
+            return 0; // Invalid coupon
+        }
+
+        // Get cart items
+        $validCartItems = $cartData->map(function ($cartItem) {
+            $item = Item::find($cartItem->item_id);
+            if ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'cat_id' => $item->cat_id,
+                    'cart_quantity' => $cartItem->qty,
+                    'addons_total_price' => $cartItem->addons_total_price,
+                    'item_price' => $cartItem->item_price,
+                    'extras_total_price' => $cartItem->extras_total_price,
+                ];
+            }
+            return null;
+        })->filter();
+        
+        // Check categories and products
+        $allowedCategories = !empty($checkoffercode->category_ids) ? 
+            explode(',', $checkoffercode->category_ids) : [];
+        $excludedProducts = !empty($checkoffercode->product_ids) ? 
+            explode(',', $checkoffercode->product_ids) : [];
+        
+        // Filter valid items
+        $validItems = $validCartItems->filter(function ($cartItem) use ($allowedCategories, $excludedProducts) {
+            $categoryAllowed = empty($allowedCategories) || in_array($cartItem->cat_id, $allowedCategories);
+            $productNotExcluded = empty($excludedProducts) || !in_array($cartItem->id, $excludedProducts);
+            return $categoryAllowed && $productNotExcluded;
+        });
+
+        if ($validItems->isEmpty()) {
+            return 0; // Not applicable
+        }
+
+        // Check dates
+        if (!($currentDate >= $checkoffercode->start_date && $currentDate <= $checkoffercode->expire_date)) {
+            return 0; // Expired
+        }
+
+        // Check times
+        if (($checkoffercode->start_time && $currentTime < $checkoffercode->start_time) ||
+            ($checkoffercode->end_time && $currentTime > $checkoffercode->end_time)) {
+            return 0; // Not in valid time
+        }
+
+        // Calculate valid amount
+        $validOrderAmount = $validItems->sum(fn($item) => 
+            ($item->item_price + $item->addons_total_price + $item->extras_total_price) * $item->cart_quantity
+        );
+
+        // Check minimum amount
+        if ($checkoffercode->min_amount > 0 && $validOrderAmount < $checkoffercode->min_amount) {
+            return 0; // Minimum amount not met
+        }
+
+        // Check usage limit
+        if ($checkoffercode->usage_limit > 0) {
+            $usageCount = Order::where('offer_code', $code)->count();
+            if ($usageCount >= $checkoffercode->usage_limit) {
+                return 0; // Usage limit reached
+            }
+        }
+
+        // Check per-user usage
+        if ($checkoffercode->usage_type == 1 && $userId) {
+            $userUsageCount = Order::where('offer_code', $code)
+                ->where('user_id', $userId)
+                ->count();
+            if ($userUsageCount > 0) {
+                return 0; // Already used by user
+            }
+        }
+
+        // Calculate discount
+        if ($checkoffercode->offer_type == 1) {
+            // Fixed amount
+            $offer_amount = min($checkoffercode->offer_amount, $validOrderAmount);
+        } else {
+            // Percentage
+            $offer_amount = ($validOrderAmount * $checkoffercode->offer_amount) / 100;
+            
+            // Apply max limit
+            if ($checkoffercode->max_discount > 0) {
+                $offer_amount = min($offer_amount, $checkoffercode->max_discount);
+            }
+        }
+
+        return round($offer_amount, 2);
     }
 
     public static function check_restaurant_closed()
@@ -1073,6 +1180,154 @@ class helper
     public static function calculateDiscount($cart)
     {
         $branchId = Session::get('branch_id');
+        $currentDateTime = now(); // Get the current date and time
+
+        $cartDiscountMessage = '';
+        $totalCartDiscount = 0;
+        // Step 1: Group cart items by deal_id (skip nulls)
+        $groupedByDeal = $cart->filter(fn($item) => $item->deal_id !== null)
+            ->groupBy('deal_id');
+
+        if ($groupedByDeal->isNotEmpty()){
+
+            // Step 2: Identify if any product-based BMSM deal exists
+            $productBasedDealExists = false;
+
+            foreach ($groupedByDeal as $dealId => $items) {
+                if (!$dealId) continue;
+
+                $deal = TopDeals::where('id', $dealId)
+                    ->where('deal_type', 4)
+                    ->where('bmsm_deal_type', 1) // product-based
+                    ->first();
+
+                if ($deal) {
+                    $productBasedDealExists = true;
+                    break;
+                }
+            }
+
+            // Step 3: Now loop again and apply only one type of deal
+            foreach ($groupedByDeal as $dealId => $items) {
+                if (!$dealId) continue;
+
+                $deal = TopDeals::with('bmsmTiers')
+                    ->where('id', $dealId)
+                    ->where('deal_type', 4)
+                    ->first();
+
+                if (!$deal || $deal->bmsmTiers->isEmpty()) continue;
+
+                // Rule: If a product-based deal exists, skip cart-total-based
+                if ($productBasedDealExists && $deal->bmsm_deal_type == 2) {
+                    continue;
+                }
+
+                $discountAmount = 0;
+
+                // === PRODUCT-BASED ===
+                if ($deal->bmsm_deal_type == 1) {
+                    $totalQty = $items->sum('qty');
+                    $totalPrice = $items->sum(function ($item) {
+                        return ($item->item_price + $item->addons_total_price) * $item->qty;
+                    });
+
+                    $bestTier = $deal->bmsmTiers
+                        ->sortByDesc('min_qty')
+                        ->firstWhere('min_qty', '<=', $totalQty);
+
+                    if ($bestTier) {
+                        if ($deal->offer_type == 2) {
+                            $discountAmount = ($bestTier->discount_value / 100) * $totalPrice;
+                            $cartDiscountMessage = "🎉 Hurray! You received {$bestTier->discount_value}% discount on your cart.";
+                        } else {
+                            $discountAmount = $bestTier->discount_value;
+                            $cartDiscountMessage = "🎉 Hurray! You saved $" . number_format($discountAmount, 2) . " on your cart.";
+                        }
+                    }
+                } // === CART-TOTAL-BASED ===
+
+                // Apply only the first valid discount (either product-based or cart-total)
+                if ($discountAmount > 0) {
+                    $totalCartDiscount = $discountAmount;
+                    break;
+                }
+            }
+        }else {
+            $deals = TopDeals::with('bmsmTiers', 'product')
+                ->join('item', 'top_deals.product_id', '=', 'item.id')
+                ->where('deal_type', 4) // ✅ BMSM type
+                ->where(function ($query) use ($currentDateTime) {
+                    $query->where('start_date', '<=', $currentDateTime->toDateString())
+                        ->where('end_date', '>=', $currentDateTime->toDateString());
+                })
+                ->where(function ($query) use ($currentDateTime) {
+                    $query->where('start_time', '<=', $currentDateTime->toTimeString())
+                        ->where('end_time', '>=', $currentDateTime->toTimeString());
+                })
+                ->where(function ($query) use ($branchId) {
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%")
+                        ->orWhere('item.branch_ids', 'like', "$branchId,%")
+                        ->orWhere('item.branch_ids', 'like', "%,$branchId")
+                        ->orWhere('item.branch_ids', '=', $branchId);
+                })
+                ->select('top_deals.*')
+                ->orderBy('top_deals.order', 'asc')
+                ->get(); // Changed from first() to get()
+
+            $totalCartDiscount = 0;
+            $bestDeal = null;
+            $bestDiscount = 0;
+            $cartDiscountMessage = '';
+
+            if ($deals->isNotEmpty()) {
+                $totalCartPrice = $cart->sum(function ($item) {
+                    return ($item->item_price + $item->addons_total_price) * $item->qty;
+                });
+
+                foreach ($deals as $deal) {
+                    if ($deal->bmsm_deal_type == 2) {
+                        $bestTier = $deal->bmsmTiers
+                            ->sortByDesc('min_qty')
+                            ->firstWhere('min_qty', '<=', $totalCartPrice);
+
+                        if ($bestTier) {
+                            if ($deal->offer_type == 2) {
+                                $discountAmount = ($bestTier->discount_value / 100) * $totalCartPrice;
+                            } else {
+                                $discountAmount = $bestTier->discount_value;
+                            }
+
+                            // Track the best deal
+                            if ($discountAmount > $bestDiscount) {
+                                $bestDiscount = $discountAmount;
+                                $bestDeal = $deal;
+                                $bestTierFound = $bestTier;
+                            }
+                        }
+                    }
+                }
+
+                // Apply only the best deal
+                if ($bestDeal) {
+                    $totalCartDiscount = $bestDiscount;
+                    if ($bestDeal->offer_type == 2) {
+                        $cartDiscountMessage = "🎉 Hurray! You received {$bestTierFound->discount_value}% discount on your cart.";
+                    } else {
+                        $cartDiscountMessage = "🎉 Hurray! You saved $" . number_format($bestDiscount, 2) . " on your cart.";
+                    }
+                }
+            }
+
+        }
+        return [
+            'totalCartDiscount' => $totalCartDiscount,
+            'cartDiscountMessage' => $cartDiscountMessage
+        ];
+    }
+
+    public static function calculateDiscountOnApi($cart, $branchId)
+    {
         $currentDateTime = now(); // Get the current date and time
 
         $cartDiscountMessage = '';

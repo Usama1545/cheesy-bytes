@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\Api\SiteController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DealController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\UserController;
@@ -25,11 +27,11 @@ Route::get('/config', function () {
 });
 
 Route::get('branches', [SiteController::class, 'branches']);
-Route::get('home-items', [SiteController::class, 'homeItems'])
-    ->middleware('auth:sanctum');
+Route::get('sliders', [SiteController::class, 'sliders']);
+Route::get('home-items', [SiteController::class, 'homeItems']);
 
 Route::get('categories', [SiteController::class, 'categories']);Route::get('categories', [SiteController::class, 'categories']);
-Route::get('category-items/{slug}', [SiteController::class, 'categoryItems'])->middleware('auth:sanctum');
+Route::get('category-items/{slug}', [SiteController::class, 'categoryItems']);
 Route::get('item-details/{slug}', [SiteController::class, 'ItemDetails']);
 Route::get('pizza-item-details/{slug}', [SiteController::class, 'pizzadetails']);
 Route::get('deals', [DealController::class, 'deals']);
@@ -42,24 +44,29 @@ Route::post('/verify-otp', [UserController::class, 'verifyotp']);
 Route::post('/resend-otp', [UserController::class, 'resendotp']);
 Route::post('/login', [UserController::class, 'checklogin']);
 Route::post('/forgot-password', [UserController::class, 'sendpass']);
-Route::post('add-to-cart', [SiteController::class, 'addToCart']);
-Route::post('add-pizza-cart', [SiteController::class, 'addPizzaToCart']);
-Route::post('get-cart-items', [SiteController::class, 'getCartItems']);
-Route::post('update-cart-item', [SiteController::class, 'updateCartItem']);
-Route::post('remove-cart-item', [SiteController::class, 'removeCartItem']);
+Route::post('add-to-cart', [CartController::class, 'addToCart']);
+Route::post('add-pizza-cart', [CartController::class, 'addPizzaToCart']);
+Route::get('get-cart-items', [CartController::class, 'index']);
+Route::post('update-cart-item', [CartController::class, 'qtyupdate']);
+Route::post('remove-cart-item', [CartController::class, 'removeCartItem']);
+Route::get('checkout', [CheckoutController::class, 'index']);
+Route::post('checkout/placeorder', [CheckoutController::class, 'placeOrder']);
+Route::get('checkout/paymentSuccess/{order_id}', [CheckoutController::class, 'paymentSuccess']);
+Route::post('timeslot', [CheckoutController::class, 'timeslot']);
 
 // Protected User Routes (Authentication Required)
 // Using auth:sanctum for token-based API authentication
 Route::middleware(['auth:sanctum'])->group(function () {
     
+Route::get('orders', [UserController::class, 'getOrders']);
 Route::get('favoriteItems', [FavoriteController::class, 'index']);
 Route::post('managefavorite', [FavoriteController::class, 'toggle']);
-    Route::get('/profile', [UserController::class, 'getProfile']);
-    Route::post('/profile/update', [UserController::class, 'editprofile']);
-    Route::get('/profile/send-email-status', [UserController::class, 'send_email_status']);
-    Route::get('/refer-earn', [UserController::class, 'referearn']);
-    Route::post('/changepassword', [UserController::class, 'updatepassword']);
-    Route::post('/logout', [UserController::class, 'logout']);
+Route::get('/profile', [UserController::class, 'getProfile']);
+Route::post('/profile/update', [UserController::class, 'editprofile']);
+Route::get('/profile/send-email-status', [UserController::class, 'send_email_status']);
+Route::get('/refer-earn', [UserController::class, 'referearn']);
+Route::post('/changepassword', [UserController::class, 'updatepassword']);
+Route::post('/logout', [UserController::class, 'logout']);
 });
 
 

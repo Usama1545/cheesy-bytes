@@ -21,6 +21,7 @@ use App\Helpers\helper;
 use App\Models\Category;
 use App\Models\AddonsGroup;
 use App\Models\Extra;
+use App\Models\Slider;
 use App\Models\DealCategory;
 use Illuminate\Support\Facades\Hash;
 
@@ -35,8 +36,8 @@ class SiteController extends Controller
     public function homeItems(Request $request)
     {
         $branchId = $request->branch_id;
-        $user = auth()->user();
-        $userId = Auth::id();
+        $user = auth('sanctum')->user();
+        $userId = auth('sanctum')->user()->id ?? null;
         // dd($userId);
         if (!$branchId) {
             return response()->json([
@@ -246,7 +247,7 @@ class SiteController extends Controller
             ], 400);
         }
 
-        $userId    = Auth::id();
+        $userId    = auth('sanctum')->user()->id;
         $sessionId = $request->header('X-Session-Id'); // guest cart fallback
 
         /* -----------------------------------------------------
@@ -348,7 +349,7 @@ class SiteController extends Controller
     }
 
     public function ItemDetails(Request $request, $slug) {
-        $user_id  = Auth::id();
+        $user_id  = auth('sanctum')->user()->id;
         $branchId = $request->branch_id;
 
         if (!$branchId) {
@@ -610,7 +611,7 @@ class SiteController extends Controller
 
     public function deals(Request $request)
     {
-        $user_id = @Auth::user()->id;
+        $user_id = auth('sanctum')->user()->id;
         $branchId = $request->branch_id;
 
         $sessionId = $user_id ?? $request->header('X-Session-Id');
@@ -682,5 +683,18 @@ class SiteController extends Controller
 
 
         return ['response' => $mapped];
+    }
+
+    public function sliders(Request $request)
+    {
+        $sliders = Slider::with('item_info', 'category_info')->where('branch_id', $request->branch_id)->where('is_available', 1)->orderByDesc('id')->get();
+        return response()->json([
+            'status' => true,
+            'data' => $sliders->map(function ($slider) {
+                return [
+                   'image' => helper::image_path($slider->image),
+                ];
+            })
+        ]);
     }
 }

@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\log;
 
 class CartController extends Controller
 {
-        public function addtocart(Request $request)
+    public function addtocart(Request $request)
     {
         // Validate required fields
         $validated = $request->validate([
@@ -31,13 +31,13 @@ class CartController extends Controller
             'item_price' => 'required|numeric|min:0',
         ]);
 
-        // Get session ID from header (required for API)
         $sessionId = $request->header('X-Session-Id');
+        $userId = auth('sanctum')->user()->id ??  null;
         
-        if (!$sessionId) {
+        if (!$userId && !$sessionId) {
             return response()->json([
                 'status' => 0,
-                'message' => 'Session ID is required. Please provide X-Session-Id header.',
+                'message' => 'Please login or provide Session ID. Please provide X-Session-Id header.',
                 'buynow' => $request->buynow ?? 0
             ], 400);
         }
@@ -47,8 +47,8 @@ class CartController extends Controller
         try {
             // Handle buynow clearance
             if ($request->buynow == 1) {
-                if (Auth::user() && Auth::user()->type == 2) {
-                    Cart::where('buynow', 1)->where('user_id', Auth::user()->id)->delete();
+                if (auth('sanctum')->user() && auth('sanctum')->user()->type == 2) {
+                    Cart::where('buynow', 1)->where('user_id', auth('sanctum')->user()->id)->delete();
                 } else {
                     Cart::where('buynow', 1)->where('session_id', $sessionId)->delete();
                 }
@@ -96,7 +96,7 @@ class CartController extends Controller
                     }
 
                     // Base cart query
-                    $cartQuery = Auth::check() && Auth::user()->type == 2
+                    $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
                         ? Cart::where('user_id', Auth::id())
                         : Cart::where('session_id', $sessionId);
 
@@ -161,20 +161,25 @@ class CartController extends Controller
                     }
                 }
             }
+            // Default empty values
+            $addonIds     = [];
+            $extraIds     = [];
+
+            $addonsIds    = '';
+            $addonsNames  = '';
+            $addonsPrices = '';
+
+            $extrasIds    = '';
+            $extrasNames  = '';
+            $extrasPrices = '';
 
             // Validate addons/extras if provided
             if ($request->has('addons_id')) {
-                // Handle both array and string formats
-    
-                $addonIds = $request->addons_id;
-                // Convert to array and filter out empty values
-                $addonIds = array_filter($addonIds, function($id) {
-                    return !empty($id) && $id !== '';
-                });
-                
+                $addonIds = $request->addons_id ?? [];
+                $addonIds = is_array($addonIds) ? $addonIds : [$addonIds];
+                $addonIds = array_filter($addonIds, fn($id) => !empty($id));
                 if (!empty($addonIds)) {
                     $validAddons = Addons::whereIn('id', $addonIds)->count();
-                    
                     if ($validAddons != count(array_unique($addonIds))) {
                         return response()->json([
                             'status' => 0,
@@ -186,20 +191,11 @@ class CartController extends Controller
             }
 
             if ($request->has('extras_id')) {
-                // Handle both array and string formats
-              
-                    $extraIds = $request->extras_id;
-                
-                
-                // Convert to array and filter out empty values
+                $extraIds = $request->extras_id ?? [];
                 $extraIds = is_array($extraIds) ? $extraIds : [$extraIds];
-                $extraIds = array_filter($extraIds, function($id) {
-                    return !empty($id) && $id !== '';
-                });
-                
+                $extraIds = array_filter($extraIds, fn($id) => !empty($id));
                 if (!empty($extraIds)) {
                     $validExtras = Extra::whereIn('id', $extraIds)->count();
-                    
                     if ($validExtras != count(array_unique($extraIds))) {
                         return response()->json([
                             'status' => 0,
@@ -209,23 +205,30 @@ class CartController extends Controller
                     }
                 }
             }
+            if (!empty($addonIds)) {
+                $addons        = Addons::whereIn('id', $addonIds)->get();
+                $addonsIds     = $addons->pluck('id')->implode('|');
+                $addonsNames   = $addons->pluck('name')->implode('|');
+                $addonsPrices  = $addons->pluck('price')->implode('|');
+            }
 
-            // Create cart item
+            if (!empty($extraIds)) {
+                $extras        = Extra::whereIn('id', $extraIds)->get();
+                $extrasIds     = $extras->pluck('id')->implode('|');
+                $extrasNames   = $extras->pluck('name')->implode('|');
+                $extrasPrices  = $extras->pluck('price')->implode('|');
+            }
+
+
+              // Create cart item
             $cart = new Cart();
-            if (Auth::user() && Auth::user()->type == 2) {
-                $cart->user_id = Auth::user()->id;
+            if (auth('sanctum')->user() && auth('sanctum')->user()->type == 2) {
+                $cart->user_id = auth('sanctum')->user()->id;
                 $cart->session_id = "";
             } else {
                 $cart->user_id = "";
                 $cart->session_id = $sessionId;
             }
-
-            $addonsIds    = helper::toPipeString($request->addons_id);          // "1|3|5"
-            $addonsNames  = helper::toPipeString($request->addons_name);        // "Extra Cheese|Bacon|Avocado"
-            $addonsPrices = helper::toPipeString($request->addons_price);  
-            $extrasIds    = helper::toPipeString($request->extras_id);
-            $extrasNames  = helper::toPipeString($request->extras_name);
-            $extrasPrices = helper::toPipeString($request->extras_price);
 
             $cart->item_id = $itemdata->id;
             $cart->deal_id = $request->deal_id ?? null;
@@ -233,25 +236,28 @@ class CartController extends Controller
             $cart->item_type = $request->item_type ?? $itemdata->type ?? 1;
             $cart->item_image = $itemdata->item_image ?? null;
             $cart->deal_category_id = $request->deal_category_id ?? null;
-            $cart->tax = $request->tax ?? $itemdata->tax ?? 0;
+            
+            $cart->tax = $itemdata->tax ?? 0;
+
             $cart->item_price = helper::number_format($validated['item_price']);
             $cart->addons_id           = $addonsIds;
             $cart->addons_name         = $addonsNames;
             $cart->addons_price        = $addonsPrices;
-            $cart->addons_total_price = helper::number_format(array_sum($request->addons_price));
+
+            $cart->addons_total_price = isset($addons) ? helper::number_format($addons->sum('price')) : 0;
+
             $cart->extras_id           = $extrasIds;
             $cart->extras_name         = $extrasNames;
             $cart->extras_price        = $extrasPrices;
-            $extraPrices = is_array($request->extras_price) ? $request->extras_price : [];
-            $cart->extras_total_price = helper::number_format(array_sum($extraPrices));
+            $cart->extras_total_price = isset($extras) ? helper::number_format($extras->sum('price')) : 0;
             $cart->qty = $validated['qty'];
             $cart->buynow = $request->buynow ?? 0;
             // $cart->branch_id = $branchId; // Store branch ID with cart item
             $cart->save();
 
             // Get cart count
-            if (Auth::user() && Auth::user()->type == 2) {
-                $total_count = Cart::where('user_id', Auth::user()->id)
+            if (auth('sanctum')->user() && auth('sanctum')->user()->type == 2) {
+                $total_count = Cart::where('user_id', auth('sanctum')->user()->id)
                     ->where('buynow', 0)
                     // ->where('branch_id', $branchId)
                     ->count();
@@ -330,8 +336,8 @@ class CartController extends Controller
         try {
             // Handle buynow clearance
             if ($request->buynow == 1) {
-                if (Auth::user() && Auth::user()->type == 2) {
-                    Cart::where('buynow', 1)->where('user_id', Auth::user()->id)->delete();
+                if (auth('sanctum')->user() && auth('sanctum')->user()->type == 2) {
+                    Cart::where('buynow', 1)->where('user_id', auth('sanctum')->user()->id)->delete();
                 } else {
                     Cart::where('buynow', 1)->where('session_id', $sessionId)->delete();
                 }
@@ -434,7 +440,7 @@ class CartController extends Controller
                         ], 400);
                     }
 
-                    $cartQuery = Auth::check() && Auth::user()->type == 2
+                    $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
                         ? Cart::where('user_id', Auth::id())
                         : Cart::where('session_id', $sessionId);
 
@@ -501,8 +507,8 @@ class CartController extends Controller
             
             // Create cart item
             $cart = new Cart();
-            if (Auth::user() && Auth::user()->type == 2) {
-                $cart->user_id = Auth::user()->id;
+            if (auth('sanctum')->user() && auth('sanctum')->user()->type == 2) {
+                $cart->user_id = auth('sanctum')->user()->id;
                 $cart->session_id = "";
             } else {
                 $cart->user_id = "";
@@ -538,8 +544,8 @@ class CartController extends Controller
             $cart->save();
 
             // Get cart count
-            if (Auth::user() && Auth::user()->type == 2) {
-                $total_count = Cart::where('user_id', Auth::user()->id)
+            if (auth('sanctum')->user() && auth('sanctum')->user()->type == 2) {
+                $total_count = Cart::where('user_id', auth('sanctum')->user()->id)
                     ->where('buynow', 0)
                     ->where('branch_id', $branchId)
                     ->count();
@@ -585,13 +591,13 @@ class CartController extends Controller
         }
     }
 
-    public function deletecartitem(Request $request)
+    public function removeCartItem(Request $request)
     {
         $sessionId = $request->header('X-Session-Id');
 
         try {
             $validator = $request->validate([
-                'id' => 'required|integer|exists:carts,id'
+                'id' => 'required|integer|exists:cart,id'
             ]);
 
             $checkcart = Cart::find($request->id);
@@ -603,7 +609,7 @@ class CartController extends Controller
                 ], 404);
             }
 
-            $cartQuery = Auth::check() && Auth::user()->type == 2
+            $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
                 ? Cart::where('user_id', Auth::id())
                 : Cart::where('session_id', $sessionId);
 
@@ -774,7 +780,7 @@ class CartController extends Controller
         $sessionId = $request->header('X-Session-Id');
         try {
             $validator = $request->validate([
-                'id' => 'required|integer|exists:carts,id',
+                'id' => 'required|integer|exists:cart,id',
                 'type' => 'required|in:plus,minus'
             ]);
 
@@ -788,7 +794,7 @@ class CartController extends Controller
             }
 
             // Determine cart query for totals
-            $cartQuery = Auth::check() && Auth::user()->type == 2
+            $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
                 ? Cart::where('user_id', Auth::id())
                 : Cart::where('session_id', $sessionId);
 
@@ -968,8 +974,8 @@ class CartController extends Controller
     {
         $sessionId = $request->header('X-Session-Id');
         try {
-            if (Auth::check() && Auth::user()->type == 2) {
-                $getcartlist = Cart::where('user_id', Auth::user()->id)->orderByDesc('id')->get();
+            if (auth('sanctum')->user() && auth('sanctum')->user()->type == 2) {
+                $getcartlist = Cart::where('user_id', auth('sanctum')->user()->id)->orderByDesc('id')->get();
             } else {
                 $getcartlist = Cart::where('session_id', $sessionId)->orderByDesc('id')->get();
             }
@@ -991,7 +997,7 @@ class CartController extends Controller
                                 }
 
                                 if ($tax->type == 2) {
-                                    $price = ($tax->tax / 100) * ($cart->addons_total_price + $cart->item_price) * $cart->qty;
+                                    $price = ($tax->tax / 100) * ($cart->addons_total_price + $cart->extras_total_price + $cart->item_price) * $cart->qty;
                                 }
                                 $tax_price[] = $price;
                             } else {
@@ -1000,7 +1006,7 @@ class CartController extends Controller
                                 }
 
                                 if ($tax->type == 2) {
-                                    $price = ($tax->tax / 100) * ($cart->addons_total_price + $cart->item_price) * $cart->qty;
+                                    $price = ($tax->tax / 100) * ($cart->addons_total_price + $cart->extras_total_price + $cart->item_price) * $cart->qty;
                                 }
                                 $tax_price[array_search($tax->name, $tax_name)] += $price;
                             }
@@ -1014,7 +1020,7 @@ class CartController extends Controller
             // Calculate totals
             $subtotal = 0;
             foreach ($getcartlist as $item) {
-                $itemTotal = ($item->item_price * $item->qty) + $item->addons_total_price;
+                $itemTotal = (($item->item_price + $item->addons_total_price + $cart->extras_total_price )* $item->qty);
                 $subtotal += $itemTotal;
             }
             
@@ -1026,18 +1032,37 @@ class CartController extends Controller
                 'status' => true,
                 'message' => 'Cart retrieved successfully',
                 'data' => [
-                    'cart_items' => $getcartlist,
-                    'settings' => $getsettings,
+                    'cart_items' => $getcartlist->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'item_id' => $item->item_id,
+                            'deal_id' => $item->deal_id,
+                            'deal_category_id' => $item->deal_category_id,
+                            'item_name' => $item->item_name,
+                            'item_price' => $item->item_price,
+                            'item_image' => json_decode($item->item_image)->image_url ?? '',
+                            'addons_id' => explode("|", $item->addons_id),
+                            "addons_name" => explode("|", $item->addons_name),
+                            'addons_total_price' => $item->addons_total_price,
+                            'extras' => explode("|", $item->extras_id),
+                            'extras_name' => explode("|", $item->extras_name),
+                            'extras_total_price' => $item->extras_total_price,
+                            'qty' => $item->qty,
+                            'tax' => $item->tax,
+                            'total_price' => round(($item->item_price + $item->addons_total_price + $item->extras_total_price )* $item->qty,2), // round($item->item_price + $item->addons_total_price + $item->extras_total_price + $item->tax * $item->qty,
+                        ];
+                    }),
+                    // 'settings' => $getsettings,
                     'taxes' => [
                         'names' => $tax_name,
                         'prices' => $tax_price
                     ],
                     'discount' => $discount,
                     'totals' => [
-                        'subtotal' => $subtotal,
-                        'tax_total' => $total_tax,
-                        'discount_amount' => $discount_amount,
-                        'grand_total' => $grand_total
+                        'subtotal' => round($subtotal,2),
+                        'tax_total' => round($total_tax,2),
+                        'discount_amount' => round($discount_amount,2),
+                        'grand_total' => round($grand_total,2)
                     ]
                 ]
             ]);
