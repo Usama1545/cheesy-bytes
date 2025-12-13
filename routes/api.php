@@ -35,7 +35,7 @@ Route::get('category-items/{slug}', [SiteController::class, 'categoryItems']);
 Route::get('item-details/{slug}', [SiteController::class, 'ItemDetails']);
 Route::get('pizza-item-details/{slug}', [SiteController::class, 'pizzadetails']);
 Route::get('deals', [DealController::class, 'deals']);
-Route::get('/show-deal-item/{slug}', [DealController::class, 'showDealitem']);
+Route::get('show-deal-item/{slug}', [DealController::class, 'showDealitem']);
 Route::get('deal-items/{dealId}', [DealController::class, 'dealItems']);
 
 // Public User Routes (No Authentication Required)

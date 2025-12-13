@@ -348,9 +348,13 @@ class SiteController extends Controller
         ]);
     }
 
-    public function ItemDetails(Request $request, $slug) {
-        $user_id  = auth('sanctum')->user()->id;
+    public function ItemDetails(Request $request, $slug) 
+    {
+        $user_id = auth('sanctum')->user()->id ?? null;
         $branchId = $request->branch_id;
+        $deal_id = $request->deal_id;
+        $deal_category_id = $request->deal_category_id;
+        $size_ids = $request->size_ids ? explode(',', $request->size_ids) : [];
 
         if (!$branchId) {
             return response()->json([
@@ -359,6 +363,7 @@ class SiteController extends Controller
             ], 400);
         }
 
+        // Common query for item info
         $iteminfo = Item::with(['subcategory_info', 'category_info', 'item_image'])
             ->select(
                 'item.*',
@@ -375,7 +380,7 @@ class SiteController extends Controller
                 $query->on('item_prices.item_id', '=', 'item.id')
                     ->where('item_prices.branch_id', '=', $branchId);
             })
-            ->where('item.slug', $request->slug)
+            ->where('item.slug', $slug)
             ->where('item.item_status', 1)
             ->first();
 
@@ -386,17 +391,138 @@ class SiteController extends Controller
             ], 404);
         }
 
-        // Deal price override
-        if ($request->deal_id) {
-            $topDeal = TopDeals::find($request->deal_id);
+        // Check if item is pizza
+        $is_pizza = ($iteminfo->category_info && $iteminfo->category_info->slug == 'pizza');
+        
+        // Handle deal pricing
+        $final_price = $iteminfo->item_price ?? $iteminfo->prices;
+        $dealprice = null;
+
+        if ($deal_id) {
+            $topDeal = TopDeals::find($deal_id);
             if ($topDeal) {
                 $product_id = $topDeal->product_id;
-                $price = ItemPrice::where('item_id', $product_id)
-                    ->where('branch_id', $branchId)
-                    ->value('price');
+                
+                if ($is_pizza && !empty($size_ids)) {
+                    // Pizza deal pricing logic
+                    if ($topDeal->deal_type == 3 && $deal_category_id) {
+                        // Deal with category (e.g., BOGO, Mix & Match)
+                        $deal_category = DealCategory::where('id', $deal_category_id)->first();
+                        
+                        // Get pizza prices for the item
+                        $pizzaPrices = PizzaPrice::where('item_id', $iteminfo->id)
+                            ->where('branch_id', $branchId)
+                            ->get();
+                        
+                        // Calculate base price from pizza prices
+                        if (!$pizzaPrices->isEmpty()) {
+                            $dealPrice = $pizzaPrices
+                                ->filter(function ($price) use ($size_ids) {
+                                    return in_array($price->size_id, $size_ids);
+                                })
+                                ->sortBy('price')
+                                ->first();
+                            
+                            $basePrice = $dealPrice ? $dealPrice->price : $final_price;
+                        } else {
+                            $basePrice = $final_price;
+                        }
+                        
+                        // Apply deal pricing
+                        if (!$deal_category || !$deal_category->is_free) {
+                            $dealprice = $basePrice;
+                        } else {
+                            if ($topDeal->offer_type == 1) {
+                                $dealprice = max(0, $basePrice - $topDeal->offer_amount);
+                            } elseif ($topDeal->offer_type == 2) {
+                                $dealprice = $basePrice - ($basePrice * ($topDeal->offer_amount / 100));
+                            } else {
+                                $dealprice = $basePrice;
+                            }
+                        }
+                    } else {
+                        // Other deal types for pizza (Flat, Selective, Percent, etc.)
+                        // First get the base price
+                        if (!empty($size_ids)) {
+                            $basePrice = PizzaPrice::where('item_id', $iteminfo->id)
+                                ->where('branch_id', $branchId)
+                                ->whereIn('size_id', $size_ids)
+                                ->orderBy('price', 'asc')
+                                ->value('price');
+                                
+                            if (!$basePrice) {
+                                $basePrice = ItemPrice::where('item_id', $iteminfo->id)
+                                    ->where('branch_id', $branchId)
+                                    ->value('price') ?? $final_price;
+                            }
+                        } else {
+                            $basePrice = $final_price;
+                        }
+                        
+                        // Apply deal pricing based on deal type
+                        $dealprice = $this->applyDealLogic($topDeal, $basePrice, $deal_category_id, $iteminfo->id);
+                    }
+                } else {
+                    // Non-pizza deal pricing
+                    $price = ItemPrice::where('item_id', $product_id)
+                        ->where('branch_id', $branchId)
+                        ->value('price');
+                        
+                    if ($price) {
+                        $final_price = $price;
+                    }
+
+                    // Apply deal pricing
+                    $final_price = $this->applyDealLogic($topDeal, $final_price, $deal_category_id, $iteminfo->id);
+                }
             }
         }
 
+        // Prepare pizza-specific data if it's a pizza
+        $sizes = [];
+        $pizza_crusts = [];
+        
+        if ($is_pizza) {
+            // Get pizza prices
+            $prices = PizzaPrice::where('item_id', $iteminfo->id)
+                ->where('branch_id', $branchId)
+                ->get();
+            
+            // Get crusts
+            $crustsQuery = ProductSizeCrust::where('item_id', $iteminfo->id);
+            if (!empty($size_ids)) {
+                $crustsQuery->whereIn('size_id', $size_ids);
+            }
+            $crusts = $crustsQuery->get();
+            
+            $sizes = $prices->map(function ($price) use ($crusts, $dealprice) {
+                $sizeCrusts = $crusts->where('size_id', $price->size_id);
+                
+                // Only include size if it has crusts
+                if ($sizeCrusts->isNotEmpty()) {
+                    return [
+                        'id' => $price->size_id,
+                        'name' => $price->size->name ?? null,
+                        'label' => $price->size->label ?? null,
+                        'price' => $dealprice ?? $price->price,
+                        'crusts' => $sizeCrusts->map(function ($crust) {
+                            return [
+                                'id' => $crust->crust_id,
+                                'name' => $crust->crust->name ?? null,
+                                'price' => $crust->price,
+                            ];
+                        })->values()->toArray(),
+                    ];
+                }
+                
+                return null;
+            })
+            ->filter() // Remove null entries (sizes without crusts)
+            ->values()
+            ->toArray();
+        }
+
+        // Get addons groups
         $addons_group = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')
             ->whereIn('id', explode(',', $iteminfo->addons_id))
             ->where('is_deleted', 2)
@@ -404,12 +530,33 @@ class SiteController extends Controller
             ->orderBy('reorder_id')
             ->get();
 
+        // Get addons with branch filtering
         $addons = Addons::select('id', 'addongroup_id', 'name', 'price')
-            ->where('is_deleted', 2)
             ->where('is_available', 1)
+            ->where(function ($query) use ($branchId, $is_pizza) {
+                // For pizza, use the branch_id filtering from pizzadetails function
+                if ($is_pizza) {
+                    $query->where('branch_ids', 'like', "%,$branchId,%")
+                        ->orWhere('branch_ids', 'like', "$branchId,%")
+                        ->orWhere('branch_ids', 'like', "%,$branchId")
+                        ->orWhere('branch_ids', '=', $branchId);
+                } else {
+                    // For non-pizza items, get all available addons
+                }
+            })
             ->orderBy('reorder_id')
             ->get();
 
+        // Filter addons groups based on available addons
+        $addons_group = $addons_group->filter(function ($group) use ($addons, $is_pizza) {
+            $group->availableAddons = $addons->where('addongroup_id', $group->id);
+            if ($is_pizza) {
+                return $group->availableAddons->isNotEmpty();
+            }
+            return true;
+        })->values();
+
+        // Get extras
         $extras = Extra::where('item_id', $iteminfo->id)
             ->where(function ($query) use ($branchId) {
                 $query->where('branch_id', 'like', "%,$branchId,%")
@@ -419,10 +566,7 @@ class SiteController extends Controller
             })
             ->get();
 
-        foreach ($addons_group as $group) {
-            $group->availableAddons = $addons->where('addongroup_id', $group->id)->values();
-        }
-
+        // Prepare response data
         $itemdata = [
             "id"              => $iteminfo->id,
             "slug"            => $iteminfo->slug,
@@ -431,22 +575,73 @@ class SiteController extends Controller
             "item_type_image" => $iteminfo->item_type == 1
                                     ? helper::image_path("veg.svg")
                                     : helper::image_path("nonveg.svg"),
-            "price"           => $price ?? $iteminfo->item_price ?? $iteminfo->prices,
+            "price"           => $dealprice ?? $final_price,
             "video_url"       => $iteminfo->video_url,
             "is_top_deals"    => $iteminfo->is_top_deals,
             "tax"             => $iteminfo->tax,
             "image_name"      => optional($iteminfo->item_image)->image_name,
             "is_favorite"     => $iteminfo->is_favorite,
+            "is_pizza"        => $is_pizza,
             "addons_group"    => $addons_group,
-            "addons"          => $addons,
             "extras"          => $extras,
         ];
+
+        // Add pizza-specific data if it's a pizza
+        if ($is_pizza) {
+            $itemdata['sizes'] = $sizes;
+            $itemdata['pizza_details'] = [
+                'category_id' => $iteminfo->category_info->id ?? null,
+                'category_name' => $iteminfo->category_info->name ?? null,
+                'category_slug' => $iteminfo->category_info->slug ?? null,
+            ];
+        }
 
         return response()->json([
             'status'   => true,
             'item'     => $itemdata,
         ]);
+    }
+
+    // Helper function for deal logic
+    private function applyDealLogic($topDeal, $price, $deal_category_id, $item_id)
+    {
+        if ($topDeal->deal_type == 3) {
+            $dealItem = \App\Models\DealItem::where('deal_id', $topDeal->id)
+                ->where('item_id', $item_id)
+                ->first();
+
+            if ($dealItem) {
+                $dealCategory = \App\Models\DealCategory::where('id', $deal_category_id)
+                    ->first();
+
+                if ($dealCategory && $dealCategory->is_free == 1) {
+                    if ($topDeal->offer_type == 1) {
+                        $price = max(0, $price - $topDeal->offer_amount);
+                    } else {
+                        $price = $price - ($price * ($topDeal->offer_amount / 100));
+                    }
+                }
+            }
+        } elseif ($topDeal->deal_type == 2 || $topDeal->deal_type == 0) {
+            // Flat deal
+            if ($topDeal->offer_type == 1) {
+                $price = max(0, $price - $topDeal->offer_amount);
+            } else {
+                $price -= $price * ($topDeal->offer_amount / 100);
+            }
+        } elseif ($topDeal->deal_type == 1) {
+            // selective Offer
+            $price = $topDeal->offer_amount;
+        } else {
+            // Percent or Fixed discount
+            if ($topDeal->offer_type == 1) {
+                $price = max(0, $price - $topDeal->offer_amount);
+            } else {
+                $price -= $price * ($topDeal->offer_amount / 100);
+            }
+        }
         
+        return $price;
     }
 
     public function pizzadetails($slug, Request $request)

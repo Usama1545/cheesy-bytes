@@ -289,6 +289,7 @@ class DealController extends Controller
 
                 return [
                     'deal_category_id' => $cat->id,
+                    'size_id'          => $cat->size_id,
                     'category_id'      => $cat->category_id,
                     'category_name'    => optional($cat->category)->category_name,
                     'is_free'          => $cat->is_free ? true : false,
@@ -356,8 +357,4 @@ class DealController extends Controller
             ]);
         }
     }
-
-
-
-
 }
