@@ -269,65 +269,84 @@ class ItemController extends Controller
     }
 
 
-    public function productdetails($id,Request $request)
+    public function productdetails($id, Request $request)
     {
         $branchId = Session::get('branch_id');
         $dealprice = null;
-        $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images','pizzaPrices', 'item_image')->select('item.*',
-            DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"))
+
+        // Fetch item with price and relations
+        $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'pizzaPrices', 'item_image')
+            ->select('item.*', DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"))
             ->leftJoin('item_prices', function ($query) use ($branchId) {
                 $query->on('item_prices.item_id', '=', 'item.id')
-                    ->where('item_prices.branch_id', '=', $branchId);
+                    ->where('item_prices.branch_id', $branchId);
             })
             ->groupBy('item.id')
             ->where('item.id', $id)
             ->where('item.item_status', '1')
             ->first();
-        $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')->whereIn('id', explode(',', $getitemdata->addons_id))->where('is_deleted', 2)->where('is_available', 1)->orderBy('reorder_id')->get();
+
+        if (!$getitemdata) {
+            return response()->json(['error' => 'Item not found'], 404);
+        }
+
+        // Fetch addons group
+        $addonsIds = explode(',', $getitemdata->addons_id);
+        $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')
+            ->whereIn('id', $addonsIds)
+            ->where('is_deleted', 2)
+            ->where('is_available', 1)
+            ->orderBy('reorder_id')
+            ->get();
+
+        // Fetch addons filtered by branch
         $getitemdata['addons'] = Addons::select('id', 'addongroup_id', 'name', 'price')
             ->where('is_deleted', 2)
             ->where('is_available', 1)
-            ->where(function ($query) {
-                $branchId = \Illuminate\Support\Facades\Session::get('branch_id');
-                $query->where('branch_ids', 'like', "%,$branchId,%") // Match middle
-                ->orWhere('branch_ids', 'like', "$branchId,%") // Match start
-                ->orWhere('branch_ids', 'like', "%,$branchId") // Match end
-                ->orWhere('branch_ids', '=', $branchId);
+            ->where(function ($query) use ($branchId) {
+                $query->where('branch_ids', 'like', "%,$branchId,%")
+                    ->orWhere('branch_ids', 'like', "$branchId,%")
+                    ->orWhere('branch_ids', 'like', "%,$branchId")
+                    ->orWhere('branch_ids', '=', $branchId);
             })
-            ->orderBy('reorder_id')->get();
-        $getitemdata['addons_group'] = $getitemdata['addons_group']->filter(function ($addons_group) use ($getitemdata) {
-            $addons_group->availableAddons = $getitemdata['addons']->where('addongroup_id', $addons_group->id);
-            return $addons_group->availableAddons->isNotEmpty(); // Exclude groups without addons
-        })->values();
-        $getitemdata['extras'] = Extra::where('item_id', $getitemdata->id)->where(function ($query) {
-                    $branchId = Session::get('branch_id');
-                    $query->where('branch_id', 'like', "%,$branchId,%") // Match middle
-                    ->orWhere('branch_id', 'like', "$branchId,%") // Match start
-                    ->orWhere('branch_id', 'like', "%,$branchId") // Match end
-                    ->orWhere('branch_id', '=', $branchId);
-                })->get();
-        if (isset($request['dealId']) && isset($request['sizeId'])) {
-            $topDeal = TopDeals::where('id', $request->dealId)->first();
+            ->orderBy('reorder_id')
+            ->get();
 
+        // Filter addons_group to only include groups with available addons
+        $getitemdata['addons_group'] = $getitemdata['addons_group']->filter(function ($group) use ($getitemdata) {
+            $group->availableAddons = $getitemdata['addons']->where('addongroup_id', $group->id);
+            return $group->availableAddons->isNotEmpty();
+        })->values();
+
+        // Fetch extras filtered by branch
+        $getitemdata['extras'] = Extra::where('item_id', $getitemdata->id)
+            ->where(function ($query) use ($branchId) {
+                $query->where('branch_id', 'like', "%,$branchId,%")
+                    ->orWhere('branch_id', 'like', "$branchId,%")
+                    ->orWhere('branch_id', 'like', "%,$branchId")
+                    ->orWhere('branch_id', '=', $branchId);
+            })
+            ->get();
+
+        $deal_type = null;
+        $topDeal = null;
+
+        if (isset($request['dealId']) && isset($request['sizeId'])) {
+            $topDeal = TopDeals::find($request['dealId']);
             if (!$topDeal) {
                 return response()->json(['error' => 'Invalid deal ID'], 400);
             }
 
-            $product_id = $topDeal->product_id;
             $deal_type = $topDeal->deal_type;
-
-            // Convert comma-separated sizeId string to an array
             $sizeIds = explode(',', $request['sizeId']);
 
             if ($deal_type == 3) {
-                $deal_category = DealCategory::where('id', $request->dealCategoryId)->first();
+                $deal_category = DealCategory::find($request['dealCategoryId'] ?? 0);
 
-                // Step 1: Always calculate base price first
+                // Base price from pizzaPrices if exists
                 if (!$getitemdata->pizzaPrices->isEmpty()) {
                     $dealPrice = $getitemdata->pizzaPrices
-                        ->filter(function ($price) use ($sizeIds, $branchId) {
-                            return in_array($price->size_id, $sizeIds) && $price->branch_id == $branchId;
-                        })
+                        ->filter(fn($price) => in_array($price->size_id, $sizeIds) && $price->branch_id == $branchId)
                         ->sortBy('price')
                         ->first();
 
@@ -336,80 +355,81 @@ class ItemController extends Controller
                     $basePrice = $getitemdata->item_price;
                 }
 
-                // Step 2: If no category or not free → normal price
+                // Apply deal logic
                 if (!$deal_category || !$deal_category->is_free) {
                     $dealprice = $basePrice;
                 } else {
-                    // Step 3: Free category → apply offer logic
-                    if ($topDeal->offer_type == 1) {
-                        // Fixed discount
+                    if ($topDeal->offer_type == 1) { // Fixed discount
                         $dealprice = max(0, $basePrice - $topDeal->offer_amount);
-                    } elseif ($topDeal->offer_type == 2) {
-                        // Percentage discount
+                    } elseif ($topDeal->offer_type == 2) { // Percentage discount
                         $dealprice = $basePrice - ($basePrice * ($topDeal->offer_amount / 100));
                     } else {
-                        $dealprice = $basePrice; // unknown offer_type → just use base price
+                        $dealprice = $basePrice;
                     }
                 }
-            }
-            else {
-                // Fetch price from the related `pizza_prices` table
-                $dealprice = PizzaPrice::where('item_id', $product_id)
+            } else {
+                // Deal type 1 or others: fetch pizza price first
+                $dealprice = PizzaPrice::where('item_id', $topDeal->product_id)
                     ->where('branch_id', $branchId)
                     ->whereIn('size_id', $sizeIds)
                     ->orderBy('price', 'asc')
                     ->value('price');
 
-                // If no specific price exists in `pizza_prices`, fall back to item price
                 if (!$dealprice) {
-                    $dealprice = ItemPrice::where('item_id', $product_id)
+                    $dealprice = ItemPrice::where('item_id', $topDeal->product_id)
                         ->where('branch_id', $branchId)
                         ->value('price');
                 }
             }
 
-            // Fetch crusts for multiple sizes
+            // Fetch crusts filtered by sizeIds
             $crusts = ProductSizeCrust::where('item_id', $id)
-                ->whereIn('size_id', $sizeIds)
+                ->when($sizeIds, fn($q) => $q->whereIn('size_id', $sizeIds))
                 ->get();
-        }
-        else {
+        } else {
             $crusts = ProductSizeCrust::where('item_id', $id)->get();
         }
+
         $prices = PizzaPrice::where('item_id', $id)->where('branch_id', $branchId)->get();
 
-         $groupedData = $crusts->groupBy(function ($item) {
-            return $item->size_id; // Group by size_id
-        })->map(function ($items) use ($prices,$dealprice) {
+        // Group crusts by size
+        $groupedData = $crusts->groupBy('size_id')->map(function ($items) use ($prices, $dealprice, $deal_type, $topDeal) {
             $firstItem = $items->first();
-
-            // Find the corresponding size price
             $sizePrice = $prices->firstWhere('size_id', $firstItem->size_id);
+            $sizePriceValue = $sizePrice->price ?? 0;
+
+            $sizeDealPrice = null;
+            if ($deal_type == 2 || $deal_type == 0 && $topDeal) {
+                if ($topDeal->offer_type == 1) {
+                    $sizeDealPrice = max(0, $sizePriceValue - $topDeal->offer_amount);
+                } elseif ($topDeal->offer_type == 2) {
+                    $sizeDealPrice = $sizePriceValue - ($sizePriceValue * ($topDeal->offer_amount / 100));
+                } else {
+                    $sizeDealPrice = $sizePriceValue;
+                }
+            }
 
             return [
                 'id' => $firstItem->size_id,
-                'name' => $firstItem->size->name, // Assuming a relationship with Size model
-                'label' => $firstItem->size->label, // Assuming a relationship with Size model
-                'size_price' => $dealprice ??  $sizePrice->price ?? null, // Add size price if available
-
-                'crusts' => $items->map(function ($item) {
-                    return [
-                        'id' => $item->crust_id,
-                        'name' => $item->crust->name, // Assuming a relationship with Crust model
-                        'price' => $item->price,
-                    ];
-                })->toArray(),
+                'name' => $firstItem->size->name ?? null,
+                'label' => $firstItem->size->label ?? null,
+                'size_price' => $sizeDealPrice ?? $dealprice ?? $sizePriceValue,
+                'crusts' => $items->map(fn($item) => [
+                    'id' => $item->crust_id,
+                    'name' => $item->crust->name ?? null,
+                    'price' => $item->price,
+                ])->toArray(),
             ];
         })->values()->toArray();
-
-
 
         $responce = [
             'item_detail' => $getitemdata,
             'crust_data' => $groupedData
         ];
+
         return ['responce' => $responce];
     }
+
 
     public function itemdetails(Request $request)
     {

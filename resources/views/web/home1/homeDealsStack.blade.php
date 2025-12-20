@@ -1,203 +1,229 @@
 <?php
 use App\Helpers\helper;
 
-$itemData = (new App\Helpers\helper)->getTopFourDeals();
+$helper = new App\Helpers\helper();
+$itemData = $helper->getTopFourDeals();
 $count = count($itemData);
 $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height classes
 ?>
 
 <div class="container container-model py-5">
     <div class="deals-wrapper justify-content-center">
-        @if(isset($itemData[0]))
-        <!-- Left Image with Heading and Button -->
-        @php
-            $item = $itemData[0];
-            if($item->deal_type !== 3 && $item->deal_type !== 1 && $item->deal_type !== 4) {
-                if(@$item->offer_type !== 1) {
-                    if (@$item->offer_type == 1) {
-                        $price = $item->dealPrice > @$item->offer_amount ? $item->dealPrice - @$item->offer_amount : $item->dealPrice;
+        @if (isset($itemData[0]))
+            <!-- Left Image with Heading and Button -->
+            @php
+                $item = $itemData[0];
+                if ($item->deal_type !== 3 && $item->deal_type !== 1 && $item->deal_type !== 4) {
+                    if (@$item->offer_type !== 1) {
+                        if (@$item->offer_type == 1) {
+                            $price =
+                                $item->dealPrice > @$item->offer_amount
+                                    ? $item->dealPrice - @$item->offer_amount
+                                    : $item->dealPrice;
+                        } else {
+                            $price = $item->dealPrice - $item->dealPrice * (@$item->offer_amount / 100);
+                        }
+                        $original_price = $item->dealPrice;
+                        $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                    } elseif (@$item->offer_type !== 1 && @$item->deal_type == 1) {
+                        $price = $item->product->original_price - $item->dealPrice;
+                        $off = 0;
+                        $original_price = $item->product->original_price ?? $item->offer_amount;
                     } else {
-                        $price = $item->dealPrice - $item->dealPrice * (@$item->offer_amount / 100);
+                        $price = $item->dealPrice - $item->offer_amount;
+                        $original_price = $item->dealPrice;
+                        $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
                     }
-                    $original_price = $item->dealPrice;
-                    $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                } else if(@$item->offer_type !== 1 && @$item->deal_type == 1) {
-                    $price = $item->product->original_price - $item->dealPrice;
-                    $off = 0;
-                    $original_price = $item->product->original_price ?? $item->offer_amount;
                 } else {
-                    $price = $item->dealPrice - $item->offer_amount;
-                    $original_price = $item->dealPrice;
-                    $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                    $price = $item->dealPrice;
+                    $off = 0;
+                    $original_price = $item->product->original_price;
                 }
-            } else {
-                $price = $item->dealPrice;
-                $off = 0;
-                $original_price = $item->product->original_price;
-            }
-        @endphp
-        <div class="deal-card left-deal-card">
-            <img src="{{ @helper::image_path($item->product['item_image']->image_name) }}" alt="Main Deal"
-                 class="left-image {{ $heightClass }}">
-            <div class="deal-overlay {{ $heightClass }}">
-                <div>
-                    <!--<div class="deal-heading">{{ $item->product->item_name }}</div>-->
-                </div>
-                <div>
-                    @if($item->deal_type !== 3 && $item->deal_type !== 4)
-                        <div class="d-flex align-items-start">
-                            <div class="d-flex flex-column align-items-center"
-                                 style="line-height: 1;">
-                                <span class="fs-6 ">$</span>
-                            </div>
-                            <div class="d-flex flex-column ms-1" style="line-height: 1;">
-                                <div class="d-flex">
-                                                        <span
-                                                            class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
-                                    <div class="line-1">
-                                                        <span
-                                                            class="fs-6  line-1">{{ sprintf("%02d", ($price - floor($price)) * 100) }}</span>
-                                        <small class="ms-1 ">each</small></div>
+            @endphp
+            <div class="deal-card left-deal-card">
+                <img src="{{ @helper::image_path($item->product['item_image']->image_name) }}" alt="Main Deal"
+                    class="left-image {{ $heightClass }}">
+                <div class="deal-overlay {{ $heightClass }}">
+                    <div>
+                        <!--<div class="deal-heading">{{ $item->product->item_name }}</div>-->
+                    </div>
+                    <div>
+                        @if ($item->deal_type !== 3 && $item->deal_type !== 4 && $item->deal_type !== 2 && $item->deal_type !== 0)
+                            <div class="d-flex align-items-start">
+                                <div class="d-flex flex-column align-items-center" style="line-height: 1;">
+                                    <span class="fs-6 ">$</span>
                                 </div>
+                                <div class="d-flex flex-column ms-1" style="line-height: 1;">
+                                    <div class="d-flex">
+                                        <span class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
+                                        <div class="line-1">
+                                            <span
+                                                class="fs-6  line-1">{{ sprintf('%02d', ($price - floor($price)) * 100) }}</span>
+                                            <small class="ms-1 ">each</small>
+                                        </div>
+                                    </div>
 
+                                </div>
                             </div>
-                        </div>
 
-                        @if ($original_price > $price)
-                            <div>
-                                <small>
-                                    <del
-                                        class="text-muted">{{ helper::currency_format($original_price) }}</del>
-                                </small>
-                            </div>
+                            @if ($original_price > $price)
+                                <div>
+                                    <small>
+                                        <del class="text-muted">{{ helper::currency_format($original_price) }}</del>
+                                    </small>
+                                </div>
+                            @endif
                         @endif
-                    @endif
 
-                    @if($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
-                            <a
-                                class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}"
-                            >
+                        @if (
+                            $item->deal_type == 1 ||
+                                $item->deal_type == 3 ||
+                                $item->deal_type == 4 ||
+                                $item->deal_type == 2 ||
+                                $item->deal_type == 0)
+                            <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
+                                href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}">
                                 Select
                                 <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
                                 <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
                             </a>
-                    @else
-                        <button
-                            class="btn btn-sm deal-button btn-secondary fw-500 px-3 py-2 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                            onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
-                            {{ trans('labels.add') }}
-                            <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                            <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
-                        </button>
-                    @endif
-                </div>
-            </div>
-        </div>
-        @endif
-
-        @if($count > 1)
-        <!-- Right Images -->
-        <div class="right-images">
-            @for($i = 1; $i < $count; $i++)
-                @if(isset($itemData[$i]))
-                @php
-                    $item = $itemData[$i];
-                    if($item->deal_type !== 3 && $item->deal_type !== 1 && $item->deal_type !== 4) {
-                        if(@$item->offer_type !== 1) {
-                            if (@$item->offer_type == 1) {
-                                $price = $item->dealPrice > @$item->offer_amount ? $item->dealPrice - @$item->offer_amount : $item->dealPrice;
-                            } else {
-                                $price = $item->dealPrice - $item->dealPrice * (@$item->offer_amount / 100);
-                            }
-                            $original_price = $item->dealPrice;
-                            $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                        } else if(@$item->offer_type !== 1 && @$item->deal_type == 1) {
-                            $price = $item->product->original_price - $item->dealPrice;
-                            $off = 0;
-                            $original_price = $item->product->original_price ?? $item->offer_amount;
-                        } else {
-                            $price = $item->dealPrice - $item->offer_amount;
-                            $original_price = $item->dealPrice;
-                            $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                        }
-                    } else {
-                        $price = $item->dealPrice;
-                        $off = 0;
-                        $original_price = $item->product->original_price;
-                    }
-                @endphp
-                <div class="deal-card">
-                    <img src="{{ @helper::image_path($item->product['item_image']->image_name) }}" class="deal-image" alt="Deal {{ $i }}">
-                    <div class="deal-overlay">
-                        <div>
-                            <!--<div class="deal-heading">{{ $item->product->item_name }}</div>-->
-                            @if($i >= 2) <!-- Only show description for 3rd and 4th items -->
-                                <div class="deal-description">{{ $item->product->item_description }}</div>
-                            @endif
-                        </div>
-                        <div>
-                            @if($item->deal_type !== 3 && $item->deal_type !== 4)
-                                <div class="d-flex align-items-start">
-                                    <div class="d-flex flex-column align-items-center"
-                                         style="line-height: 1;">
-                                        <span class="fs-6 ">$</span>
-                                    </div>
-                                    <div class="d-flex flex-column ms-1" style="line-height: 1;">
-                                        <div class="d-flex">
-                                                        <span
-                                                            class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
-                                            <div class="line-1">
-                                                        <span
-                                                            class="fs-6  line-1">{{ sprintf("%02d", ($price - floor($price)) * 100) }}</span>
-                                                <small class="ms-1 ">each</small></div>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                @if ($original_price > $price)
-                                    <div>
-                                        <small>
-                                            <del
-                                                class="text-muted">{{ helper::currency_format($original_price) }}</del>
-                                        </small>
-                                    </div>
-                                @endif
-                            @endif
-                            @if($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
-                                <a
-                                    class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                    href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}"
-                                >
-                                    Select
-                                    <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                    <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
-                                </a>
-                            @else
-                                <button
-                                    class="btn btn-sm deal-button btn-secondary fw-500 px-3 py-2 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                    onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
-                                    {{ trans('labels.add') }}
-                                    <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                    <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
-                                </button>
-                            @endif
-                        </div>
+                        @else
+                            <button
+                                class="btn btn-sm deal-button btn-secondary fw-500 px-3 py-2 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
+                                onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
+                                {{ trans('labels.add') }}
+                                <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
+                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
+                            </button>
+                        @endif
                     </div>
                 </div>
-                @endif
-            @endfor
-        </div>
+            </div>
+        @endif
+
+        @if ($count > 1)
+            <!-- Right Images -->
+            <div class="right-images">
+                @for ($i = 1; $i < $count; $i++)
+                    @if (isset($itemData[$i]))
+                        @php
+                            $item = $itemData[$i];
+                            if ($item->deal_type !== 3 && $item->deal_type !== 1 && $item->deal_type !== 4) {
+                                if (@$item->offer_type !== 1) {
+                                    if (@$item->offer_type == 1) {
+                                        $price =
+                                            $item->dealPrice > @$item->offer_amount
+                                                ? $item->dealPrice - @$item->offer_amount
+                                                : $item->dealPrice;
+                                    } else {
+                                        $price = $item->dealPrice - $item->dealPrice * (@$item->offer_amount / 100);
+                                    }
+                                    $original_price = $item->dealPrice;
+                                    $off =
+                                        $original_price > 0
+                                            ? number_format(100 - ($price * 100) / $original_price, 1)
+                                            : 0;
+                                } elseif (@$item->offer_type !== 1 && @$item->deal_type == 1) {
+                                    $price = $item->product->original_price - $item->dealPrice;
+                                    $off = 0;
+                                    $original_price = $item->product->original_price ?? $item->offer_amount;
+                                } else {
+                                    $price = $item->dealPrice - $item->offer_amount;
+                                    $original_price = $item->dealPrice;
+                                    $off =
+                                        $original_price > 0
+                                            ? number_format(100 - ($price * 100) / $original_price, 1)
+                                            : 0;
+                                }
+                            } else {
+                                $price = $item->dealPrice;
+                                $off = 0;
+                                $original_price = $item->product->original_price;
+                            }
+                        @endphp
+                        <div class="deal-card">
+                            <img src="{{ @helper::image_path($item->product['item_image']->image_name) }}"
+                                class="deal-image" alt="Deal {{ $i }}">
+                            <div class="deal-overlay">
+                                <div>
+                                    <!--<div class="deal-heading">{{ $item->product->item_name }}</div>-->
+                                    @if ($i >= 2)
+                                        <!-- Only show description for 3rd and 4th items -->
+                                        <div class="deal-description">{{ $item->product->item_description }}</div>
+                                    @endif
+                                </div>
+                                <div>
+                                    @if ($item->deal_type !== 3 && $item->deal_type !== 4 && $item->deal_type !== 2 && $item->deal_type !== 0)
+                                        <div class="d-flex align-items-start">
+                                            <div class="d-flex flex-column align-items-center" style="line-height: 1;">
+                                                <span class="fs-6 ">$</span>
+                                            </div>
+                                            <div class="d-flex flex-column ms-1" style="line-height: 1;">
+                                                <div class="d-flex">
+                                                    <span class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
+                                                    <div class="line-1">
+                                                        <span
+                                                            class="fs-6  line-1">{{ sprintf('%02d', ($price - floor($price)) * 100) }}</span>
+                                                        <small class="ms-1 ">each</small>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        @if ($original_price > $price)
+                                            <div>
+                                                <small>
+                                                    <del
+                                                        class="text-muted">{{ helper::currency_format($original_price) }}</del>
+                                                </small>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if ($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
+                                        <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
+                                            href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}">
+                                            Select
+                                            <i
+                                                class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
+                                            <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
+                                            </div>
+                                        </a>
+                                    @elseif($item->deal_type == 2 || $item->deal_type == 0)
+                                        <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
+                                            href="{{ helper::branch_route('flatDealDetails', ['id' => $item->deal_id]) }}">
+                                            Select
+                                            <i
+                                                class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
+                                            <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
+                                            </div>
+                                        </a>
+                                    @else
+                                        <button
+                                            class="btn btn-sm deal-button btn-secondary fw-500 px-3 py-2 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
+                                            onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
+                                            {{ trans('labels.add') }}
+                                            <i
+                                                class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
+                                            <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
+                                            </div>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endfor
+            </div>
         @endif
     </div>
 </div>
 
 <style>
+    .sec-padding {
+        padding: 10px 0px;
+    }
 
-.sec-padding {
-    padding: 10px 0px;
-}
     .container-model {
         display: flex;
         justify-content: center;
@@ -292,7 +318,8 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
 
         .left-deal-card {
             flex: 1 1 60%;
-            aspect-ratio: 1 / 1; /* Square */
+            aspect-ratio: 1 / 1;
+            /* Square */
             max-width: 530px;
             max-height: 530px;
         }
@@ -307,7 +334,8 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
 
         .right-images .deal-card {
             flex: 1;
-            aspect-ratio: 3 / 2; /* 390x260 */
+            aspect-ratio: 3 / 2;
+            /* 390x260 */
             max-height: 260px;
         }
     }
@@ -323,7 +351,8 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
         .right-images .deal-card {
             width: 100%;
             max-width: 306px;
-            aspect-ratio: 1 / 1; /* Square */
+            aspect-ratio: 1 / 1;
+            /* Square */
         }
 
         .right-images {
@@ -332,6 +361,7 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
             align-items: center;
         }
     }
+
     .container-model {
         display: flex;
         justify-content: center;
@@ -426,7 +456,8 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
 
         .left-deal-card {
             flex: 1 1 60%;
-            aspect-ratio: 1 / 1; /* Square */
+            aspect-ratio: 1 / 1;
+            /* Square */
             max-width: 530px;
             max-height: 530px;
         }
@@ -441,7 +472,8 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
 
         .right-images .deal-card {
             flex: 1;
-            aspect-ratio: 3 / 2; /* 390x260 */
+            aspect-ratio: 3 / 2;
+            /* 390x260 */
             max-height: 260px;
         }
     }
@@ -457,7 +489,8 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
         .right-images .deal-card {
             width: 100%;
             max-width: 306px;
-            aspect-ratio: 1 / 1; /* Square */
+            aspect-ratio: 1 / 1;
+            /* Square */
         }
 
         .right-images {
@@ -466,5 +499,4 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
             align-items: center;
         }
     }
-
 </style>

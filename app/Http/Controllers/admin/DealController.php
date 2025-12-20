@@ -32,19 +32,34 @@ class DealController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:item,id',
-            'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to the sizes table
-            'offer_type' => 'required|in:1,2',
-            'offer_amount' => 'required|numeric|min:0',
+            'product_ids' => 'required|array',
+            'product_ids.*' => 'exists:item,id',
+            'size_id' => 'required|array',
+            'size_id.*' => 'exists:sizes,id',
             'start_date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
             'end_date' => 'required|date|after_or_equal:start_date',
             'end_time' => 'required|date_format:H:i',
-            'is_active' => 'boolean',
-            'order' => 'required|numeric|min:1'
+            'offer_type' => 'required|in:1,2',
+            'offer_amount' => 'required|numeric|min:0',
+            'order' => 'required|integer|min:1',
+          ]);
+
+
+        $deal = TopDeals::create([
+            'product_id' => $request->product_id,
+            'slug' => $request->slug,
+            'start_date' => $request->start_date,
+            'start_time' => $request->start_time,
+            'end_date' => $request->end_date,
+            'end_time' => $request->end_time,
+            'offer_type' => $request->offer_type,
+            'offer_amount' => $request->offer_amount,
+            'order' => $request->order,
+            'size_id' => implode(',', $request->size_id),
+            'product_ids'=> implode(',', $request->product_ids),
+
         ]);
-
-
-        $deal = TopDeals::create($request->all());
 
         $slug = Item::find($request->product_id)->slug;
         $slugexists = TopDeals::where('slug', $slug)->exists();
@@ -78,16 +93,18 @@ class DealController extends Controller
     {
         $request->validate([
             'id' => 'required|exists:top_deals,id',
-            'size_id' => 'required|exists:sizes,id',
-            'product_id' => 'sometimes|required|exists:item,id',
-            'discount_type' => 'sometimes|required|in:flat,percentage',
-            'offer_amount' => 'sometimes|required|numeric|min:0',
+            'product_id' => 'required|exists:item,id',
+            'product_ids' => 'required|array',
+            'product_ids.*' => 'exists:item,id',
+            'size_id' => 'required|array',
+            'size_id.*' => 'exists:sizes,id',
             'start_date' => 'required|date',
             'start_time' => 'required',
             'end_date' => 'required|date|after_or_equal:start_date',
             'end_time' => 'required',
-            'is_active' => 'boolean',
-            'order' => 'required|numeric|min:1'
+            'offer_type' => 'required|in:1,2',
+            'offer_amount' => 'required|numeric|min:0',
+            'order' => 'required|integer|min:1',
         ]);
 
         $deal = TopDeals::findOrFail($request->id);
@@ -96,7 +113,6 @@ class DealController extends Controller
         if ($request->filled('product_id')) {
             $slug = Item::findOrFail($request->product_id)->slug;
 
-            // Check if slug exists in another deal (exclude current deal)
             $slugExists = TopDeals::where('slug', $slug)
                 ->where('id', '!=', $deal->id)
                 ->exists();
@@ -108,11 +124,20 @@ class DealController extends Controller
             $request->merge(['slug' => $slug]);
         }
 
-        $deal->update($request->only([
-            'size_id', 'product_id', 'discount_type', 'offer_amount',
-            'start_date', 'start_time', 'end_date', 'end_time',
-            'is_active', 'order', 'slug'
-        ]));
+        $deal->update([
+            'product_id' => $request->product_id,
+            'slug' => $request->slug,
+            'start_date' => $request->start_date,
+            'start_time' => $request->start_time,
+            'end_date' => $request->end_date,
+            'end_time' => $request->end_time,
+            'offer_type' => $request->offer_type,
+            'offer_amount' => $request->offer_amount,
+            'order' => $request->order,
+            'size_id' => implode(',', $request->size_id),
+            'product_ids'=> implode(',', $request->product_ids),
+
+        ]);
 
         return redirect('admin/topDeals')->with('success', 'Deal updated successfully!');
     }
@@ -483,6 +508,157 @@ class DealController extends Controller
         } catch (\Exception $e) 
         {
             dd($e);
+        }
+    }
+
+    public function flatDealDetails($branch, $slug)
+    {
+        try {
+            $branchId = Session::get('branch_id');
+            $user_id = Session::get('user_id');
+            $session_id = Session::getId();
+            
+            // Get deal data
+            $topDealData = TopDeals::with('product')->where('slug', $slug)->firstOrFail();
+            $dealType = $topDealData->deal_type;
+            $dealSizeIDs = $topDealData->size_id ?? '1';
+            $productIds = explode(',', $topDealData->product_ids);
+            
+            // Validate we only handle flat deals (type 0 or 2)
+            if (!in_array($dealType, [0, 2])) {
+                abort(404, 'This deal type is not supported');
+            }
+            
+            // Get cart items to check if already in cart
+            $cartItemIdsFromOtherDeals = DB::table('cart')
+                ->join('top_deals', 'cart.deal_id', '=', 'top_deals.id')
+                ->where('cart.deal_id', '!=', $topDealData->id)
+                ->when($user_id, fn($q) => $q->where('cart.user_id', $user_id),
+                    fn($q) => $q->where('cart.session_id', $session_id)
+                )
+                ->pluck('cart.item_id')
+                ->toArray();
+            
+            // Get product data with pricing
+            $getitemdata = Item::whereRaw("FIND_IN_SET(?, item.branch_ids)", [$branchId])
+                ->with('category_info', 'subcategory_info', 'item_images', 'pizzaPrices', 'item_image')
+                ->select(
+                    'item.*',
+                    DB::raw("
+                        CASE 
+                            WHEN category_info.category_name = 'pizza' 
+                            THEN (
+                                SELECT pp.price 
+                                FROM pizza_prices AS pp 
+                                WHERE FIND_IN_SET(pp.size_id, '$dealSizeIDs') 
+                                AND pp.item_id = item.id 
+                                AND pp.branch_id = $branchId 
+                                AND pp.price > 0
+                                ORDER BY pp.price ASC 
+                                LIMIT 1
+                            ) 
+                            ELSE (
+                                SELECT ip.price 
+                                FROM item_prices AS ip 
+                                WHERE ip.item_id = item.id 
+                                AND ip.branch_id = $branchId 
+                                AND ip.price > 0
+                                LIMIT 1
+                            ) 
+                        END AS item_price
+                    "),
+                    DB::raw('(CASE WHEN cart.item_id IS NULL OR cart.item_id IN (' . implode(',', $cartItemIdsFromOtherDeals ?: [0]) . ') THEN 0 ELSE 1 END) AS is_cart'),
+                    DB::raw('(CASE WHEN cart.item_id IS NULL OR cart.item_id IN (' . implode(',', $cartItemIdsFromOtherDeals ?: [0]) . ') THEN 0 ELSE cart.qty END) AS cartQty')
+                )
+                ->leftJoin('categories as category_info', 'category_info.id', '=', 'item.cat_id')
+                ->leftJoin('cart', function ($query) use ($session_id, $user_id) {
+                    $query->on('cart.item_id', '=', 'item.id')
+                        ->where('cart.buynow', '=', '0');
+                    if ($user_id) {
+                        $query->where('cart.user_id', '=', $user_id);
+                    } else {
+                        $query->where('cart.session_id', '=', $session_id);
+                    }
+                })
+                ->whereIn('item.id', $productIds)
+                ->where(function ($q) use ($branchId, $dealSizeIDs) {
+                    $q->whereExists(function ($sub) use ($branchId) {
+                        $sub->select(DB::raw(1))
+                            ->from('item_prices')
+                            ->whereRaw('item_prices.item_id = item.id')
+                            ->where('item_prices.branch_id', $branchId)
+                            ->where('item_prices.price', '>', 0);
+                    })
+                    ->orWhereExists(function ($sub) use ($branchId, $dealSizeIDs) {
+                        $sub->select(DB::raw(1))
+                            ->from('pizza_prices')
+                            ->whereRaw('pizza_prices.item_id = item.id')
+                            ->where('pizza_prices.branch_id', $branchId)
+                            ->where('pizza_prices.price', '>', 0)
+                            ->whereRaw("FIND_IN_SET(pizza_prices.size_id, '$dealSizeIDs')");
+                    });
+                })
+                ->groupBy('item.id')
+                ->get();
+            
+            // Apply deal pricing based on offer_type
+            $getitemdata->transform(function ($item) use ($topDealData) {
+                $originalPrice = $item->item_price ?? 0;
+                $dealPrice = $originalPrice;
+                
+                // Apply deal pricing logic
+                if ($topDealData->offer_type == 1) {
+                    // Fixed price offer
+                    $dealPrice = $topDealData->offer_amount;
+                } elseif ($topDealData->offer_type == 2) {
+                    // Percentage discount
+                    $discountAmount = ($originalPrice * $topDealData->offer_amount) / 100;
+                    $dealPrice = $originalPrice - $discountAmount;
+                }
+                
+                // Add deal pricing info
+                $item->original_price = $originalPrice;
+                $item->deal_price = max(0, round($dealPrice, 2));
+                $item->deal_discount = $originalPrice - $item->deal_price;
+                $item->offer_type = $topDealData->offer_type;
+                $item->offer_amount = $topDealData->offer_amount;
+                
+                return $item;
+            });
+            
+            // Prepare result structure
+            $result = collect([
+                [
+                    'category_id' => null,
+                    'category_name' => $topDealData->product->item_name ?? 'Deal Items',
+                    'items' => $getitemdata->values(),
+                    'size_ids' => explode(',', $dealSizeIDs),
+                    'size_id' => $topDealData->size_id,
+                    'offer_type' => $topDealData->offer_type,
+                    'offer_amount' => $topDealData->offer_amount,
+                    'deal_id' => $topDealData->id,
+                    'deal_type' => $dealType,
+                    'category_meta' => null,
+                    'deal_details' => [
+                        'name' => $topDealData->product->item_name ?? 'Deal',
+                        'description' => $topDealData->description ?? '',
+                        'valid_from' => $topDealData->valid_from,
+                        'valid_to' => $topDealData->valid_to,
+                    ]
+                ]
+            ]);
+
+            // dd($result);
+            
+            // Return view based on deal type
+           
+            return view('web.flat-deal-details', compact('result'));
+            
+            
+        } catch (\Exception $e) {
+            // Better error handling in production
+            // Log::error('Deal details error: ' . $e->getMessage());
+            abort(404, 'Deal not found or unavailable');
         }
     }
 
