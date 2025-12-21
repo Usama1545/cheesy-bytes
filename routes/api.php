@@ -18,7 +18,9 @@ Route::get('/fetch-job', [PrintController::class, 'fetchPrintJob']);
 Route::get('/fetchJob',[PrintController::class,'fetchConPrintJob']);
 Route::get('print-orders', [AdminController::class, 'printOrders']);
 Route::get('deleteUnpaidPreBookings', [OrderController::class, 'deleteUnpaidPreBookings']);
-
+Route::get('/refund-policy', [SiteController::class, 'refundpolicy']);
+Route::get('/abous-us', [SiteController::class, 'aboutus']);
+Route::get('/privacy-policy', [SiteController::class, 'privacypolicy']); 
 Route::get('/config', function () {
     Artisan::call('config:cache');
     Artisan::call('config:clear');

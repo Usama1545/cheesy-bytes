@@ -306,7 +306,7 @@ class DealController extends Controller
         }
 
         // SELECTIVE or BMSM
-        if ($deal->deal_type == 1 || $deal->deal_type == 2 || $deal->deal_type == 4) {
+        if ($deal->deal_type == 1 || $deal->deal_type == 2 || $deal->deal_type == 4 || $deal->deal_type == 0) {
                
 
             $productIds = explode(',', $deal->product_ids);

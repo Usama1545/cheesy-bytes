@@ -3,13 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\ApiCacheHelper;
+use Illuminate\Support\Facades\Cache;
 use Session;
 class Category extends Model
 {
     protected $table = 'categories';
     protected $fillable = ['category_name', 'image','branch_ids'];
     protected $appends = ['image_url'];
-
+    protected static function booted()
+    {
+        static::saved(function ($category) {
+            // Clear all category-related cache
+            ApiCacheHelper::clear('categories');
+            ApiCacheHelper::clear("category_items_{$category->slug}");
+            
+            // Also clear the base cache
+            Cache::forget("category_items_base_{$category->slug}_branch_*");
+        });
+    }
     public function category_info()
     {
         return $this->hasOne('App\Models\Category', 'id')->select('id', 'category_name', 'slug');

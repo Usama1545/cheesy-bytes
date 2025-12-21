@@ -23,8 +23,12 @@ use App\Models\AddonsGroup;
 use App\Models\Extra;
 use App\Models\Slider;
 use App\Models\DealCategory;
+use App\Helpers\ApiCacheHelper;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Cache;
+use App\Models\PrivacyPolicy;
+use App\Models\RefundPolicy;
+use App\Models\Aboutus;
 class SiteController extends Controller
 {
     public function branches()
@@ -36,9 +40,8 @@ class SiteController extends Controller
     public function homeItems(Request $request)
     {
         $branchId = $request->branch_id;
-        $user = auth('sanctum')->user();
-        $userId = auth('sanctum')->user()->id ?? null;
-        // dd($userId);
+        $userId = auth('sanctum')->id();
+        
         if (!$branchId) {
             return response()->json([
                 'status'  => false,
@@ -46,64 +49,82 @@ class SiteController extends Controller
             ], 400);
         }
 
-        $sessionId = $request->header('X-Session-Id'); // optional fallback for guests
+        // Use ApiCacheHelper to cache the response
+        $response = ApiCacheHelper::remember(
+            'home_items', // endpoint name
+            1800, // 30 minutes TTL (adjust as needed)
+            function () use ($request, $branchId, $userId) {
+                $sessionId = $request->header('X-Session-Id');
+                
+                /* -----------------------------
+                    TOP ITEMS
+                ----------------------------- */
+                $topItemsQuery = Item::with('category_info', 'subcategory_info', 'item_image')
+                    ->select(
+                        'item.*',
+                        DB::raw('COUNT(order_details.item_id) AS item_order_counter'),
+                        DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId 
+                            THEN COALESCE(item_prices.price, 0) 
+                            ELSE 0 END) AS item_price")
+                    )
+                    ->leftJoin('order_details', 'order_details.item_id', '=', 'item.id')
+                    ->leftJoin('item_prices', function ($query) use ($branchId) {
+                        $query->on('item_prices.item_id', '=', 'item.id')
+                            ->where('item_prices.branch_id', '=', $branchId);
+                    })
+                    ->where('item.item_status', 1)
+                    ->where(function ($query) use ($branchId) {
+                        $query->where('item.branch_ids', 'like', "%,$branchId,%")
+                            ->orWhere('item.branch_ids', 'like', "$branchId,%")
+                            ->orWhere('item.branch_ids', 'like', "%,$branchId")
+                            ->orWhere('item.branch_ids', '=', $branchId);
+                    })
+                    ->groupBy('order_details.item_id', 'item.id');
 
-        /* -----------------------------
-            TOP ITEMS
-        ----------------------------- */
-        $topItemsQuery = Item::with('category_info', 'subcategory_info', 'item_image')
-            ->select(
-                'item.*',
-                DB::raw('COUNT(order_details.item_id) AS item_order_counter'),
-                DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId 
-                    THEN COALESCE(item_prices.price, 0) 
-                    ELSE 0 END) AS item_price")
-            )
-            ->leftJoin('order_details', 'order_details.item_id', '=', 'item.id')
-            ->leftJoin('item_prices', function ($query) use ($branchId) {
-                $query->on('item_prices.item_id', '=', 'item.id')
-                    ->where('item_prices.branch_id', '=', $branchId);
-            })
-            ->where('item.item_status', 1)
-            ->where(function ($query) use ($branchId) {
-                $query->where('item.branch_ids', 'like', "%,$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "%,$branchId")
-                    ->orWhere('item.branch_ids', '=', $branchId);
-            })
-            ->groupBy('order_details.item_id', 'item.id');
+                if ($userId) {
+                    $topItemsQuery
+                        ->addSelect(DB::raw('(CASE WHEN favorite.item_id IS NULL THEN 0 ELSE 1 END) AS is_favorite'))
+                        ->leftJoin('favorite', function ($query) use ($userId) {
+                            $query->on('favorite.item_id', '=', 'item.id')
+                                ->where('favorite.user_id', '=', $userId);
+                        })
+                        ->addSelect(DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart'))
+                        ->leftJoin('cart', function ($query) use ($userId) {
+                            $query->on('cart.item_id', '=', 'item.id')
+                                ->where('cart.user_id', '=', $userId)
+                                ->where('cart.buynow', '=', 0);
+                        });
+                } else {
+                    $topItemsQuery
+                        ->addSelect(DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart'))
+                        ->leftJoin('cart', function ($query) use ($sessionId) {
+                            $query->on('cart.item_id', '=', 'item.id')
+                                ->where('cart.session_id', '=', $sessionId)
+                                ->where('cart.buynow', '=', 0);
+                        });
+                }
 
-        if ($userId) {
-            $topItemsQuery
-                ->addSelect(DB::raw('(CASE WHEN favorite.item_id IS NULL THEN 0 ELSE 1 END) AS is_favorite'))
-                ->leftJoin('favorite', function ($query) use ($userId) {
-                    $query->on('favorite.item_id', '=', 'item.id')
-                        ->where('favorite.user_id', '=', $userId);
-                })
-                ->addSelect(DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart'))
-                ->leftJoin('cart', function ($query) use ($userId) {
-                    $query->on('cart.item_id', '=', 'item.id')
-                        ->where('cart.user_id', '=', $userId)
-                        ->where('cart.buynow', '=', 0);
-                });
-        } else {
-            $topItemsQuery
-                ->addSelect(DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart'))
-                ->leftJoin('cart', function ($query) use ($sessionId) {
-                    $query->on('cart.item_id', '=', 'item.id')
-                        ->where('cart.session_id', '=', $sessionId)
-                        ->where('cart.buynow', '=', 0);
-                });
-        }
+                $topItems = $topItemsQuery
+                    ->orderByDesc('item_order_counter')
+                    ->limit(6)
+                    ->get();
 
-        $topItems = $topItemsQuery
-            ->orderByDesc('item_order_counter')->limit(6)   // or 8
-            ->get();
+                // Return the response structure
+                return [
+                    'status'        => true,
+                    'top_items'     => $topItems,
+                    'cached'        => false, // Will be overridden
+                    'timestamp'     => now()->toDateTimeString()
+                ];
+            },
+            $request, // Pass the request for parameter-based caching
+            $userId   // Pass user ID for user-specific caching
+        );
 
-        return response()->json([
-            'status'        => true,
-            'top_items'     => $topItems,
-        ]);
+        // Override cached flag to indicate this is fresh from cache
+        $response['cached'] = true;
+        
+        return response()->json($response);
     }
 
     public function categories(Request $request)
@@ -117,14 +138,39 @@ class SiteController extends Controller
             ], 400);
         }
 
-        $categories = Category::select('id', 'category_name', 'slug', 'image')->where('branch_ids', 'like', "%,$branchId,%")->where('is_available',1)->get();
+        $userId = auth('sanctum')->id();
 
-        return response()->json([
-            'status'        => true,
-            'top_items'     => $categories,
-        ]);
+        // Use ApiCacheHelper to cache categories
+        $response = ApiCacheHelper::remember(
+            'categories', // endpoint name
+            3600, // 1 hour TTL (categories don't change often)
+            function () use ($branchId) {
+                $categories = Category::select('id', 'category_name', 'slug', 'image')
+                    ->where(function ($q) use ($branchId) {
+                        $q->where('branch_ids', $branchId)
+                        ->orWhere('branch_ids', 'like', "$branchId,%")
+                        ->orWhere('branch_ids', 'like', "%,$branchId")
+                        ->orWhere('branch_ids', 'like', "%,$branchId,%");
+                    })
+                    ->where('is_available', 1)
+                    ->get();
+
+                return [
+                    'status'        => true,
+                    'top_items'     => $categories,
+                    'cached'        => false,
+                    'timestamp'     => now()->toDateTimeString()
+                ];
+            },
+            $request, // Pass request for parameter-based caching
+            $userId   // User-specific caching (optional for categories)
+        );
+
+        // Override cached flag
+        $response['cached'] = true;
+        
+        return response()->json($response);
     }
-
 
     public function checklogin(Request $request)
     {
@@ -239,6 +285,7 @@ class SiteController extends Controller
     public function categoryItems(Request $request, $slug)
     {
         $branchId = $request->branch_id;
+        $userId = auth('sanctum')->id();
 
         if (!$branchId) {
             return response()->json([
@@ -247,18 +294,58 @@ class SiteController extends Controller
             ], 400);
         }
 
-        $userId    = auth('sanctum')->user()->id;
-        $sessionId = $request->header('X-Session-Id'); // guest cart fallback
-
         /* -----------------------------------------------------
-        FETCH CATEGORY
+            LEVEL 1: CACHE BASE DATA (SHARED BETWEEN ALL USERS)
         ------------------------------------------------------ */
-        $category = Category::where('slug', $slug)
-            ->where('is_available', 1)
-            ->where('is_deleted', 2)
-            ->first();
+        $baseCacheKey = "category_items_base_{$slug}_branch_{$branchId}";
+        $baseData = Cache::remember($baseCacheKey, 3600, function () use ($slug, $branchId) {
+            $category = Category::where('slug', $slug)
+                ->where('is_available', 1)
+                ->where('is_deleted', 2)
+                ->first();
 
-        if (!$category) {
+            if (!$category) {
+                return null;
+            }
+
+            $subcategories = Subcategory::where('cat_id', $category->id)
+                ->where('is_available', 1)
+                ->where('is_deleted', 2)
+                ->orderBy('reorder_id')
+                ->get();
+
+            $baseItems = Item::with('category_info', 'subcategory_info', 'item_image')
+                ->select(
+                    'item.*',
+                    DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId 
+                        THEN COALESCE(item_prices.price, 0) 
+                        ELSE 0 END) AS item_price")
+                )
+                ->leftJoin('item_prices', function ($query) use ($branchId) {
+                    $query->on('item_prices.item_id', '=', 'item.id')
+                        ->where('item_prices.branch_id', '=', $branchId);
+                })
+                ->where('item.item_status', 1)
+                ->where('item.cat_id', $category->id)
+                ->where(function ($query) use ($branchId) {
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%")
+                        ->orWhere('item.branch_ids', 'like', "$branchId,%")
+                        ->orWhere('item.branch_ids', 'like', "%,$branchId")
+                        ->orWhere('item.branch_ids', '=', $branchId);
+                })
+                ->groupBy('item.id')
+                ->orderBy('item.reorder_id')
+                ->get();
+
+            return [
+                'category' => $category,
+                'subcategories' => $subcategories,
+                'baseItems' => $baseItems,
+                'itemIds' => $baseItems->pluck('id')->toArray()
+            ];
+        });
+
+        if (!$baseData) {
             return response()->json([
                 'status'  => false,
                 'message' => 'Category not found',
@@ -266,71 +353,59 @@ class SiteController extends Controller
         }
 
         /* -----------------------------------------------------
-        FETCH SUBCATEGORIES
+            LEVEL 2: GET USER-SPECIFIC DATA
         ------------------------------------------------------ */
-        $subcategories = Subcategory::where('cat_id', $category->id)
-            ->where('is_available', 1)
-            ->where('is_deleted', 2)
-            ->orderBy('reorder_id')
-            ->get();
-
-        /* -----------------------------------------------------
-        BASE QUERY FOR ITEMS
-        ------------------------------------------------------ */
-        $itemsQuery = Item::with('category_info', 'subcategory_info', 'item_image')
-            ->select(
-                'item.*',
-                DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId 
-                    THEN COALESCE(item_prices.price, 0) 
-                    ELSE 0 END) AS item_price")
-            )
-            ->leftJoin('item_prices', function ($query) use ($branchId) {
-                $query->on('item_prices.item_id', '=', 'item.id')
-                    ->where('item_prices.branch_id', '=', $branchId);
-            })
-            ->where('item.item_status', 1)
-            ->where('item.cat_id', $category->id)
-            ->where(function ($query) use ($branchId) {
-                $query->where('item.branch_ids', 'like', "%,$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "%,$branchId")
-                    ->orWhere('item.branch_ids', '=', $branchId);
-            })
-            ->groupBy('item.id')
-            ->orderBy('item.reorder_id');
-
-        /* -----------------------------------------------------
-        USER-SPECIFIC FIELDS (favorite, cart)
-        ------------------------------------------------------ */
+        $sessionId = $request->header('X-Session-Id');
+        $itemIds = $baseData['itemIds'];
+        
         if ($userId) {
-            $itemsQuery
-                ->addSelect(DB::raw('(CASE WHEN favorite.item_id IS NULL THEN 0 ELSE 1 END) AS is_favorite'))
-                ->leftJoin('favorite', function ($q) use ($userId) {
-                    $q->on('favorite.item_id', '=', 'item.id')
-                    ->where('favorite.user_id', '=', $userId);
-                })
-                ->addSelect(DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart'))
-                ->leftJoin('cart', function ($q) use ($userId) {
-                    $q->on('cart.item_id', '=', 'item.id')
-                    ->where('cart.user_id', '=', $userId)
-                    ->where('cart.buynow', 0);
-                });
+            // Cache user favorites for 5 minutes
+            $favoriteKey = "user_{$userId}_favorites_" . md5(implode(',', $itemIds));
+            $favoriteIds = Cache::remember($favoriteKey, 300, function () use ($userId, $itemIds) {
+                return DB::table('favorite')
+                    ->where('user_id', $userId)
+                    ->whereIn('item_id', $itemIds)
+                    ->pluck('item_id')
+                    ->toArray();
+            });
+
+            // Cache user cart items for 5 minutes
+            $cartKey = "user_{$userId}_cart_" . md5(implode(',', $itemIds));
+            $cartItemIds = Cache::remember($cartKey, 300, function () use ($userId, $itemIds) {
+                return DB::table('cart')
+                    ->where('user_id', $userId)
+                    ->where('buynow', 0)
+                    ->whereIn('item_id', $itemIds)
+                    ->pluck('item_id')
+                    ->toArray();
+            });
         } else {
-            $itemsQuery
-                ->addSelect(DB::raw('(CASE WHEN cart.item_id IS NULL THEN 0 ELSE 1 END) AS is_cart'))
-                ->leftJoin('cart', function ($q) use ($sessionId) {
-                    $q->on('cart.item_id', '=', 'item.id')
-                    ->where('cart.session_id', '=', $sessionId)
-                    ->where('cart.buynow', 0);
+            if ($sessionId) {
+                $cartKey = "guest_{$sessionId}_cart_" . md5(implode(',', $itemIds));
+                $cartItemIds = Cache::remember($cartKey, 300, function () use ($sessionId, $itemIds) {
+                    return DB::table('cart')
+                        ->where('session_id', $sessionId)
+                        ->where('buynow', 0)
+                        ->whereIn('item_id', $itemIds)
+                        ->pluck('item_id')
+                        ->toArray();
                 });
+            } else {
+                $cartItemIds = [];
+            }
+            $favoriteIds = [];
         }
 
-        $items = $itemsQuery->get();
-
         /* -----------------------------------------------------
-        GROUP ITEMS BY SUBCATEGORY
+            ENRICH AND GROUP ITEMS
         ------------------------------------------------------ */
-        $groupedItems = $items
+        $enrichedItems = $baseData['baseItems']->map(function ($item) use ($favoriteIds, $cartItemIds) {
+            $item->is_favorite = in_array($item->id, $favoriteIds) ? 1 : 0;
+            $item->is_cart = in_array($item->id, $cartItemIds) ? 1 : 0;
+            return $item;
+        });
+
+        $groupedItems = $enrichedItems
             ->sortBy(fn($item) => $item->subcategory_info->reorder_id ?? PHP_INT_MAX)
             ->groupBy(fn($item) =>
                 $item->subcategory_info->subcategory_name 
@@ -338,22 +413,26 @@ class SiteController extends Controller
             );
 
         /* -----------------------------------------------------
-        API RESPONSE
+            API RESPONSE
         ------------------------------------------------------ */
         return response()->json([
             'status'        => true,
-            'category'      => $category,
-            'subcategories' => $subcategories,
+            'category'      => $baseData['category'],
+            'subcategories' => $baseData['subcategories'],
             'items'         => $groupedItems,
+            'cache_info'    => [
+                'base_cached' => true,
+                'user_cached' => true,
+                'response_time' => microtime(true) - LARAVEL_START
+            ]
         ]);
     }
-
     public function ItemDetails(Request $request, $slug) 
     {
         $user_id = auth('sanctum')->user()->id ?? null;
         $branchId = $request->branch_id;
-        $deal_id = $request->deal_id;
-        $deal_category_id = $request->deal_category_id;
+        $deal_id = $request->dealId;
+        $deal_category_id = $request->dealCategoryId;
         $size_ids = $request->size_ids ? explode(',', $request->size_ids) : [];
 
         if (!$branchId) {
@@ -369,20 +448,22 @@ class SiteController extends Controller
                 'item.*',
                 DB::raw('(CASE WHEN favorite.item_id IS NULL THEN 0 ELSE 1 END) AS is_favorite'),
                 DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId 
-                        THEN COALESCE(item_prices.price, 0) 
-                        ELSE 0 END) AS item_price")
+                    THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price")
             )
             ->leftJoin('favorite', function ($query) use ($user_id) {
                 $query->on('favorite.item_id', '=', 'item.id')
-                    ->where('favorite.user_id', '=', $user_id);
+                      ->where('favorite.user_id', '=', $user_id);
             })
             ->leftJoin('item_prices', function ($query) use ($branchId) {
                 $query->on('item_prices.item_id', '=', 'item.id')
-                    ->where('item_prices.branch_id', '=', $branchId);
+                      ->where('item_prices.branch_id', '=', $branchId);
             })
             ->where('item.slug', $slug)
             ->where('item.item_status', 1)
+            ->groupBy('item.id')   // 🔥 REQUIRED
             ->first();
+
+            
 
         if (!$iteminfo) {
             return response()->json([
@@ -400,13 +481,13 @@ class SiteController extends Controller
 
         if ($deal_id) {
             $topDeal = TopDeals::find($deal_id);
+
             if ($topDeal) {
                 $product_id = $topDeal->product_id;
-                
                 if ($is_pizza && !empty($size_ids)) {
+                    
                     // Pizza deal pricing logic
                     if ($topDeal->deal_type == 3 && $deal_category_id) {
-                        // Deal with category (e.g., BOGO, Mix & Match)
                         $deal_category = DealCategory::where('id', $deal_category_id)->first();
                         
                         // Get pizza prices for the item
@@ -441,26 +522,18 @@ class SiteController extends Controller
                             }
                         }
                     } else {
-                        // Other deal types for pizza (Flat, Selective, Percent, etc.)
-                        // First get the base price
-                        if (!empty($size_ids)) {
-                            $basePrice = PizzaPrice::where('item_id', $iteminfo->id)
+                        // Regular pizza deal pricing
+                        $dealprice = PizzaPrice::where('item_id', $product_id)
+                            ->where('branch_id', $branchId)
+                            ->whereIn('size_id', $size_ids)
+                            ->orderBy('price', 'asc')
+                            ->value('price');
+                            
+                        if (!$dealprice) {
+                            $dealprice = ItemPrice::where('item_id', $product_id)
                                 ->where('branch_id', $branchId)
-                                ->whereIn('size_id', $size_ids)
-                                ->orderBy('price', 'asc')
                                 ->value('price');
-                                
-                            if (!$basePrice) {
-                                $basePrice = ItemPrice::where('item_id', $iteminfo->id)
-                                    ->where('branch_id', $branchId)
-                                    ->value('price') ?? $final_price;
-                            }
-                        } else {
-                            $basePrice = $final_price;
                         }
-                        
-                        // Apply deal pricing based on deal type
-                        $dealprice = $this->applyDealLogic($topDeal, $basePrice, $deal_category_id, $iteminfo->id);
                     }
                 } else {
                     // Non-pizza deal pricing
@@ -471,9 +544,29 @@ class SiteController extends Controller
                     if ($price) {
                         $final_price = $price;
                     }
+                    
+                    
+                    if ($topDeal->deal_type == 3) {
+                                  
 
-                    // Apply deal pricing
-                    $final_price = $this->applyDealLogic($topDeal, $final_price, $deal_category_id, $iteminfo->id);
+                        $dealItem = \App\Models\DealItem::where('deal_id', $topDeal->id)
+                            ->where('item_id', $iteminfo->id)
+                            ->first();
+
+                        if ($dealItem) {
+                            $dealCategory = \App\Models\DealCategory::where('id', $deal_category_id)
+                                ->first();
+
+                            if ($dealCategory && $dealCategory->is_free == 1) {
+                                if ($topDeal->offer_type == 1) {
+                                    $price = max(0, $price - $topDeal->offer_amount);
+                                } else {
+                                    $price = $price - ($price * ($topDeal->offer_amount / 100));
+                                }
+                            }
+                        }
+                        $final_price = $price;
+                    }
                 }
             }
         }
@@ -565,20 +658,16 @@ class SiteController extends Controller
                     ->orWhere('branch_id', '=', $branchId);
             })
             ->get();
+            
 
         // Prepare response data
         $itemdata = [
             "id"              => $iteminfo->id,
             "slug"            => $iteminfo->slug,
             "item_name"       => $iteminfo->item_name,
-            "item_type"       => $iteminfo->item_type,
-            "item_type_image" => $iteminfo->item_type == 1
-                                    ? helper::image_path("veg.svg")
-                                    : helper::image_path("nonveg.svg"),
             "price"           => $dealprice ?? $final_price,
-            "video_url"       => $iteminfo->video_url,
-            "is_top_deals"    => $iteminfo->is_top_deals,
-            "tax"             => $iteminfo->tax,
+           "tax"             => $iteminfo->tax,
+            "image"           => $iteminfo->item_image->image_url,
             "image_name"      => optional($iteminfo->item_image)->image_name,
             "is_favorite"     => $iteminfo->is_favorite,
             "is_pizza"        => $is_pizza,
@@ -600,48 +689,6 @@ class SiteController extends Controller
             'status'   => true,
             'item'     => $itemdata,
         ]);
-    }
-
-    // Helper function for deal logic
-    private function applyDealLogic($topDeal, $price, $deal_category_id, $item_id)
-    {
-        if ($topDeal->deal_type == 3) {
-            $dealItem = \App\Models\DealItem::where('deal_id', $topDeal->id)
-                ->where('item_id', $item_id)
-                ->first();
-
-            if ($dealItem) {
-                $dealCategory = \App\Models\DealCategory::where('id', $deal_category_id)
-                    ->first();
-
-                if ($dealCategory && $dealCategory->is_free == 1) {
-                    if ($topDeal->offer_type == 1) {
-                        $price = max(0, $price - $topDeal->offer_amount);
-                    } else {
-                        $price = $price - ($price * ($topDeal->offer_amount / 100));
-                    }
-                }
-            }
-        } elseif ($topDeal->deal_type == 2 || $topDeal->deal_type == 0) {
-            // Flat deal
-            if ($topDeal->offer_type == 1) {
-                $price = max(0, $price - $topDeal->offer_amount);
-            } else {
-                $price -= $price * ($topDeal->offer_amount / 100);
-            }
-        } elseif ($topDeal->deal_type == 1) {
-            // selective Offer
-            $price = $topDeal->offer_amount;
-        } else {
-            // Percent or Fixed discount
-            if ($topDeal->offer_type == 1) {
-                $price = max(0, $price - $topDeal->offer_amount);
-            } else {
-                $price -= $price * ($topDeal->offer_amount / 100);
-            }
-        }
-        
-        return $price;
     }
 
     public function pizzadetails($slug, Request $request)
@@ -806,90 +853,198 @@ class SiteController extends Controller
 
     public function deals(Request $request)
     {
-        $user_id = auth('sanctum')->user()->id;
+        $userId = auth('sanctum')->id();
         $branchId = $request->branch_id;
 
-        $sessionId = $user_id ?? $request->header('X-Session-Id');
-        $currentDateTime = now();
+        if (!$branchId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'branch_id is required'
+            ], 400);
+        }
 
+        // Use ApiCacheHelper to cache the response
+        $response = ApiCacheHelper::remember(
+            'deals', // endpoint name
+            300, // 5 minutes TTL (deals change frequently due to time constraints)
+            function () use ($request, $branchId, $userId) {
+                $sessionId = $userId ?? $request->header('X-Session-Id');
+                $currentDateTime = now();
 
-        $getsearchitems = TopDeals::with(['product.item_image'])
-            ->join('item', 'top_deals.product_id', '=', 'item.id')
-            ->leftJoin('cart', function ($query) use ($sessionId) {
-                $query->on('cart.item_id', '=', 'item.id')
-                    ->where('cart.user_id', '=', $sessionId)
-                    ->where('cart.buynow', '=', '0');
-            })
-            ->leftJoin('item_prices', function ($query) use ($branchId) {
-                $query->on('item_prices.item_id', '=', 'item.id')
-                    ->where('item_prices.branch_id', '=', $branchId);
-            })
-            ->where(function ($query) use ($currentDateTime) {
-                $query->where('start_date', '<=', $currentDateTime->toDateString())
-                    ->where('end_date', '>=', $currentDateTime->toDateString());
-            })
-            ->where(function ($query) use ($currentDateTime) {
-                $query->where('start_time', '<=', $currentDateTime->toTimeString())
-                    ->where('end_time', '>=', $currentDateTime->toTimeString());
-            })
-            ->where(function ($query) use ($branchId) {
-                $query->where('item.branch_ids', 'like', "%,$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "%,$branchId")
-                    ->orWhere('item.branch_ids', '=', $branchId);
-            })
-            ->select(
-                'top_deals.*',
-                'top_deals.id as deal_id',
-                'item_prices.price as dealPrice'
-            )
-            ->groupBy('item.id') // Ensuring each item appears only once
-            ->get();
+                // Get deals without cart join first (for better caching)
+                $getsearchitems = TopDeals::with(['product.item_image'])
+                    ->join('item', 'top_deals.product_id', '=', 'item.id')
+                    ->leftJoin('item_prices', function ($query) use ($branchId) {
+                        $query->on('item_prices.item_id', '=', 'item.id')
+                            ->where('item_prices.branch_id', '=', $branchId);
+                    })
+                    ->where(function ($query) use ($currentDateTime) {
+                        $query->where('start_date', '<=', $currentDateTime->toDateString())
+                            ->where('end_date', '>=', $currentDateTime->toDateString());
+                    })
+                    ->where(function ($query) use ($currentDateTime) {
+                        $query->where('start_time', '<=', $currentDateTime->toTimeString())
+                            ->where('end_time', '>=', $currentDateTime->toTimeString());
+                    })
+                    ->where(function ($query) use ($branchId) {
+                        $query->where('item.branch_ids', 'like', "%,$branchId,%")
+                            ->orWhere('item.branch_ids', 'like', "$branchId,%")
+                            ->orWhere('item.branch_ids', 'like', "%,$branchId")
+                            ->orWhere('item.branch_ids', '=', $branchId);
+                    })
+                    ->select(
+                        'top_deals.*',
+                        'top_deals.id as deal_id',
+                        'item_prices.price as dealPrice',
+                        'item.id as item_id' // Add item_id for cart lookup
+                    )
+                    ->groupBy('item.id')
+                    ->get();
 
-            $mapped = $getsearchitems->map(function ($deal) {
+                // Get cart items separately for better cache reuse
+                $itemIds = $getsearchitems->pluck('item_id')->toArray();
+                $cartItemIds = [];
+                
+                if ($sessionId) {
+                    if ($userId) {
+                        // Cache user cart items for 2 minutes
+                        $cartKey = "user_{$userId}_deals_cart_" . md5(implode(',', $itemIds));
+                        $cartItemIds = Cache::remember($cartKey, 120, function () use ($userId, $itemIds) {
+                            return DB::table('cart')
+                                ->where('user_id', $userId)
+                                ->where('buynow', 0)
+                                ->whereIn('item_id', $itemIds)
+                                ->pluck('item_id')
+                                ->toArray();
+                        });
+                    } else {
+                        // Cache guest cart items for 2 minutes
+                        $cartKey = "guest_{$sessionId}_deals_cart_" . md5(implode(',', $itemIds));
+                        $cartItemIds = Cache::remember($cartKey, 120, function () use ($sessionId, $itemIds) {
+                            return DB::table('cart')
+                                ->where('session_id', $sessionId)
+                                ->where('buynow', 0)
+                                ->whereIn('item_id', $itemIds)
+                                ->pluck('item_id')
+                                ->toArray();
+                        });
+                    }
+                }
 
-                $product = $deal->product;
-                $image   = $product?->item_image?->image_url ?? null;
+                // Map the deals with cart status
+                $mapped = $getsearchitems->map(function ($deal) use ($cartItemIds) {
+                    $product = $deal->product;
+                    $image   = $product?->item_image?->image_url ?? null;
 
-                // Final unified structure
+                    return [
+                        'deal_id'      => $deal->deal_id,
+                        'item_id'      => $deal->item_id,
+                        'deal_type'    => $deal->deal_type,
+                        'title'        => $deal->title,
+                        'description'  => $deal->description,
+                        'start_date'   => $deal->start_date,
+                        'end_date'     => $deal->end_date,
+                        'start_time'   => $deal->start_time,
+                        'end_time'     => $deal->end_time,
+                        'image'        => $image,
+                        'dealPrice'    => $deal->dealPrice,
+                        'in_cart'      => in_array($deal->item_id, $cartItemIds),
+
+                        'meta' => [
+                            'is_flat'      => $deal->deal_type == 1,
+                            'is_selective' => $deal->deal_type == 2,
+                            'is_bogo'      => $deal->deal_type == 3,
+                            'is_bmsm'      => $deal->deal_type == 4,
+                        ],
+
+                        'size_id' => $deal->deal_type == 2 ? ($deal->size_id ?? null) : null
+                    ];
+                });
+
                 return [
-                    'deal_id'      => $deal->deal_id,
-                    'deal_type'    => $deal->deal_type,
-                    'title'        => $deal->title,
-                    'description'  => $deal->description,
-                    'start_date'   => $deal->start_date,
-                    'end_date'     => $deal->end_date,
-                    'start_time'   => $deal->start_time,
-                    'end_time'     => $deal->end_time,
-                    'image'        => $image,
-                    'dealPrice'    => $deal->dealPrice,
-
-                    'meta' => [
-                        'is_flat'      => $deal->deal_type == 1,
-                        'is_selective' => $deal->deal_type == 2,
-                        'is_bogo'      => $deal->deal_type == 3,
-                        'is_bmsm'      => $deal->deal_type == 4,
-                    ],
-
-                    // Selective → Only return size_id
-                    'size_id' => $deal->deal_type == 2 ? ($deal->size_id ?? null) : null
+                    'status' => true,
+                    'response' => $mapped,
+                    'cached' => false,
+                    'timestamp' => now()->toDateTimeString()
                 ];
-            });
+            },
+            $request, // Pass the request for parameter-based caching
+            $userId   // Pass user ID for user-specific caching
+        );
 
-
-        return ['response' => $mapped];
+        // Override cached flag
+        $response['cached'] = true;
+        
+        return response()->json($response);
     }
 
     public function sliders(Request $request)
     {
-        $sliders = Slider::with('item_info', 'category_info')->where('branch_id', $request->branch_id)->where('is_available', 1)->orderByDesc('id')->get();
-        return response()->json([
-            'status' => true,
-            'data' => $sliders->map(function ($slider) {
+        $branchId = $request->branch_id;
+        $userId = auth('sanctum')->id();
+
+        if (!$branchId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'branch_id is required'
+            ], 400);
+        }
+
+        // Use ApiCacheHelper to cache the response
+        $response = ApiCacheHelper::remember(
+            'sliders', // endpoint name
+            7200, // 2 hours TTL (sliders don't change often)
+            function () use ($branchId) {
+                $sliders = Slider::with('item_info', 'category_info')
+                    ->where('branch_id', $branchId)
+                    ->where('is_available', 1)
+                    ->orderByDesc('id')
+                    ->get()
+                    ->map(function ($slider) {
+                        return [
+                        'id' => $slider->id,
+                        'image' => helper::image_path($slider->image),
+                        'title' => $slider->title ?? null,
+                        'description' => $slider->description ?? null,
+                        'link_type' => $slider->link_type ?? null,
+                        'item_id' => $slider->item_info->id ?? null,
+                        'category_id' => $slider->category_info->id ?? null,
+                        'external_link' => $slider->external_link ?? null,
+                        ];
+                    });
+
                 return [
-                   'image' => helper::image_path($slider->image),
+                    'status' => true,
+                    'data' => $sliders,
+                    'cached' => false,
+                    'timestamp' => now()->toDateTimeString()
                 ];
-            })
-        ]);
+            },
+            $request, // Pass the request
+            $userId   // User ID (though sliders are usually the same for all users)
+        );
+
+        // Override cached flag
+        $response['cached'] = true;
+        
+        return response()->json($response);
+    }
+
+    public function privacypolicy(Request $request)
+    {
+        $getprivacypolicy = PrivacyPolicy::first();
+        return response()->json($getprivacypolicy);
+    }
+
+     public function aboutus(Request $request)
+    {
+        $getaboutus = Aboutus::first();
+        return response()->json($getaboutus);
+    }
+
+     public function refundpolicy(Request $request)
+    {
+        $getrefundpolicy = RefundPolicy::first();
+        return response()->json($getrefundpolicy);
     }
 }

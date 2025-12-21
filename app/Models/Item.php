@@ -5,13 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Models\itemPrice;
-
+use App\Helpers\ApiCacheHelper;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class Item extends Model
 {
     protected $table = 'item';
     protected $fillable = ['cat_id', 'subcat_id', 'item_name', 'branch_ids','slug', 'image', 'item_type', 'has_variation', 'attribute', 'price', 'original_price', 'addons_id', 'item_description', 'preparation_time', 'tax', 'avg_ratting', 'discount_percentage', 'item_status', 'is_featured', 'is_deleted', 'delivery_time'];
-
+    protected static function booted()
+    {
+        static::saved(function ($item) {
+            // Find the category for this item
+            $category = Category::find($item->cat_id);
+            if ($category) {
+                // Clear category items cache
+                ApiCacheHelper::clear("category_items_{$category->slug}");
+                Cache::forget("category_items_base_{$category->slug}_branch_*");
+            }
+        });
+    }
     public function subcategory_info()
     {
         return $this->hasOne('App\Models\Subcategory', 'id', 'subcat_id')->select('subcategories.id', 'subcategories.subcategory_name', 'subcategories.slug', 'subcategories.reorder_id');
