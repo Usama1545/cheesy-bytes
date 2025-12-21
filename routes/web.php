@@ -676,6 +676,7 @@ Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware','
 
         Route::get('/item-{slug}', [WebItemController::class, 'itemdetails'])->name('itemdetails');
         Route::get('bogo-deal-details/{id}',[DealController::class, 'bogoDealDetails'])->name('bogoDealDetails');
+        Route::get('flat-deal-details/{id}',[DealController::class, 'flatDealDetails'])->name('flatDealDetails');
 
         //        Route::get('/item-{slug}', [WebItemController::class, 'itemdetails'])->name('itemdetails');
 

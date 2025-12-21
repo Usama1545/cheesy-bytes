@@ -75,17 +75,21 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
                             @endif
                         @endif
 
-                        @if (
-                            $item->deal_type == 1 ||
-                                $item->deal_type == 3 ||
-                                $item->deal_type == 4 ||
-                                $item->deal_type == 2 ||
-                                $item->deal_type == 0)
+                        @if ($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
                             <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
                                 href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}">
                                 Select
                                 <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
+                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
+                                </div>
+                            </a>
+                        @elseif($item->deal_type == 2 || $item->deal_type == 0)
+                            <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
+                                href="{{ helper::branch_route('flatDealDetails', ['id' => $item->deal_id]) }}">
+                                Select
+                                <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
+                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
+                                </div>
                             </a>
                         @else
                             <button
@@ -93,7 +97,8 @@ $heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height class
                                 onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
                                 {{ trans('labels.add') }}
                                 <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
+                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
+                                </div>
                             </button>
                         @endif
                     </div>

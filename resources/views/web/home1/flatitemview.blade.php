@@ -2,17 +2,26 @@
     <div class="card rounded-4 overflow-hidden h-100">
         @php
             use App\Helpers\helper;
+
             $categoryName = strtolower($itemdata['category_info']->category_name);
             $isPizza = $categoryName === 'pizza';
             $dealId = $deal['deal_id'];
+
             $originalPrice = $itemdata->original_price ?? $itemdata->item_price;
-            $dealPrice = $itemdata->deal_discount ?? $originalPrice;
-            $discount = $itemdata->deal_price ?? 0;
-            $off = $originalPrice > 0 ? number_format(100 - ($dealPrice * 100) / $originalPrice, 1) : 0;
+
+            // deal_discount = discount amount
+            $discountAmount = $itemdata->deal_discount ?? 0;
+
+            // final deal price
+            $dealPrice = max(0, $originalPrice - $discountAmount);
+
+            // % OFF calculation
+            $off = $originalPrice > 0 ? number_format(($discountAmount * 100) / $originalPrice, 1) : 0;
 
             $isInCart = $itemdata->is_cart == 1;
             $cartQty = $isInCart ? helper::getCartItemQty($itemdata->id) : 0;
         @endphp
+
 
         @if ($isPizza)
             <a data-bs-toggle="modal" data-bs-target="#PizzaModal" class="btn btn-sm fw-500 border-0 cursor-pointer"
