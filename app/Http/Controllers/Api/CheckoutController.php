@@ -476,7 +476,7 @@ class CheckoutController extends Controller
                         'discount_applied' => $discountAmount > 0,
                         'discount_amount' => round($discountAmount, 2)
                     ]
-                ], 201);
+                ], 200);
 
             } else {
                 DB::rollback();
@@ -495,7 +495,7 @@ class CheckoutController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to place order',
+                'message' => 'Failed to place order now',
                 'error' => config('app.debug') ? $th->getMessage() : null
             ], 500);
         }
@@ -641,7 +641,8 @@ class CheckoutController extends Controller
 
     public function createPrintJob($id, $branch_id)
     {
-        $branch = Branch::find($branch_id);
+        $branch = Branch::findOrFail($branch_id);
+        log::info(json_encode($branch));
         PrintJob::create([
             'printer_id' => $branch->printer_id,
             'mac_id' => $branch->mac_id,
@@ -735,12 +736,13 @@ class CheckoutController extends Controller
         }
     }
 
-    public function paymentsuccess(Order $order)
+    public function paymentsuccess($id)
     {
+        $order = Order::findOrFail($id);
         try {
-           $order->update([
-               'payment_status' => 2
-           ]);
+           $order->payment_status = 2;
+           $order->save();
+           
            
             $this->createPrintJob($order->id, $order->branch_id);
             $response = ['status' => 1, 'msg' => 'Payment successful'];
@@ -755,6 +757,4 @@ class CheckoutController extends Controller
     {
         return response()->json(['status' => 0, 'msg' => 'Payment failed']);
     }
-
-
 }

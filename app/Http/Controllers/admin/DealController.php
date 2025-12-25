@@ -44,11 +44,18 @@ class DealController extends Controller
             'offer_amount' => 'required|numeric|min:0',
             'order' => 'required|integer|min:1',
           ]);
-
+        
+        $slug = Item::find($request->product_id)->slug;
+        $slugexists = TopDeals::where('slug', $slug)->exists();
+        if ($slugexists) {
+            $slug = $slug . '-' .$deal->id;
+        }
+        
+        // dd($slug);
 
         $deal = TopDeals::create([
+            'slug' => $slug,
             'product_id' => $request->product_id,
-            'slug' => $request->slug,
             'start_date' => $request->start_date,
             'start_time' => $request->start_time,
             'end_date' => $request->end_date,
@@ -59,16 +66,6 @@ class DealController extends Controller
             'size_id' => implode(',', $request->size_id),
             'product_ids'=> implode(',', $request->product_ids),
 
-        ]);
-
-        $slug = Item::find($request->product_id)->slug;
-        $slugexists = TopDeals::where('slug', $slug)->exists();
-        if ($slugexists) {
-            $slug = $slug . '-' .$deal->id;
-        }
-
-        $deal->update([
-            'slug' => $slug,
         ]);
 
         return redirect('admin/topDeals')->with('success', 'Deal created successfully!');

@@ -19,7 +19,7 @@
             $off = $originalPrice > 0 ? number_format(($discountAmount * 100) / $originalPrice, 1) : 0;
 
             $isInCart = $itemdata->is_cart == 1;
-            $cartQty = $isInCart ? helper::getCartItemQty($itemdata->id) : 0;
+            $cartQty = $isInCart ? helper::get_item_cart($itemdata->id) : 0;
         @endphp
 
 

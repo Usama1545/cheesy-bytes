@@ -28,8 +28,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use App\Models\PrivacyPolicy;
 use App\Models\RefundPolicy;
-use App\Models\TermsCondition;
 use App\Models\Aboutus;
+use App\Models\TermsCondition;
+
 class SiteController extends Controller
 {
     public function branches()
@@ -1030,7 +1031,8 @@ class SiteController extends Controller
         
         return response()->json($response);
     }
-
+    
+    
     public function privacypolicy(Request $request)
     {
         $getprivacypolicy = PrivacyPolicy::first();
@@ -1048,7 +1050,8 @@ class SiteController extends Controller
         $getrefundpolicy = RefundPolicy::first();
         return response()->json($getrefundpolicy);
     }
-
+    
+    
     public function termsconditions(Request $request)
     {
         $gettermscondition = TermsCondition::first();

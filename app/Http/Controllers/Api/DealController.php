@@ -106,6 +106,7 @@ class DealController extends Controller
 
     public function showDealItem(Request $request, $slug)
     {
+        // dd($slug);
         $dealId = $request->deal_id;
 
         // Basic validation
@@ -114,7 +115,7 @@ class DealController extends Controller
         }
 
         $branchId = $request->branch_id;
-        $userId   = optional(Auth::user())->id;
+        $userId   = auth('sanctum')->user()->id ?? "";
 
         // Fetch deal
         $deal = TopDeals::where('id', $dealId)->firstOrFail();

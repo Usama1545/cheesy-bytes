@@ -43,9 +43,9 @@ class Branch extends Model
             ->select('branch_id', 'public_key', 'secret_key');
     }
 
+
     public function delivery_partners()
     {
         return $this->hasMany(Carrier::class, 'branch_id', 'id');
     }
-
 }

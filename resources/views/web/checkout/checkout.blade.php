@@ -411,7 +411,7 @@
                             <div class="special-instruction mb-3 border">
                                 <label class="form-label mb-3 border-bottom pb-2 w-100"
                                        for="tip">Tip</label>
-                                <input type="number" class="form-control" name="tip" id="tip"
+                                <input type="number" class="form-control" name="tip" id="tip" min="1" step="1"
                                           placeholder="Tip">
                             </div>
                             <div class="special-instruction mb-3 border">
@@ -599,7 +599,13 @@
     <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/checkout.js') }}"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
      <script>
+         document.getElementById('tip').addEventListener('keydown', function (e) {
+    if (e.key === '-' || e.key === 'e') {
+        e.preventDefault();
+    }
+});
         var select = "{{ trans('labels.select') }}";
         var dateFormat = "{{ helper::appdata()->date_format }}";
         var today = new Date(); // Get today's date
