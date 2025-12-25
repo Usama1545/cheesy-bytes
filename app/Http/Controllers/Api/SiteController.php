@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use App\Models\PrivacyPolicy;
 use App\Models\RefundPolicy;
+use App\Models\TermsCondition;
 use App\Models\Aboutus;
 class SiteController extends Controller
 {
@@ -1046,5 +1047,11 @@ class SiteController extends Controller
     {
         $getrefundpolicy = RefundPolicy::first();
         return response()->json($getrefundpolicy);
+    }
+
+    public function termsconditions(Request $request)
+    {
+        $gettermscondition = TermsCondition::first();
+        return response()->json($gettermscondition);
     }
 }

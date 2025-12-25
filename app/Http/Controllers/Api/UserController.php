@@ -618,7 +618,7 @@ class UserController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_number,
                 'branch_id' => $order->branch_id,
-                'status' => $order->status,
+                'status' => helper::gettype($order->status, $order->status_type, $order->order_type->name),
                 'grand_total' => (float)$order->grand_total,
                 'discount_amount' => (float)$order->discount_amount,
                 'tax_amount' => (float)$order->tax_amount,

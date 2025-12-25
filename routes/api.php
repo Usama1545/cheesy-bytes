@@ -21,6 +21,7 @@ Route::get('deleteUnpaidPreBookings', [OrderController::class, 'deleteUnpaidPreB
 Route::get('/refund-policy', [SiteController::class, 'refundpolicy']);
 Route::get('/abous-us', [SiteController::class, 'aboutus']);
 Route::get('/privacy-policy', [SiteController::class, 'privacypolicy']); 
+Route::get('terms-conditions', [SiteController::class, 'termsconditions']); 
 Route::get('/config', function () {
     Artisan::call('config:cache');
     Artisan::call('config:clear');
