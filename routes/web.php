@@ -55,7 +55,7 @@ use App\Http\Controllers\admin\ShippingareaController;
 use App\Http\Controllers\admin\TaxController;
 use App\Http\Controllers\admin\WhyChooseUsController;
 use App\Http\Controllers\addons\BlogController;
-use App\Models\Redirect;
+use App\Http\Controllers\Admin\ScriptController;
 use Illuminate\Support\Facades\Artisan;
 
 /*
@@ -326,6 +326,15 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 
         Route::post('branches/delete', [BranchController::class, 'delete']);
         Route::post('branches/update-{id}', [BranchController::class, 'update']);
+
+        Route::prefix('scripts')->group(function () {
+            Route::get('/', [ScriptController::class, 'index']);
+            Route::get('/add', [ScriptController::class, 'add']);
+            Route::post('/store', [ScriptController::class, 'store']);
+            Route::get('/{id}', [ScriptController::class, 'edit']);
+            Route::post('/delete', [ScriptController::class, 'delete']);
+            Route::post('/update/{id}', [ScriptController::class, 'update']);
+        });
 
 
         //carrier

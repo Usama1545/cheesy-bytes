@@ -13,8 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('packages', function (Blueprint $table) {
+        Schema::create('tag_scripts', function (Blueprint $table) {
             $table->id();
+            $table->text('script');
+            $table->string('type');
+            $table->foreignId('branch_id')->references('id')->on('branches')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('tag_scripts');
     }
 };

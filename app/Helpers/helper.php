@@ -34,6 +34,7 @@ use App\Models\TopDeals;
 use App\Models\User;
 use App\Models\WhatsappMessage;
 use Carbon\Carbon;
+use App\Models\TagScript;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -1480,6 +1481,20 @@ class helper
         $branchId = session()->get('branch_id');
         $branch = Branch::where('id', $branchId)->first();
         return $branch;
+    }
+
+    public static function getScripts()
+    {
+        $branchId = session()->get('branch_id');
+        return TagScript::query()
+            ->when($branchId, fn ($q) =>
+                $q->where(function ($q) use ($branchId) {
+                    $q->where('branch_id', $branchId)
+                      ->orWhereNull('branch_id');
+                })
+            )
+            ->orderBy('id')
+            ->get();
     }
 
 }

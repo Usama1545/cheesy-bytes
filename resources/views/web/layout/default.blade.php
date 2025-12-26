@@ -47,8 +47,7 @@
         ! function(f, b, e, v, n, t, s) {
             if (f.fbq) return;
             n = f.fbq = function() {
-                n.callMethod ?
-                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
             };
             if (!f._fbq) f._fbq = n;
             n.push = n;
@@ -60,72 +59,12 @@
             t.src = v;
             s = b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t, s)
-        }(window, document, 'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
         fbq('init', '2425470157809730');
-        fbq('track', 'PageView');
-    </script>
-    <!-- Meta Pixel Code -->
-    <script>
-        ! function(f, b, e, v, n, t, s) {
-            if (f.fbq) return;
-            n = f.fbq = function() {
-                n.callMethod ?
-                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-            };
-            if (!f._fbq) f._fbq = n;
-            n.push = n;
-            n.loaded = !0;
-            n.version = '2.0';
-            n.queue = [];
-            t = b.createElement(e);
-            t.async = !0;
-            t.src = v;
-            s = b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t, s)
-        }(window, document, 'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '714068061098147');
         fbq('track', 'PageView');
     </script>
-    <noscript><img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=714068061098147&ev=PageView&noscript=1" /></noscript>
-    <!-- End Meta Pixel Code -->
-
-    <noscript><img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=2425470157809730&ev=PageView&noscript=1" /></noscript>
-    <!-- End Meta Pixel Code -->
-
-    @if ($branchSlug == 'richmond-tx-crn-1464-rd-beechnut-st')
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11513358041"></script>
-
-        <script>
-            window.dataLayer = window.dataLayer || [];
-
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-            gtag('js', new Date());
-
-            gtag('config', 'AW-11513358041');
-        </script>
-    @else
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-PLCD3K2B48"></script>
-
-        <script>
-            window.dataLayer = window.dataLayer || [];
-
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-
-            gtag('js', new Date());
-
-            gtag('config', 'G-PLCD3K2B48');
-        </script>
-    @endif
-    <!-- Hotjar Tracking Code for https://thecheesybite.com/ -->
     <script>
         (function(h, o, t, j, a, r) {
             h.hj = h.hj || function() {
@@ -142,6 +81,19 @@
             a.appendChild(r);
         })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
     </script>
+    <!-- End Meta Pixel Code -->
+    <noscript><img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=714068061098147&ev=PageView&noscript=1" /></noscript>
+    <!-- End Meta Pixel Code -->
+
+    <noscript><img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=2425470157809730&ev=PageView&noscript=1" /></noscript>
+    <!-- End Meta Pixel Code -->
+
+    @foreach (@helper::getScripts() as $script)
+        {!! $script->script !!}
+    @endforeach
+
 
     <!-- PWA -->
     @if (@helper::checkaddons('pwa'))
@@ -156,19 +108,6 @@
         }
     </style>
     @yield('styles')
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16777176618"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-
-        gtag('js', new Date());
-
-        gtag('config', 'AW-16777176618');
-    </script>
 </head>
 
 <body>
