@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Cache;
 class Slider extends Model
 {
     protected $table='slider';
-    protected $fillable=['image','title','description','branch_id'];
+    protected $fillable=['image','title','description','branch_id','mobile_image','item_id','cat_id','subcat_id','type','is_available' ];
 
     protected static function booted()
     {

@@ -85,6 +85,7 @@ class helper
 
     public static function image_path($image)
     {
+        // dd($image);
         $path = url(env('ASSETSPATHURL') . 'admin-assets/images/item-placeholder.png');
         if (Str::contains($image, 'noaccess')) {
             if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/' . $image)) {
@@ -144,6 +145,12 @@ class helper
         if (Str::contains($image, 'quick-')) {
             if (file_exists(storage_path('app/public/admin-assets/images/about/' . $image))) {
                 $path = url(env('ASSETSPATHURL') . 'admin-assets/images/about/' . $image);
+            }
+        }
+        if (Str::contains($image, 'deal-')) {
+            // dd($image);
+            if(file_exists(env('ASSETSPATHURL') . 'admin-assets/images/' . $image)) {
+                $path = url(env('ASSETSPATHURL') . 'admin-assets/images/' . $image);
             }
         }
         return $path;
@@ -1495,6 +1502,80 @@ class helper
             )
             ->orderBy('id')
             ->get();
+    }
+
+     public static function calculatePrice($item): array
+    {
+        if ($item->deal_type === 3 || $item->deal_type === 1) {
+            return [
+                'price' => $item->dealPrice,
+                'original_price' => $item->product->original_price ?? $item->dealPrice,
+                'discount' => 0
+            ];
+        }
+
+        // Complex price calculation logic
+        if (!isset($item->offer_type) || $item->offer_type !== 1) {
+            if (isset($item->offer_type) && $item->offer_type == 1) {
+                $price = $item->dealPrice > ($item->offer_amount ?? 0)
+                    ? $item->dealPrice - ($item->offer_amount ?? 0)
+                    : $item->dealPrice;
+            } else {
+                $price = $item->dealPrice - $item->dealPrice * (($item->offer_amount ?? 0) / 100);
+            }
+            
+            $originalPrice = $item->dealPrice;
+            $discount = $originalPrice > 0 
+                ? number_format(100 - ($price * 100) / $originalPrice, 1)
+                : 0;
+        } elseif ($item->deal_type == 1) {
+            $price = $item->product->original_price - $item->dealPrice;
+            $originalPrice = $item->product->original_price ?? ($item->offer_amount ?? 0);
+            $discount = 0;
+        } else {
+            $price = $item->dealPrice - ($item->offer_amount ?? 0);
+            $originalPrice = $item->dealPrice;
+            $discount = $originalPrice > 0
+                ? number_format(100 - ($price * 100) / $originalPrice, 1)
+                : 0;
+        }
+
+        return [
+            'price' => $price,
+            'original_price' => $originalPrice,
+            'discount' => $discount
+        ];
+    }
+
+    /**
+     * Get button configuration based on deal type
+     */
+    public static function getButtonConfig($item): array
+    {
+        $slug = $item->product->slug ?? '';
+        $dealId = $item->deal_id ?? '';
+        
+        if (in_array($item->deal_type, [1, 3, 4])) {
+            return [
+                'type' => 'link',
+                'url' => helper::branch_route('bogoDealDetails', ['id' => $dealId]),
+                'text' => 'Select'
+            ];
+        }
+        
+        if (in_array($item->deal_type, [2, 0])) {
+            return [
+                'type' => 'link',
+                'url' => helper::branch_route('flatDealDetails', ['id' => $dealId]),
+                'text' => 'Select'
+            ];
+        }
+        
+        return [
+            'type' => 'button',
+            'action' => "showdealitem('{$slug}','{$dealId}','" . url('/show-deal-item') . "')",
+            'text' => trans('labels.add')
+        ];
     }
 
 }

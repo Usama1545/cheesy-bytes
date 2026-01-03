@@ -30,6 +30,7 @@ class DealController extends Controller
     // Create a new deal
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'product_id' => 'required|exists:item,id',
             'product_ids' => 'required|array',
@@ -43,13 +44,22 @@ class DealController extends Controller
             'offer_type' => 'required|in:1,2',
             'offer_amount' => 'required|numeric|min:0',
             'order' => 'required|integer|min:1',
-          ]);
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+        ]);
         
         $slug = Item::find($request->product_id)->slug;
         $slugexists = TopDeals::where('slug', $slug)->exists();
         if ($slugexists) {
-            $slug = $slug . '-' .$deal->id;
+            $slug = $slug . '-' . uniqid();
         }
+
+        $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+        $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+        $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
+
+        $item = Item::find($request->product_id)->item_image();
         
         // dd($slug);
 
@@ -65,7 +75,8 @@ class DealController extends Controller
             'order' => $request->order,
             'size_id' => implode(',', $request->size_id),
             'product_ids'=> implode(',', $request->product_ids),
-
+            'web_image' => $image,
+            'mobile_image' => $mobile_image,
         ]);
 
         return redirect('admin/topDeals')->with('success', 'Deal created successfully!');
@@ -102,10 +113,22 @@ class DealController extends Controller
             'offer_type' => 'required|in:1,2',
             'offer_amount' => 'required|numeric|min:0',
             'order' => 'required|integer|min:1',
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
 
         $deal = TopDeals::findOrFail($request->id);
-
+        $image = $deal->web_image;
+        $mobile_image = $deal->mobile_image;
+        if ($request->file('web_image') != "") {
+            $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+            $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        }
+        if ($request->file('mobile_image') != "") {
+            $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+            $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
+        }
+       
         // Generate slug from product
         if ($request->filled('product_id')) {
             $slug = Item::findOrFail($request->product_id)->slug;
@@ -133,6 +156,8 @@ class DealController extends Controller
             'order' => $request->order,
             'size_id' => implode(',', $request->size_id),
             'product_ids'=> implode(',', $request->product_ids),
+            'web_image' => $image,
+            'mobile_image' => $mobile_image,
 
         ]);
 
@@ -687,12 +712,25 @@ class DealController extends Controller
             'product_ids' => 'required|array',
             'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to the sizes table
             'min_count' => 'required|numeric|min:1',
-            'order' => 'required|numeric|min:1'
-
+            'order' => 'required|numeric|min:1',
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
+
+        $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+        $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+        $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
+
+        $slug = Item::find($request->product_id)->slug;
+        $slugexists = TopDeals::where('slug', $slug)->exists();
+        if ($slugexists) {
+            $slug = $slug . '-' .uniqid();
+        }
 
         // Create a deal with default deal_type and formatted product_ids
         $deal = TopDeals::create([
+            'slug' => $slug,
             'product_id' => $validatedData['product_id'],
             'offer_type' => $validatedData['offer_type'] ?? 1,
             'offer_amount' => $validatedData['offer_amount'] ?? 0,
@@ -706,7 +744,8 @@ class DealController extends Controller
             'min_count' => $validatedData['min_count'],
             'deal_type' => 1, // Default deal_type
             'order' => $validatedData['order'],
-
+            'web_image' => $image,
+            'mobile_image' => $mobile_image
         ]);
 
         return redirect('admin/deals')->with('success', 'Deal created successfully!');
@@ -742,18 +781,45 @@ class DealController extends Controller
             'product_ids' => 'required|array',
             'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to sizes table
             'min_count' => 'required|numeric|min:1',
-            'order' => 'required|numeric|min:1'
-
+            'order' => 'required|numeric|min:1',
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
         // Find the deal using validated ID
-        $deal = TopDeals::findOrFail($validatedData['id']);
+        $deal = TopDeals::findOrFail($request->id);
+        $image = $deal->web_image;
+        $mobile_image = $deal->mobile_image;
+        if ($request->file('web_image') != "") {
+            $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+            $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        }
+        if ($request->file('mobile_image') != "") {
+            $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+            $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
+        }
+       
+        // Generate slug from product
+        if ($request->filled('product_id')) {
+            $slug = Item::findOrFail($request->product_id)->slug;
+
+            $slugExists = TopDeals::where('slug', $slug)
+                ->where('id', '!=', $deal->id)
+                ->exists();
+
+            if ($slugExists) {
+                $slug = $slug . '-' . $deal->id;
+            }
+
+            $request->merge(['slug' => $slug]);
+        }
+        
         $product_ids = implode(',', $validatedData['product_ids']);
         $size_ids = implode(',', $validatedData['size_id']);
 
         // Update deal with merged attributes
         $deal->update(array_merge(
             $validatedData,
-            ['product_ids' => $product_ids, 'size_id' => $size_ids]
+            ['product_ids' => $product_ids, 'size_id' => $size_ids, 'web_image' => $image, 'mobile_image' => $mobile_image]
         ));
         $deal->save();
 

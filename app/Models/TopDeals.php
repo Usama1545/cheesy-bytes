@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 class TopDeals extends Model
 {
     use HasFactory;
-    protected $fillable = ['product_id','offer_type','deal_type','offer_amount','start_date','end_date','start_time','end_time','size_id','product_ids','min_count','order','bmsm_deal_type','slug'];
+    protected $fillable = ['product_id','offer_type','deal_type','offer_amount','start_date','end_date','start_time','end_time','size_id','product_ids','min_count','order','bmsm_deal_type','slug','web_image','mobile_image'];
     protected $table = 'top_deals';
 
     protected static function booted()

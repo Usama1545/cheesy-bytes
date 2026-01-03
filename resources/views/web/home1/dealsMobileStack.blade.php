@@ -2,7 +2,8 @@
 
 use App\Helpers\helper;
 
-$itemData = (new App\Helpers\helper)->getTopFourDeals();
+$helper = new App\Helpers\helper();
+$itemData = $helper->getTopHomeDeals();
 $count = count($itemData);
 ?>
 @push('style-lib')
@@ -11,30 +12,39 @@ $count = count($itemData);
 
 <div class="container py-2">
 
-    @if($count > 0)
+    @if ($count > 0)
         <div id="dealsCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
-                @for($i = 0; $i < $count; $i++)
-                    @if(isset($itemData[$i]))
+                @for ($i = 0; $i < $count; $i++)
+                    @if (isset($itemData[$i]))
                         @php
                             $item = $itemData[$i];
-                            if($item->deal_type !== 3 && $item->deal_type !== 1) {
-                                if(@$item->offer_type !== 1) {
+                            if ($item->deal_type !== 3 && $item->deal_type !== 1) {
+                                if (@$item->offer_type !== 1) {
                                     if (@$item->offer_type == 1) {
-                                        $price = $item->dealPrice > @$item->offer_amount ? $item->dealPrice - @$item->offer_amount : $item->dealPrice;
+                                        $price =
+                                            $item->dealPrice > @$item->offer_amount
+                                                ? $item->dealPrice - @$item->offer_amount
+                                                : $item->dealPrice;
                                     } else {
                                         $price = $item->dealPrice - $item->dealPrice * (@$item->offer_amount / 100);
                                     }
                                     $original_price = $item->dealPrice;
-                                    $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                                } else if(@$item->offer_type !== 1 && @$item->deal_type == 1) {
+                                    $off =
+                                        $original_price > 0
+                                            ? number_format(100 - ($price * 100) / $original_price, 1)
+                                            : 0;
+                                } elseif (@$item->offer_type !== 1 && @$item->deal_type == 1) {
                                     $price = $item->product->original_price - $item->dealPrice;
                                     $off = 0;
                                     $original_price = $item->product->original_price ?? $item->offer_amount;
                                 } else {
                                     $price = $item->dealPrice - $item->offer_amount;
                                     $original_price = $item->dealPrice;
-                                    $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                                    $off =
+                                        $original_price > 0
+                                            ? number_format(100 - ($price * 100) / $original_price, 1)
+                                            : 0;
                                 }
                             } else {
                                 $price = $item->dealPrice;
@@ -43,36 +53,33 @@ $count = count($itemData);
                             }
                         @endphp
 
-                        <div class="carousel-item @if($i == 0) active @endif">
+                        <div class="carousel-item @if ($i == 0) active @endif">
                             <div class="carousel-card position-relative overflow-hidden rounded">
-                                <img
-                                    src="{{ @helper::image_path($item->product['item_image']->image_name) }}"
-                                    class="w-100 h-100 object-fit-cover"
-                                    alt="{{ $item->product->item_name }}"
-                                >
+                                <img src="{{ @helper::image_path($item->web_image) }}"
+                                    class="w-100 h-100 object-fit-cover" alt="{{ $item->product->item_name }}">
                                 <div
                                     class="position-absolute top-0 start-0 w-100 h-100 bg-transparent p-3 d-flex flex-column justify-content-between text-white">
                                     <div>
                                         <h5 class="fw-bold mb-2"></h5>
-                                        @if($i >= 2)
+                                        @if ($i >= 2)
                                             <p class="small">{{ $item->product->item_description }}</p>
                                         @endif
                                     </div>
                                     <div class="d-flex flex-column align-items-end">
-                                        @if($item->deal_type !== 3)
+                                        @if ($item->deal_type !== 3)
                                             <div class="d-flex align-items-start">
                                                 <div class="d-flex flex-column align-items-center"
-                                                     style="line-height: 1;">
+                                                    style="line-height: 1;">
                                                     <span class="fs-6 ">$</span>
                                                 </div>
                                                 <div class="d-flex flex-column ms-1" style="line-height: 1;">
                                                     <div class="d-flex">
-                                                        <span
-                                                            class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
+                                                        <span class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
                                                         <div class="line-1">
-                                                        <span
-                                                            class="fs-6  line-1">{{ sprintf("%02d", ($price - floor($price)) * 100) }}</span>
-                                                            <small class="ms-1 ">each</small></div>
+                                                            <span
+                                                                class="fs-6  line-1">{{ sprintf('%02d', ($price - floor($price)) * 100) }}</span>
+                                                            <small class="ms-1 ">each</small>
+                                                        </div>
                                                     </div>
 
                                                 </div>
@@ -90,20 +97,19 @@ $count = count($itemData);
 
 
                                         <div class="mt-2">
-                                            @if($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
-                                                <a
-                                                    class="btn btn-sm btn-primary d-flex align-items-center gap-2"
-                                                    href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}"
-                                                >
+                                            @if ($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
+                                                <a class="btn btn-sm btn-primary d-flex align-items-center gap-2"
+                                                    href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}">
                                                     Select
-                                                    <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                                    <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}"></div>
+                                                    <i
+                                                        class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
+                                                    <div
+                                                        class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
+                                                    </div>
                                                 </a>
                                             @else
-                                                <button
-                                                    class="btn btn-sm btn-primary d-flex align-items-center gap-2"
-                                                    onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')"
-                                                >
+                                                <button class="btn btn-sm btn-primary d-flex align-items-center gap-2"
+                                                    onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
                                                     {{ trans('labels.add') }}
                                                     <i class="fa-solid fa-plus"></i>
                                                 </button>
@@ -131,8 +137,6 @@ $count = count($itemData);
 
 
 <style>
-
-
     .carousel-item img {
         object-fit: fill !important;
     }
@@ -143,18 +147,21 @@ $count = count($itemData);
     #dealsCarousel .carousel-control-next {
         height: 15%;
         /*background-color: #D6B62B; */
-        border-radius: 50%; /* Makes it circular */
+        border-radius: 50%;
+        /* Makes it circular */
         top: 50%;
         opacity: 1;
         transform: translateY(-50%);
     }
 
-    .carousel-control-next, .carousel-control-prev {
+    .carousel-control-next,
+    .carousel-control-prev {
         width: 5% !important;
         margin-left: 5px;
     }
 
-    .carousel-control-next, .carousel-control-next {
+    .carousel-control-next,
+    .carousel-control-next {
         width: 5% !important;
         margin-right: 5px;
     }
@@ -181,8 +188,7 @@ $count = count($itemData);
         border-radius: 8px;
         width: 100%;
         height: 200px;
-        flex: 0 0 100%; /* prevent shrinking */
+        flex: 0 0 100%;
+        /* prevent shrinking */
     }
-
-
 </style>

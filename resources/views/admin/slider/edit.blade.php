@@ -14,12 +14,13 @@
                                     <div class="col-md-6">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label for=""
-                                                       class="col-form-label">Branch <span class="text-danger">*</span>
+                                                <label for="" class="col-form-label">Branch <span
+                                                        class="text-danger">*</span>
                                                 </label>
                                                 <select name="branch_id" class="form-control" required id="branch_id">
                                                     @foreach (helper::get_branchs() as $branch)
-                                                        <option value="{{ $branch->id }}" {{ $branch->id == $getslider->branch_id ? 'selected' : '' }}>
+                                                        <option value="{{ $branch->id }}"
+                                                            {{ $branch->id == $getslider->branch_id ? 'selected' : '' }}>
                                                             {{ $branch->name }}
                                                         </option>
                                                     @endforeach
@@ -30,8 +31,7 @@
                                             <label class="col-form-label" for="">{{ trans('labels.title') }} <span
                                                     class="text-danger">*</span> </label>
                                             <input type="text" class="form-control" name="title"
-                                                placeholder="{{ trans('labels.title') }}" value="{{ $getslider->title }}"
-                                                >
+                                                placeholder="{{ trans('labels.title') }}" value="{{ $getslider->title }}">
                                         </div>
                                         <div class="form-group">
                                             <label class="col-form-label" for="type">{{ trans('labels.type') }}</label>
@@ -88,8 +88,19 @@
                                             <img src="{{ helper::image_path($getslider->image) }}" alt=""
                                                 class="img-fluid rounded mt-1 h-50px">
                                         </div>
+                                        <div class="form-group">
+                                            <label class="col-form-label" for="">Mobile Image
+                                            </label>
+                                            <input type="file" class="form-control" name="mobile_image" accept="image/*">
+                                            @error('image')
+                                                <span class="text-danger">{{ $message }}</span><br>
+                                            @enderror
+                                            <img src="{{ helper::image_path($getslider->mobile_image) }}" alt=""
+                                                class="img-fluid rounded mt-1 h-50px">
+                                        </div>
                                     </div>
-                                    <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
+                                    <div
+                                        class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                         <a href="{{ URL::to('admin/slider') }}"
                                             class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                         <button class="btn btn-primary"

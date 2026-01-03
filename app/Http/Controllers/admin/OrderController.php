@@ -20,23 +20,25 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $user= auth()->user();
+        // dd($user);
         // Start the query for orders
         $getorders = Order::with('user_info', 'branch');
    
 
-    if ($user->branch_id !== null) {
-        $getorders = $getorders->where(function ($query) use ($user) {
-            $query->where('branch_id', $user->branch_id)
-                  ->whereDate('created_at', '>=', now()->subDays(2)); // Fetch today + last 2 days
+        if ($user->branch_id !== null) {
+        // Branch user → only their branch + last 2 days
+            $getorders->where('branch_id', $user->branch_id)
+                    ->whereDate('created_at', '>=', now()->subDays(2));
+        }
+
+        $getorders->where(function ($q) {
+            $q->where(function ($q) {
+                $q->where('transaction_type', 15)
+                ->where('payment_status', 2);
+            })
+            ->orWhere('transaction_type', '!=', 15);
         });
-    }
-    $getorders= $getorders->where(function ($query) {
-        $query->where('transaction_type', 15)
-              ->where('payment_status', 2);
-    })
-    ->orWhere(function ($query) {
-        $query->where('transaction_type', '!=', 15);
-    });
+        
         // Apply status filter
         if ($request->has('status') && $request->status != "") {
             if ($request->status == "processing") {

@@ -137,31 +137,47 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div
-                                        class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
-                                        <a href="{{ URL::to('admin/item') }}"
-                                            class="btn btn-danger">{{ trans('labels.cancel') }}</a>
-                                        <button class="btn btn-primary"
-                                            @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
-                                            @else type="submit" @endif>{{ trans('labels.save') }}</button>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="">{{ trans('labels.image') }}
+                                        </label>
+                                        <input type="file" class="form-control" name="web_image" accept="image/*">
+                                        @error('web_image')
+                                            <span class="text-danger">{{ $message }}</span><br>
+                                        @enderror
+                                        <img src="{{ helper::image_path($getitem->web_image) }}" alt=""
+                                            class="img-fluid rounded mt-1 h-50px">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="">Mobile Image
+                                        </label>
+                                        <input type="file" class="form-control" name="mobile_image" accept="image/*">
+                                        @error('mobile_image')
+                                            <span class="text-danger">{{ $message }}</span><br>
+                                        @enderror
+                                        <img src="{{ helper::image_path($getitem->mobile_image) }}" alt=""
+                                            class="img-fluid rounded mt-1 h-50px">
                                     </div>
                                 </div>
-                            </form>
+                                <div
+                                    class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
+                                    <a href="{{ URL::to('admin/item') }}"
+                                        class="btn btn-danger">{{ trans('labels.cancel') }}</a>
+                                    <button class="btn btn-primary"
+                                        @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
+                                            @else type="submit" @endif>{{ trans('labels.save') }}</button>
+                                </div>
                         </div>
+                        </form>
                     </div>
                 </div>
             </div>
-
-
         </div>
+
+
+    </div>
     </div>
 @endsection
 @section('script')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1/ckeditor.js"></script>
-    <script type="text/javascript">
-        CKEDITOR.replace('allergens');
-    </script>
     <script
         src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/bootstrap/bootstrap-select.v1.14.0-beta2.min.js') }}">
     </script>

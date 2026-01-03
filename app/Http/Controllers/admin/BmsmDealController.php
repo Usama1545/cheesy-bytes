@@ -46,7 +46,14 @@ class BmsmDealController extends Controller
             'tiers.*.min_qty' => 'required|numeric|min:1',
             'tiers.*.max_qty' => 'required|numeric|min:1|gte:tiers.*.min_qty',
             'tiers.*.discount_value' => 'required|numeric|min:0',
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
+
+        $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+        $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+        $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
 
         $deal = TopDeals::create([
             'product_id' => $request->product_id,
@@ -59,6 +66,9 @@ class BmsmDealController extends Controller
             'end_time' => $request->end_time,
             'order' => $request->order,
             'bmsm_deal_type' => $request->bmsm_deal_type,
+            'web_image' => $image,
+            'mobile_image' => $mobile_image,
+
         ]);
 
         $slug = Item::find($request->product_id)->slug;
@@ -123,8 +133,20 @@ class BmsmDealController extends Controller
             'tiers.*.min_qty' => 'required|numeric|min:1',
             'tiers.*.max_qty' => 'required|numeric|min:1|gte:tiers.*.min_qty',
             'tiers.*.discount_value' => 'required|numeric|min:0',
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
         $deal = TopDeals::findOrFail($request->id);
+        $image = $deal->web_image;
+        $mobile_image = $deal->mobile_image;
+        if ($request->file('web_image') != "") {
+            $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+            $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        }
+        if ($request->file('mobile_image') != "") {
+            $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+            $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
+        }
 
         $slug = Item::find($request->product_id)->slug;
         $slugexists = TopDeals::where('slug', $slug)->exists();
@@ -144,6 +166,8 @@ class BmsmDealController extends Controller
             'size_id' => $request->size_id,
             'order' => $request->order,
             'bmsm_deal_type' => $request->bmsm_deal_type,
+            'web_image' => $image,
+            'mobile_image' => $mobile_image,
         ]);
 
         // Clean old relationships

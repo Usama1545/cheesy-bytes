@@ -96,6 +96,27 @@
                                         <input type="number" class="form-control" value="{{ $getitem->order }}"
                                             name="order" required="">
                                     </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="">{{ trans('labels.image') }}
+                                        </label>
+                                        <input type="file" class="form-control" name="web_image" accept="image/*">
+                                        @error('web_image')
+                                            <span class="text-danger">{{ $message }}</span><br>
+                                        @enderror
+                                        <img src="{{ helper::image_path($getitem->web_image) }}" alt=""
+                                            class="img-fluid rounded mt-1 h-50px">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="">Mobile Image
+                                        </label>
+                                        <input type="file" class="form-control" name="mobile_image" accept="image/*">
+                                        @error('mobile_image')
+                                            <span class="text-danger">{{ $message }}</span><br>
+                                        @enderror
+
+                                        <img src="{{ helper::image_path($getitem->mobile_image) }}" alt=""
+                                            class="img-fluid rounded mt-1 h-50px">
+                                    </div>
 
                                     <!-- adding category select and number of proects -->
 

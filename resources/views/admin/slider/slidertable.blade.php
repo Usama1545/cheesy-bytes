@@ -4,6 +4,7 @@
             <th></th>
             <th>#</th>
             <th>{{ trans('labels.image') }}</th>
+            <th>mobile image</th>
             <th>{{ trans('labels.title') }}</th>
             <th>{{ trans('Branch') }}</th>
 
@@ -21,6 +22,8 @@
                 <td><a tooltip="{{ trans('labels.move') }}"><i class="fa-light fa-up-down-left-right mx-2"></i></a></td>
                 <td>@php echo $i++; @endphp</td>
                 <td><img src='{{ helper::image_path($slider->image) }}' class='img-fluid rounded h-50px'></td>
+                <td><img src='{{ helper::image_path($slider->mobile_image) }}' class='img-fluid rounded h-50px'></td>
+
                 <td>{{ $slider->title }}</td>
                 <td>
                     {{ $slider['branch']->name }}

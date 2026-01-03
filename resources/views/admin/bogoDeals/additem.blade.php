@@ -95,6 +95,22 @@
                                     <input type="number" class="form-control numbers_only" name="order"
                                         value="{{ old('order') }}" placeholder="Order By">
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-form-label">{{ trans('labels.image') }}
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="web_image" id="image"
+                                            accept="image/*" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-form-label">mobile Image
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="mobile_image" id="mobile_image"
+                                            accept="image/*" required>
+                                    </div>
+                                </div>
 
                                 <hr />
                                 <div class="w-100 mb-2">

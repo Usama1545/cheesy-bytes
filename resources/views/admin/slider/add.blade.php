@@ -7,14 +7,13 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <div class="form-validation">
-                            <form action="{{ URL::to('admin/slider/store') }}" method="post"
-                                  enctype="multipart/form-data">
+                            <form action="{{ URL::to('admin/slider/store') }}" method="post" enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for=""
-                                                   class="col-form-label">Branch <span class="text-danger">*</span>
+                                            <label for="" class="col-form-label">Branch <span
+                                                    class="text-danger">*</span>
                                             </label>
                                             <select name="branch_id" class="form-control" required id="branch_id">
                                                 @foreach (helper::get_branchs() as $branch)
@@ -30,14 +29,13 @@
                                             <label class="col-form-label" for="">{{ trans('labels.title') }} <span
                                                     class="text-danger">*</span> </label>
                                             <input type="text" class="form-control" name="title"
-                                                   placeholder="{{ trans('labels.title') }}" value="{{ old('title') }}"
-                                                >
+                                                placeholder="{{ trans('labels.title') }}" value="{{ old('title') }}">
                                         </div>
 
                                         <div class="form-group">
                                             <label class="col-form-label" for="type">{{ trans('labels.type') }}</label>
                                             <select name="type" class="form-select type" data-live-search="true"
-                                                    id="type">
+                                                id="type">
                                                 <option value="" selected>{{ trans('labels.select') }}</option>
                                                 <option value="1" {{ old('type') == 1 ? 'selected' : '' }}>
                                                     {{ trans('labels.category') }}</option>
@@ -48,9 +46,8 @@
                                         <div class="form-group 1 gravity">
                                             <label class="col-form-label" for="">{{ trans('labels.category') }}
                                                 <span class="text-danger">*</span> </label>
-                                            <select name="cat_id" class="form-select selectpicker"
-                                                    data-live-search="true"
-                                                    id="cat_id">
+                                            <select name="cat_id" class="form-select selectpicker" data-live-search="true"
+                                                id="cat_id">
                                                 <option value="" selected>{{ trans('labels.select') }}</option>
                                                 @foreach ($getcategory as $category)
                                                     <option value="{{ $category->id }}"
@@ -59,15 +56,14 @@
                                                 @endforeach
                                             </select>
                                             @error('cat_id')
-                                            <span class="text-danger">{{ $message }}</span>
+                                                <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
                                         <div class="form-group 2 gravity">
                                             <label class="col-form-label" for="">{{ trans('labels.item') }} <span
                                                     class="text-danger">*</span> </label>
-                                            <select name="item_id" class="form-select selectpicker"
-                                                    data-live-search="true"
-                                                    id="item_id">
+                                            <select name="item_id" class="form-select selectpicker" data-live-search="true"
+                                                id="item_id">
                                                 <option value="" selected>{{ trans('labels.select') }}</option>
                                                 @foreach ($getitem as $item)
                                                     <option value="{{ $item->id }}"
@@ -76,7 +72,7 @@
                                                 @endforeach
                                             </select>
                                             @error('item_id')
-                                            <span class="text-danger">{{ $message }}</span>
+                                                <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     </div>
@@ -85,22 +81,27 @@
                                         <div class="form-group">
                                             <label class="col-form-label" for="">{{ trans('labels.description') }}
                                             </label>
-                                            <textarea name="description" class="form-control" rows="5"
-                                                      placeholder="{{ trans('labels.description') }}">{{ old('description') }}</textarea>
+                                            <textarea name="description" class="form-control" rows="5" placeholder="{{ trans('labels.description') }}">{{ old('description') }}</textarea>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-form-label" for="">{{ trans('labels.image') }}
                                                 <span class="text-danger">*</span> </label>
                                             <input type="file" class="form-control" name="image" accept="image/*"
-                                                   required>
+                                                required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-form-label" for="">Mobile Image
+                                                <span class="text-danger">*</span> </label>
+                                            <input type="file" class="form-control" name="mobile_image" accept="image/*"
+                                                required>
                                         </div>
                                     </div>
                                     <div
                                         class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                         <a href="{{ URL::to('admin/slider') }}"
-                                           class="btn btn-danger">{{ trans('labels.cancel') }}</a>
+                                            class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                         <button class="btn btn-primary"
-                                                @if (env('Environment') == 'sendbox') type="button"
+                                            @if (env('Environment') == 'sendbox') type="button"
                                                 onclick="myFunction()"
                                                 @else type="submit" @endif>{{ trans('labels.save') }}</button>
                                     </div>

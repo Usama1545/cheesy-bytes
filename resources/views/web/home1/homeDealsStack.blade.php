@@ -2,506 +2,277 @@
 use App\Helpers\helper;
 
 $helper = new App\Helpers\helper();
-$itemData = $helper->getTopFourDeals();
+$itemData = $helper->getTopHomeDeals();
 $count = count($itemData);
-$heightClass = 'dynamic-height-' . min($count, 3); // Max 3 for the height classes
+
+$mainItem = $itemData->first();
+$sideItems = $itemData->slice(1, 2); // Only 2 side items
+$extraItems = $itemData->slice(3); // Items 4+
 ?>
 
 <div class="container container-model py-5">
-    <div class="deals-wrapper justify-content-center">
-        @if (isset($itemData[0]))
-            <!-- Left Image with Heading and Button -->
-            @php
-                $item = $itemData[0];
-                if ($item->deal_type !== 3 && $item->deal_type !== 1 && $item->deal_type !== 4) {
-                    if (@$item->offer_type !== 1) {
-                        if (@$item->offer_type == 1) {
-                            $price =
-                                $item->dealPrice > @$item->offer_amount
-                                    ? $item->dealPrice - @$item->offer_amount
-                                    : $item->dealPrice;
-                        } else {
-                            $price = $item->dealPrice - $item->dealPrice * (@$item->offer_amount / 100);
-                        }
-                        $original_price = $item->dealPrice;
-                        $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                    } elseif (@$item->offer_type !== 1 && @$item->deal_type == 1) {
-                        $price = $item->product->original_price - $item->dealPrice;
-                        $off = 0;
-                        $original_price = $item->product->original_price ?? $item->offer_amount;
-                    } else {
-                        $price = $item->dealPrice - $item->offer_amount;
-                        $original_price = $item->dealPrice;
-                        $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
-                    }
-                } else {
-                    $price = $item->dealPrice;
-                    $off = 0;
-                    $original_price = $item->product->original_price;
-                }
-            @endphp
-            <div class="deal-card left-deal-card">
-                <img src="{{ @helper::image_path($item->product['item_image']->image_name) }}" alt="Main Deal"
-                    class="left-image {{ $heightClass }}">
-                <div class="deal-overlay {{ $heightClass }}">
-                    <div>
-                        <!--<div class="deal-heading">{{ $item->product->item_name }}</div>-->
-                    </div>
-                    <div>
-                        @if ($item->deal_type !== 3 && $item->deal_type !== 4 && $item->deal_type !== 2 && $item->deal_type !== 0)
-                            <div class="d-flex align-items-start">
-                                <div class="d-flex flex-column align-items-center" style="line-height: 1;">
-                                    <span class="fs-6 ">$</span>
-                                </div>
-                                <div class="d-flex flex-column ms-1" style="line-height: 1;">
-                                    <div class="d-flex">
-                                        <span class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
-                                        <div class="line-1">
-                                            <span
-                                                class="fs-6  line-1">{{ sprintf('%02d', ($price - floor($price)) * 100) }}</span>
-                                            <small class="ms-1 ">each</small>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            @if ($original_price > $price)
-                                <div>
-                                    <small>
-                                        <del class="text-muted">{{ helper::currency_format($original_price) }}</del>
-                                    </small>
-                                </div>
-                            @endif
-                        @endif
-
-                        @if ($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
-                            <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}">
-                                Select
-                                <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
-                                </div>
-                            </a>
-                        @elseif($item->deal_type == 2 || $item->deal_type == 0)
-                            <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                href="{{ helper::branch_route('flatDealDetails', ['id' => $item->deal_id]) }}">
-                                Select
-                                <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
-                                </div>
-                            </a>
-                        @else
-                            <button
-                                class="btn btn-sm deal-button btn-secondary fw-500 px-3 py-2 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
-                                {{ trans('labels.add') }}
-                                <i class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
-                                </div>
-                            </button>
-                        @endif
-                    </div>
-                </div>
+    <!-- TOP SECTION: Main + Side deals -->
+    <div class="deals-wrapper">
+        @if ($mainItem)
+            <!-- Main Deal (Left) -->
+            <div class="main-deal-container">
+                @include('web.layout.deal-card', [
+                    'item' => $mainItem,
+                    'isMain' => true,
+                    'type' => 'main',
+                ])
             </div>
         @endif
 
-        @if ($count > 1)
-            <!-- Right Images -->
-            <div class="right-images">
-                @for ($i = 1; $i < $count; $i++)
-                    @if (isset($itemData[$i]))
-                        @php
-                            $item = $itemData[$i];
-                            if ($item->deal_type !== 3 && $item->deal_type !== 1 && $item->deal_type !== 4) {
-                                if (@$item->offer_type !== 1) {
-                                    if (@$item->offer_type == 1) {
-                                        $price =
-                                            $item->dealPrice > @$item->offer_amount
-                                                ? $item->dealPrice - @$item->offer_amount
-                                                : $item->dealPrice;
-                                    } else {
-                                        $price = $item->dealPrice - $item->dealPrice * (@$item->offer_amount / 100);
-                                    }
-                                    $original_price = $item->dealPrice;
-                                    $off =
-                                        $original_price > 0
-                                            ? number_format(100 - ($price * 100) / $original_price, 1)
-                                            : 0;
-                                } elseif (@$item->offer_type !== 1 && @$item->deal_type == 1) {
-                                    $price = $item->product->original_price - $item->dealPrice;
-                                    $off = 0;
-                                    $original_price = $item->product->original_price ?? $item->offer_amount;
-                                } else {
-                                    $price = $item->dealPrice - $item->offer_amount;
-                                    $original_price = $item->dealPrice;
-                                    $off =
-                                        $original_price > 0
-                                            ? number_format(100 - ($price * 100) / $original_price, 1)
-                                            : 0;
-                                }
-                            } else {
-                                $price = $item->dealPrice;
-                                $off = 0;
-                                $original_price = $item->product->original_price;
-                            }
-                        @endphp
-                        <div class="deal-card">
-                            <img src="{{ @helper::image_path($item->product['item_image']->image_name) }}"
-                                class="deal-image" alt="Deal {{ $i }}">
-                            <div class="deal-overlay">
-                                <div>
-                                    <!--<div class="deal-heading">{{ $item->product->item_name }}</div>-->
-                                    @if ($i >= 2)
-                                        <!-- Only show description for 3rd and 4th items -->
-                                        <div class="deal-description">{{ $item->product->item_description }}</div>
-                                    @endif
-                                </div>
-                                <div>
-                                    @if ($item->deal_type !== 3 && $item->deal_type !== 4 && $item->deal_type !== 2 && $item->deal_type !== 0)
-                                        <div class="d-flex align-items-start">
-                                            <div class="d-flex flex-column align-items-center" style="line-height: 1;">
-                                                <span class="fs-6 ">$</span>
-                                            </div>
-                                            <div class="d-flex flex-column ms-1" style="line-height: 1;">
-                                                <div class="d-flex">
-                                                    <span class="fs-1 fw-bold line-1">{{ floor($price) }}</span>
-                                                    <div class="line-1">
-                                                        <span
-                                                            class="fs-6  line-1">{{ sprintf('%02d', ($price - floor($price)) * 100) }}</span>
-                                                        <small class="ms-1 ">each</small>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-
-                                        @if ($original_price > $price)
-                                            <div>
-                                                <small>
-                                                    <del
-                                                        class="text-muted">{{ helper::currency_format($original_price) }}</del>
-                                                </small>
-                                            </div>
-                                        @endif
-                                    @endif
-                                    @if ($item->deal_type == 1 || $item->deal_type == 3 || $item->deal_type == 4)
-                                        <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                            href="{{ helper::branch_route('bogoDealDetails', ['id' => $item->deal_id]) }}">
-                                            Select
-                                            <i
-                                                class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                            <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
-                                            </div>
-                                        </a>
-                                    @elseif($item->deal_type == 2 || $item->deal_type == 0)
-                                        <a class="btn btn-sm deal-button btn-secondary fw-500 py-2 px-3 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                            href="{{ helper::branch_route('flatDealDetails', ['id' => $item->deal_id]) }}">
-                                            Select
-                                            <i
-                                                class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                            <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
-                                            </div>
-                                        </a>
-                                    @else
-                                        <button
-                                            class="btn btn-sm deal-button btn-secondary fw-500 px-3 py-2 float-start rounded-3 d-flex gap-1 justify-content-center align-items-center addon_modal_{{ $item->product->slug }}"
-                                            onclick="showdealitem('{{ $item->product->slug }}','{{ $item->deal_id }}','{{ URL::to('/show-deal-item') }}')">
-                                            {{ trans('labels.add') }}
-                                            <i
-                                                class="fa-solid fa-plus addon_modal_icon_{{ $item->product->slug }}"></i>
-                                            <div class="loader d-none addon_modal_loader_{{ $item->product->slug }}">
-                                            </div>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                @endfor
+        @if (count($sideItems) > 0)
+            <!-- Side Deals (Right, max 2) -->
+            <div class="side-deals-container">
+                @foreach ($sideItems as $index => $item)
+                    @include('web.layout.deal-card', [
+                        'item' => $item,
+                        'index' => $index,
+                        'isMain' => false,
+                        'type' => 'side',
+                    ])
+                @endforeach
             </div>
         @endif
     </div>
+
+    <!-- BOTTOM SECTION: Extra deals (3+) -->
+    @if (count($extraItems) > 0)
+        <div class="extra-deals-grid">
+            @foreach ($extraItems as $item)
+                @include('web.layout.deal-card', [
+                    'item' => $item,
+                    'isMain' => false,
+                    'type' => 'extra',
+                ])
+            @endforeach
+        </div>
+    @endif
 </div>
 
 <style>
-    .sec-padding {
-        padding: 10px 0px;
-    }
-
     .container-model {
-        display: flex;
-        justify-content: center;
-        background-color: transparent;
-        flex-wrap: wrap;
-        width: 100%;
         max-width: 1200px;
         margin: 0 auto;
+        background-color: transparent;
     }
 
+    /* TOP SECTION LAYOUT */
     .deals-wrapper {
         display: flex;
-        flex-wrap: wrap;
+        gap: 15px;
         width: 100%;
-        gap: 10px;
+        margin-bottom: 20px;
+        align-items: stretch;
+        /* Make sure all items stretch to same height */
     }
 
-    /* Common card styling */
+    .main-deal-container {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .side-deals-container {
+        flex: 0 0 400px;
+        /* Fixed width for side column */
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* BOTTOM GRID LAYOUT */
+    .extra-deals-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        width: 100%;
+    }
+
+    /* UNIFORM ASPECT RATIO FOR ALL IMAGES - THIS IS CRITICAL */
     .deal-card {
         position: relative;
         overflow: hidden;
-        border-radius: 8px;
+        border-radius: 12px;
+        background: #f8f9fa;
+        aspect-ratio: 4 / 3;
+    }
+
+    /* Image wrapper fills card */
+    .image-container {
+        position: absolute;
+        inset: 0;
         display: flex;
-        flex-direction: column;
-        flex-grow: 1;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
     }
 
-    /* Images */
-    .left-deal-card img,
-    .right-images .deal-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    .deal-image {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
     }
 
-    /* Hover effect */
-    .deal-card:hover .deal-image {
-        transform: scale(1.03);
-    }
-
-    /* Overlay content */
+    /* Overlay */
     .deal-overlay {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        padding: 1rem;
-        color: #fff;
+        padding: 20px;
+        color: white;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-    }
-
-    .deal-heading {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-
-    .deal-price {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #ff0000 !important;
-    }
-
-    .deal-description {
-        font-size: 0.9rem;
-        color: #fff;
-        margin-bottom: 0.5rem;
-    }
-
-    .deal-button {
-        background-color: #ff0000 !important;
-        border: none;
-        color: #fff;
-        padding: 7px 7px;
-        border-radius: 5px;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    /* --- RESPONSIVE LAYOUT --- */
-
-    /* DESKTOP VIEW */
-    @media (min-width: 992px) {
-        .deals-wrapper {
-            flex-direction: row;
-        }
-
-        .left-deal-card {
-            flex: 1 1 60%;
-            aspect-ratio: 1 / 1;
-            /* Square */
-            max-width: 530px;
-            max-height: 530px;
-        }
-
-        .right-images {
-            flex: 1 1 38%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 390px;
-        }
-
-        .right-images .deal-card {
-            flex: 1;
-            aspect-ratio: 3 / 2;
-            /* 390x260 */
-            max-height: 260px;
-        }
-    }
-
-    /* TABLET & MOBILE VIEW */
-    @media (max-width: 991px) {
-        .deals-wrapper {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .left-deal-card,
-        .right-images .deal-card {
-            width: 100%;
-            max-width: 306px;
-            aspect-ratio: 1 / 1;
-            /* Square */
-        }
-
-        .right-images {
-            flex-direction: column;
-            width: 100%;
-            align-items: center;
-        }
-    }
-
-    .container-model {
-        display: flex;
-        justify-content: center;
-        background-color: transparent;
-        flex-wrap: wrap;
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .deals-wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        width: 100%;
-        gap: 10px;
-    }
-
-    /* Common card styling */
-    .deal-card {
-        position: relative;
-        overflow: hidden;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-    }
-
-    /* Images */
-    .left-deal-card img,
-    .right-images .deal-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Hover effect */
-    .deal-card:hover .deal-image {
-        transform: scale(1.03);
-    }
-
-    /* Overlay content */
-    .deal-overlay {
+        background: linear-gradient(to bottom,
+                transparent 0%,
+                transparent 50%,
+                rgba(0, 0, 0, 0.6) 80%,
+                rgba(0, 0, 0, 0.8) 100%);
+        pointer-events: none;
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 1rem;
-        color: #fff;
+        inset: 0;
+        z-index: 2;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        pointer-events: none;
+        /* Allow clicking through overlay */
     }
 
-    .deal-heading {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-
-    .deal-price {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #ff0000 !important;
-    }
-
-    .deal-description {
-        font-size: 0.9rem;
-        color: #fff;
-        margin-bottom: 0.5rem;
+    /* Make button clickable */
+    .deal-overlay>div:last-child {
+        pointer-events: auto;
     }
 
     .deal-button {
-        background-color: #ff0000 !important;
+        background: #dc3545 !important;
         border: none;
-        color: #fff;
-        padding: 7px 7px;
-        border-radius: 5px;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        font-weight: bold;
-        cursor: pointer;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: fit-content;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
 
-    /* --- RESPONSIVE LAYOUT --- */
+    .deal-button:hover {
+        background: #c82333 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-    /* DESKTOP VIEW */
-    @media (min-width: 992px) {
+    /* Price display - adjust for position */
+    .price-main {
+        font-size: 2.2rem;
+        font-weight: 700;
+    }
+
+    .price-side {
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+
+    .price-extra {
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+
+    .original-price {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-top: 2px;
+    }
+
+    /* Deal description */
+    .deal-description {
+        font-size: 13px;
+        line-height: 1.3;
+        color: rgba(255, 255, 255, 0.9);
+        margin-top: 5px;
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    @media (min-width: 1200px) {
+        .side-deals-container {
+            flex: 0 0 400px;
+        }
+
+        .main-deal-container .deal-card {
+            aspect-ratio: 4 / 3;
+            /* Same as all others */
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .side-deals-container {
+            flex: 0 0 350px;
+        }
+
+        .extra-deals-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* Tablet */
+    @media (min-width: 768px) and (max-width: 991px) {
         .deals-wrapper {
+            flex-direction: column;
+        }
+
+        .side-deals-container {
+            flex: none;
+            width: 100%;
             flex-direction: row;
         }
 
-        .left-deal-card {
-            flex: 1 1 60%;
-            aspect-ratio: 1 / 1;
-            /* Square */
-            max-width: 530px;
-            max-height: 530px;
-        }
-
-        .right-images {
-            flex: 1 1 38%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 390px;
-        }
-
-        .right-images .deal-card {
+        .side-deals-container .deal-card {
             flex: 1;
-            aspect-ratio: 3 / 2;
-            /* 390x260 */
-            max-height: 260px;
+        }
+
+        .extra-deals-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
     }
 
-    /* TABLET & MOBILE VIEW */
-    @media (max-width: 991px) {
+    /* Mobile */
+    @media (max-width: 767px) {
         .deals-wrapper {
             flex-direction: column;
-            align-items: center;
+            gap: 15px;
         }
 
-        .left-deal-card,
-        .right-images .deal-card {
+        .side-deals-container {
+            flex: none;
             width: 100%;
-            max-width: 306px;
-            aspect-ratio: 1 / 1;
-            /* Square */
         }
 
-        .right-images {
-            flex-direction: column;
-            width: 100%;
-            align-items: center;
+        .extra-deals-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        /* All cards same on mobile */
+        .deal-card {
+            aspect-ratio: 4 / 3;
+        }
+
+        .price-main,
+        .price-side,
+        .price-extra {
+            font-size: 1.8rem;
+            /* Uniform size on mobile */
         }
     }
 </style>

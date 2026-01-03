@@ -29,9 +29,12 @@ class SliderController extends Controller
     public function store(Request $request)
     {
         $image = 'slider-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
+        $mobile_image = 'slider-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/slider', $image);
+        $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images/slider', $mobile_image);
         $slider = new Slider;
         $slider->image = $image;
+        $slider->mobile_image = $mobile_image;
         $slider->title = $request->title;
         $slider->branch_id = $request->branch_id;
         $slider->description = $request->description;
@@ -69,6 +72,12 @@ class SliderController extends Controller
             $image = 'slider-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
             $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/slider', $image);
             $slider->image = $image;
+            $slider->save();
+        }
+        if ($request->file('mobile_image') != "") {
+            $mobile_image = 'slider-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+            $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images/slider', $mobile_image);
+            $slider->mobile_image = $mobile_image;
             $slider->save();
         }
         $slider->branch_id = $request->branch_id;

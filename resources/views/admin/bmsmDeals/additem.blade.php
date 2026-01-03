@@ -1,7 +1,7 @@
 @extends('admin.theme.default')
 @section('styles')
     <link rel="stylesheet"
-          href="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/css/bootstrap/bootstrap-select.v1.14.0-beta2.min.css') }}">
+        href="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/css/bootstrap/bootstrap-select.v1.14.0-beta2.min.css') }}">
 @endsection
 @section('content')
     @include('admin.breadcrumb')
@@ -18,9 +18,9 @@
                                     <label class="form-label">Products</label>
                                     <div class="dropdown bootstrap-select show-tick form-control w-100">
                                         <select class="form-control selectpicker w-100" name="product_id"
-                                                data-live-search="true">
+                                            data-live-search="true">
 
-                                            @foreach(helper::getItems() as $item)
+                                            @foreach (helper::getItems() as $item)
                                                 <option value="{{ $item->id }}">
                                                     {{ $item->item_name }}
                                                 </option>
@@ -29,12 +29,10 @@
 
                                         <div class="dropdown-menu ">
                                             <div class="bs-searchbox"><input type="search" class="form-control"
-                                                                             autocomplete="off" role="combobox"
-                                                                             aria-label="Search"
-                                                                             aria-controls="bs-select-1"
-                                                                             aria-autocomplete="list"></div>
+                                                    autocomplete="off" role="combobox" aria-label="Search"
+                                                    aria-controls="bs-select-1" aria-autocomplete="list"></div>
                                             <div class="inner show" role="listbox" id="bs-select-1" tabindex="-1"
-                                                 aria-multiselectable="true">
+                                                aria-multiselectable="true">
                                                 <ul class="dropdown-menu inner show" role="presentation"></ul>
                                             </div>
                                         </div>
@@ -43,7 +41,8 @@
 
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Deal Type</label>
-                                    <select class="form-control selectpicker w-100" id="bmsm_deal_type" name="bmsm_deal_type" data-live-search="true">
+                                    <select class="form-control selectpicker w-100" id="bmsm_deal_type"
+                                        name="bmsm_deal_type" data-live-search="true">
                                         <option value="1">Product Based</option>
                                         <option value="2">Cart Based</option>
                                     </select>
@@ -53,9 +52,9 @@
                                 <div class="form-group col-md-6" id="product_selector_section" style="display: none;">
                                     <label class="form-label">Select Products</label>
                                     <select class="form-control selectpicker w-100" multiple name="product_ids[]"
-                                            data-live-search="true">
+                                        data-live-search="true">
 
-                                        @foreach(helper::getItems() as $item)
+                                        @foreach (helper::getItems() as $item)
                                             <option value="{{ $item->id }}">
                                                 {{ $item->item_name }}
                                             </option>
@@ -64,12 +63,10 @@
 
                                     <div class="dropdown-menu ">
                                         <div class="bs-searchbox"><input type="search" class="form-control"
-                                                                         autocomplete="off" role="combobox"
-                                                                         aria-label="Search"
-                                                                         aria-controls="bs-select-1"
-                                                                         aria-autocomplete="list"></div>
+                                                autocomplete="off" role="combobox" aria-label="Search"
+                                                aria-controls="bs-select-1" aria-autocomplete="list"></div>
                                         <div class="inner show" role="listbox" id="bs-select-1" tabindex="-1"
-                                             aria-multiselectable="true">
+                                            aria-multiselectable="true">
                                             <ul class="dropdown-menu inner show" role="presentation"></ul>
                                         </div>
                                     </div>
@@ -80,13 +77,13 @@
                                     <label class="form-label">Start date
                                         <span class="text-danger"> *</span></label>
                                     <input type="date" class="form-control" id="start_date" name="start_date"
-                                           required="">
+                                        required="">
                                 </div>
                                 <div class="col-sm-6 form-group" id="end_date">
                                     <label class="form-label">End date
                                         <span class="text-danger"> *</span></label>
                                     <input type="date" class="form-control" id="end_date" name="end_date"
-                                           required="">
+                                        required="">
                                 </div>
 
 
@@ -94,14 +91,14 @@
                                     <label class="form-label">Start Time
                                         <span class="text-danger"> *</span></label>
                                     <input type="time" class="form-control" name="start_time" id="start_time"
-                                           required="">
+                                        required="">
                                 </div>
 
                                 <div class="col-sm-6 form-group" id="end_time">
                                     <label class="form-label">End Time
                                         <span class="text-danger"> *</span></label>
                                     <input type="time" class="form-control" name="end_time" id="end_time"
-                                           required="">
+                                        required="">
                                 </div>
 
 
@@ -123,13 +120,30 @@
                                     <label class="form-label">Order
                                         <span class="text-danger"> *</span></label>
                                     <input type="text" class="form-control numbers_only" name="order"
-                                           placeholder="Order By">
+                                        placeholder="Order By">
                                 </div>
 
-                                <hr/>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-form-label">{{ trans('labels.image') }}
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="web_image" id="image"
+                                            accept="image/*" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-form-label">mobile Image
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="mobile_image" id="mobile_image"
+                                            accept="image/*" required>
+                                    </div>
+                                </div>
+
+                                <hr />
                                 <div class="form-group col-md-12">
                                     <button class="btn btn-primary float-end" type="button" onclick="addBmsmTier()"
-                                            id="add_more"><span style="margin-right: 10px">Add More</span><i
+                                        id="add_more"><span style="margin-right: 10px">Add More</span><i
                                             class="fa fa-plus"></i>
                                     </button>
                                 </div>
@@ -145,9 +159,9 @@
                                 <div
                                     class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                     <a href="{{ URL::to('admin/bmsmDeals') }}"
-                                       class="btn btn-danger">{{ trans('labels.cancel') }}</a>
+                                        class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                     <button class="btn btn-primary"
-                                            @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
+                                        @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
                                             @else type="submit" @endif>{{ trans('labels.save') }}</button>
                                 </div>
                             </div>
@@ -172,8 +186,8 @@
     <script>
         let tierIndex = 0;
 
-        $(document).ready(function () {
-            $('#bmsm_deal_type').on('change', function () {
+        $(document).ready(function() {
+            $('#bmsm_deal_type').on('change', function() {
                 const type = $(this).val();
                 if (type === '1') {
                     $('#product_selector_section').show();
@@ -210,5 +224,4 @@
             tierIndex++;
         }
     </script>
-
 @endsection

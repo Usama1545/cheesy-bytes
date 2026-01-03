@@ -10,7 +10,7 @@
             <div class="col-12">
                 <div class="card border-0 box-shadow">
                     <div class="card-body pb-0">
-                        <form action="{{ URL::to('admin/topDeals/store') }}" method="POST">
+                        <form action="{{ URL::to('admin/topDeals/store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
 
@@ -128,7 +128,22 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-form-label">{{ trans('labels.image') }}
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="web_image" id="image"
+                                            accept="image/*" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-form-label">mobile Image
+                                            <span class="text-danger">*</span> </label>
+                                        <input type="file" class="form-control" name="mobile_image" id="mobile_image"
+                                            accept="image/*" required>
+                                    </div>
+                                </div>
 
                                 <div
                                     class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

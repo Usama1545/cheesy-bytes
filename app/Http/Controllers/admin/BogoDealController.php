@@ -41,7 +41,18 @@ class BogoDealController extends Controller
             'is_active' => 'boolean',
             'order' => 'required|numeric|min:1',
             'deal_rules' => 'required|array',
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+
         ]);
+
+        $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+        $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+        $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
+
+        $item = Item::find($request->product_id)->item_image();
+      
 
         $deal = TopDeals::create([
             'product_id' => $request->product_id,
@@ -54,9 +65,11 @@ class BogoDealController extends Controller
             'end_time' => $request->end_time,
             'size_id' => $request->size_id,
             'order' => $request->order,
+            'web_image' => $image,
+            'mobile_image' => $mobile_image,
         ]);
 
-         $slug = Item::find($request->product_id)->slug;
+        $slug = Item::find($request->product_id)->slug;
         $slugexists = TopDeals::where('slug', $slug)->exists();
         if ($slugexists) {
             $slug = $slug . '-' .$deal->id;
@@ -134,6 +147,8 @@ class BogoDealController extends Controller
             'size_id' => 'nullable|integer|exists:sizes,id',
             'order' => 'required|numeric|min:1',
             'deal_rules' => 'required|array',
+            'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
 
         $deal = TopDeals::findOrFail($request->id);
@@ -142,6 +157,18 @@ class BogoDealController extends Controller
         if ($slugexists) {
             $slug = $slug . '-' .$deal->id;
         }
+
+        $image = $deal->web_image;
+        $mobile_image = $deal->mobile_image;
+        if ($request->file('web_image') != "") {
+            $image = 'deal-' . uniqid() . '.' . $request->web_image->getClientOriginalExtension();
+            $request->web_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $image);
+        }
+        if ($request->file('mobile_image') != "") {
+            $mobile_image = 'deal-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
+            $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images', $mobile_image);
+        }
+
         // Update base deal info
         $deal->update([
             'product_id' => $request->product_id,
@@ -154,6 +181,8 @@ class BogoDealController extends Controller
             'end_time' => $request->end_time,
             'size_id' => $request->size_id,
             'order' => $request->order,
+            'web_image' => $image,
+            'mobile_image' => $mobile_image,
         ]);
 
         // Clean old relationships
