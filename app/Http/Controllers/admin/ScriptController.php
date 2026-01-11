@@ -61,12 +61,17 @@ class ScriptController extends Controller
         return redirect('/admin/scripts')->with('success', trans('messages.success'));
     }
 
-    public function delete($id)
+    public function delete(Request $request)
     {
-        $delete = TagScript::find($id)->delete();
-        if ($delete) {
-            return 1;
-        } else {
+        $id = $request->id;
+        if($id){
+            $delete = TagScript::find($id)->delete();
+            if ($delete) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }else {
             return 0;
         }
     }

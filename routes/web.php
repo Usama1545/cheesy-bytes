@@ -55,7 +55,7 @@ use App\Http\Controllers\admin\ShippingareaController;
 use App\Http\Controllers\admin\TaxController;
 use App\Http\Controllers\admin\WhyChooseUsController;
 use App\Http\Controllers\addons\BlogController;
-use App\Http\Controllers\Admin\ScriptController;
+use App\Http\Controllers\admin\ScriptController;
 use Illuminate\Support\Facades\Artisan;
 
 /*

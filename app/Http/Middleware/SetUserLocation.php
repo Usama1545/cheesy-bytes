@@ -11,45 +11,44 @@ class SetUserLocation
 {
     public function handle(Request $request, Closure $next)
     {
-        // Bypass routes that shouldn’t use branch logic
+        // Skip middleware for these routes
         if (
-            $request->routeIs('location') ||
-            $request->routeIs('location.store') ||
-            $request->routeIs('location.update') ||
+            $request->routeIs('location*') ||
             $request->routeIs('admin.*')
         ) {
             return $next($request);
         }
 
-        // Extract the first URL segment (potential branch slug)
-        $urlSegments = $request->segments();
-        $branchSlug = $urlSegments[0] ?? null;
+        // 1️⃣ If route has branch slug → validate & store
+        $branchSlug = $request->route('branch');
 
-        // 🟢 CASE 1: URL includes a potential branch slug
         if ($branchSlug) {
             $branch = Branch::where('slug', $branchSlug)->first();
 
-            if ($branch) {
-                // Valid branch → store it in session
-                Session::put('branch_id', $branch->id);
-                return $next($request);
-            } else {
-                // Invalid branch → redirect to locations page (301)
-                return redirect()->route('location', [], 301);
+            if (! $branch) {
+                abort(404);
             }
+
+            Session::put('branch_id', $branch->id);
+
+            return $next($request);
         }
 
-        // 🟡 CASE 2: No branch slug in URL
-        // If the session already has a branch, we could redirect to that branch’s slug
+        // 2️⃣ If NO branch in route but session has branch
         if (Session::has('branch_id')) {
             $branch = Branch::find(Session::get('branch_id'));
+
             if ($branch) {
-                $newUrl = url("{$branch->slug}/" . ltrim($request->getRequestUri(), '/'));
-                return redirect($newUrl, 301);
+                return redirect()->route('home', [
+                    'branch' => $branch->slug,
+                ]);
             }
+
+            // Session is stale → clean it
+            Session::forget('branch_id');
         }
 
-        // 🚫 Otherwise, no branch found → redirect to location selector
-        return redirect()->route('location', [], 301);
+        // 3️⃣ No branch in route AND no session → force location selection
+        return redirect()->route('location');
     }
 }

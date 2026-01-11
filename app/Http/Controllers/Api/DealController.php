@@ -73,7 +73,10 @@ class DealController extends Controller
             $mapped = $getsearchitems->map(function ($deal) {
 
                 $product = $deal->product;
-                $image   = $product?->item_image?->image_url ?? null;
+                $image =
+                    $deal->mobile_image ? helper::image_path($deal->mobile_image)
+                    : ($deal->web_image ? helper::image_path($deal->web_image)
+                    : $product?->item_image?->image_url);
 
                 // Final unified structure
                 return [

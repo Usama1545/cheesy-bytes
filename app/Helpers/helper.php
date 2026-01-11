@@ -594,7 +594,7 @@ class helper
 
     public static function date_format($date)
     {
-        return date(helper::appdata()->date_format, strtotime($date));
+        return $date ? \Carbon\Carbon::parse($date)->format('d-m-Y') : null;
     }
 
     public static function time_format($time)

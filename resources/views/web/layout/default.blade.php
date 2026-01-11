@@ -85,6 +85,7 @@
     <noscript><img height="1" width="1" style="display:none"
             src="https://www.facebook.com/tr?id=714068061098147&ev=PageView&noscript=1" /></noscript>
     <!-- End Meta Pixel Code -->
+<meta name="google-site-verification" content="JMp4fvFTm4an5uvdb7-AKDhAV9AVFm_RbYVPc4V3DnU">
 
     <noscript><img height="1" width="1" style="display:none"
             src="https://www.facebook.com/tr?id=2425470157809730&ev=PageView&noscript=1" /></noscript>

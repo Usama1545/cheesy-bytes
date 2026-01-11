@@ -103,12 +103,20 @@ class MenuController extends Controller
     {
         $branchId = Session::get('branch_id');
         $branch = Branch::find($branchId);
+        $categorydata = Category::where('slug', $category)
+            ->where('is_available', 1)
+            ->where('is_deleted', 2)
+            ->first();
+
+        if (! $categorydata) {
+            abort(404);
+        }
+
         $htmlContent = CountySeo::where('county', $branch->slug)->where('category', $category)->pluck('content')->first();
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $topdeals = helper::top_deals();
 
-        $categorydata = Category::where('slug', $category)->where('is_available', 1)->where('is_deleted', 2)->first();
         $subcategories = Subcategory::where('cat_id', @$categorydata->id)->where('is_available', 1)->where('is_deleted', 2)->get();
 
         $branchId = Session::get('branch_id');

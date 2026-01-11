@@ -1005,7 +1005,7 @@ class SiteController extends Controller
                     ->map(function ($slider) {
                         return [
                         'id' => $slider->id,
-                        'image' => helper::image_path($slider->image),
+                        'image' => helper::image_path($slider->mobile_image) ?? helper::image_path($slider->image),
                         'title' => $slider->title ?? null,
                         'description' => $slider->description ?? null,
                         'link_type' => $slider->link_type ?? null,

@@ -563,7 +563,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function timeslot(Request $request)
+   public function timeslot(Request $request)
     {
         try {
             $slots = [];
@@ -612,13 +612,15 @@ class CheckoutController extends Controller
                             $slot_parts = explode(' - ', $item);
                             if ($request->inputDate === $current_date) {
                                 if ($currenttime < date('H:i', strtotime($slot_parts[1]))) {
+                                    $time = $this->formatTimeSlotTo12Hour($item);
                                     $slots[] = array(
-                                        'slot' => $item,
+                                        'slot' => $time,
                                     );
                                 }
                             } else {
+                                $time = $this->formatTimeSlotTo12Hour($item);
                                 $slots[] = array(
-                                    'slot' => $item,
+                                    'slot' => $time,
                                 );
                             }
                         }
@@ -631,6 +633,17 @@ class CheckoutController extends Controller
             return response()->json(['status' => 0, 'message' => trans('messages.wrong')], 200);
         }
     }
+
+    private function formatTimeSlotTo12Hour($timeSlot)
+    {
+        $parts = explode(' - ', $timeSlot);
+        
+        $startTime = date('g:i', strtotime($parts[0])); // 'g:i' = 12-hour format with minutes
+        $endTime = date('g:i', strtotime($parts[1]));   // 'g:i' = 12-hour format with minutes
+        
+        return $startTime . ' - ' . $endTime;
+    }
+
 
     public function paymentsuccess(Request $request)
     {

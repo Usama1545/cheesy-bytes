@@ -7,7 +7,7 @@
             <div class="col-md-12 my-2 d-flex justify-content-end">
 
 
-                @if ($orderdata->status_type == 1 || $orderdata->status_type == 2)
+              
                     <button type="button" class="btn btn-dark dropdown-toggle px-4 py-2"
                         data-bs-toggle="dropdown">{{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? trans('labels.action') : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}</button>
                     <div class="dropdown-menu dropdown-menu-right branch-only cursor-pointer">
@@ -18,7 +18,6 @@
                                 {{ $status->name }} </a>
                         @endforeach
                     </div>
-                @endif
             </div>
         </div>
         <div class="row">
