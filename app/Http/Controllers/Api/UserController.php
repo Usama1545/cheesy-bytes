@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Models\UserDeviceToken;
 use Lunaweb\RecaptchaV3\Facades\RecaptchaV3;
 
 class UserController extends Controller
@@ -669,4 +670,15 @@ class UserController extends Controller
         ]);
     }
 
+    public function storeToken(Request $request)
+    {
+        UserDeviceToken::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'fcm_token' => $request->fcm_token
+            ]
+        );
+
+        return response()->json(['status' => 'saved']);
+    }
 }

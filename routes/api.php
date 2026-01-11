@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\UserController;
 
 Route::post('/print-job/{jobId}/acknowledge', [PrintController::class, 'acknowledgePrintJob']);
+Route::get('registerDeviceToken', [UserController::class, 'storeToken']);
 Route::get('/fetch-job', [PrintController::class, 'fetchPrintJob']);
 Route::get('/fetchJob',[PrintController::class,'fetchConPrintJob']);
 Route::get('print-orders', [AdminController::class, 'printOrders']);
