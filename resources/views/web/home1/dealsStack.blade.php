@@ -52,6 +52,48 @@ $extraItems = $itemData->slice(3); // Items 4+
         </div>
     @endif
 </div>
+@if ($count == 1)
+    {
+    <style>
+        .image-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .deal-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+} @else{
+    <style>
+        .image-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+
+        .deal-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+    </style>
+    }
+@endif
 
 <style>
     .container-model {
@@ -100,24 +142,6 @@ $extraItems = $itemData->slice(3); // Items 4+
         aspect-ratio: 4 / 3;
     }
 
-    /* Image wrapper fills card */
-    .image-container {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fff;
-    }
-
-    .deal-image {
-        max-width: 100%;
-        max-height: 100%;
-        width: auto;
-        height: auto;
-        object-fit: contain;
-        display: block;
-    }
 
     /* Overlay */
     .deal-overlay {

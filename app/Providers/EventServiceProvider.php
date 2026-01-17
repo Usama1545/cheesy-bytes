@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Events\DealCreated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use App\Events\OrderStatusChanged;
 use App\Listeners\SendOrderStatusNotification;
+use App\Listeners\SendDealCreatedNotification;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,9 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        DealCreated::class => [
+            SendDealCreatedNotification::class,
         ],
          OrderStatusChanged::class => [
             SendOrderStatusNotification::class,

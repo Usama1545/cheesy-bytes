@@ -153,7 +153,10 @@ class CheckoutController extends Controller
                     'currency' => $settings->currency ?? 'USD',
                     'currency_symbol' => $settings->currency_symbol ?? '$',
                     'tax_inclusive' => $settings->tax_inclusive ?? false,
-                    'minimum_order' => $settings->minimum_order ?? 0
+                    'minimum_order' => $settings->minimum_order ?? 0,
+                    'can_use_credits' => $user ? $settings->min_redeem_points <= $user->wallet : false,
+                    'has_credits' => $user ? $user->wallet : 0,
+                    'dollar_per_credit' => $settings->dollar_per_point,
                 ]
             ];
             
@@ -303,10 +306,42 @@ class CheckoutController extends Controller
             // Calculate totals
             $tip = $request->tip ?? 0;
             $tax = array_sum($tax_price);
-            $grandTotal = $totalCartValue + $tip + $tax - $discountAmount;
+
+            $baseAmount = max(0, $totalCartValue - $discountAmount);
+
+            $credit_discount = 0;
+            $creditsRequested = (int) $request->credits_used;
+
+            if ($user && $creditsRequested > 0) {
+                $settings = Settings::first();
+                $creditsRequested = min($creditsRequested, $user->wallet);
+                $maxCreditsAllowed = floor(
+                    $baseAmount / $settings->dollar_per_point
+                );
+                if($creditsRequested > $maxCreditsAllowed) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'You can use up to ' . $maxCreditsAllowed . ' credits for this order'
+                    ]);
+                }
+                $creditsToUse = min($creditsRequested, $maxCreditsAllowed);
+
+                $credit_discount = $creditsToUse * $settings->dollar_per_point;
+                $user->wallet = max(0, $user->wallet - $creditsToUse);
+            }
+
+            $grandTotal = max(
+                0,
+                $totalCartValue + $tip + $tax - $discountAmount - $credit_discount
+            );
+
             // Ensure grand total is not negative
             if ($grandTotal < 0) {
                 $grandTotal = 0;
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Order total cannot be zero'
+                ]);
             }
 
             // Check user wallet if authenticated
@@ -358,6 +393,7 @@ class CheckoutController extends Controller
             $order->tip = helper::number_format($tip);
             $order->order_notes = $request->order_notes;
             $order->order_from = "api";
+            $order->applied_credits = $creditsToUse ?? 0;
             $order->status = 4;
             $order->status_type = 1;
             $order->delivery_date = $request->pickup_date; // Using pickup date instead of delivery
@@ -653,6 +689,7 @@ class CheckoutController extends Controller
     public function timeslot(Request $request)
     {
         try {
+            $branchId = $request->branch_id;
             $slots = [];
             date_default_timezone_set(helper::appdata()->timezone);
 
@@ -660,7 +697,7 @@ class CheckoutController extends Controller
                 $day = date('l', strtotime(helper::date_format($request->inputDate)));
 
                 $minute = "";
-                $time = Time::where('day', $day)->first();
+                $time = Time::where('day', $day)->where('branch_id', $branchId)->first();
 
                 if ($time->always_close == 1) {
                     $slots = ["closed"]; // Return array with "closed" message
@@ -738,23 +775,41 @@ class CheckoutController extends Controller
 
     public function paymentsuccess($id)
     {
-        $order = Order::findOrFail($id);
-        try {
-           $order->payment_status = 2;
-           $order->save();
-           
-           
-            $this->createPrintJob($order->id, $order->branch_id);
-            $response = ['status' => 1, 'msg' => 'Payment successful'];
-        } catch (\Exception $e) {
-            $response = ['status' => 0, 'msg' => $e->getMessage()];
-        }
+        DB::transaction(function () use ($id) {
 
-        return response()->json($response);
+            $order = Order::lockForUpdate()->findOrFail($id);
+
+            if ($order->payment_status === 2) {
+                return;
+            }
+
+            if ($order->user_id) {
+                $user = User::findOrFail($order->user_id);
+                $settings = Settings::first();
+
+                $points = floor($order->grand_total / $settings->point_per_dollar);
+
+                if ($points > 0) {
+                    $user->increment('wallet', $points);
+                }
+            }
+
+            $order->update([
+                'payment_status' => 2
+            ]);
+
+            $this->createPrintJob($order->id, $order->branch_id);
+        });
+
+        return response()->json([
+            'status' => 1,
+            'msg' => 'Payment successful'
+        ]);
     }
 
     public function paymentfail()
     {
         return response()->json(['status' => 0, 'msg' => 'Payment failed']);
+
     }
 }

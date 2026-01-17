@@ -207,6 +207,16 @@ class SettingController extends Controller
             $setting->mobile_app_description = $request->mobile_app_description;
             $setting->save();
         }
+        if($request->credit_update){
+            $setting = Settings::first();
+            if (empty($setting)) {
+                $setting = new Settings();
+            }
+             $setting->point_per_dollar = $request->point_per_dollar;
+            $setting->dollar_per_point = $request->dollar_per_point;
+            $setting->min_redeem_points = $request->min_redeem_points;
+            $setting->save();
+        }
         if ($request->web_update) {
             if ($request->hasFile('favicon')) {
                 $favicon = 'favicon-' . uniqid() . '.' . $request->favicon->getClientOriginalExtension();

@@ -12,7 +12,7 @@
                             <form action="{{ URL::to('admin/time/store') }}" method="post">
                                 @csrf
                                 <div class="row">
-                                    <div class="col-md-4 mb-lg-0">
+                                    <div class="col-md-3 mb-lg-0">
                                         <div class="form-group">
                                             <label class="form-label">{{ trans('labels.time_interval') }}<span
                                                     class="text-danger"> *
@@ -23,7 +23,9 @@
                                                     name="interval_time" placeholder="{{ trans('labels.time_interval') }}"
                                                     aria-describedby="button-addon2"
                                                     value="{{ $settingsdata->interval_time }}" required>
-                                                <select name="interval_type" class="border border-muted {{ session()->get('direction') == 2 ? 'rounded-start' : 'rounded-end' }}" required>
+                                                <select name="interval_type"
+                                                    class="border border-muted {{ session()->get('direction') == 2 ? 'rounded-start' : 'rounded-end' }}"
+                                                    required>
                                                     <option value="1"
                                                         {{ $settingsdata->interval_type == 1 ? 'selected' : '' }}>
                                                         {{ trans('labels.minute') }}
@@ -36,7 +38,26 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-lg-0">
+                                    <div class="col-md-3 mb-lg-0">
+                                        <div class="form-group">
+                                            <label class="form-label">{{ trans('labels.perslot_booking_limit') }}
+                                                <span class="text-danger"> * </span></label>
+                                            <select name="branch_id" class="form-control selectpicker" required
+                                                data-live-search="true"
+                                                onchange="window.location='{{ url('admin/time') }}?branch_id=' + this.value">
+
+                                                @foreach (helper::get_branchs() as $branch)
+                                                    <option value="{{ $branch->id }}"
+                                                        {{ $branchId == $branch->id ? 'selected' : '' }}>
+                                                        {{ $branch->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="branch_id" value="{{ $branchId }}">
+
+                                    <div class="col-md-3 mb-lg-0">
                                         <div class="form-group">
                                             <label class="form-label">{{ trans('labels.perslot_booking_limit') }}
                                                 <span class="text-danger"> * </span></label>
@@ -46,7 +67,7 @@
                                                 value="{{ $settingsdata->perslot_booking_limit }}" required>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 form-group">
+                                    <div class="col-md-3 form-group">
                                         <label class="form-label" for="">{{ trans('labels.date_time') }}
                                         </label>
                                         <input id="ordertypedatetime-switch" type="checkbox" class="checkbox-switch"
@@ -165,7 +186,8 @@
                                         </div>
                                     </div>
                                 @endforeach
-                                <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
+                                <div
+                                    class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                     <button class="btn btn-primary"
                                         @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()" @else type="submit" @endif>{{ trans('labels.save') }}</button>
                                 </div>

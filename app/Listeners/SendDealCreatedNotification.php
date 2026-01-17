@@ -2,15 +2,17 @@
 
 namespace App\Listeners;
 
+use App\Events\DealCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
-use App\Events\OrderStatusChanged;
+use App\Models\Item;
+use App\Models\User;
 use App\Models\UserDeviceToken;
 use Illuminate\Support\Facades\Log;
 
-class SendOrderStatusNotification implements ShouldQueue
+class SendDealCreatedNotification implements ShouldQueue
 {
     use InteractsWithQueue;
     /**
@@ -29,33 +31,49 @@ class SendOrderStatusNotification implements ShouldQueue
      * @param  object  $event
      * @return void
      */
-    public function handle(OrderStatusChanged $event)
+    public function handle(DealCreated $event)
     {
-        $tokens = UserDeviceToken::where('user_id', $event->order->user_id)
+        $item = Item::find($event->deal->product_id);
+
+        if (!$item || empty($item->branch_ids)) {
+            return;
+        }
+
+        $branchIds = collect(explode(',', $item->branch_ids))
+            ->map(fn ($id) => trim($id))
+            ->filter();
+
+        $userIds = User::whereIn('branch_id', $branchIds)
+            ->pluck('id');
+
+        $tokens = UserDeviceToken::whereIn('user_id', $userIds)
             ->pluck('fcm_token')
+            ->filter()
+            ->values()
             ->toArray();
 
-        if (empty($tokens)) return;
+        if (empty($tokens)) {
+            return;
+        }
 
         $messaging = app('firebase.messaging');
 
         $message = CloudMessage::new()
             ->withNotification(Notification::create(
-                'Order Update',
-                "Your order has just been {$event->newStatus}. We're on it!"
+                'New Deal Landed',
+                'A new deal has landed for you. Check it out!'
             ))
             ->withData([
-                'type' => 'order_status_update',
-                'order_id' => (string) $event->order->id,
-                'status' => $event->newStatus,
+                'type' => 'new_offer',
             ]);
 
         $response = $messaging->sendMulticast($message, $tokens);
-        
+
         Log::info('FCM response', [
             'success' => $response->successes()->count(),
             'failure' => $response->failures()->count(),
         ]);
     }
+
 
 }

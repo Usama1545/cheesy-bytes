@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use App\Models\Order;
 use App\Observers\OrderObserver;
+use App\Models\TopDeals;
+use App\Observers\DealObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
         Order::observe(OrderObserver::class);
+        TopDeals::observe(DealObserver::class);
 
     }
 }
