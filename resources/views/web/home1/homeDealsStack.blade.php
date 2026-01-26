@@ -53,7 +53,6 @@ $extraItems = $itemData->slice(3); // Items 4+
     @endif
 </div>
 @if ($count == 1)
-    {
     <style>
         .image-container {
             position: absolute;
@@ -72,7 +71,7 @@ $extraItems = $itemData->slice(3); // Items 4+
             display: block;
         }
     </style>
-} @else{
+@else
     <style>
         .image-container {
             position: absolute;
@@ -92,7 +91,6 @@ $extraItems = $itemData->slice(3); // Items 4+
             display: block;
         }
     </style>
-    }
 @endif
 <style>
     .container-model {

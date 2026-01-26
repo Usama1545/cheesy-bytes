@@ -40,7 +40,7 @@
                                     </div>
                                     <div class="col-md-3 mb-lg-0">
                                         <div class="form-group">
-                                            <label class="form-label">{{ trans('labels.perslot_booking_limit') }}
+                                            <label class="form-label">Select Branch
                                                 <span class="text-danger"> * </span></label>
                                             <select name="branch_id" class="form-control selectpicker" required
                                                 data-live-search="true"

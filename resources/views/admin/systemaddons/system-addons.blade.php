@@ -45,7 +45,7 @@
                                                         </h5>
                                                     </div>
                                                     <div class="card-footer">
-                                                        <p class="card-text d-inline"><small class="text-muted">{{ date('d M Y', strtotime($addon->created_at)); }}</small></p>
+                                                        <p class="card-text d-inline"><small class="text-muted">{{ date('d M Y', strtotime($addon->created_at)) }}</small></p>
                                                         @if ($addon->activated == 1)
                                                             <a @if (env('Environment') == 'sendbox') onclick="myFunction()" @else onclick="StatusUpdate('{{ $addon->id }}','2','{{ URL::to('admin/systemaddons/update') }}')" @endif class="btn btn-sm btn-success {{session()->get('direction') == 2 ? 'float-start' : 'float-end'}}">{{ trans('labels.activated') }}</a>
                                                         @else

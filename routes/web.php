@@ -150,6 +150,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::post('gallery/delete', [OtherPagesController::class, 'gallery_delete']);
         // others
         Route::get('home', [AdminController::class, 'home'])->name('dashboard');
+        Route::get('mobile-home', [AdminController::class, 'mobileHome'])->name('mobile-dashboard');
         Route::post('change-password', [AdminController::class, 'changepassword']);
         Route::post('edit-profile', [AdminController::class, 'editprofile']);
         Route::get('getorder', [AdminController::class, 'getorder']);

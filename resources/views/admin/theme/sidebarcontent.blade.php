@@ -1,11 +1,19 @@
 @php $modules = explode(',',helper::get_roles()); @endphp
 <ul class="navbar-nav">
-    <li class="nav-item mb-2 fs-7">
-        <a class="nav-link rounded d-flex {{ request()->is('admin/home*') ? 'active' : '' }}"
-            href="{{ URL::to('/admin/home') }}" aria-expanded="false">
-            <i class="fa-solid fa-house-user"></i><span class="nav-text ">{{ trans('labels.dashboard') }}</span>
-        </a>
-    </li>
+    @if (Auth::user()->type == 1)
+        <li class="nav-item mb-2 fs-7">
+            <a class="nav-link rounded d-flex {{ request()->is('admin/home*') ? 'active' : '' }}"
+                href="{{ URL::to('/admin/home') }}" aria-expanded="false">
+                <i class="fa-solid fa-house-user"></i><span class="nav-text ">{{ trans('labels.dashboard') }}</span>
+            </a>
+        </li>
+        <li class="nav-item mb-2 fs-7">
+            <a class="nav-link rounded d-flex {{ request()->is('admin/mobile-home*') ? 'active' : '' }}"
+                href="{{ URL::to('/admin/mobile-home') }}" aria-expanded="false">
+                <i class="fa-solid fa-house-user"></i><span class="nav-text ">Mobile Dashboard</span>
+            </a>
+        </li>
+    @endif
     {{--    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('23', $modules) == true ? '' : 'd-none') : '' }}" --}}
     {{--        id="23"> --}}
     {{--        <a class="nav-link rounded d-flex {{ request()->is('admin/systemaddons*') ? 'active' : '' }}" --}}

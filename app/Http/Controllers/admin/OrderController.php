@@ -19,125 +19,130 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $user= auth()->user();
-        // dd($user);
-        // Start the query for orders
-        $getorders = Order::with('user_info', 'branch');
-   
+        $user = auth()->user();
 
-        if ($user->branch_id !== null) {
-        // Branch user → only their branch + last 2 days
-            $getorders->where('branch_id', $user->branch_id)
-                    ->whereDate('created_at', '>=', now()->subDays(2));
+        $query = Order::query()
+            ->with([
+                'user_info:id,name',
+                'branch:id,name'
+            ])
+            ->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->where('transaction_type', 15)
+                    ->where('payment_status', 2);
+                })->orWhere('transaction_type', '!=', 15);
+            });
+
+        /* =========================
+        BRANCH USER RESTRICTION
+        ========================== */
+        if ($user->branch_id) {
+            $query->where('branch_id', $user->branch_id)
+                ->whereDate('created_at', '>=', now()->subDays(2));
         }
 
-        $getorders->where(function ($q) {
+        /* =========================
+        FILTERS
+        ========================== */
+
+        // Branch filter (admin only)
+        if ($request->filled('branch_id') && !$user->branch_id) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        // Order from (web / api)
+        if ($request->filled('order_from')) {
+            $query->where('order_from', $request->order_from);
+        }
+
+        // Date range
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $query->whereBetween('created_at', [
+                $request->from_date . ' 00:00:00',
+                $request->to_date . ' 23:59:59',
+            ]);
+        }
+
+        // Status
+        if ($request->filled('status')) {
+            match ($request->status) {
+                'processing' => $query->whereIn('status_type', [1, 2]),
+                'completed'  => $query->where('status_type', 3),
+                'cancelled'  => $query->where('status_type', 4),
+                default => null
+            };
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('order_number', 'like', '%' . $request->search . '%')
+                ->orWhere('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        /* =========================
+        FINAL QUERY
+        ========================== */
+        $getorders = $query
+            ->select([
+                'id',
+                'order_number',
+                'branch_id',
+                'name',
+                'grand_total',
+                'tip',
+                'order_type',
+                'transaction_type',
+                'payment_status',
+                'status',
+                'status_type',
+                'admin_notes',
+                'created_at',
+                'order_from'
+            ])
+            ->orderByDesc('id')
+            ->paginate(20)
+            ->withQueryString();
+
+        /* =========================
+        COUNTERS (FAST)
+        ========================== */
+
+        $branchId = $user->branch_id ?? $request->branch_id;
+
+        $baseCountQuery = Order::where(function ($q) {
             $q->where(function ($q) {
                 $q->where('transaction_type', 15)
                 ->where('payment_status', 2);
-            })
-            ->orWhere('transaction_type', '!=', 15);
-        });
-        
-        // Apply status filter
-        if ($request->has('status') && $request->status != "") {
-            if ($request->status == "processing") {
-                $getorders->whereIn('status_type', [1, 2]);
-            } elseif ($request->status == "completed") {
-                $getorders->where('status_type', 3);
-            } elseif ($request->status == "cancelled") {
-                $getorders->where('status_type', 4);
-            }
-        }
-        $getorders = $getorders->orderByDesc('id')->get()->groupBy('branch_id') // Group orders by branch_id
-        ->map(function ($orders, $branchId) {
-            return [
-                'branch_name' => $orders->first()->branch->name ?? 'Unknown', // Get branch name or default to 'Unknown'
-                'orders' => $orders->map(function ($order) {
-                    return [
-                        'id' => $order->id,
-                        'user_name' => $order->name, // Adjust as per your relationship
-                        'status' => $order->status,
-                        'status_type' => $order->status_type,
-                        'admin_notes' => $order->admin_notes,
-                        'order_number' => $order->order_number,
-                        'grand_total' => $order->grand_total,
-                        'order_type' => $order->order_type,
-                        'tip' => $order->tip,
-                        'transaction_type' => $order->transaction_type,
-                        'payment_status' => $order->payment_status,
-                        'created_at' => $order->created_at->format('Y-m-d H:i:s'),
-                    ];
-                }),
-            ];
+            })->orWhere('transaction_type', '!=', 15);
         })
-            ->values();
-        // Filter orders by branch (assuming 'branch_id' is the column for branch filtering)
-        if ($request->has('branch_id') && $request->branch_id != "") {
-            $getorders = $getorders->where('branch_id', $request->branch_id);  // Adjust the column name if it's different
-        }
+        ->where('order_from', '!=', 'pos')
+        ->when($branchId, fn ($q) => $q->where('branch_id', $branchId));
 
-        // Filter orders based on status type
-        $branchId = $user->branch_id ?? $request->branch_id; // Use user branch_id if available, otherwise request branch_id
+        $totalprocessing = (clone $baseCountQuery)->whereIn('status_type', [1,2])->count();
+        $totalcompleted  = (clone $baseCountQuery)->where('status_type', 3)->count();
+        $totalcancelled  = (clone $baseCountQuery)->where('status_type', 4)->count();
+        $total           = (clone $baseCountQuery)->count();
 
-
-        // Retrieve orders with the necessary sorting
-        // Get available drivers for the branch (assuming 'branch_id' for filtering drivers by branch)
-        $getdriver = User::where('type', '3')->where('is_available', 1)
-            ->orderByDesc('id')
+        /* =========================
+        DRIVERS
+        ========================== */
+        $getdriver = User::where('type', 3)
+            ->where('is_available', 1)
+            ->select('id', 'name')
             ->get();
 
-        // Get order counts for each status per branch
-        $totalprocessing = Order::whereIn('status_type', [1, 2])->where(function ($query) {
-            $query->where('transaction_type', 15)
-                ->where('payment_status', 2); // Ensure paid status for type 15
-        })->orWhere(function ($query) {
-            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
-        })
-            ->where('order_from', '!=', 'pos')
-            ->when($branchId, function ($query, $branchId) {
-                return $query->where('branch_id', $branchId);  // Apply branch_id filter if $branchId is available
-            })
-            ->count();
-        // Shared conditions for transaction_type and payment_status filtering
-        $transactionFilter = function ($query) {
-            $query->where(function ($query) {
-                $query->where('transaction_type', 15)
-                    ->where('payment_status', 2);  // Ensure paid status for type 15
-            })->orWhere(function ($query) {
-                $query->whereNot('transaction_type', 15);  // Fetch all other payment types without checking status
-            });
-        };
-
-        // For total completed orders
-        $totalcompleted = Order::where('status_type', 3)
-            ->where('order_from', '!=', 'pos')
-            ->where($transactionFilter)  // Apply shared transaction filter
-            ->when($branchId, function ($query, $branchId) {
-                return $query->where('branch_id', $branchId);  // Apply branch filter if available
-            })
-            ->count();
-
-        // For total cancelled orders
-        $totalcancelled = Order::where('status_type', 4)
-            ->where('order_from', '!=', 'pos')
-            ->where($transactionFilter)  // Apply shared transaction filter
-            ->when($branchId, function ($query, $branchId) {
-                return $query->where('branch_id', $branchId);  // Apply branch filter if available
-            })
-            ->count();
-
-        // For total orders (all statuses)
-        $total = Order::where($transactionFilter)  // Apply shared transaction filter
-        ->when($branchId, function ($query, $branchId) {
-            return $query->where('branch_id', $branchId);  // Apply branch filter if available
-        })
-            ->count();
-
-
-        // Pass the data to the view
-        return view('admin.orders.index', compact('getorders', 'getdriver', 'totalprocessing','total', 'totalcompleted', 'totalcancelled'));
+        return view('admin.orders.index', compact(
+            'getorders',
+            'getdriver',
+            'totalprocessing',
+            'totalcompleted',
+            'totalcancelled',
+            'total'
+        ));
     }
+
 
     public function update(Request $request)
     {

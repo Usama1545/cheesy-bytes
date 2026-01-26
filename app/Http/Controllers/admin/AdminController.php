@@ -44,34 +44,34 @@ class AdminController extends Controller
         $getusers = User::Where('type', '=', '2')->get();
         $getdriver = User::where('is_available', '1')->where('type', '3')->get();
         $getreview = Ratting::all();
-        $getorders = Order::where(function ($query) {
+        $getorders = Order::where('order_from', '=' , 'web')->where(function ($query) {
             $query->where('transaction_type', 15)
                 ->where('payment_status', 2); // Ensure paid status for type 15
         })->orWhere(function ($query) {
             $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
         })->get();
 
-        $getorderscount = Order::where(function ($query) {
+        $getorderscount = Order::where('order_from', '=' , 'web')->where(function ($query) {
             $query->where('transaction_type', 15)
                 ->where('payment_status', 2); // Ensure paid status for type 15
         })->orWhere(function ($query) {
             $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
-        })->get();
+        })->count();
         $getorderdetailscount = OrderDetails::all();
         $banners = Banner::all();
-        $order_total = Order::where(function ($query) {
+        $order_total = Order::where('order_from', '=' , 'web')->where(function ($query) {
             $query->where('transaction_type', 15)
                 ->where('payment_status', 2); // Ensure paid status for type 15
         })->orWhere(function ($query) {
             $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
         })->where('status', '!=', '6')->where('status', '!=', '7')->sum('grand_total');
-        $order_tax = Order::where(function ($query) {
+        $order_tax = Order::where('order_from', '=' , 'web')->where(function ($query) {
             $query->where('transaction_type', 15)
                 ->where('payment_status', 2); // Ensure paid status for type 15
         })->orWhere(function ($query) {
             $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
         })->where('status', '!=', '6')->where('status', '!=', '7')->sum('tax_amount');
-        $getbranchorders = Order::with('user_info', 'branch')->whereDate('created_at', Carbon::today())
+        $getbranchorders = Order::where('order_from', '=' , 'web')->with('user_info', 'branch')->whereDate('created_at', Carbon::today())
             ->where(function ($query) {
                 $query->where('transaction_type', 15)
                     ->where('payment_status', 2); // Ensure paid status for type 15
@@ -101,31 +101,54 @@ class AdminController extends Controller
                 ];
             })
             ->values();
-        $topitems = Item::with('category_info', 'subcategory_info', 'item_image')->leftJoin('order_details', 'order_details.item_id', 'item.id')->whereNull('custom_pizza_id')
-            ->select('item.id', 'item.cat_id', 'item.subcat_id', 'item.item_name', 'item.slug', DB::raw('count(order_details.item_id) as item_order_counter'))
-            ->groupBy('order_details.item_id')
-            ->orderByDesc('item_order_counter')
-            ->having('item_order_counter', '>', 0)
+        $topitems = Item::with('category_info', 'subcategory_info', 'item_image')
+            ->leftJoin('order_details', 'order_details.item_id', 'item.id')
+            ->leftJoin('order', 'order.id', 'order_details.order_id')
+            ->where('order.order_from', 'web')
+            ->whereNull('order_details.custom_pizza_id')
+            ->select(
+                'item.id',
+                'item.cat_id',
+                'item.subcat_id',
+                'item.item_name',
+                'item.slug',
+                DB::raw('COUNT(order_details.item_id) as item_order_counter')
+            )
             ->where('item.item_status', '1')
-            ->get()->take(7);
+            ->groupBy('item.id')
+            ->having('item_order_counter', '>', 0)
+            ->orderByDesc('item_order_counter')
+            ->limit(7)
+            ->get();
+
         $topusers = User::leftJoin('order', 'order.user_id', 'users.id')
-            ->select('users.id', 'users.name', 'users.email', 'users.mobile', 'profile_image', DB::raw('count(order.user_id) as user_order_counter'))
-            ->groupBy('order.user_id')
-            ->orderByDesc('user_order_counter')
-            ->having('user_order_counter', '>', 0)
+            ->where('order.order_from', 'web')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.mobile',
+                'users.profile_image',
+                DB::raw('COUNT(order.id) as user_order_counter')
+            )
             ->where('users.type', '2')
             ->where('users.is_available', '1')
-            ->get()->take(5);
+            ->groupBy('users.id')
+            ->having('user_order_counter', '>', 0)
+            ->orderByDesc('user_order_counter')
+            ->limit(5)
+            ->get();
+
 
         // ORDER-CHART-START
         $year = $request->getyear != "" ? $request->getyear : date('Y');
-        $order_years = Order::select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->where(function ($query) {
+        $order_years = Order::where('order_from', '=' , 'web')->select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->where(function ($query) {
             $query->where('transaction_type', 15)
                 ->where('payment_status', 2); // Ensure paid status for type 15
         })->orWhere(function ($query) {
             $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
         })->orderByDesc('created_at')->get();
-        $orderlabels = Order::select(DB::raw("MONTHNAME(created_at) as month_name"))->whereYear('created_at', $year)->where(function ($query) {
+        $orderlabels = Order::where('order_from', '=' , 'web')->select(DB::raw("MONTHNAME(created_at) as month_name"))->whereYear('created_at', $year)->where(function ($query) {
             $query->where('transaction_type', 15)
                 ->where('payment_status', 2); // Ensure paid status for type 15
         })->orWhere(function ($query) {
@@ -133,13 +156,13 @@ class AdminController extends Controller
         })->orderBy('created_at')->groupBy(DB::raw("MONTHNAME(created_at)"))->pluck('month_name');
         $deliverydata = $pickupdata = array();
         foreach ($orderlabels as $monthname) {
-            $deliverydata[] = Order::whereYear('created_at', $year)->where('order_type', 1)->where(function ($query) {
+            $deliverydata[] = Order::where('order_from', '=' , 'web')->whereYear('created_at', $year)->where('order_type', 1)->where(function ($query) {
                 $query->where('transaction_type', 15)
                     ->where('payment_status', 2); // Ensure paid status for type 15
             })->orWhere(function ($query) {
                 $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
             })->orderBy('created_at')->where(DB::raw("MONTHNAME(created_at)"), $monthname)->count();
-            $pickupdata[] = Order::whereYear('created_at', $year)->where('order_type', 2)->where(function ($query) {
+            $pickupdata[] = Order::where('order_from', '=' , 'web')->whereYear('created_at', $year)->where('order_type', 2)->where(function ($query) {
                 $query->where('transaction_type', 15)
                     ->where('payment_status', 2); // Ensure paid status for type 15
             })->orWhere(function ($query) {
@@ -165,13 +188,13 @@ class AdminController extends Controller
         // EARNINGS-CHART-START
         $earningsyear = $request->earningsyear != "" ? $request->earningsyear : date('Y');
         $earningsbranch = $request->earningsbranch != "" ? $request->earningsbranch : Branch::first()->id;
-        $earnings_years = Order::select(DB::raw("YEAR(created_at) as year"))->where(function ($query) {
+        $earnings_years = Order::where('order_from', '=' , 'web')->select(DB::raw("YEAR(created_at) as year"))->where(function ($query) {
             $query->where('transaction_type', 15)
                 ->where('payment_status', 2); // Ensure paid status for type 15
         })->orWhere(function ($query) {
             $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
         })->groupBy(DB::raw("YEAR(created_at)"))->orderByDesc('created_at')->get();
-        $reviewslist = Order::select(DB::raw("YEAR(created_at) as year"), DB::raw("MONTHNAME(created_at) as month_name"), DB::raw("SUM(grand_total) as grand_total"))
+        $reviewslist = Order::where('order_from', '=' , 'web')->select(DB::raw("YEAR(created_at) as year"), DB::raw("MONTHNAME(created_at) as month_name"), DB::raw("SUM(grand_total) as grand_total"))
             ->whereYear('created_at', $earningsyear)
             ->where(function ($query) {
                 $query->where('transaction_type', 15)
@@ -201,6 +224,200 @@ class AdminController extends Controller
             return response()->json(['orderlabels' => $orderlabels, 'deliverydata' => $deliverydata, 'pickupdata' => $pickupdata, 'userslabels' => $userslabels, 'userdata' => $userdata, 'earningslabels' => $earningslabels, 'earningsdata' => $earningsdata], 200);
         } else {
             return view('admin.dashboard.home', compact('topitems', 'topusers', 'gettotalcategory', 'getitems', 'addons', 'getusers', 'banners', 'getreview', 'getorderscount', 'getorderdetailscount', 'order_total', 'order_tax', 'getpromocode', 'getbranchorders', 'getdriver', 'order_years', 'orderlabels', 'deliverydata', 'pickupdata', 'user_years', 'userslabels', 'userdata', 'earnings_years', 'earningslabels', 'earningsdata'));
+        }
+    }
+
+    public function mobileHome(Request $request)
+    {
+        $ordersbranch = $request->ordersbranch != "" ? $request->ordersbranch : Branch::first()->id;
+
+        $gettotalcategory = Category::where('is_available', '1')->where('is_deleted', '2')->count();
+        $getitems = Item::where('item_status', '1')->get();
+        $addons = Addons::where('is_available', '1')->where('is_deleted', '2')->get();
+        $getpromocode = Promocode::where('is_available', 1)->get();
+        $getusers = User::Where('type', '=', '2')->get();
+        $getdriver = User::where('is_available', '1')->where('type', '3')->get();
+        $getreview = Ratting::all();
+        $getorders = Order::where('order_from', '=' , 'api')->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->get();
+
+        $getorderscount = Order::where('order_from', '=' , 'api')->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->count();
+        $getorderdetailscount = OrderDetails::all();
+        $banners = Banner::all();
+        $order_total = Order::where('order_from', '=' , 'api')->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->where('status', '!=', '6')->where('status', '!=', '7')->sum('grand_total');
+        $order_tax = Order::where('order_from', '=' , 'api')->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->where('status', '!=', '6')->where('status', '!=', '7')->sum('tax_amount');
+        $getbranchorders = Order::where('order_from', '=' , 'api')->with('user_info', 'branch')->whereDate('created_at', Carbon::today())
+            ->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->select('order.*') // Correct table name for consistency
+            ->get()
+            ->groupBy('branch_id') // Group orders by branch_id
+            ->map(function ($orders, $branchId) {
+                return [
+                    'branch_name' => $orders->first()->branch->name ?? 'Unknown', // Get branch name or default to 'Unknown'
+                    'orders' => $orders->map(function ($order) {
+                        return [
+                            'id' => $order->id,
+                            'user_name' => $order->name, // Adjust as per your relationship
+                            'status' => $order->status,
+                            'status_type' => $order->status_type,
+                            'admin_notes' => $order->admin_notes,
+                            'order_number' => $order->order_number,
+                            'grand_total' => $order->grand_total,
+                            'order_type' => $order->order_type,
+                            'transaction_type' => $order->transaction_type,
+                            'payment_status' => $order->payment_status,
+                            'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+                        ];
+                    }),
+                ];
+            })
+            ->values();
+        $topitems = Item::with('category_info', 'subcategory_info', 'item_image')
+            ->leftJoin('order_details', 'order_details.item_id', 'item.id')
+            ->leftJoin('order', 'order.id', 'order_details.order_id')
+            ->where('order.order_from', 'api')
+            ->whereNull('order_details.custom_pizza_id')
+            ->select(
+                'item.id',
+                'item.cat_id',
+                'item.subcat_id',
+                'item.item_name',
+                'item.slug',
+                DB::raw('COUNT(order_details.item_id) as item_order_counter')
+            )
+            ->where('item.item_status', '1')
+            ->groupBy('item.id')
+            ->having('item_order_counter', '>', 0)
+            ->orderByDesc('item_order_counter')
+            ->limit(7)
+            ->get();
+
+        $topusers = User::leftJoin('order', 'order.user_id', 'users.id')
+            ->where('order.order_from', 'api')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.mobile',
+                'users.profile_image',
+                DB::raw('COUNT(order.id) as user_order_counter')
+            )
+            ->where('users.type', '2')
+            ->where('users.is_available', '1')
+            ->groupBy('users.id')
+            ->having('user_order_counter', '>', 0)
+            ->orderByDesc('user_order_counter')
+            ->limit(5)
+            ->get();
+
+
+        // ORDER-CHART-START
+        $year = $request->getyear != "" ? $request->getyear : date('Y');
+        $order_years = Order::where('order_from', '=' , 'api')->select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->orderByDesc('created_at')->get();
+        $orderlabels = Order::where('order_from', '=' , 'api')->select(DB::raw("MONTHNAME(created_at) as month_name"))->whereYear('created_at', $year)->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->orderBy('created_at')->groupBy(DB::raw("MONTHNAME(created_at)"))->pluck('month_name');
+        $deliverydata = $pickupdata = array();
+        foreach ($orderlabels as $monthname) {
+            $deliverydata[] = Order::where('order_from', '=' , 'api')->whereYear('created_at', $year)->where('order_type', 1)->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->orderBy('created_at')->where(DB::raw("MONTHNAME(created_at)"), $monthname)->count();
+            $pickupdata[] = Order::where('order_from', '=' , 'api')->whereYear('created_at', $year)->where('order_type', 2)->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->orderBy('created_at')->where(DB::raw("MONTHNAME(created_at)"), $monthname)->count();
+        }
+        // ORDER-CHART-END
+
+
+        // USERS-CHART-START
+        $useryear = $request->useryear != "" ? $request->useryear : date('Y');
+        $user_years = User::select(DB::raw("YEAR(created_at) as year"))->groupBy(DB::raw("YEAR(created_at)"))->orderByDesc('created_at')->get();
+        $userslist = User::select(DB::raw("YEAR(created_at) as year"), DB::raw("MONTHNAME(created_at) as month_name"), DB::raw("COUNT(id) as total_user"))
+            ->whereYear('created_at', $useryear)
+            ->where('type', 2)
+            ->orderBy('created_at')
+            ->groupBy(DB::raw("MONTHNAME(created_at)"))
+            ->pluck('total_user', 'month_name');
+        $userslabels = $userslist->keys();
+        $userdata = $userslist->values();
+        // USERS-CHART-END
+
+        // EARNINGS-CHART-START
+        $earningsyear = $request->earningsyear != "" ? $request->earningsyear : date('Y');
+        $earningsbranch = $request->earningsbranch != "" ? $request->earningsbranch : Branch::first()->id;
+        $earnings_years = Order::where('order_from', '=' , 'api')->select(DB::raw("YEAR(created_at) as year"))->where(function ($query) {
+            $query->where('transaction_type', 15)
+                ->where('payment_status', 2); // Ensure paid status for type 15
+        })->orWhere(function ($query) {
+            $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+        })->groupBy(DB::raw("YEAR(created_at)"))->orderByDesc('created_at')->get();
+        $reviewslist = Order::where('order_from', '=' , 'api')->select(DB::raw("YEAR(created_at) as year"), DB::raw("MONTHNAME(created_at) as month_name"), DB::raw("SUM(grand_total) as grand_total"))
+            ->whereYear('created_at', $earningsyear)
+            ->where(function ($query) {
+                $query->where('transaction_type', 15)
+                    ->where('payment_status', 2); // Ensure paid status for type 15
+            })->orWhere(function ($query) {
+                $query->whereNot('transaction_type', 15); // Fetch all other payment types without checking status
+            })->where('branch_id', $earningsbranch)
+            ->whereNotIn('status', array(1, 6, 7))
+            ->orderBy('created_at')
+            ->groupBy(DB::raw("MONTHNAME(created_at)"))
+            ->pluck('grand_total', 'month_name');
+        $earningslabels = $reviewslist->keys();
+        $earningsdata = $reviewslist->values();
+        // EARNINGS-CHART-END
+
+        if (env('Environment') == 'sendbox') {
+            $userslabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July ', 'August', 'September', 'October', 'November', 'December'];
+            $userdata = [636, 1269, 2810, 2843, 3637, 467, 902, 1296, 402, 1173, 1509, 413];
+            $earningslabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July ', 'August', 'September', 'October', 'November', 'December'];
+            $earningsdata = [636, 1269, 2810, 2843, 2545, 467, 902, 1296, 402, 1173, 1509, 2000];
+            $orderlabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July ', 'August', 'September', 'October', 'November', 'December'];
+            $deliverydata = [285, 830, 550, 881, 130, 194, 213, 525, 245, 348, 581, 459];
+            $pickupdata = [105, 343, 394, 299, 636, 984, 492, 135, 287, 250, 509, 121];
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['orderlabels' => $orderlabels, 'deliverydata' => $deliverydata, 'pickupdata' => $pickupdata, 'userslabels' => $userslabels, 'userdata' => $userdata, 'earningslabels' => $earningslabels, 'earningsdata' => $earningsdata], 200);
+        } else {
+            return view('admin.dashboard.mobile-home', compact('topitems', 'topusers', 'gettotalcategory', 'getitems', 'addons', 'getusers', 'banners', 'getreview', 'getorderscount', 'getorderdetailscount', 'order_total', 'order_tax', 'getpromocode', 'getbranchorders', 'getdriver', 'order_years', 'orderlabels', 'deliverydata', 'pickupdata', 'user_years', 'userslabels', 'userdata', 'earnings_years', 'earningslabels', 'earningsdata'));
         }
     }
 

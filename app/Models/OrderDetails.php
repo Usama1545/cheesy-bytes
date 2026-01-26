@@ -7,7 +7,39 @@ use Illuminate\Database\Eloquent\Model;
 class OrderDetails extends Model
 {
     protected $table='order_details';
-    protected $fillable=['user_id','order_id','item_id','price','qty','custom_pizza_id','dipping_price','dipping_name','dipping_quantity','size_id','crust_id'];
+    protected $fillable = [
+        'order_id',
+        'user_id',
+
+        'item_id',
+        'deal_id',
+        'custom_pizza_id',
+
+        'item_name',
+        'item_type',
+        'item_image',
+
+        'crust_id',
+        'size_id',
+
+        'qty',
+        'item_price',
+        'tax',
+
+        'dipping_quantity',
+        'dipping_name',
+        'dipping_price',
+
+        'addons_id',
+        'addons_name',
+        'addons_price',
+        'addons_total_price',
+
+        'extras_id',
+        'extras_name',
+        'extras_price',
+        'extras_total_price',
+    ];
     public function items(){
         return $this->hasOne('App\Models\Item','id','item_id');
     }

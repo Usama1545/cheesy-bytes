@@ -22,12 +22,15 @@ use App\Models\Payment;
 use App\Models\Settings;
 use App\Models\Shippingarea;
 use App\Models\SystemAddons;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Time;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
 use Session;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use DateTime;
 use Exception;
 use Stripe;
@@ -206,352 +209,164 @@ class CheckoutController extends Controller
     public function placeorder(Request $request)
     {
         try {
+            date_default_timezone_set(@helper::appdata()->timezone);
             DB::beginTransaction();
-            if ($request->transaction_type == 1 || $request->transaction_type == 2 || $request->transaction_type == 3 || $request->transaction_type == 4 || $request->transaction_type == 15 || $request->transaction_type == 6) {
 
-                $address = $request->address;
-                $address_type = $request->address_type;
-                $landmark = $request->landmark;
-                $postal_code = $request->pincode;
-                $delivery_charge = $request->delivery_charge;
-                $name = $request->name;
-                $email = $request->email;
-                $mobile = $request->mobile;
-                $order_type = $request->order_type;
-                $transaction_type = $request->transaction_type;
-                $tip = $request->tip ?? 0;
-                $grand_total = $request->grand_total + $tip;
-                $tax = $request->tax;
-                $tax_name = $request->tax_name;
-                $order_notes = $request->order_notes;
-                $transaction_id = $request->transaction_id;
-                $country = $request->country;
-                $state = $request->state;
-                $city = $request->city;
-                $buynow = $request->buynow;
-                $delivery_date = $request->delivery_date;
-                $delivery_time = $request->delivery_time;
-            } else {
-                $userdata = Session::get('userdata');
-                $address = $userdata['address'];
-                $address_type = $userdata['address_type'];
-                $delivery_charge = $userdata['delivery_charge'];
-                $name = $userdata['name'];
-                $email = $userdata['email'];
-                $mobile = $userdata['mobile'];
-                $order_type = $userdata['order_type'];
-                $transaction_type = $userdata['transaction_type'];
-                $tip = $userdata['tip'] ?? 0;
-                $grand_total = $userdata['grand_total'] + $tip;
-                $tax_name = $userdata['tax_name'];
-                $tax = $userdata['tax'];
-                $order_notes = $userdata['order_notes'];
-                $landmark = $userdata['landmark'];
-                $postal_code = $userdata['pincode'];
-                if ($request->paymentId == null) {
-                    $transaction_id = session()->get('payment_id');
-                } else {
-                    $transaction_id = $request->paymentId;
-                }
+            $transaction_type = 15; // ✅ STRIPE ONLY
 
-                $country = $userdata['country'];
-                $state = $userdata['state'];
-                $city = $userdata['city'];
-                $buynow = $userdata['buynow'];
-                $delivery_date = $userdata['delivery_date'];
-                $delivery_time = $userdata['delivery_time'];
-            }
+            $request->validate([
+                'name' => 'required',
+                'email' => 'required|email',
+                'mobile' => 'required',
+                'grand_total' => 'required|numeric|min:0',
+            ]);
 
-            date_default_timezone_set(helper::appdata()->timezone);
+            $branchId = session()->get('branch_id');
+            $tip = $request->tip ?? 0;
+            $grand_total = $request->grand_total + $tip;
 
-            if (Auth::user() && Auth::user()->type == 2) {
-                $cartdata = Cart::where('user_id', Auth::user()->id)->get();
+            // -------------------- CART --------------------
+            if (Auth::check() && Auth::user()->type == 2) {
+                $user = Auth::user();
+                $cartdata = Cart::where('user_id', $user->id)->get();
+                $user_id = $user->id;
             } else {
                 $cartdata = Cart::where('session_id', Session::getId())->get();
-            }
 
-            if (count($cartdata) <= 0) {
-                return response()->json(['status' => 0, 'message' => trans('messages.cart_is_empty')], 200);
-            }
-
-            if ($order_type == "") {
-                return response()->json(['status' => 0, 'message' => trans('messages.order_type_required')], 200);
-            }
-            if ($transaction_type == "") {
-                return response()->json(['status' => 0, 'message' => trans('messages.transaction_type_required')], 200);
-            }
-            if ($transaction_type != 1 && $transaction_type != 2 && $transaction_type != 4) {
-                if ($transaction_id == "") {
-                    return response()->json(['status' => 0, 'message' => trans('messages.transaction_id_required')], 200);
+                if ($cartdata->isEmpty()) {
+                    return response()->json(['status' => 0, 'message' => trans('messages.cart_is_empty')]);
                 }
-            }
-            $transaction_id = $transaction_id;
 
-            if (Auth::user() && Auth::user()->type == 2) {
-                $checkuser = User::where('is_available', 1)->where('id', Auth::user()->id)->first();
-                if ($transaction_type == 2) {
-                    if ($checkuser->wallet == "" || ($checkuser->wallet < $grand_total)) {
-                        return response()->json(['status' => 0, 'message' => trans('messages.insufficient_wallet')], 200);
-                    }
-                }
-            }
+                $guestUser = User::firstOrCreate(
+                    ['email' => $request->email],
+                    [
+                        'name' => $request->name,
+                        'mobile' => $request->mobile,
+                        'password' => Hash::make('password'),
+                        'type' => 2,
+                    ]
+                );
 
-            $defaultsatus = CustomStatus::where('type', 1)->where('order_type', $order_type)->where('is_available', 1)->where('is_deleted', 2)->first();
-            if (empty($defaultsatus) && $defaultsatus == null) {
-                if ($transaction_type == 7 || $transaction_type == 8 || $transaction_type == 9 || $transaction_type == 10 || $transaction_type == 11 || $transaction_type == 12 || $transaction_type == 13 || $transaction_type == 14) {
-                    return redirect()->back()->with('error', trans('order not placed without default status !!'));
-                } else {
-                    return response()->json(['status' => 0, 'message' => trans('order not placed without default status !!')], 200);
-                }
+                $guestUser->branch_id = $branchId;
+                $guestUser->save();
+
+                $user_id = $guestUser->id;
             }
 
-
-            $getordernumber = Order::select('order_number', 'order_number_digit', 'order_number_start')->orderBy('id', 'DESC')->first();
-
-            if (empty($getordernumber->order_number_digit)) {
-                $n = helper::appdata()->order_number_start;
-                $newbooking_number = str_pad($n, 0, STR_PAD_LEFT);
-            } else {
-                if ($getordernumber->order_number_start == helper::appdata()->order_number_start) {
-                    $n = (int)($getordernumber->order_number_digit);
-                    $newbooking_number = str_pad($n + 1, 0, STR_PAD_LEFT);
-                } else {
-                    $n = helper::appdata()->order_number_start;
-                    $newbooking_number = str_pad($n, 0, STR_PAD_LEFT);
-                }
+            if ($cartdata->isEmpty()) {
+                return response()->json(['status' => 0, 'message' => trans('messages.cart_is_empty')]);
             }
-            $order = new Order;
-            $order_number = helper::appdata()->order_prefix . $newbooking_number;
+
+            // -------------------- ORDER NUMBER --------------------
+            $lastOrder = Order::latest('id')->first();
+            $start = helper::appdata()->order_number_start;
+
+            $digit = (!$lastOrder || $lastOrder->order_number_start != $start)
+                ? $start
+                : $lastOrder->order_number_digit + 1;
+
+            $order_number = helper::appdata()->order_prefix . $digit;
+
+            // -------------------- ORDER --------------------
+            $order = new Order();
             $order->order_number = $order_number;
-            $order->order_number_digit = $newbooking_number;
-            $order->order_number_start = helper::appdata()->order_number_start;
-            $order->user_id = @$checkuser->id;
-            $order->order_type = $order_type;
-
-            if ($order_type == 1) {
-                $shipping = Shippingarea::find($request->delivery_area);
-                $order->address_type = $address_type;
-                $order->address = $address;
-                $order->landmark = $landmark;
-                $order->postal_code = $postal_code;
-                $order->country = $country;
-                $order->state = $shipping->state->name;
-                $order->city = $city;
-                $order->delivery_area = $request->delivery_area;
-            } else {
-                $order->address_type = null;
-                $order->address = $address;
-                $order->landmark = null;
-                $order->postal_code = null;
-                $order->country = null;
-                $order->state = null;
-                $order->city = null;
-                $order->branch_id = session()->get('branch_id');
-            }
-
-            $order->name = $name;
-            $order->email = $email;
-            $order->mobile = $mobile;
-            if (session()->has('discount_data')) {
-                $order->offer_code = session()->get('discount_data')['offer_code'];
-                $order->discount_amount = helper::number_format(session()->get('discount_data')['offer_amount']);
-            } else {
-                $order->offer_code = "";
-                $order->discount_amount = helper::number_format(0);
-            }
-            $order->transaction_type = $transaction_type;
-            if ($transaction_type != 1 && $transaction_type != 2) {
-                $order->transaction_id = $transaction_id;
-            }
-            $order->tax_amount = $tax;
-            $order->tax_name = $tax_name;
-            $order->delivery_charge = helper::number_format($delivery_charge);
+            $order->order_number_digit = $digit;
+            $order->order_number_start = $start;
+            $order->user_id = $user_id;
+            $order->order_type = $request->order_type;
+            $order->branch_id = $branchId;
+            $order->address = $request->address ?? null;
+            $order->name = $request->name;
+            $order->email = $request->email;
+            $order->mobile = $request->mobile;
+            $order->tax_amount = $request->tax ?? 0;
+            $order->tax_name = $request->tax_name ?? null;
+            $order->delivery_charge = helper::number_format($request->delivery_charge ?? 0);
             $order->grand_total = helper::number_format($grand_total);
             $order->tip = helper::number_format($tip);
-            $order->order_notes = $order_notes;
+            $order->order_notes = $request->order_notes;
             $order->order_from = "web";
-            $order->status = $defaultsatus->id;
-            $order->status_type = $defaultsatus->type;
-            $order->delivery_date = $delivery_date;
-            $order->delivery_time = $delivery_time;
-            $order->branch_id = session()->get('branch_id');
-            if ($transaction_type == 1 || $transaction_type == 15) {
-                $order->payment_status = 1;
-            } else {
-                $order->payment_status = 2;
+            $order->status = 4; // default pending
+            $order->status_type = 1;
+            $order->delivery_date = $request->delivery_date;
+            $order->delivery_time = $request->delivery_time;
+            $order->transaction_type = 15;
+            $order->payment_status = 1;
+            $order->save();
+
+            // -------------------- ORDER DETAILS --------------------
+            foreach ($cartdata as $cart) {
+                OrderDetails::create([
+                    'order_id' => $order->id,
+                    'user_id' => $user_id,
+                    'item_id' => $cart->item_id,
+                    'deal_id' => $cart->deal_id,
+                    'custom_pizza_id' => $cart->custom_pizza_id,
+                    'item_name' => $cart->item_name,
+                    'item_type' => $cart->item_type,
+                    'item_image' => $cart->item_image,
+                    'crust_id' => $cart->crust_id,
+                    'size_id' => $cart->size_id,
+                    'dipping_quantity' => $cart->dipping_quantity,
+                    'dipping_name' => $cart->dipping_name,
+                    'dipping_price' => $cart->dipping_price,
+                    'tax' => $cart->tax,
+                    'qty' => $cart->qty,
+                    'item_price' => $cart->item_price,
+                    'addons_id' => $cart->addons_id,
+                    'addons_name' => $cart->addons_name,
+                    'addons_price' => $cart->addons_price,
+                    'addons_total_price' => $cart->addons_total_price,
+                    'extras_id' => $cart->extras_id,
+                    'extras_name' => $cart->extras_name,
+                    'extras_price' => $cart->extras_price,
+                    'extras_total_price' => $cart->extras_total_price,
+                ]);
             }
 
-            if ($order->save()) {
-                if (Auth::user() && Auth::user()->type == 2) {
-                    if ($checkuser) {
-                        $checkuser->branch_id = session()->get('branch_id');
-                        $checkuser->save();
-                    }
-                } else {
-                    // ✅ If guest user, store branch_id by session_id (if you have a UserGuest table or similar)
-                   $guestUser = User::where('email', $email)
-                        ->orWhere('mobile', $mobile)
-                        ->first();
-                
-                    if ($guestUser) {
-                        // 🔄 Update existing user
-                        $guestUser->branch_id = session()->get('branch_id');
-                        $guestUser->save();
-                    } else {
-                        // 🚀 Create new guest user
-                        $guestUser = new User();
-                        $guestUser->branch_id = session()->get('branch_id');
-                        $guestUser->name = $name;
-                        $guestUser->email = $email;
-                        $guestUser->mobile = $mobile;
-                        $guestUser->password = ''; // empty password
-                        $guestUser->type = 2;      // mark as guest/user type 2
-                        $guestUser->save();
-                    }              
-                }
-                if ($transaction_type == 2) {
-                    $checkuser->wallet = $checkuser->wallet - $grand_total;
-                    $transaction = new Transaction();
-                    $transaction->user_id = @$checkuser->id;
-                    $transaction->order_id = $order->id;
-                    $transaction->order_number = $order_number;
-                    $transaction->transaction_id = $transaction_id;
-                    $transaction->transaction_type = 1;
-                    $transaction->amount = helper::number_format($grand_total);
-                    if ($transaction->save()) {
-                        $checkuser->save();
-                    }
-                }
-                if (Auth::user() && Auth::user()->type == 2) {
-                    $cartdata = Cart::where('user_id', $checkuser->id)->get();
-                } else {
-                    $cartdata = Cart::where('session_id', Session::getId())->get();
-                }
+            // -------------------- CLEAR CART --------------------
+            Auth::check()
+                ? Cart::where('user_id', $user_id)->delete()
+                : Cart::where('session_id', Session::getId())->delete();
 
-                foreach ($cartdata as $cart) {
-                    $od = new OrderDetails();
-                    $od->order_id = $order->id;
-                    $od->user_id = @$checkuser->id;
-                    $od->item_id = $cart->item_id;
-                    $od->deal_id = $cart->deal_id ?? null;
-                    $od->custom_pizza_id = $cart->custom_pizza_id ?? null;
-                    $od->item_name = $cart->item_name;
-                    $od->item_type = $cart->item_type;
-                    $od->item_image = $cart->item_image;
-                    $od->crust_id = $cart->crust_id;
-                    $od->size_id = $cart->size_id;
-                    $od->dipping_quantity = $cart->dipping_quantity;
-                    $od->dipping_name = $cart->dipping_name;
-                    $od->dipping_price = $cart->dipping_price;
-                    $od->tax = $cart->tax;
-                    $od->qty = $cart->qty;
-                    $od->item_price = $cart->item_price;
-                    $od->addons_id = $cart->addons_id;
-                    $od->addons_name = $cart->addons_name;
-                    $od->addons_price = $cart->addons_price;
-                    $od->addons_total_price = $cart->addons_total_price;
-                    $od->extras_id = $cart->extras_id;
-                    $od->extras_name = $cart->extras_name;
-                    $od->extras_price = $cart->extras_price;
-                    $od->extras_total_price = $cart->extras_total_price;
-                    $od->save();
-                }
+            // -------------------- STRIPE --------------------
 
-                 if($transaction_type != 15){
-                    if (Auth::user() && Auth::user()->type == 2 ) {
-                        Cart::where('user_id', $checkuser->id)->delete();
-                        if ($checkuser->is_notification == 1) {
-                            $title = trans('labels.order_placed');
-                            $body = "Your Order " . $order_number . " has been placed.";
-                            $noti = helper::push_notification($checkuser->token, $title, $body, "order", $order->id);
-                        }
-                        $orderdata = Order::where('id', $order->id)->first();
-                        $itemdata = OrderDetails::where('order_id', $order->id)->get();
-                        if ($checkuser->is_mail == 1) {
-                            $invoice_helper = helper::create_order_invoice($checkuser->email, $checkuser->name, $order_number, $orderdata, $itemdata);
-                        }
-                    } else {
-                        Cart::where('session_id', Session::getId())->delete();
+            $stripekey = helper::stripe_data()->secret_key;
+            Stripe\Stripe::setApiKey($stripekey);
+            $stripe = Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => ['name' => $order_number],
+                        'unit_amount' => round($grand_total * 100),
+                    ],
+                    'quantity' => 1,
+                ]],
+                'metadata' => [
+                    'company_name' => 'CheesyBite',
+                    'logo_url' => 'https://thecheesybite.com/assets/images/logo.png'
+                ],
+                'mode' => 'payment',
+                'success_url' => route('payment.success', ['order' => $order_number]),
+                'cancel_url' => route('payment.cancel', ['order' => $order_number]),
+            ]);
+            $this->createPrintJob($order->id);
 
-                        $title = trans('labels.order_placed');
-                        $body = "Your Order " . $order_number . " has been placed.";
-                        $noti = helper::push_notification(125, $title, $body, "order", $order->id);
+            DB::commit();
 
-                        $orderdata = Order::where('id', $order->id)->first();
-                        $itemdata = OrderDetails::where('order_id', $order->id)->get();
-                    }
-                }else{
-                    $orderdata = Order::where('id', $order->id)->first();
-                    $itemdata = OrderDetails::where('order_id', $order->id)->get();
-                }
-                $admindata = User::select('id', 'name', 'email', 'mobile')->where('type', 1)->first();
-                if (Auth::user() && Auth::user()->type == 2) {
-                    $admin_invoice = helper::create_order_invoice($admindata->email, $checkuser->name, $order_number, $orderdata, $itemdata);
-                } else {
-                    $admin_invoice = helper::create_order_invoice($admindata->email, $request->name, $order_number, $orderdata, $itemdata);
-                }
-                session()->forget('discount_data');
-                session()->forget('userdata');
+            return response()->json([
+                'status' => 1,
+                'redirecturl' => $stripe->url,
+            ]);
 
-                if ($transaction_type == 7 || $transaction_type == 8 || $transaction_type == 9 || $transaction_type == 10 || $transaction_type == 11 || $transaction_type == 12 || $transaction_type == 13 || $transaction_type == 14) {
-                    return redirect('/success-' . $order_number)->with('success', trans('messages.order_placed_note'));
-                }
-                if (@helper::checkaddons('whatsapp_message')) {
-                    if (whatsapp_helper::whatsapp_message_config()->order_created == 1) {
-                        whatsapp_helper::whatsappmessage($order_number);
-                    }
-                }
-                $this->createPrintJob($order->id);
-                if ($transaction_type == 15) {
-                    try {
-                        $stripekey = helper::stripe_data()->secret_key;
-                        Stripe\Stripe::setApiKey($stripekey);
-
-                        $checkoutSession = Stripe\Checkout\Session::create([
-                            'payment_method_types' => ['card'],
-                            'line_items' => [[
-                                'price_data' => [
-                                    'currency' => 'usd',
-                                    'product_data' => [
-                                        'name' => $order_number,
-                                    ],
-                                    'unit_amount' => round($grand_total * 100),
-                                ],
-                                'quantity' => 1,
-                            ]],
-                            'metadata' => [
-                                'company_name' => 'CheesyBite',
-                                'logo_url' => 'https://thecheesybite.com/assets/images/logo.png'
-                            ],
-                            'mode' => 'payment',
-                            'success_url' => route('payment.success', ['order' => $order_number]),
-                            'cancel_url' => route('payment.cancel', ['order' => $order_number]),
-                        ]);
-
-                        DB::commit();
-                        // Redirect to Stripe Checkout
-                        return response()->json(['status' => 1,'redirecturl' => $checkoutSession->url]);
-                    } catch (Exception $e) {
-                        DB::rollback();
-                                                    dd($e->getMessage());
-
-                        return response()->json(['status' => 0, 'message' => trans('messages.unable_to_complete_payment')], 200);
-                    }
-                }
-                DB::commit();
-                return response()->json(['status' => 1, 'message' => trans('messages.success'), 'order_id' => $order_number], 200);
-            } else {
-                DB::rollback();
-                return response()->json(['status' => 0, 'message' => trans('messages.wrong')], 200);
-            }
         } catch (\Throwable $th) {
             DB::rollback();
-                            dd($th->getMessage());
-
-            return response()->json(['status' => 0, 'message' => trans('messages.wrong')], 200);
+            dd($th);
+            Log::error($th);
+            return response()->json(['status' => 0, 'message' => 'Order failed']);
         }
     }
-
     public function createPrintJob($id)
     {
         $branch_id = session()->get('branch_id');
@@ -563,9 +378,10 @@ class CheckoutController extends Controller
         ]);
     }
 
-   public function timeslot(Request $request)
+    public function timeslot(Request $request)
     {
         try {
+            $branchId = session()->get('branch_id');
             $slots = [];
             date_default_timezone_set(helper::appdata()->timezone);
 
@@ -573,7 +389,7 @@ class CheckoutController extends Controller
                 $day = date('l', strtotime(helper::date_format($request->inputDate)));
 
                 $minute = "";
-                $time = Time::where('day', $day)->first();
+                $time = Time::where('day', $day)->where('branch_id', $branchId)->first();
 
                 if ($time->always_close == 1) {
                     $slots = "1";

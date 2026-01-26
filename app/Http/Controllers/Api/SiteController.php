@@ -30,12 +30,25 @@ use App\Models\PrivacyPolicy;
 use App\Models\RefundPolicy;
 use App\Models\Aboutus;
 use App\Models\TermsCondition;
+use Carbon\Carbon;
 
 class SiteController extends Controller
 {
     public function branches()
     {
-        $branches = Branch::with('delivery_partners')->get();
+        $day = Carbon::today()->format('l');
+
+        $branches = Branch::with([
+                'delivery_partners',
+                'time' => function ($query) use ($day) {
+                    $query->where('day', $day);
+                }
+            ])
+            ->whereHas('time', function ($query) use ($day) {
+                $query->where('day', $day);
+            })
+            ->get();
+
         return response()->json($branches);
     }
 

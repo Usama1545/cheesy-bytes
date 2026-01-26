@@ -33,26 +33,13 @@ class SendDealCreatedNotification implements ShouldQueue
      */
     public function handle(DealCreated $event)
     {
-        $item = Item::find($event->deal->product_id);
-
-        if (!$item || empty($item->branch_ids)) {
-            return;
-        }
-
-        $branchIds = collect(explode(',', $item->branch_ids))
-            ->map(fn ($id) => trim($id))
-            ->filter();
-
-        $userIds = User::whereIn('branch_id', $branchIds)
-            ->pluck('id');
-
-        $tokens = UserDeviceToken::whereIn('user_id', $userIds)
+        $tokens = UserDeviceToken::whereNotNull('fcm_token')
             ->pluck('fcm_token')
             ->filter()
-            ->values()
-            ->toArray();
+            ->unique()
+            ->values();
 
-        if (empty($tokens)) {
+        if ($tokens->isEmpty()) {
             return;
         }
 
@@ -64,16 +51,21 @@ class SendDealCreatedNotification implements ShouldQueue
                 'A new deal has landed for you. Check it out!'
             ))
             ->withData([
-                'type' => 'new_offer',
+                'type'      => 'new_offer',
+                'deal_id'   => (string) $event->deal->id,
+                'title'     => $event->deal->title ?? '',
+                'source'    => 'deal_created',
             ]);
 
-        $response = $messaging->sendMulticast($message, $tokens);
+        $tokens->chunk(500)->each(function ($chunk) use ($messaging, $message, $event) {
+            $response = $messaging->sendMulticast($message, $chunk->toArray());
 
-        Log::info('FCM response', [
-            'success' => $response->successes()->count(),
-            'failure' => $response->failures()->count(),
-        ]);
+            Log::info('FCM deal notification chunk sent', [
+                'deal_id' => $event->deal->id,
+                'sent'    => $chunk->count(),
+                'success' => $response->successes()->count(),
+                'failure' => $response->failures()->count(),
+            ]);
+        });
     }
-
-
 }

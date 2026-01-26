@@ -177,6 +177,7 @@ class CheckoutController extends Controller
 
     public function placeOrder(Request $request)
     {
+        date_default_timezone_set(@helper::appdata()->timezone);
         try {
             DB::beginTransaction();
             

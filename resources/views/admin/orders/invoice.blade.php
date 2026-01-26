@@ -7,17 +7,17 @@
             <div class="col-md-12 my-2 d-flex justify-content-end">
 
 
-              
-                    <button type="button" class="btn btn-dark dropdown-toggle px-4 py-2"
-                        data-bs-toggle="dropdown">{{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? trans('labels.action') : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}</button>
-                    <div class="dropdown-menu dropdown-menu-right branch-only cursor-pointer">
-                        @foreach (helper::customstauts($orderdata->order_type) as $status)
-                            <a class="dropdown-item w-auto @if ($orderdata->status == $status->id) fw-600 @endif"
-                                data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $status->name }}"
-                                onclick="OrderStatusUpdate('{{ $orderdata->id }}','{{ $status->id }}','{{ $status->type }}','{{ URL::to('admin/orders/update') }}')">
-                                {{ $status->name }} </a>
-                        @endforeach
-                    </div>
+
+                <button type="button" class="btn btn-dark dropdown-toggle px-4 py-2"
+                    data-bs-toggle="dropdown">{{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? trans('labels.action') : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}</button>
+                <div class="dropdown-menu dropdown-menu-right branch-only cursor-pointer">
+                    @foreach (helper::customstauts($orderdata->order_type) as $status)
+                        <a class="dropdown-item w-auto @if ($orderdata->status == $status->id) fw-600 @endif"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $status->name }}"
+                            onclick="OrderStatusUpdate('{{ $orderdata->id }}','{{ $status->id }}','{{ $status->type }}','{{ URL::to('admin/orders/update') }}')">
+                            {{ $status->name }} </a>
+                    @endforeach
+                </div>
             </div>
         </div>
         <div class="row">
@@ -297,10 +297,11 @@
                                     @foreach ($ordersdetails as $orders)
                                         @php
                                             $total_price =
-                                                ($orders['item_price'] +
-                                                    $orders['addons_total_price'] +
-                                                    $orders['extras_total_price']) *
-                                                $orders['qty'];
+                                                ((float) ($orders['item_price'] ?? 0) +
+                                                    (float) ($orders['addons_total_price'] ?? 0) +
+                                                    (float) ($orders['extras_total_price'] ?? 0)) *
+                                                (int) ($orders['qty'] ?? 1);
+
                                             $data[] = ['total_price' => $total_price];
                                             $order_total = array_sum(array_column(@$data, 'total_price'));
                                             $addonstotal =
@@ -438,7 +439,6 @@
 
                                                     <div class="modal-body">
                                                         @if ($orders->custom_pizza_id !== null)
-                                                            {{--                                                            <?php $data = new App\Helpers\helper()->getCustomPizzaDetails($orders->custom_pizza_id); ?> --}}
                                                             <div class="mt-2 p-2 border-bottom" id="extras">
                                                                 <p class="m-0 fs-6 fw-500">Size: <small
                                                                         class="text-muted">{{ $orders->custom_pizza?->size->label }}

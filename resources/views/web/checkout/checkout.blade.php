@@ -600,44 +600,52 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
-     <script>
-         document.getElementById('tip').addEventListener('keydown', function (e) {
-    if (e.key === '-' || e.key === 'e') {
-        e.preventDefault();
-    }
-});
-        var select = "{{ trans('labels.select') }}";
-        var dateFormat = "{{ helper::appdata()->date_format }}";
-        var today = new Date(); // Get today's date
-        var placeholderFormat = dateFormat
-
-            .replace(/Y/g, 'yyyy') // Full year
-            .replace(/m/g, 'mm') // Month
-            .replace(/d/g, 'dd'); // Day
-
-        document.getElementById("delivery_dt").setAttribute("placeholder", placeholderFormat);
-
-        // Get today's date in the correct format
-        var formattedToday = today.toISOString().split('T')[0];
-
-    </script>
-
-   <script>
-    var serverTime = "{{ now()->format('Y-m-d') }}"; // Get server-side date
-    document.addEventListener('DOMContentLoaded', function () {
-        const deliveryDateInput = document.getElementById('delivery_dt');
-
-        // Ensure min date is set to server time
-        deliveryDateInput.setAttribute('min', serverTime);
-
-        // Prevent past dates
-        deliveryDateInput.addEventListener('input', function () {
-            if (deliveryDateInput.value < serverTime) {
-                deliveryDateInput.value = serverTime;
+    <script>
+        document.getElementById('tip').addEventListener('keydown', function (e) {
+            if (e.key === '-' || e.key === 'e') {
+                e.preventDefault();
             }
         });
-    });
-</script>
+        
+        var select = "{{ trans('labels.select') }}";
+        var dateFormat = "{{ helper::appdata()->date_format }}";
+        
+        // Convert app date format to placeholder format
+        var placeholderFormat = dateFormat
+            .replace(/Y/g, 'yyyy')
+            .replace(/m/g, 'mm')
+            .replace(/d/g, 'dd');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            const deliveryDateInput = document.getElementById('delivery_dt');
+            deliveryDateInput.setAttribute('placeholder', placeholderFormat);
+        });
+    </script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deliveryDateInput = document.getElementById('delivery_dt');
+        
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+        
+            const localToday = `${yyyy}-${mm}-${dd}`;
+        
+            // Set min date using user's local timezone
+            deliveryDateInput.min = localToday;
+        
+            // Prevent selecting past dates
+            deliveryDateInput.addEventListener('input', function () {
+                if (deliveryDateInput.value < localToday) {
+                    deliveryDateInput.value = localToday;
+                }
+            });
+        });
+    </script>
+
 
 
     <script>
