@@ -1,0 +1,120 @@
+/*============** Counter **============*/
+
+.counter_bg {
+    background-size: cover;
+    background-position: center center;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: rgba(16, 140, 230, .1);
+      z-index: -1;
+    }
+  }
+
+.counter-area {
+	position: relative;
+    z-index: 1;
+
+}
+.single_count {
+    padding: 45px 0;
+    @media #{$md-device} {
+        padding: 20px 0 20px;
+      }
+    @media #{$xsm-device} {
+            padding: 15px 0 15px;
+      }
+      i {
+        font-size: 50px;
+        color: $white;
+        display: inherit;
+        line-height: 0;
+        margin-bottom: 30px;
+      }
+    span {
+        font-size: 50px;
+        color: $white;
+        font-weight: 500;
+        @media #{$lg-device} {
+            font-size: 40px;
+        }
+        @media #{$md-device} {
+            font-size: 40px;
+        }
+        @media #{$sm-device} {
+            font-size: 40px;
+        }
+    }
+    h3{
+        color: $white;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        @media #{$md-device} {
+            font-size: 14px;;
+        }
+    }
+}
+
+
+
+.services-item {
+    background-color: #fff;
+    -webkit-box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.05);
+    padding: 60px 20px;
+    text-align: center;
+    border: 1px solid #D9E1FF;
+    border-radius: 5px;
+    height: 100%;
+  }
+  
+  @media (max-width: 1399px) {
+    .services-item {
+      padding: 40px 20px;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .services-item {
+      padding: 30px 10px;
+    }
+  }
+  
+  .services-item:hover {
+    -webkit-box-shadow: 0px 0px 60px rgba(0, 0, 0, 0.08);
+            box-shadow: 0px 0px 60px rgba(0, 0, 0, 0.08);
+  }
+  
+  .services-item:hover .services-item__title-link {
+    color: #9061fa;
+  }
+  
+  .services-item__title {
+    text-transform: capitalize;
+  }
+  
+  .services-item__icon {
+    margin-bottom: 25px;
+  }
+  
+  .services-item__icon img {
+    width: 60px;
+    height: 60px;
+    -o-object-fit: contain;
+       object-fit: contain;
+  }
+  
+  .services-item__desc {
+    max-width: 350px;
+    margin: 0 auto;
+  }
+  

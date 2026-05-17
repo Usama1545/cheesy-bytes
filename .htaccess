@@ -1,0 +1,26 @@
+<IfModule mod_security.c>
+    SecFilterEngine Off
+    SecFilterScanPOST Off
+SecRuleRemoveById 400011
+SecRuleRemoveById 400012
+</IfModule>
+
+<IfModule mod_security2.c>
+    <LocationMatch "^/api/">
+        SecRuleEngine Off
+    </LocationMatch>
+</IfModule>
+
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Remove www - Redirect www.thecheesybite.com to thecheesybite.com
+    RewriteCond %{HTTP_HOST} ^www\.thecheesybite\.com [NC]
+    RewriteRule ^(.*)$ https://thecheesybite.com/$1 [R=301,L]
+    
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

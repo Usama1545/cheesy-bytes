@@ -1,0 +1,78 @@
+@extends('web.layout.default')
+<?php
+use App\Helpers\Helper;
+
+$itemData = Helper::getBranch(); // ✅ works
+?>
+@section('page_title')| {{ trans('labels.categories') }} | {{ $itemData->seo_name }}@endsection
+@section('content')
+    <div class="breadcrumb-sec">
+        <div class="container">
+            <div class="breadcrumb-sec-content">
+                <nav class="text-dark breadcrumb-divider" aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li
+                            class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
+                            <a class="text-dark fw-600" href="{{ helper::branch_route('home') }}">{{ trans('labels.home') }}</a>
+                        </li>
+                        <li
+                            class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active">
+                            {{ trans('labels.categories') }}
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row g-3 mb-3 mt-5">
+            @foreach (helper::get_categories() as $categorydata)
+                <div class="col-lg-2-4 col-md-4 col-sm-6 col-12">
+                    <div class="category-wrapper mx-2">
+                        @if(isset($county))
+                            <a href="{{ URL::to($county.'/menu/' . $categorydata->slug) }}">
+                                <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category">
+                            </a>
+                        @else
+                            <a href="{{ helper::branch_route('menu', ['category' => $categorydata->slug]) }}">
+                                <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category">
+                            </a>
+                        @endif
+                        <p class="my-2 text-start">{{ $categorydata->category_name }}</p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    <style>
+        .category-wrapper {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .category-image {
+            width: 230px;
+            height: 230px;
+            object-fit: fill; /* Ensures the image fits without cropping */
+            margin: 0 auto; /* Center the image horizontally */
+        }
+
+        @media (max-width: 576px) { /* Adjust this breakpoint as needed */
+            .category-image {
+                width: 100%;
+                height: 100%;
+                object-fit: fill; /* Ensures the image covers the entire space */
+            }
+        }
+
+
+        @media (min-width: 992px) {
+            .col-lg-2-4 {
+                flex: 0 0 20%; /* Makes the columns take up 20% of the container on large screens */
+                max-width: 20%;
+            }
+        }
+
+    </style>
+@endsection

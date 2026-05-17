@@ -1,0 +1,1817 @@
+ @import url("https://fonts.googleapis.com/css2?family=La+Belle+Aurore&display=swap");
+ @import url("https://fonts.googleapis.com/css2?family=Bubbler+One&display=swap");
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+ @font-face {
+   font-family: "La storia Bold";
+   /* You can name it anything you want */
+   src: url("../fonts/la-storia-bold.otf") format("opentype");
+
+   /* Adjust the path and format accordingly */
+ }
+
+ @font-face {
+   font-family: "Bogart Trial";
+   /* You can name it anything you want */
+   src: url("../fonts/Bogart-Regular-trial.ttf") format("tff");
+
+   /* Adjust the path and format accordingly */
+ }
+
+ @font-face {
+   font-family: "Butterscotch";
+   /* You can name it anything you want */
+   src: url("../fonts/Butterscotch.otf") format("opentype");
+
+   /* Adjust the path and format accordingly */
+ }
+
+ * {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+ }
+
+ a {
+   text-decoration: none !important;
+ }
+
+ .f-li-a li a {
+   font-family: Bogart Trial !important;
+   text-transform: uppercase;
+   text-shadow: #000 0.1px 0.1px;
+ }
+
+
+
+ .icons a i {
+   font-size: 23px;
+ }
+
+ .bgMain::after {
+   content: "";
+   position: absolute;
+   top: 0;
+   left: -40px;
+   width: 75%;
+   height: 100%;
+   z-index: -1;
+   background: rgba(229, 193, 193, 0.12);
+   box-shadow: 1px 1px 9px 0px rgba(229, 193, 193, 0.48);
+ }
+
+
+
+
+ .vrText {
+   color: #000;
+   font-family: La Belle Aurore;
+   font-size: 28px;
+   font-style: normal;
+   font-weight: 400;
+   /* line-height: 86.5px; */
+   /* 308.929% */
+   letter-spacing: 2.1px;
+   text-transform: lowercase;
+   transform: rotate(-90deg);
+   position: absolute;
+   left: -190px;
+   top: 250px;
+ }
+
+ .vrText2 {
+   color: #000;
+   font-family: La storia Bold;
+   font-size: 25px;
+   font-style: normal;
+   font-weight: 900;
+   position: absolute;
+   right: -150px;
+ }
+
+ .mainText {
+   color: #000;
+   font-family: Bogart Trial;
+   font-size: 18px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 35px;
+   /* 228.846% */
+   letter-spacing: 3.12px;
+   text-transform: uppercase;
+ }
+
+ .smText {
+   color: #000;
+   font-family: Bogart Trial;
+   font-size: 11px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 18px;
+   /* 168.182% */
+   text-transform: lowercase;
+   margin-bottom: 0;
+ }
+
+ .Navbar {
+   box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+   background-color: #fff;
+ }
+
+ .logo {
+   width: 150px;
+   object-fit: cover;
+ }
+
+ .navmenu {
+   width: fit-content;
+ }
+
+ .itemBefor {
+   position: relative;
+ }
+
+ .itemBefor::before {
+   content: "";
+   position: absolute;
+   height: 20px;
+   width: 2px;
+   background-color: #000;
+   top: 10px;
+   left: 3.1rem;
+ }
+
+ .heading2 {
+   color: #000;
+   text-align: center;
+
+   /* h3 */
+   font-family: Bogart Trial;
+   font-size: 19px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 27px;
+   /* 142.105% */
+   letter-spacing: 2.28px;
+   text-transform: uppercase;
+ }
+
+
+ .paraSub2 {
+   color: #000;
+   text-align: center;
+
+   /* p2 */
+   font-family: Bubbler One;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 400;
+
+   /* 33.333% */
+   letter-spacing: 0.75px;
+ }
+
+ .sInp {
+   border: none;
+   box-shadow: none;
+ }
+
+
+
+ @media (max-width: 768px) {
+   .sInp {
+     border: 1px solid #a5844e73;
+     box-shadow: none;
+   }
+ }
+
+ .sInp:focus {
+   box-shadow: none;
+ }
+
+ .search {
+   border-radius: 12px;
+   border: 1px solid rgba(0, 0, 0, 0.04);
+   background: rgba(255, 255, 255, 0);
+   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.25);
+   position: relative;
+ }
+
+ .search::before {
+   content: "";
+   position: absolute;
+   height: 100%;
+   width: 2px;
+   background: rgba(0, 0, 0, 0.5);
+   top: 0;
+   right: 57%;
+   position: absolute;
+   margin-left: 2px;
+ }
+
+ .btnSearch {
+   border-radius: 12px;
+   background: #c09653;
+   box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.25);
+   width: 50px;
+   height: 50px;
+   position: absolute;
+   right: 0;
+ }
+
+ .wosCard {
+   border-radius: 50px 50px 12px 12px;
+   background: #fcf8f8;
+   box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.19);
+ }
+
+ .chead {
+   /* color: #d10707; */
+   text-align: center;
+   font-family: Bogart Trial;
+   font-size: 17px;
+   font-style: normal;
+   font-weight: 400;
+   letter-spacing: 2.04px;
+   text-transform: uppercase;
+   display: flex;
+   justify-content: center;
+ }
+
+ /* @media (max-width:100px) {
+    .chead {
+        height: 50px;
+        display: flex;
+        align-items: center;
+    }
+    .paraSub2{
+        height: 35px !important; 
+    }
+} */
+
+ .pcHead {
+   color: #000;
+   text-align: center;
+   font-family: Bogart Trial;
+   font-size: 21px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 40.5px;
+   /* 359.524% */
+ }
+
+ .deText {
+   color: #000;
+   text-align: center;
+
+   font-family: Bubbler One;
+   font-size: 10px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 13.5px;
+   /* 135% */
+   letter-spacing: 1px;
+ }
+
+ .pCard {
+   overflow: hidden;
+   border-radius: 8px !important;
+   border: 1px solid rgba(0, 0, 0, 0.12) !important;
+   background: rgba(255, 255, 255, 0) !important;
+ }
+
+ .pImg {
+   border-radius: 8px;
+ }
+
+ .btnView {
+   border-radius: 12px;
+   background: #c09653;
+   color: #fff;
+   font-weight: 500;
+   font-family: Bogart Trial;
+ }
+
+ .headerImg {
+   border-radius: 8px;
+
+   box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.25);
+ }
+
+ .button-next {
+   position: absolute;
+   top: 50%;
+   right: -40px;
+ }
+
+ .button-prev {
+   position: absolute;
+   top: 50%;
+   left: -40px;
+ }
+
+ .bgClients {
+   /* background: rgba(249, 239, 239, 0.66);
+    box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.25);
+    border: 2px solid red */
+   position: relative;
+ }
+
+ .bgClients::before {
+   content: "";
+   background: rgba(249, 239, 239, 0.66);
+   box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.25);
+   width: 100%;
+
+   height: 450px;
+   position: absolute;
+ }
+
+ .paraB {
+   color: #000;
+   text-align: right;
+   font-family: La storia Bold;
+   font-size: 14px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 137px;
+   /* 978.571% */
+ }
+
+ .paraB2 {
+   color: #000;
+   text-align: right;
+
+   font-family: Bubbler One;
+   font-size: 19px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 38.5px;
+   /* 202.632% */
+   letter-spacing: 0.95px;
+ }
+
+ .boxImg {
+   border-radius: 8px;
+   background: rgba(0, 0, 0, 0);
+   height: 400px;
+   width: 800px;
+ }
+
+ .leftSideBox {
+   /* position: absolute; */
+   position: relative;
+   margin-top: -110px;
+ }
+
+ .cText {
+   color: #000;
+   font-family: Bogart Trial;
+   font-size: 1rem;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 30.5px;
+   letter-spacing: 1.7px;
+ }
+
+ .vText {
+   color: #000;
+   font-family: La Belle Aurore;
+   font-size: 25px;
+   font-style: normal;
+   font-weight: 400;
+
+   letter-spacing: 1.875px;
+   text-transform: lowercase;
+   transform: rotate(-90deg);
+ }
+
+ .bgLeft {
+   position: relative;
+ }
+
+ .bgLeft::before {
+   content: "";
+   position: absolute;
+   left: -20px;
+   top: 0;
+   border-radius: 8px;
+   background: #fbf4f4;
+   width: 60%;
+   height: 100%;
+ }
+
+ .bgRight {
+   position: relative;
+ }
+
+ .bgRight::before {
+   content: "";
+   position: absolute;
+   z-index: -1;
+   top: 40px;
+   left: -3px;
+   border-radius: 8px;
+   background: #fbf4f4;
+   width: 100%;
+   height: 70%;
+ }
+
+ /* media queries */
+ @media (max-width: 992px) {
+   .vrText2 {
+     position: static;
+     font-size: 20px;
+   }
+
+   .vrText {
+     transform: rotate(0deg);
+     position: static;
+   }
+
+   br {
+     display: none;
+   }
+
+   .search::before {
+     display: none;
+   }
+
+   .bgMain::after {
+     width: 100%;
+     left: 0;
+   }
+
+   .itemBefor2::before {
+     display: none;
+   }
+ }
+
+ /* Code By Qasim */
+ .curveText {
+   font-family: La storia Bold;
+ }
+
+ .NormalText {
+   font-family: Bogart Trial;
+ }
+
+ .mCard {
+   position: relative;
+ }
+
+ .designImgs div img {
+   width: 100%;
+ }
+
+ .rotatedText {
+   text-wrap: nowrap;
+   transform: rotate(-90deg);
+   color: #000;
+   font-family: La Belle Aurore;
+   font-size: 28px;
+   font-style: normal;
+   font-weight: 400;
+   letter-spacing: 2.1px;
+   text-transform: lowercase;
+   position: absolute;
+   left: -250px;
+   top: 50%;
+ }
+
+ @media (max-width: 882px) {
+   .rotatedText {
+     transform: rotate(0);
+     font-size: 28px;
+     font-weight: 400;
+     letter-spacing: 2.1px;
+     position: static;
+     text-wrap: wrap;
+   }
+ }
+
+ button {
+   transition: 0.4s ease;
+ }
+
+ button:hover {
+   background-color: #a5844e !important;
+   color: #fff !important;
+ }
+
+ .ripple-btn {
+   position: relative;
+   overflow: hidden;
+   border: none;
+   color: #fff;
+   cursor: pointer;
+   /* border-radius: 4px; */
+   outline: none;
+   border-radius: 12px;
+   background: #c09653;
+   color: #fff;
+   font-weight: 600;
+   /* font-family: Bogart Trial; */
+   font-family: lexend deca;
+   padding: 10px;
+ }
+
+ .ripple {
+   position: absolute;
+   border-radius: 50%;
+   background: rgba(255, 255, 255, 0.7);
+   transform: scale(0);
+   animation: ripple-animation 0.9s linear;
+ }
+
+ @keyframes ripple-animation {
+   to {
+     transform: scale(4);
+     opacity: 0;
+   }
+ }
+
+ /* Code by Rahmat  */
+ @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=La+Belle+Aurore&display=swap");
+
+ .hero-virtical p {
+   writing-mode: vertical-lr;
+   transform: rotate(-180deg);
+   font-family: "La Belle Aurore", sans-serif;
+   font-size: 20px;
+   font-weight: 500;
+   word-spacing: 5px !important;
+   margin-left: 5rem !important;
+ }
+
+ .hero-main img {
+   height: 100% !important;
+ }
+
+ .hero-signature {
+   margin-left: -3rem;
+ }
+
+ .hero-left p {
+   font-size: 11px !important;
+ }
+
+ .hero-tittle h4 {
+   display: inline !important;
+ }
+
+ .arrow {
+   background: #c09653;
+   box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.25);
+ }
+
+ .input-first {
+   border-right: 5px solid rgba(0, 0, 0, 0.5) !important;
+   margin-right: 10px !important;
+   outline: none !important;
+ }
+
+ /* footer-start */
+ .footer {
+   background-color: #e2ded8;
+   font-family: lexend deca;
+   font-size: .8rem;
+ }
+
+ .fhead {
+   font-size: 1.5em;
+ }
+
+ .icondiv {
+   border: 1px solid black;
+   width: 30px;
+   height: 30px;
+   border-radius: 50%;
+
+ }
+
+ .footer-links {
+   gap: 5rem;
+ }
+
+
+ .footer-links li a {
+   word-break: wrap;
+ }
+
+ .footer-wea p {
+   font-family: La storia Bold;
+ }
+
+ li {
+   position: relative;
+   list-style: none;
+ }
+
+ .footer-link::after {
+   content: "";
+   position: absolute;
+   width: 5px;
+   height: 5px;
+   border-radius: 50%;
+   background: #000;
+   top: 50%;
+   left: -50px;
+ }
+
+ .footer-pic {
+   width: 11.11%;
+ }
+
+ /* hero section end */
+
+ @media (max-width: 992px) {
+   .hero-virtical p {
+     writing-mode: horizontal-tb !important;
+     transform: rotate(-0deg) !important;
+     font-family: "La Belle Aurore", sans-serif;
+     font-size: 20px;
+     font-weight: 500;
+     word-spacing: 5px !important;
+   }
+
+   .hero-tittle h4 {
+     display: flex !important;
+     justify-content: center !important;
+     align-items: center !important;
+     font-size: 20px !important;
+     font-weight: 500 !important;
+     word-spacing: 5px !important;
+   }
+
+   .horz-line img {
+     width: 100% !important;
+   }
+
+   .hero-signature {
+     margin-left: 0rem !important;
+   }
+
+   .footer-links {
+     gap: 2rem;
+   }
+
+   .footer-link::after {
+     left: -20px;
+     /* gap: 2rem; */
+   }
+
+   /* .b-sub{
+    width: 24%;
+} */
+
+ }
+
+ /* Scroll Bar  */
+ /* Define the styles for the scrollbar */
+ ::-webkit-scrollbar {
+   width: 8px;
+   /* Set the width of the scrollbar */
+ }
+
+ /* Handle on hover */
+ ::-webkit-scrollbar-thumb:hover {
+   background: #a5844e;
+ }
+
+ /* Define the styles for the scrollbar track */
+ ::-webkit-scrollbar-track {
+   background: #f1f1f1;
+ }
+
+ /* Define the styles for the scrollbar handle */
+ ::-webkit-scrollbar-thumb {
+   background: #c09653;
+ }
+
+ /* Define the styles for the scrollbar corner */
+ ::-webkit-scrollbar-corner {
+   background: #f1f1f1;
+ }
+
+ .wosCard {
+   position: relative;
+   overflow: hidden;
+ }
+
+ .wosCard:hover::after {
+   content: "";
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   width: 0;
+   height: 0;
+   background-color: #a5844e42;
+   border-radius: 50%;
+   animation: ripplee 0.9s ease;
+ }
+
+ @keyframes ripplee {
+   to {
+     width: 200%;
+     padding-bottom: 200%;
+     opacity: 1;
+   }
+ }
+
+ .pCard:hover img {
+   transition: 0.6s ease !important;
+ }
+
+ .pCard:hover img {
+   transform: scale(1.11);
+ }
+
+ .footer-links li:hover {
+   scale: 1.1;
+   transition: 0.4s all ease-in-out;
+ }
+
+ @media (max-width:768px) {
+   .sub {
+     width: 33.5%;
+   }
+
+   /* .b-sub{
+      width: 30%;
+  } */
+ }
+
+ @media (max-width:557px) {
+   .sub {
+     width: 50%;
+   }
+ }
+
+ @media (max-width: 420px) {
+   .button-prev {
+     position: absolute;
+     top: 50%;
+     left: -20px;
+   }
+
+   .button-next {
+     position: absolute;
+     top: 50%;
+     right: -20px;
+   }
+ }
+
+ .swiper-butto-next {
+   top: 10%;
+   position: absolute;
+   left: 0;
+   z-index: 2;
+ }
+
+ .swiper-butto-prev {
+   top: 10%;
+   position: absolute;
+   right: 0;
+   z-index: 2;
+ }
+
+ .mh1 {
+   color: #000;
+   font-family: La storia Bold;
+   font-size: 12px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 27px;
+   /* 225% */
+   letter-spacing: 6.42px;
+   text-transform: capitalize;
+ }
+
+ .mp1 {
+   color: #000;
+   text-align: center;
+   font-family: Bubbler One;
+   font-size: 19px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 9px;
+   /* 47.368% */
+   letter-spacing: 1.71px;
+   text-transform: capitalize;
+ }
+
+ .mp2 {
+   color: #000;
+   font-family: La storia Bold;
+   font-size: 12px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 27px;
+   /* 225% */
+   letter-spacing: 5.94px;
+   text-transform: capitalize;
+ }
+
+ .wosModal {
+   border-radius: 0px !important;
+ }
+
+ .mp3 {
+   color: #000;
+   text-align: center;
+   font-family: Bubbler One;
+   font-size: 13px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 9px;
+   /* 69.231% */
+   letter-spacing: 1.17px;
+   text-transform: capitalize;
+ }
+
+ .mp4 {
+   color: #b19707 !important;
+   font-weight: 600 !important;
+ }
+
+ .mp5 {
+   color: #000;
+   font-family: La storia Bold;
+   font-size: 9px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 27px;
+   /* 300% */
+   letter-spacing: 5.445px;
+   text-transform: capitalize;
+ }
+
+ .brndImg img {
+   width: 30px;
+ }
+
+ .ip1 {
+   color: #000;
+   font-family: Bubbler One;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 900;
+   line-height: 25px;
+   /* 166.667% */
+   letter-spacing: 4.05px;
+   text-transform: capitalize;
+ }
+
+ /* 
+.form-control:focus {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: #C09653;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(192, 150, 83, 0.25);
+
+} */
+
+ /* start home logged in page */
+
+ .swiper {
+   width: 100%;
+   height: 100%;
+ }
+
+ .swiper-slide {
+   text-align: center;
+   font-size: 18px;
+   background: #fff;
+   display: flex;
+   justify-content: space-around;
+   align-items: center;
+ }
+
+ .spr .swiper-slide img {
+   display: block;
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+ }
+
+ .design {
+   width: fit-content;
+   border-radius: 12px;
+   background: #c09653;
+   color: #fff !important;
+
+ }
+
+ .design-bg {
+   height: 40vh;
+   top: 199px;
+   right: 160px;
+   background: rgba(192, 150, 83, 0.13) !important;
+   box-shadow: 1px 1px 9px 0px rgba(229, 193, 193, 0.48);
+ }
+
+ .vr2Text {
+   color: #000;
+   font-family: La Belle Aurore;
+   font-size: 28px;
+   font-style: normal;
+   font-weight: 400;
+   letter-spacing: 2.1px;
+   text-transform: lowercase;
+   transform: rotate(90deg) !important;
+   position: absolute;
+   top: 250px !important;
+   right: 0;
+ }
+
+
+
+
+ /* sedtion templet start*/
+ .templet-links {
+   gap: 3rem !important;
+ }
+
+ .bgDesign::after {
+   content: "";
+
+   position: absolute;
+   right: 100px;
+   height: 390px;
+   width: 600px;
+   top: 120px;
+   border-radius: 12px;
+   background: rgba(192, 150, 83, 0.13);
+   box-shadow: 1px 1px 9px 0px rgba(229, 193, 193, 0.48);
+
+ }
+
+ .dLinks a {
+   color: #000;
+   text-align: center;
+
+   font-family: Bubbler One;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 400;
+
+   /* 33.333% */
+   letter-spacing: 2.1px;
+ }
+
+ .dLinks a:hover {
+   background-color: #a5844e !important;
+   transition: 0.5s;
+   color: #fff !important;
+   box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px !important;
+
+ }
+
+ .tp1 {
+   color: #222;
+   text-align: center;
+   font-family: Bubbler One;
+   font-size: 20px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 29.5px;
+   /* 147.5% */
+   letter-spacing: 3.4px;
+   text-transform: uppercase;
+ }
+
+ .DesignCards {
+   padding: 0.5rem;
+   border-radius: 10px;
+ }
+
+ .DesignCards:hover {
+   box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+   transition: 0.3s all ease-in-out;
+   cursor: pointer;
+ }
+
+ @media(max-width:370px) {
+   .sub {
+     width: 100%;
+   }
+ }
+
+ @media(max-width:1300px) {
+   .vr2Text {
+     right: -40px !important;
+   }
+ }
+
+ @media(max-width:1000px) {
+   .vr2Text {
+     position: static;
+     transform: none !important;
+   }
+ }
+
+ @media(max-width:992px) {
+
+   .templet-links {
+     gap: 1rem !important;
+   }
+ }
+
+
+
+ /************* paymwnt page ************************/
+
+ .itemBefor2 {
+   position: relative;
+ }
+
+ .itemBefor2::before {
+   content: "";
+   position: absolute;
+   height: 20px;
+   width: 2px;
+   background-color: #000;
+   top: 10px;
+   left: 4.8rem;
+   margin-left: .2em;
+ }
+
+ .ppr1 {
+   color: #000;
+   font-family: Lexend Deca;
+   font-size: 17px;
+   font-style: normal;
+   font-weight: 700;
+   line-height: 25px;
+   /* 125% */
+ }
+
+ .main {
+   background: #E8ECF1;
+   ;
+ }
+
+ .ph2 {
+
+   color: #1D1D1F;
+   text-overflow: ellipsis;
+
+
+   /* SBH1 */
+   font-family: Lexend Deca;
+   font-size: 25px;
+   font-style: normal;
+   font-weight: 600;
+   line-height: 50px;
+   /* 200% */
+   text-transform: uppercase;
+ }
+
+ .ppr3 {
+   color: #000;
+   text-align: center;
+
+   /* SBH1 */
+   font-family: Lexend Deca;
+   font-size: 25px;
+   font-style: normal;
+   font-weight: 600;
+   line-height: 50px;
+   /* 200% */
+   text-transform: uppercase;
+ }
+
+ .ppr4 {
+   color: #000;
+   text-align: center;
+
+   /* Mp1 */
+   font-family: Lexend Deca;
+   font-size: 17px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 34px;
+   /* 200% */
+ }
+
+ .prTabs .nav-item.show .nav-link,
+ .nav-tabs .nav-link.active {
+   background-color: transparent !important;
+   border-bottom: 2px solid #000 !important;
+ }
+
+ .cardHead1 {
+   color: #5E8D28;
+
+   /* RH2 */
+   font-family: Lexend Deca;
+   font-size: 35px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 50px;
+   /* 125% */
+ }
+
+ .subDet {
+   color: #000;
+
+   /* Mp1 */
+   font-family: Lexend Deca;
+   font-size: 14px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 34px;
+   /* 200% */
+   text-transform: capitalize;
+ }
+
+ .cardPrice {
+   color: #000;
+
+   /* MH1 */
+   font-family: Lexend Deca;
+   font-size: 28px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 41.373px;
+   /* 129.289% */
+   letter-spacing: 1px;
+ }
+
+ .pCardBtn {
+   border-radius: 8px !important;
+   border: 1px solid #929292 !important;
+   background: rgba(146, 146, 146, 0.10) !important;
+   color: rgba(0, 0, 0, 0.50) !important;
+   text-align: center;
+   font-family: Lexend Deca !important;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 400 !important;
+   line-height: 24px;
+   /* 160% */
+ }
+
+ .paymCard {
+   border-radius: 15px !important;
+ }
+
+ .paymCard li {
+   color: #000;
+
+   /* Mp1 */
+   font-family: Lexend Deca;
+   font-size: 14px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 34px;
+   /* 200% */
+   text-transform: capitalize;
+ }
+
+ .cardHead2 {
+   color: #02766F;
+
+   /* RH2 */
+   font-family: Lexend Deca;
+   font-size: 40px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 50px;
+   /* 125% */
+ }
+
+ .cardHead3 {
+   color: #516269;
+
+   /* RH2 */
+   font-family: Lexend Deca;
+   font-size: 40px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 50px;
+   /* 125% */
+ }
+
+ .cardHead4 {
+   color: #C09653;
+
+   /* RH2 */
+   font-family: Lexend Deca;
+   font-size: 40px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 50px;
+   /* 125% */
+ }
+
+ .hp {
+   color: #C09653;
+   text-align: center;
+   font-family: Butterscotch !important;
+   font-size: 25px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 29.5px;
+   /* 118% */
+   letter-spacing: 3.25px;
+   text-transform: capitalize;
+ }
+
+ .hp2 {
+   color: #C09653;
+   text-align: center;
+   font-family: Lexend Deca;
+   font-size: 17px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 34px;
+   /* 200% */
+   text-decoration-line: underline;
+ }
+
+ .tp1 {
+   color: #000;
+   text-align: center;
+
+   /* Mh3 */
+   font-family: Lexend Deca;
+   font-size: 20px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 30px;
+   /* 150% */
+ }
+
+ .tp2 {
+   color: #000;
+   text-align: center;
+
+   /* LP2 */
+   font-family: Lexend Deca;
+   font-size: 12px;
+   font-style: normal;
+   font-weight: 300;
+   line-height: 24px;
+   /* 200% */
+   letter-spacing: 1.2px;
+ }
+
+ .tesCard {
+   border-radius: 35px;
+ }
+
+ .testmImg {
+   width: 130px;
+   height: 130px;
+   border-radius: 50%;
+
+   display: block;
+   margin-inline: auto;
+   margin-top: -60px;
+ }
+
+ .wosAccord {
+   border-radius: 20px !important;
+ }
+
+ .wosAccord .accordion-button {
+   border-radius: 20px !important;
+ }
+
+ .brandImg {
+   width: 30px;
+ }
+
+ .butnDiv {
+   display: flex;
+   background-color: #fff;
+   border-radius: 50px;
+   justify-content: space-between;
+
+ }
+
+ .btnBill {
+   border-radius: 50px;
+ }
+
+ .btnb2 {
+   display: flex;
+   flex-direction: column;
+
+ }
+
+ .btnb2 span {
+   color: #C09653;
+   text-align: center;
+   font-family: Lexend Deca;
+   font-size: 13px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: normal;
+   text-transform: capitalize;
+ }
+
+ .activo {
+   border: 1px solid #b19707;
+ }
+
+ .bxShadow {
+   /* box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.10); */
+   /* box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.10);   */
+   border-bottom: 3px solid #f7f7f7;
+
+
+
+ }
+
+ .phea {
+   color: #555454;
+   text-align: center;
+
+   /* menu sb 16 */
+   font-family: Lexend Deca;
+   font-size: 16px;
+   font-style: normal;
+   font-weight: 600;
+   line-height: 24px;
+   /* 150% */
+ }
+
+ /************** payment page emd ******************* */
+
+
+
+
+
+ /* not logged in page css start ###################################### */
+
+
+ .paraSub3 {
+   color: #000;
+   text-align: center;
+
+   /* Rp1 15 */
+   font-family: Lexend Deca;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 34px;
+   /* 226.667% */
+ }
+
+ .heading3 {
+   color: #000;
+   text-align: center;
+
+   /* SBH1 */
+   font-family: Lexend Deca;
+   font-size: 25px;
+   font-style: normal;
+   font-weight: 600;
+   line-height: 50px;
+   /* 200% */
+   text-transform: uppercase;
+ }
+
+ .creativeClr {
+   color: #000;
+   text-align: center;
+
+   /* LP2 */
+   font-family: Lexend Deca !important;
+   font-size: 12px;
+   font-style: normal;
+   font-weight: 300;
+   line-height: 24px;
+   /* 200% */
+   letter-spacing: 1.2px;
+ }
+
+
+
+
+
+ /* not logged in page css end ###################################### */
+
+
+
+ /* design page css not loged in ------------------ */
+ .easy {
+   color: #000;
+
+   /* butter h2 */
+   font-family: Butterscotch !important;
+   font-size: 35px;
+   border-right: 1px solid #000;
+   height: 140px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 52.5px;
+   /* 150% */
+ }
+
+ .easy2 {
+   color: #000;
+
+   /* butter h2 */
+   font-family: Butterscotch !important;
+   font-size: 35px;
+   border-left: 1px solid #000;
+   height: 140px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 52.5px;
+   /* 150% */
+ }
+
+ .shareWeb {
+   color: #000;
+
+   /* Mp1 */
+   font-family: Lexend Deca;
+   font-size: 17px;
+   font-style: normal;
+   font-weight: 900;
+   text-decoration: none !important;
+   line-height: 34px;
+   /* 200% */
+   text-transform: capitalize;
+ }
+
+ .weding {
+   color: #000;
+
+   /* Mp1 */
+   font-family: Lexend Deca;
+   font-size: 17px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 34px;
+   /* 200% */
+   text-transform: capitalize;
+ }
+
+ .absRow {
+   position: absolute;
+   left: -140px;
+   bottom: -40px;
+ }
+
+ .bgaft::after {
+   content: "";
+   position: absolute;
+   width: 75%;
+   height: 75%;
+   border-radius: 8px;
+   background: rgba(247, 241, 233, 0.55);
+   z-index: -1;
+   left: 12px;
+ }
+
+ /* media query start ---------------- */
+ @media screen and (max-width: 768px) {
+   .easy {
+     color: #000;
+
+     /* butter h2 */
+     font-family: Butterscotch !important;
+     font-size: 35px;
+     border-bottom: 1px solid #000;
+     height: 140px;
+     border-right: none !important;
+     font-style: normal;
+     font-weight: 400;
+     line-height: 52.5px;
+     /* 150% */
+   }
+
+   .easy2 {
+     color: #000;
+
+     /* butter h2 */
+     font-family: Butterscotch !important;
+     font-size: 35px;
+     border-left: none !important;
+     border-bottom: 1px solid #000;
+     height: 140px;
+     font-style: normal;
+     font-weight: 400;
+     line-height: 52.5px;
+     /* 150% */
+   }
+ }
+
+ @media(max-width:992px) {
+   .absRow {
+     position: static;
+   }
+ }
+
+ /* media query end ---------------- */
+
+
+ /* design page css not logrd in ens ------------------ */
+
+ /* desing page 2 ,3 css */
+ .pvrT {
+   color: #000;
+   text-align: center;
+   font-family: La Belle Aurore;
+   font-size: 30px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 28px;
+   /* 93.333% */
+   letter-spacing: 1.95px;
+   transform: rotate(-90deg);
+   position: absolute;
+   top: 200px;
+   left: -170px;
+ }
+
+ .form-f {
+   border-radius: 8px !important;
+   box-shadow: none !important;
+   ;
+ }
+
+ .form-f:focus {
+   border: 1px solid #a5844e !important;
+ }
+
+ /* media query */
+ @media(max-width:768px) {
+   .pvrT {
+     transform: none;
+     position: static;
+     margin-block: 2rem;
+   }
+ }
+
+ /* end desing page 2 ,3  css */
+
+ /* venu Page css */
+
+ .bgAft {
+   position: relative;
+ }
+
+ .bgAft::after {
+   content: "";
+   position: absolute;
+   height: 100%;
+   width: 100%;
+   border-radius: 8px;
+   background: #F5EEE3;
+   left: -20px;
+   top: 0;
+   z-index: -1;
+   padding-block: 4rem;
+ }
+
+ .venuImage {
+   height: 150px;
+   width: 150px;
+   border-radius: 50%;
+ }
+
+ .fontButter {
+   color: #000;
+   text-align: center;
+
+   /* butter h2 */
+   font-family: Butterscotch;
+   font-size: 35px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 52.5px;
+   /* 150% */
+
+ }
+
+ .bg-bf {
+   position: relative;
+ }
+
+ .bg-bf::before {
+   content: "";
+   position: absolute;
+   top: 0;
+   right: -50px;
+   height: 100%;
+   width: 100%;
+   background: #F5EEE3;
+   border-radius: 5px;
+   z-index: -1;
+ }
+
+ .bCard {
+   width: 20%;
+   transition: 0.4s all ease-in-out;
+ }
+
+ .bCard:hover {
+   scale: 1.1;
+   transition: 0.4s all ease-in-out;
+ }
+
+ .venueCard {
+   border-radius: 8px !important;
+   border: 1px solid rgba(0, 0, 0, 0.08) !important;
+   background: #FFF !important;
+ }
+
+ .venueCard:hover {
+   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+ }
+
+ .venuImage {
+   border-radius: 8px !important;
+ }
+
+ @media(max-width:1200px) {
+   .bCard {
+     width: 11%;
+   }
+ }
+
+ @media(max-width:992px) {
+   .bCard {
+     width: 50%;
+   }
+ }
+
+ @media(max-width:510px) {
+   .bCard {
+     width: 100%;
+   }
+ }
+
+ @media(max-width:768px) {
+   .bg-bf::before {
+     right: 0 !important;
+   }
+ }
+
+ /* venue page css end */
+
+
+ /* Sign up css */
+
+ .sinImage {
+   border-radius: 10px;
+   height: 100%;
+   width: 100% !important;
+   object-fit: cover;
+ }
+
+ .sinCard {
+   border-radius: 10px;
+   box-shadow: 0px 4px 18px 0px rgba(0, 0, 0, 0.15)
+ }
+
+ .sp1 {
+   color: #000;
+   text-align: center;
+
+   /* MH1 */
+   font-family: Lexend Deca;
+   font-size: 30px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 41.373px;
+   /* 129.289% */
+   letter-spacing: 1px;
+ }
+
+ .siButtons button {
+   border-radius: 12px;
+   border: 1px solid #A9A9A9;
+   background: #FFF;
+   color: #000;
+
+   /* Mp1 */
+   font-family: Lexend Deca;
+   font-size: 17px;
+   font-style: normal;
+   font-weight: 500;
+   line-height: 25px;
+   /* 147.059% */
+   text-transform: capitalize;
+   /* padding-inline: 5rem; */
+   width: 100%;
+ }
+
+ .mut {
+   color: #A9A9A9;
+   text-align: center;
+   font-feature-settings: 'clig' off, 'liga' off;
+
+   /* Rp3(content) */
+   font-family: Lexend Deca;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 20px;
+   /* 133.333% */
+   text-transform: capitalize;
+ }
+
+ .mut2 {
+   font-size: 12px !important;
+ }
+
+ .ap2 {
+   font-size: 12px !important;
+ }
+
+ .siInp {
+   border-radius: 8px !important;
+
+   box-shadow: none !important;
+   border: 1px solid #A9A9A9 !important;
+ }
+
+ .sinp:focus {
+   border: 1px solid #d1a050 !important;
+ }
+
+ #DispEye {
+   position: absolute;
+   top: 10px;
+   right: 7px;
+   cursor: pointer;
+   transition: 0.3s ease-in-out;
+ }
+
+ #DispEye:hover {
+   transform: scale(1.2);
+   transition: 0.3s ease-in-out;
+   color: #a5844e
+ }
+
+ .apara {
+   color: #3A61CA;
+   font-feature-settings: 'clig' off, 'liga' off;
+
+   /* Rp3(content) */
+   font-family: Lexend Deca;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 20px;
+   /* 133.333% */
+   text-transform: capitalize;
+ }
+
+ .apara:hover {
+   color: #2995d3;
+   cursor: pointer;
+ }
+
+ .sinBtn {
+   border-radius: 8px;
+   border: 1px solid #A9A9A9;
+   background: rgba(169, 169, 169, 0.10);
+   color: rgba(0, 0, 0, 0.50);
+   text-align: center;
+   font-family: Lexend Deca;
+   font-size: 15px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: 24px;
+   /* 160% */
+ }
+
+ .sinBtn:hover {
+   background-color: #A9A9A9 !important;
+ }
+
+ .bgf {
+   background: #FFF;
+   box-shadow: 0px -3px 3px -4px rgba(0, 0, 0, 0.50);
+ }
+
+ .social_icon_width {
+   /* height: 30px; */
+   width: 20px;
+   transition: 0.2s all;
+   border-bottom: 1px solid transparent;
+   object-fit: cover;
+   padding-bottom: 2px;
+ }
+
+ .social_icon_width:hover {
+   transform: scale(1.2);
+   transition: 0.2s all;
+   cursor: pointer;
+   border-bottom: 1px solid #a5844e;
+
+ }
+
+ /* sign up css ends */
