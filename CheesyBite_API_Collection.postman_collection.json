@@ -1,0 +1,741 @@
+{
+    "info": {
+        "_postman_id": "cheesybite-api-collection",
+        "name": "CheesyBite API Collection",
+        "description": "Complete API collection for CheesyBite application",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"mobile\": \"1234567890\",\n    \"password\": \"password123\",\n    \"checkbox\": true,\n    \"referral_code\": \"\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/register",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "register"]
+                        },
+                        "description": "Register a new user account. If email verification is enabled, user will receive OTP."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Verify OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"otp\": \"123456\",\n    \"email\": \"john.doe@example.com\",\n    \"mobile\": \"1234567890\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/verify-otp",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "verify-otp"]
+                        },
+                        "description": "Verify OTP code sent to email or mobile. Returns user data and auth token."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Resend OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"john.doe@example.com\",\n    \"mobile\": \"1234567890\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/resend-otp",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "resend-otp"]
+                        },
+                        "description": "Resend OTP code to email or mobile number."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/login",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "login"]
+                        },
+                        "description": "Login with email and password. Returns auth token on success."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login with Mobile (OTP)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"mobile\": \"1234567890\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/login",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "login"]
+                        },
+                        "description": "Login with mobile number. OTP will be sent if OTP feature is enabled."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"john.doe@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/forgot-password",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "forgot-password"]
+                        },
+                        "description": "Send password reset email. New password will be sent to user's email."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Authentication related endpoints"
+        },
+        {
+            "name": "User Profile",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/profile",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "profile"]
+                        },
+                        "description": "Get authenticated user's profile information."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "John Doe Updated",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "profile_image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/profile/update",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "profile", "update"]
+                        },
+                        "description": "Update user profile. Can update name and/or profile image."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Toggle Email Notifications",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/profile/send-email-status",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "profile", "send-email-status"]
+                        },
+                        "description": "Toggle email notification status for the authenticated user."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"old_password\": \"password123\",\n    \"new_password\": \"newpassword123\",\n    \"confirm_password\": \"newpassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/changepassword",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "changepassword"]
+                        },
+                        "description": "Change user password. Requires old password and new password."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Referral Info",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/refer-earn",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "refer-earn"]
+                        },
+                        "description": "Get referral code and referral amount information."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/logout",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "logout"]
+                        },
+                        "description": "Logout user and revoke authentication token."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User profile and account management endpoints"
+        },
+        {
+            "name": "Branches & Items",
+            "item": [
+                {
+                    "name": "Get Branches",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/branches",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "branches"]
+                        },
+                        "description": "Get list of all branches."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Home Items",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/home-items?branch_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "home-items"],
+                            "query": [
+                                {
+                                    "key": "branch_id",
+                                    "value": "1",
+                                    "description": "Branch ID"
+                                }
+                            ]
+                        },
+                        "description": "Get home page items for a specific branch."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "categories"]
+                        },
+                        "description": "Get list of all categories."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Category Items",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/category-items/category-slug?branch_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "category-items", "category-slug"],
+                            "query": [
+                                {
+                                    "key": "branch_id",
+                                    "value": "1",
+                                    "description": "Branch ID"
+                                }
+                            ]
+                        },
+                        "description": "Get items for a specific category by slug."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Item Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/item-details/item-slug?branch_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "item-details", "item-slug"],
+                            "query": [
+                                {
+                                    "key": "branch_id",
+                                    "value": "1",
+                                    "description": "Branch ID"
+                                }
+                            ]
+                        },
+                        "description": "Get detailed information about a specific item by slug."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Pizza Item Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/pizza-item-details/pizza-slug?branch_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "pizza-item-details", "pizza-slug"],
+                            "query": [
+                                {
+                                    "key": "branch_id",
+                                    "value": "1",
+                                    "description": "Branch ID"
+                                }
+                            ]
+                        },
+                        "description": "Get detailed information about a pizza item by slug."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Branches, categories, and items endpoints"
+        },
+        {
+            "name": "Deals",
+            "item": [
+                {
+                    "name": "Get Deals",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/deals?branch_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "deals"],
+                            "query": [
+                                {
+                                    "key": "branch_id",
+                                    "value": "1",
+                                    "description": "Branch ID"
+                                }
+                            ]
+                        },
+                        "description": "Get list of active deals for a branch."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Deal Item",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/show-deal-item/item-slug?deal_id=1&branch_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "show-deal-item", "item-slug"],
+                            "query": [
+                                {
+                                    "key": "deal_id",
+                                    "value": "1",
+                                    "description": "Deal ID"
+                                },
+                                {
+                                    "key": "branch_id",
+                                    "value": "1",
+                                    "description": "Branch ID"
+                                }
+                            ]
+                        },
+                        "description": "Get deal item details by slug and deal ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Deal Items",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/deal-items/1?branch_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "deal-items", "1"],
+                            "query": [
+                                {
+                                    "key": "branch_id",
+                                    "value": "1",
+                                    "description": "Branch ID"
+                                }
+                            ]
+                        },
+                        "description": "Get all items for a specific deal."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Deals related endpoints"
+        },
+        {
+            "name": "Favorites",
+            "item": [
+                {
+                    "name": "Get Favorites",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/favoriteItems?page=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "favoriteItems"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                }
+                            ]
+                        },
+                        "description": "Get user's favorite items (paginated)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Toggle Favorite",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"item_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/managefavorite",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "managefavorite"]
+                        },
+                        "description": "Add or remove item from favorites."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User favorites endpoints"
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "auth_token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
+

@@ -1,0 +1,76 @@
+
+@mixin btn {
+    background-color: #333;
+    text-decoration: none;
+    color: $white;
+    padding: 5px 15px;
+    text-transform: capitalize;
+}
+
+@mixin border($borderStyle,$borderWidth,$borderColor,$borderRadius) {
+    border-style: $borderStyle;
+    border-width: $borderWidth;
+    border-color: $borderColor;
+    border-radius: $borderRadius;
+}
+
+@mixin transition {
+	-webkit-transition: all .25s ease;
+	-moz-transition: all .25s ease;
+	-ms-transition: all .25s ease;
+	-o-transition: all .25s ease;
+	transition: all .25s ease;
+}
+
+// --------------- COMMON BUTTON DESIGN ---------------
+
+
+@mixin common_btn {
+    background: $primaryColor;
+    padding: 20px 30px;
+    border: 0;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+@mixin play_btn {
+    height: 60px;
+    width: 60px;
+    background-color: $secondaryColor;
+    display: inline-block;
+    line-height: 60px;
+    border-radius: 50px;
+    text-align: center;
+    color: $white;
+}
+
+
+@mixin responsive($value) {
+    @if $value == 'xs' {
+        @media(max-width:320px){
+            @content;
+        }
+    }@else if($value == 'sm'){
+        @media(min-width:320px) and (max-width:576px){
+            @content;
+        }
+    }@else if($value == 'md'){
+        @media(min-width:576px) and (max-width:768px){
+            @content;
+        }
+    }@else if($value == 'lg'){
+        @media(min-width:768px) and (max-width:991px){
+            @content;
+        }
+    }@else if($value == 'xl'){
+        @media (max-width:1200px){
+            @content;
+        }
+    }
+}
+
+@mixin abs {
+    position: absolute;
+    top: 0;
+    left: 0;
+}

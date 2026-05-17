@@ -1,0 +1,55 @@
+/*============** Faq **============*/
+
+.faqs-section {
+	// background-color: #f7fafd;
+  overflow: hidden;
+}
+
+.ask_question_wrap {
+  margin-right: 30px;
+  @media #{$lg-device} {
+    margin-right: 0px;
+  }
+    .accordion-item {
+      margin-bottom: 25px;
+      border: 0;
+      border-radius: 0;
+      border-bottom: 0;
+      background: $white;
+      .accordion-body {
+        padding: 0px 22px 10px 20px;
+        font-size: 18px;
+        margin-top: 15px;
+        color: #454545;
+      }
+      .accordion-header {
+        padding: 0;
+        border: 0;
+        button {
+          font-size: 25px;
+          color: $black;
+          font-weight: 500;
+          padding: 15px 25px;
+          box-shadow: none;
+          padding-left: 60px;
+          @media #{$xsm-device} {
+            font-size: 22px;
+          }
+          span {
+            display: inline-block;
+            margin-right: 10px;
+            position: absolute;
+            left: 15px;
+            height: 100%;
+            width: 50px;
+            background: $primaryColor;
+            color: $white;
+            left: 0;
+            text-align: center;
+            line-height: 55px;
+        }
+        }
+      }
+    }
+  }
+  
