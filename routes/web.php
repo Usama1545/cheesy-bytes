@@ -477,6 +477,11 @@ Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware','
 	// home
 	
 	
+        // SEO: redirect 5xx error page and empty live pages
+        Route::permanentRedirect('/austin-pflugerville-tx/bogo-deal-details/bogo-over-rice-48', '/richmond-tx-near-grand-pkwy-99-hwy-90/categories/');
+        Route::permanentRedirect('/richmond-tx-crn-1464-rd-beechnut-st/menu/dessert', '/richmond-tx-near-grand-pkwy-99-hwy-90/categories/');
+        Route::permanentRedirect('/richmond-tx-crn-1464-rd-beechnut-st/menu/loaded-nachos', '/richmond-tx-near-grand-pkwy-99-hwy-90/categories/');
+
         Route::permanentRedirect('/products/2428185', '/');
         Route::permanentRedirect('/products/13663507', '/');
         Route::permanentRedirect('/products/5154718', '/');
@@ -608,7 +613,7 @@ Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware','
     Route::get('/location', [HomeController::class, 'location'])->name('location');
     Route::post('/location/store', [HomeController::class, 'location_store'])->name('location.store');
 
-    Route::post('/location/getDelivery/{id}', [HomeController::class, 'delivery_providers'])->name('location.delivery_providers');
+    Route::match(['GET', 'POST'], '/location/getDelivery/{id}', [HomeController::class, 'delivery_providers'])->name('location.delivery_providers');
     Route::post('/location/update/{id}', [HomeController::class, 'location_update'])->name('location.update');
     Route::get('/show-item', [WebItemController::class, 'showitem']);
     Route::get('/show-deal-item', [WebItemController::class, 'showDealitem']);
