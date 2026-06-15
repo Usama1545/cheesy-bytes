@@ -606,6 +606,13 @@
     </li>
     <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('22', $modules) == true ? '' : 'd-none') : '' }}"
         id="22">
+        <a class="nav-link rounded d-flex {{ request()->is('admin/county-seo*') ? 'active' : '' }}"
+            href="{{ URL::to('/admin/county-seo') }}" aria-expanded="false">
+            <i class="fa-solid fa-gears"></i><span class="nav-text ">Seo Content</span>
+        </a>
+    </li>
+    <li class="nav-item mb-2 fs-7 {{ Auth::user()->type != 1 ? (in_array('22', $modules) == true ? '' : 'd-none') : '' }}"
+        id="22">
         <a class="nav-link rounded d-flex {{ request()->is('admin/settings*') ? 'active' : '' }}"
             href="{{ URL::to('/admin/settings') }}" aria-expanded="false">
             <i class="fa-solid fa-gears"></i><span class="nav-text ">{{ trans('labels.general_settings') }}</span>

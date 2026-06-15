@@ -4,7 +4,9 @@
             <th>#</th>
             <th>{{ trans('labels.order_number') }}</th>
             <th>{{ trans('labels.date') }}</th>
-            <th>{{ trans('labels.user_info') }}</th>
+            <th> Username</th>
+            <th>email</th>
+            <th>phone</th>
             <th>{{ trans('labels.order_type') }}</th>
             <th>{{ trans('labels.payment_type') }}</th>
             <th>Tip </th>
@@ -33,6 +35,12 @@
                 <td>{{ helper::date_format($orderdata->created_at) }}</td>
                 <td>
                     {{ @$orderdata->name }}
+                </td>
+                <td>
+                    {{ @$orderdata->email }}
+                </td>
+                <td>
+                    {{ @$orderdata->mobile }}
                 </td>
                 <td>
                     @if ($orderdata->order_type == 1)

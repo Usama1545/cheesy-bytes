@@ -17,6 +17,7 @@
     <meta name="description" content="@yield('meta_description')">
     <link rel="icon" href="{{ helper::image_path(@helper::appdata()->favicon) }}"><!-- Favicon -->
     <link rel="stylesheet" href="{{ url(env('ASSETSPATHURL') . 'web-assets/css/bootstrap.min.css') }}">
+    <link rel="canonical" href="{{ url()->current() }}">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -612,14 +613,14 @@
                     </p>
                     <div class="row g-2 justify-content-start social-share-icon mt-3">
                         <div class="col-md-6 col-12">
-                            <a class="btn btn-outline-dark w-100 p-2" href="javascript:void(0)" onclick="showlogin()"
+                            <a class="btn btn-outline-dark w-100 p-2" href="/login"
                                 type="button">
                                 <i class="fa-solid fa-user-plus"></i>
                                 <span class="px-2">{{ trans('labels.create_account') }}</span>
                             </a>
                         </div>
                         <div class="col-md-6 col-12">
-                            <a class="btn btn-primary w-100 p-2" target="_blank" onclick="checkout()">
+                            <a class="btn btn-primary w-100 p-2" target="_blank" href="/checkout?buynow=0">
                                 <i class="fa-solid fa-address-card"></i>
                                 <span class="px-2">{{ trans('labels.continue_as_guest') }}</span>
                             </a>

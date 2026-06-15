@@ -10,8 +10,9 @@ $itemData = Helper::getBranch(); // ✅ works
     @if (!empty($categorydata))
      
         <section class="menu-section">
-
+           
             <div class="container">
+                 <h1  class="my-3">{{ @$categorydata->category_name }} in {{ $itemData->seo_name }}</h1>
                 <div class="card  w-100 mt-3" style="background-color: #D6B62B">
                     <div class="d-flex flex-column flex-md-row justify-content-between mx-1 mx-md-5 my-1 align-items-center">
                         <h4 class="my-3 text-uppercase fw-bold">START YOUR ORDER</h4>

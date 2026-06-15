@@ -22,6 +22,7 @@ use App\Helpers\Helper;
 use App\Http\Controllers\admin\ItemController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\ContactController;
+use App\Http\Controllers\admin\CountySeoController;
 use App\Http\Controllers\admin\SliderController;
 use App\Http\Controllers\admin\AddonsController;
 use App\Http\Controllers\admin\DriverController;
@@ -423,6 +424,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 
         // contact
         Route::get('contact', [ContactController::class, 'index']);
+        Route::get('county-seo', [CountySeoController::class, 'index']);
+        Route::get('county-seo/edit/{id}', [CountySeoController::class, 'edit']);
+        Route::post('county-seo/update/{id}', [CountySeoController::class, 'update']);
+        Route::get('county-seo/generate', [CountySeoController::class, 'generate']);
         Route::post('contact/destroy', [ContactController::class, 'destroy']);
         // driver
         Route::get('driver', [DriverController::class, 'index']);

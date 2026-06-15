@@ -26,7 +26,7 @@ class SetUserLocation
             $branch = Branch::where('slug', $branchSlug)->first();
 
             if (! $branch) {
-                abort(404);
+                return redirect()->route('location', [], 301);
             }
 
             Session::put('branch_id', $branch->id);

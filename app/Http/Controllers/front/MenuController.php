@@ -112,7 +112,7 @@ class MenuController extends Controller
             abort(404);
         }
 
-        $htmlContent = CountySeo::where('county', $branch->slug)->where('category', $category)->pluck('content')->first();
+        $htmlContent = CountySeo::where('branch_id', $branchId)->where('category_id', $categorydata->id)->pluck('content')->first();
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $topdeals = helper::top_deals();

@@ -10,6 +10,8 @@ use App\Models\Item;
 use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\Helper;
 use Session;
 
 class DealController extends Controller
@@ -529,7 +531,15 @@ class DealController extends Controller
         }
         } catch (\Exception $e) 
         {
-            dd($e);
+            Log::warning('Deal not found', [
+                'slug' => $slug,
+                'branch' => $branch,
+                'url' => request()->fullUrl(),
+            ]);
+
+            return redirect(
+                Helper::branch_route('deals')
+            , 301);
         }
     }
 

@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::table('county_seo', function (Blueprint $table) {
             $table->foreignId('branch_id')->nullable()->after('id');
+            $table->foreignId('category_id')->nullable()->after('id');
         });
     }
 
@@ -26,7 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('county_seo', function (Blueprint $table) {
-            $table->dropColumn('branch_id');
+            $table->dropColumn(['branch_id', 'category_id']);
         });
     }
 };

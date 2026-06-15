@@ -380,12 +380,13 @@ class helper
         $branchId = Session::get('branch_id');
         $branch = Branch::find($branchId);
         $country = $branch->slug;
-        $htmlContent = CountySeo::where('county', $branch->slug)->where('category', $category)->pluck('content')->first();
+        $categorydata = Category::where('slug', $category)->where('is_available', 1)->where('is_deleted', 2)->first();
+
+        $htmlContent = CountySeo::where('branch_id', $branch->id)->where('category_id', $categorydata->id)->pluck('content')->first();
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $topdeals = helper::top_deals();
 
-        $categorydata = Category::where('slug', $category)->where('is_available', 1)->where('is_deleted', 2)->first();
         $subcategories = Subcategory::where('cat_id', @$categorydata->id)->where('is_available', 1)->where('is_deleted', 2)->get();
 
         $branchId = Session::get('branch_id');

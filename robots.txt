@@ -1,2 +1,3 @@
 User-agent: *
 Disallow:
+https://thecheesybite.com/location/getDelivery/3
