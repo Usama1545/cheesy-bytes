@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 class Item extends Model
 {
     protected $table = 'item';
-    protected $fillable = ['cat_id', 'subcat_id', 'item_name', 'branch_ids','slug', 'image', 'item_type', 'has_variation', 'attribute', 'price', 'original_price', 'addons_id', 'item_description', 'preparation_time', 'tax', 'avg_ratting', 'discount_percentage', 'item_status', 'is_featured', 'is_deleted', 'delivery_time'];
+    protected $fillable = ['cat_id', 'subcat_id', 'item_name', 'branch_ids','slug', 'image', 'item_type', 'has_variation', 'attribute', 'price', 'max_price', 'is_price_range', 'original_price', 'addons_id', 'item_description', 'preparation_time', 'tax', 'avg_ratting', 'discount_percentage', 'item_status', 'is_featured', 'is_deleted', 'delivery_time'];
     protected static function booted()
     {
         static::saved(function ($item) {

@@ -103,15 +103,21 @@ $itemData = Helper::getBranch(); // ✅ works
                                                         </a>
 
                                                         <div class="d-flex gap-1">
-                                                            @if ($original_price > $price)
-                                                                <del class="text-muted">
-                                                                    {{ helper::currency_format($original_price) }}
-                                                                </del>
-                                                            @endif
+                                                            @if($itemdata->is_price_range && $itemdata->max_price > 0)
+                                                                <span>
+                                                                    {{ $price !== '0.00' ? helper::currency_format($price) . ' - ' . helper::currency_format($itemdata->max_price) : '' }}
+                                                                </span>
+                                                            @else
+                                                                @if ($original_price > $price)
+                                                                    <del class="text-muted">
+                                                                        {{ helper::currency_format($original_price) }}
+                                                                    </del>
+                                                                @endif
 
-                                                            <span>
-                                                                {{ $price !== '0.00' ? helper::currency_format($price) : '' }}
-                                                            </span>
+                                                                <span>
+                                                                    {{ $price !== '0.00' ? helper::currency_format($price) : '' }}
+                                                                </span>
+                                                            @endif
                                                         </div>
                                                     </h5>
                                                 </div>

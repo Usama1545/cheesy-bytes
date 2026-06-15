@@ -304,6 +304,32 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-6 col-md-6">
+                                        <div class="form-group">
+                                            <div class="form-check form-switch mt-2">
+                                                <input class="form-check-input" type="checkbox" name="is_price_range"
+                                                       id="is_price_range" value="1"
+                                                       {{ $getitem->is_price_range ? 'checked' : '' }}
+                                                       onchange="toggleMaxPrice(this)">
+                                                <label class="form-check-label" for="is_price_range">Show Price Range</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-6" id="max_price_wrapper" style="{{ $getitem->is_price_range ? '' : 'display:none;' }}">
+                                        <div class="form-group">
+                                            <label for="max_price" class="col-form-label">Max Price</label>
+                                            <input type="text" class="form-control numbers_only" name="max_price"
+                                                   id="max_price" value="{{ $getitem->max_price }}"
+                                                   placeholder="Max Price">
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+                                    function toggleMaxPrice(el) {
+                                        document.getElementById('max_price_wrapper').style.display = el.checked ? '' : 'none';
+                                    }
+                                </script>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="row">
