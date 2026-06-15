@@ -88,8 +88,13 @@ $itemData = Helper::getBranch(); // ✅ works
                                 <div class="d-flex flex-wrap justify-content-between align-items-center">
                                     <div class="d-flex align-items-center gap-2">
                                         <p class="item-price item_price m-0 text-black subtotal_{{ $getitemdata['id'] }}">
-                                            {{ helper::currency_format($price) }}</p>
-                                        @if ($original_price > $price)
+                                            @if($getitemdata->is_price_range && $getitemdata->max_price > 0)
+                                                {{ helper::currency_format($price) }} - {{ helper::currency_format($getitemdata->max_price) }}
+                                            @else
+                                                {{ helper::currency_format($price) }}
+                                            @endif
+                                        </p>
+                                        @if(!$getitemdata->is_price_range && $original_price > $price)
                                             <del class="item-price item_price fs-7 text-muted">
                                                 {{ helper::currency_format($original_price) }}</del>
                                         @endif
@@ -249,43 +254,71 @@ $itemData = Helper::getBranch(); // ✅ works
 
                                                             @endif
                                                         </div>
-                                                        @foreach ($getitemdata['addons'] as $addons)
-
-                                                            @if ($addons->addongroup_id == $addons_group->id)
-                                                                <div
-                                                                    class="mx-2 {{ session()->get('direction') == '2' ? 'd-flex gap-2' : 'form-check' }}">
-                                                                    @php
-                                                                        if ($addons_group->selection_count == 1) {
-                                                                            $type = 'radio';
-                                                                        } elseif ($addons_group->selection_count == 2) {
-                                                                            $type = 'checkbox';
-                                                                        }
-                                                                        $autoSelect = ($addons_group->selection_count == 1 && $addons_group->selection_type == 1 && $addon_index == 0) ? 'checked' : '';
-                                                                        $addon_index = 1;
-                                                                    @endphp
-                                                                    <input
-                                                                        class="form-check-input cursor-pointer addons_chk_{{ $getitemdata['id'] }} {{ session()->get('direction') == '2' ? 'ms-0' : '' }}"
-                                                                        type="{{ $type }}"
-                                                                        value="{{ $addons->id }}"
-                                                                        data-addons-id="{{ $addons->id }}"
-                                                                        data-addons-price="{{ $addons->price }}"
-                                                                        data-addons-name="{{ $addons->name }}"
-                                                                        onclick="getaddons('{{ $getitemdata['id'] }}'); calculatePizzaPrice('{{ $getitemdata['id'] }}')"
-                                                                        name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
-                                                                        id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}"
-                                                                        {{$autoSelect}} >
+                                                        @if($getitemdata->is_price_range && $addons_group->selection_count == 1 && $addons_group->selection_type == 1)
+                                                            {{-- Dropdown for price-range items --}}
+                                                            <div class="mx-2 mt-2">
+                                                                <select class="form-select"
+                                                                        onchange="syncAddonSelect('{{ $getitemdata['id'] }}', '{{ $addons_group->id }}', this)">
+                                                                    @foreach ($availableAddons as $addon)
+                                                                        <option value="{{ $addon->id }}"
+                                                                                data-addons-id="{{ $addon->id }}"
+                                                                                data-addons-price="{{ $addon->price }}"
+                                                                                data-addons-name="{{ $addon->name }}">
+                                                                            {{ $addon->name }} ({{ helper::currency_format($addon->price) }})
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                                {{-- Hidden radios keep getaddons() / calculatePizzaPrice() working unchanged --}}
+                                                                @foreach ($availableAddons as $addonIdx => $addon)
+                                                                    <input type="radio"
+                                                                           class="d-none addons_chk_{{ $getitemdata['id'] }}"
+                                                                           name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
+                                                                           id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addon->id }}"
+                                                                           value="{{ $addon->id }}"
+                                                                           data-addons-id="{{ $addon->id }}"
+                                                                           data-addons-price="{{ $addon->price }}"
+                                                                           data-addons-name="{{ $addon->name }}"
+                                                                           {{ $addonIdx === 0 ? 'checked' : '' }}>
+                                                                @endforeach
+                                                            </div>
+                                                        @else
+                                                            @foreach ($getitemdata['addons'] as $addons)
+                                                                @if ($addons->addongroup_id == $addons_group->id)
                                                                     <div
-                                                                        class="d-flex justify-content-between w-100 {{ session()->get('direction') == '2' ? 'ps-2' : 'pe-2' }}">
-                                                                        <label class="form-check-label cursor-pointer fs-7"
-                                                                            for="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}">{{ $addons->name }}</label>
-                                                                        <label class="form-check-label cursor-pointer fs-7"
-                                                                            for="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}">
-                                                                            {{ helper::currency_format($addons->price) }}
-                                                                        </label>
+                                                                        class="mx-2 {{ session()->get('direction') == '2' ? 'd-flex gap-2' : 'form-check' }}">
+                                                                        @php
+                                                                            if ($addons_group->selection_count == 1) {
+                                                                                $type = 'radio';
+                                                                            } elseif ($addons_group->selection_count == 2) {
+                                                                                $type = 'checkbox';
+                                                                            }
+                                                                            $autoSelect = ($addons_group->selection_count == 1 && $addons_group->selection_type == 1 && $addon_index == 0) ? 'checked' : '';
+                                                                            $addon_index = 1;
+                                                                        @endphp
+                                                                        <input
+                                                                            class="form-check-input cursor-pointer addons_chk_{{ $getitemdata['id'] }} {{ session()->get('direction') == '2' ? 'ms-0' : '' }}"
+                                                                            type="{{ $type }}"
+                                                                            value="{{ $addons->id }}"
+                                                                            data-addons-id="{{ $addons->id }}"
+                                                                            data-addons-price="{{ $addons->price }}"
+                                                                            data-addons-name="{{ $addons->name }}"
+                                                                            onclick="getaddons('{{ $getitemdata['id'] }}'); calculatePizzaPrice('{{ $getitemdata['id'] }}')"
+                                                                            name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
+                                                                            id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}"
+                                                                            {{$autoSelect}} >
+                                                                        <div
+                                                                            class="d-flex justify-content-between w-100 {{ session()->get('direction') == '2' ? 'ps-2' : 'pe-2' }}">
+                                                                            <label class="form-check-label cursor-pointer fs-7"
+                                                                                for="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}">{{ $addons->name }}</label>
+                                                                            <label class="form-check-label cursor-pointer fs-7"
+                                                                                for="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}">
+                                                                                {{ helper::currency_format($addons->price) }}
+                                                                            </label>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            @endif
-                                                        @endforeach
+                                                                @endif
+                                                            @endforeach
+                                                        @endif
                                                         @if ($addons_group->selection_type == 1)
                                                             <span
                                                                 class="addons_error_{{ $addons_group->id }}_{{ $getitemdata['id'] }} text-danger fs-7 ms-2"></span>
@@ -874,6 +907,12 @@ $itemData = Helper::getBranch(); // ✅ works
             (sizePrice + crustPrice + addonsTotal + extrasTotal) * qty;
 
         $('.subtotal_' + itemId).text(currency_format(finalPrice));
+    }
+
+    function syncAddonSelect(itemId, groupId, selectEl) {
+        $('input[name="addons_id_' + groupId + '_' + itemId + '"][value="' + selectEl.value + '"]').prop('checked', true);
+        getaddons(itemId);
+        calculatePizzaPrice(itemId);
     }
 
 </script>

@@ -16,6 +16,7 @@
     <title>@yield('page_title') {{ @helper::appdata()->title }}</title>
     <meta name="description" content="@yield('meta_description')">
     <link rel="icon" href="{{ helper::image_path(@helper::appdata()->favicon) }}"><!-- Favicon -->
+    <link rel="canonical" href="{{ rtrim(url()->current(), '/') }}/" />
     <link rel="stylesheet" href="{{ url(env('ASSETSPATHURL') . 'web-assets/css/bootstrap.min.css') }}">
     <link rel="canonical" href="{{ url()->current() }}">
     <!-- Bootstrap CSS -->

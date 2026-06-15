@@ -108,6 +108,8 @@ class ItemController extends Controller
         $item->price = helper::number_format($request->price);
         $item->original_price = helper::number_format($request->original_price == null ? 0 : $request->original_price);
         $item->discount_percentage = $discount;
+        $item->is_price_range = $request->has('is_price_range') ? 1 : 0;
+        $item->max_price = ($item->is_price_range && $request->max_price != null) ? helper::number_format($request->max_price) : null;
         $item->item_description = $request->description;
         $item->item_allergens = $request->allergens;
         $item->tax = $request->tax != "" ? @implode(",", $request->tax) : '';
@@ -268,6 +270,8 @@ class ItemController extends Controller
         $item->price = helper::number_format($request->price);
         $item->original_price = helper::number_format($request->original_price == null ? 0 : $request->original_price);
         $item->discount_percentage = $discount;
+        $item->is_price_range = $request->has('is_price_range') ? 1 : 0;
+        $item->max_price = ($item->is_price_range && $request->max_price != null) ? helper::number_format($request->max_price) : null;
         $item->item_name = $request->item_name;
         $item->slug = $this->getitemslug($request->item_name, $request->id);;
         $item->item_description = $request->description;

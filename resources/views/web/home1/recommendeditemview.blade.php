@@ -60,9 +60,13 @@
         <div class="item-card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex justify-content-between align-items-center gap-2">
-                    <span>{{ helper::currency_format($price) }}</span>
-                    @if ($original_price > $price)
-                        <del class="text-muted">{{ helper::currency_format($original_price) }}</del>
+                    @if($itemdata->is_price_range && $itemdata->max_price > 0)
+                        <span>{{ helper::currency_format($price) }} - {{ helper::currency_format($itemdata->max_price) }}</span>
+                    @else
+                        <span>{{ helper::currency_format($price) }}</span>
+                        @if ($original_price > $price)
+                            <del class="text-muted">{{ helper::currency_format($original_price) }}</del>
+                        @endif
                     @endif
                 </div>
                 @if ($itemdata->is_cart == 1)
