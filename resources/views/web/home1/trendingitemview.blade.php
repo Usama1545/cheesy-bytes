@@ -80,11 +80,11 @@
                         <input class="green_color fw-500 item-total-qty-{{ $itemdata->slug }}" type="text"
                             value="{{ helper::get_item_cart($itemdata->id) }}" disabled />
                         <button class="btn btn-sm green_color fw-500"
-                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">+</button>
+                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}',{{ $itemdata->is_price_range ? 1 : 0 }},'{{ URL::to('item-' . $itemdata->slug) }}')">+</button>
                     </div>
                 @else
                     <button class="btn btn-sm border green_color fw-500 px-4 py-1"
-                        onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">{{ trans('labels.add') }}</i></a></button>
+                        onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}',{{ $itemdata->is_price_range ? 1 : 0 }},'{{ URL::to('item-' . $itemdata->slug) }}')">{{ trans('labels.add') }}</i></a></button>
                 @endif
 
             </div>

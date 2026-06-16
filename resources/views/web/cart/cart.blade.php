@@ -226,11 +226,15 @@ $itemData = Helper::getBranch(); // ✅ works
                                                             @endphp
                                                             <div
                                                                 class="d-flex gap-1">
-                                                                @if ($original_price > $price)
-                                                                    <del
-                                                                        class="text-muted">{{ helper::currency_format($original_price) }}</del>
+                                                                @if($itemdata->is_price_range && $itemdata->max_price > 0)
+                                                                    <span>{{ $price !== '0.00' ? helper::currency_format($price) . ' - ' . helper::currency_format($itemdata->max_price) : '' }}</span>
+                                                                @else
+                                                                    @if ($original_price > $price)
+                                                                        <del
+                                                                            class="text-muted">{{ helper::currency_format($original_price) }}</del>
+                                                                    @endif
+                                                                    <span>{{ $price !== '0.00' ? helper::currency_format($price) : '' }}</span>
                                                                 @endif
-                                                                <span>{{ $price !== '0.00' ? helper::currency_format($price) : '' }}</span>
                                                             </div>
                                                         </h5>
                                                     </div>
@@ -248,7 +252,7 @@ $itemData = Helper::getBranch(); // ✅ works
 
                                                         <button
                                                             class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
-                                                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">
+                                                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}',{{ $itemdata->is_price_range ? 1 : 0 }},'{{ URL::to('item-' . $itemdata->slug) }}')">
                                                             Order Now
                                                             <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
                                                             <div

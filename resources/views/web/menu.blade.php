@@ -168,7 +168,9 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                     class="btn btn-sm fw-500 border-0"
                                                                     onclick="showitem(
                                                                         '{{ $itemdata->slug }}',
-                                                                        '{{ URL::to('/show-item') }}'
+                                                                        '{{ URL::to('/show-item') }}',
+                                                                        {{ $itemdata->is_price_range ? 1 : 0 }},
+                                                                        '{{ helper::branch_route('itemdetails', ['slug' => $itemdata->slug]) }}'
                                                                     )">
                                                                     +
                                                                 </button>
@@ -201,7 +203,9 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                 class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
                                                                 onclick="showitem(
                                                                     '{{ $itemdata->slug }}',
-                                                                    '{{ URL::to('/show-item') }}'
+                                                                    '{{ URL::to('/show-item') }}',
+                                                                    {{ $itemdata->is_price_range ? 1 : 0 }},
+                                                                    '{{ helper::branch_route('itemdetails', ['slug' => $itemdata->slug]) }}'
                                                                 )">
 
                                                                 Order Now

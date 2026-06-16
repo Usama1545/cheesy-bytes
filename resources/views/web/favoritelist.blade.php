@@ -151,12 +151,12 @@
                                                                 value="{{ helper::get_item_cart($itemdata->id) }}"
                                                                 disabled />
                                                             <a class="btn btn-sm fw-500 border-0"
-                                                                onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">+</a>
+                                                                onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}',{{ $itemdata->is_price_range ? 1 : 0 }},'{{ URL::to('item-' . $itemdata->slug) }}')">+</a>
                                                         </div>
                                                     @else
                                                         <button
                                                             class="btn btn-sm btn-secondary fw-500 py-2 px-4 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
-                                                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">{{ trans('labels.add') }}
+                                                            onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}',{{ $itemdata->is_price_range ? 1 : 0 }},'{{ URL::to('item-' . $itemdata->slug) }}')">{{ trans('labels.add') }}
                                                             <i
                                                                 class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
                                                             <div

@@ -360,8 +360,12 @@ function calladdtocart(slug, item_name, item_type, image_name, item_tax, item_pr
     })
 }
 
-function showitem(slug, showurl) {
+function showitem(slug, showurl, isPriceRange, detailsUrl) {
     "use strict";
+    if (isPriceRange) {
+        window.location.href = detailsUrl;
+        return;
+    }
     $('.addon_modal_' + slug).prop("disabled", true);
     $('.addon_modal_icon_' + slug).addClass('d-none');
     $('.addon_modal_loader_' + slug).removeClass('d-none');

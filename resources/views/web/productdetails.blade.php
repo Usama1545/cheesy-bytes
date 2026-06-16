@@ -4,25 +4,30 @@ use App\Helpers\Helper;
 
 $itemData = Helper::getBranch(); // ✅ works
 ?>
-@section('page_title'){{ @$getitemdata->item_name }} {{ $getitemdata->category_info->category_name }} | {{ $itemData->seo_name }} |@endsection
-@section('meta_description')Craving cheesy {{ strtolower(@$getitemdata->item_name) }} {{ strtolower(@$getitemdata->category_info->category_name) }}? Enjoy fresh, delicious {{ strtolower(@$getitemdata->item_name) }} at our {{ $itemData->seo_name }} location. Order now!@endsection
+@section('page_title')
+    {{ @$getitemdata->item_name }} {{ $getitemdata->category_info->category_name }} | {{ $itemData->seo_name }} |
+@endsection
+@section('meta_description')
+    Craving cheesy {{ strtolower(@$getitemdata->item_name) }} {{ strtolower(@$getitemdata->category_info->category_name) }}?
+    Enjoy fresh, delicious {{ strtolower(@$getitemdata->item_name) }} at our {{ $itemData->seo_name }} location. Order now!
+@endsection
 @section('content')
     <!-- <div class="breadcrumb-sec">
-        <div class="container">
-            <div class="breadcrumb-sec-content">
-                <nav class="text-dark breadcrumb-divider" aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li
-                            class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
-                            <a class="text-dark fw-600" href="{{ route('home') }}">{{ trans('labels.home') }}</a>
-                        </li>
-                        <li class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active"
-                            aria-current="page">{{ trans('item details') }}</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
-    </div> -->
+                        <div class="container">
+                            <div class="breadcrumb-sec-content">
+                                <nav class="text-dark breadcrumb-divider" aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li
+                                            class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
+                                            <a class="text-dark fw-600" href="{{ route('home') }}">{{ trans('labels.home') }}</a>
+                                        </li>
+                                        <li class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active"
+                                            aria-current="page">{{ trans('item details') }}</li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div> -->
     <section class="mt-5">
         <div class="container">
             <div class="item-details border-bottom pb-4">
@@ -57,10 +62,15 @@ $itemData = Helper::getBranch(); // ✅ works
                                                 $price = $getitemdata->item_price;
                                             }
                                         } else {
-                                            $price = $getitemdata->item_price - $getitemdata->item_price * (@$topdeals->offer_amount / 100);
+                                            $price =
+                                                $getitemdata->item_price -
+                                                $getitemdata->item_price * (@$topdeals->offer_amount / 100);
                                         }
                                         $original_price = $getitemdata->item_price;
-                                        $off = $original_price > 0 ? number_format(100 - ($price * 100) / $original_price, 1) : 0;
+                                        $off =
+                                            $original_price > 0
+                                                ? number_format(100 - ($price * 100) / $original_price, 1)
+                                                : 0;
                                     } else {
                                         $price = $getitemdata->item_price;
                                         $original_price = $getitemdata->original_price;
@@ -87,14 +97,16 @@ $itemData = Helper::getBranch(); // ✅ works
                             <div class="row my-2 align-items-center">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center">
                                     <div class="d-flex align-items-center gap-2">
-                                        <p class="item-price item_price m-0 text-black subtotal_{{ $getitemdata['id'] }}">
-                                            @if($getitemdata->is_price_range && $getitemdata->max_price > 0)
-                                                {{ helper::currency_format($price) }} - {{ helper::currency_format($getitemdata->max_price) }}
+                                        <p class="item-price item_price m-0 text-black subtotal_{{ $getitemdata['id'] }}"
+                                            @if ($getitemdata->is_price_range && $getitemdata->max_price > 0) data-price-range-locked="1" @endif>
+                                            @if ($getitemdata->is_price_range && $getitemdata->max_price > 0)
+                                                {{ helper::currency_format($price) }} -
+                                                {{ helper::currency_format($getitemdata->max_price) }}
                                             @else
                                                 {{ helper::currency_format($price) }}
                                             @endif
                                         </p>
-                                        @if(!$getitemdata->is_price_range && $original_price > $price)
+                                        @if (!$getitemdata->is_price_range && $original_price > $price)
                                             <del class="item-price item_price fs-7 text-muted">
                                                 {{ helper::currency_format($original_price) }}</del>
                                         @endif
@@ -133,16 +145,12 @@ $itemData = Helper::getBranch(); // ✅ works
                                             <div class="form-check border rounded ">
                                                 <div class="p-3">
 
-                                                    <input
-                                                        class="form-check-input pizza-size-radio"
-                                                        type="radio"
+                                                    <input class="form-check-input pizza-size-radio" type="radio"
                                                         name="pizza_size_{{ $getitemdata['id'] }}"
-                                                        id="pizza_size_{{ $size['id'] }}"
-                                                        value="{{ $size['id'] }}"
+                                                        id="pizza_size_{{ $size['id'] }}" value="{{ $size['id'] }}"
                                                         data-size-price="{{ $size['size_price'] }}"
                                                         {{ $sizeIndex == 0 ? 'checked' : '' }}
-                                                        onchange="selectPizzaSize('{{ $getitemdata['id'] }}', this)"
-                                                    >
+                                                        onchange="selectPizzaSize('{{ $getitemdata['id'] }}', this)">
 
                                                     <label class="form-check-label w-100 cursor-pointer"
                                                         for="pizza_size_{{ $size['id'] }}">
@@ -150,7 +158,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                                         <div class="d-flex justify-content-between">
                                                             <div>
                                                                 <strong>{{ $size['name'] }}</strong>
-                                                                ({{ $size['label'] }}" )
+                                                                ({{ $size['label'] }}")
                                                             </div>
 
                                                             <div>
@@ -165,7 +173,6 @@ $itemData = Helper::getBranch(); // ✅ works
                                                         style="{{ $sizeIndex == 0 ? '' : 'display:none;' }}">
 
                                                         @foreach ($size['crusts'] as $crustIndex => $crust)
-
                                                             <div class="form-check">
 
                                                                 <input
@@ -176,13 +183,10 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                     value="{{ $crust['id'] }}"
                                                                     data-crust-price="{{ $crust['price'] }}"
                                                                     {{ $crustIndex == 0 ? 'checked' : '' }}
-                                                                    onchange="calculatePizzaPrice('{{ $getitemdata['id'] }}')"
-                                                                >
+                                                                    onchange="calculatePizzaPrice('{{ $getitemdata['id'] }}')">
 
-                                                                <label
-                                                                    class="form-check-label w-100"
-                                                                    for="pizza_crust_{{ $crust['id'] }}"
-                                                                >
+                                                                <label class="form-check-label w-100"
+                                                                    for="pizza_crust_{{ $crust['id'] }}">
                                                                     <div class="d-flex justify-content-between">
                                                                         <span>{{ $crust['name'] }}</span>
 
@@ -193,7 +197,6 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                 </label>
 
                                                             </div>
-
                                                         @endforeach
 
                                                     </div>
@@ -204,12 +207,10 @@ $itemData = Helper::getBranch(); // ✅ works
                                     </div>
 
                                     {{-- hidden selected ids --}}
-                                    <input type="hidden"
-                                        id="selected_size_id_{{ $getitemdata['id'] }}"
+                                    <input type="hidden" id="selected_size_id_{{ $getitemdata['id'] }}"
                                         value="{{ $crustSizes[0]['id'] }}">
 
-                                    <input type="hidden"
-                                        id="selected_crust_id_{{ $getitemdata['id'] }}"
+                                    <input type="hidden" id="selected_crust_id_{{ $getitemdata['id'] }}"
                                         value="{{ $crustSizes[0]['crusts'][0]['id'] ?? '' }}">
 
                                 </div>
@@ -251,34 +252,37 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                     {{ trans('labels.max') }}
                                                                     {{ $addons_group->max_count }}
                                                                 </span>
-
                                                             @endif
                                                         </div>
-                                                        @if($getitemdata->is_price_range && $addons_group->selection_count == 1 && $addons_group->selection_type == 1)
+                                                        @if ($getitemdata->is_price_range && $addons_group->selection_count == 1 && $addons_group->selection_type == 1)
                                                             {{-- Dropdown for price-range items --}}
                                                             <div class="mx-2 mt-2">
                                                                 <select class="form-select"
-                                                                        onchange="syncAddonSelect('{{ $getitemdata['id'] }}', '{{ $addons_group->id }}', this)">
+                                                                    onchange="syncAddonSelect('{{ $getitemdata['id'] }}', '{{ $addons_group->id }}', this)">
+                                                                    <option value="" selected>
+                                                                        Select {{ $addons_group->name ?? 'an option' }}
+                                                                    </option>
                                                                     @foreach ($availableAddons as $addon)
                                                                         <option value="{{ $addon->id }}"
-                                                                                data-addons-id="{{ $addon->id }}"
-                                                                                data-addons-price="{{ $addon->price }}"
-                                                                                data-addons-name="{{ $addon->name }}">
-                                                                            {{ $addon->name }} ({{ helper::currency_format($addon->price) }})
+                                                                            data-addons-id="{{ $addon->id }}"
+                                                                            data-addons-price="{{ $addon->price }}"
+                                                                            data-addons-name="{{ $addon->name }}">
+                                                                            {{ $addon->name }}
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
-                                                                {{-- Hidden radios keep getaddons() / calculatePizzaPrice() working unchanged --}}
+                                                                {{-- Off-screen radios: visible to jQuery :checked selectors, invisible to users --}}
                                                                 @foreach ($availableAddons as $addonIdx => $addon)
                                                                     <input type="radio"
-                                                                           class="d-none addons_chk_{{ $getitemdata['id'] }}"
-                                                                           name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
-                                                                           id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addon->id }}"
-                                                                           value="{{ $addon->id }}"
-                                                                           data-addons-id="{{ $addon->id }}"
-                                                                           data-addons-price="{{ $addon->price }}"
-                                                                           data-addons-name="{{ $addon->name }}"
-                                                                           {{ $addonIdx === 0 ? 'checked' : '' }}>
+                                                                        class="form-check-input addons_chk_{{ $getitemdata['id'] }}"
+                                                                        style="position:absolute;left:-9999px;width:1px;height:1px;"
+                                                                        name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
+                                                                        id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addon->id }}"
+                                                                        value="{{ $addon->id }}"
+                                                                        data-addons-id="{{ $addon->id }}"
+                                                                        data-addons-price="{{ $addon->price }}"
+                                                                        data-addons-name="{{ $addon->name }}"
+                                                                        {{ $addonIdx === 0 ? 'checked' : '' }}>
                                                                 @endforeach
                                                             </div>
                                                         @else
@@ -289,10 +293,17 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                         @php
                                                                             if ($addons_group->selection_count == 1) {
                                                                                 $type = 'radio';
-                                                                            } elseif ($addons_group->selection_count == 2) {
+                                                                            } elseif (
+                                                                                $addons_group->selection_count == 2
+                                                                            ) {
                                                                                 $type = 'checkbox';
                                                                             }
-                                                                            $autoSelect = ($addons_group->selection_count == 1 && $addons_group->selection_type == 1 && $addon_index == 0) ? 'checked' : '';
+                                                                            $autoSelect =
+                                                                                $addons_group->selection_count == 1 &&
+                                                                                $addons_group->selection_type == 1 &&
+                                                                                $addon_index == 0
+                                                                                    ? 'checked'
+                                                                                    : '';
                                                                             $addon_index = 1;
                                                                         @endphp
                                                                         <input
@@ -305,12 +316,14 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                             onclick="getaddons('{{ $getitemdata['id'] }}'); calculatePizzaPrice('{{ $getitemdata['id'] }}')"
                                                                             name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
                                                                             id="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}"
-                                                                            {{$autoSelect}} >
+                                                                            {{ $autoSelect }}>
                                                                         <div
                                                                             class="d-flex justify-content-between w-100 {{ session()->get('direction') == '2' ? 'ps-2' : 'pe-2' }}">
-                                                                            <label class="form-check-label cursor-pointer fs-7"
+                                                                            <label
+                                                                                class="form-check-label cursor-pointer fs-7"
                                                                                 for="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}">{{ $addons->name }}</label>
-                                                                            <label class="form-check-label cursor-pointer fs-7"
+                                                                            <label
+                                                                                class="form-check-label cursor-pointer fs-7"
                                                                                 for="addons_{{ $addons_group->id }}_{{ $getitemdata['id'] }}_{{ $addons->id }}">
                                                                                 {{ helper::currency_format($addons->price) }}
                                                                             </label>
@@ -377,7 +390,8 @@ $itemData = Helper::getBranch(); // ✅ works
                                 value="{{ $getitemdata['tax'] }}">
                             <input type="hidden" name="item_price" id="item_price_{{ $getitemdata['id'] }}"
                                 value="{{ $price }}">
-                            <input type="hidden" name="item_qty" id="item_qty_{{ $getitemdata['id'] }}" value="1">
+                            <input type="hidden" name="item_qty" id="item_qty_{{ $getitemdata['id'] }}"
+                                value="1">
 
                             <input type="hidden" name="request_url" id="request_url_{{ $getitemdata['slug'] }}"
                                 value="{{ request()->segments()[0] }}">
@@ -461,9 +475,8 @@ $itemData = Helper::getBranch(); // ✅ works
                                 <div class="col-sm-6">
                                     <div class="d-flex align-items-center justify-content-end gap-2">
                                         @if (helper::appdata()->google_review_url != '')
-                                            <a href="{{ helper::appdata()->google_review_url }}"
-                                                class="icon-box" target="_blank"
-                                                tooltip="{{ trans('labels.review') }}">
+                                            <a href="{{ helper::appdata()->google_review_url }}" class="icon-box"
+                                                target="_blank" tooltip="{{ trans('labels.review') }}">
                                                 <i class="fa-solid fa-star fs-8"></i>
                                             </a>
                                         @endif
@@ -497,271 +510,254 @@ $itemData = Helper::getBranch(); // ✅ works
 
                 <div class="product-view" id="review-tab">
                     <ul class="nav nav-pills py-3 mb-4 border-bottom border-top" id="pills-tab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <a class="nav-link" href="javascript:void(0)" data-bs-toggle="pill"
-                                    data-bs-target="#pills-review" aria-selected="false" role="tab"
-                                    tabindex="-1">{{ trans('labels.reviews') }}</a>
-                            </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="javascript:void(0)" data-bs-toggle="pill"
+                                data-bs-target="#pills-review" aria-selected="false" role="tab"
+                                tabindex="-1">{{ trans('labels.reviews') }}</a>
+                        </li>
 
                     </ul>
                 </div>
 
                 <div class="tab-content" id="pills-tabContent">
-                        <div class="tab-pane fade" id="pills-review" role="tabpanel"
-                            aria-labelledby="pills-review-tab">
-                            <div class="row gx-4 gx-xxl-5 gy-md-0 gy-4">
-                                <div class="col-md-12 col-lg-7 col-xxl-6">
-                                    <!-- Customer rating -->
-                                    <h4 class="heading mb-3 fw-600 text-dark text-truncate">
-                                        {{ trans('labels.customer_rating') }}
-                                    </h4>
-                                    <div class="card border-0 bg-gray rounded-3 p-4 mb-4 rounded-3">
-                                        <div class="row g-4 align-items-center">
-                                            <!-- Rating info -->
-                                            <div class="col-md-4">
-                                                <div class="text-center">
-                                                    <!-- Info -->
-                                                    <h2 class="mb-0 fw-bold text-dark">
-                                                        <i class="fa-solid fa-star text-warning"></i>
-                                                        {{ number_format($getitemdata->avg_ratting, 1) }}
-                                                    </h2>
-                                                    <p class="mb-2 text-muted">{{ trans('labels.based_on') }}
-                                                        {{ count($itemreviewdata) }}
-                                                        {{ trans('labels.reviews') }}
-                                                    </p>
-                                                </div>
+                    <div class="tab-pane fade" id="pills-review" role="tabpanel" aria-labelledby="pills-review-tab">
+                        <div class="row gx-4 gx-xxl-5 gy-md-0 gy-4">
+                            <div class="col-md-12 col-lg-7 col-xxl-6">
+                                <!-- Customer rating -->
+                                <h4 class="heading mb-3 fw-600 text-dark text-truncate">
+                                    {{ trans('labels.customer_rating') }}
+                                </h4>
+                                <div class="card border-0 bg-gray rounded-3 p-4 mb-4 rounded-3">
+                                    <div class="row g-4 align-items-center">
+                                        <!-- Rating info -->
+                                        <div class="col-md-4">
+                                            <div class="text-center">
+                                                <!-- Info -->
+                                                <h2 class="mb-0 fw-bold text-dark">
+                                                    <i class="fa-solid fa-star text-warning"></i>
+                                                    {{ number_format($getitemdata->avg_ratting, 1) }}
+                                                </h2>
+                                                <p class="mb-2 text-muted">{{ trans('labels.based_on') }}
+                                                    {{ count($itemreviewdata) }}
+                                                    {{ trans('labels.reviews') }}
+                                                </p>
                                             </div>
+                                        </div>
 
-                                            <!-- Progress-bar START -->
-                                            <div class="col-md-8">
-                                                <div class="card-body p-0">
-                                                    <div class="row gx-3 g-2 align-items-center">
-                                                        <!-- 5.0 Progress bar and Rating -->
-                                                        <div class="col-2 col-sm-2 text-end">
-                                                            <span class="h6 fw-semibold mb-0 text-dark">5.0</span>
-                                                        </div>
-                                                        @php
-                                                            if (count(@$itemreviewdata) != 0) {
-                                                                $five =
-                                                                    ($fivestaraverage /
-                                                                        count(@$itemreviewdata)) *
-                                                                    100;
-                                                            } else {
-                                                                $five = 0;
-                                                            }
-                                                        @endphp
-                                                        <div class="col-2 col-sm-8">
-                                                            <div class="progress progress-sm">
-                                                                <div class="progress-bar" role="progressbar"
-                                                                    style="width: {{ $five }}%"
-                                                                    aria-valuenow="{{ round($five) }}%"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                </div>
+                                        <!-- Progress-bar START -->
+                                        <div class="col-md-8">
+                                            <div class="card-body p-0">
+                                                <div class="row gx-3 g-2 align-items-center">
+                                                    <!-- 5.0 Progress bar and Rating -->
+                                                    <div class="col-2 col-sm-2 text-end">
+                                                        <span class="h6 fw-semibold mb-0 text-dark">5.0</span>
+                                                    </div>
+                                                    @php
+                                                        if (count(@$itemreviewdata) != 0) {
+                                                            $five = ($fivestaraverage / count(@$itemreviewdata)) * 100;
+                                                        } else {
+                                                            $five = 0;
+                                                        }
+                                                    @endphp
+                                                    <div class="col-2 col-sm-8">
+                                                        <div class="progress progress-sm">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: {{ $five }}%"
+                                                                aria-valuenow="{{ round($five) }}%" aria-valuemin="0"
+                                                                aria-valuemax="100">
                                                             </div>
                                                         </div>
-                                                        <!-- 5.0 Percentage -->
-                                                        <div
-                                                            class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
-                                                            <span
-                                                                class="h6 fw-semibold mb-0 text-dark">{{ round($five) }}%</span>
-                                                        </div>
+                                                    </div>
+                                                    <!-- 5.0 Percentage -->
+                                                    <div
+                                                        class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
+                                                        <span
+                                                            class="h6 fw-semibold mb-0 text-dark">{{ round($five) }}%</span>
+                                                    </div>
 
-                                                        <!-- 4.0 Progress bar and Rating -->
-                                                        <div class="col-2 col-sm-2 text-end">
-                                                            <span class="h6 fw-semibold mb-0 text-dark">4.0</span>
-                                                        </div>
-                                                        @php
-                                                            if (count(@$itemreviewdata) != 0) {
-                                                                $four =
-                                                                    ($fourstaraverage /
-                                                                        count(@$itemreviewdata)) *
-                                                                    100;
-                                                            } else {
-                                                                $four = 0;
-                                                            }
-                                                        @endphp
-                                                        <div class="col-8 col-sm-8">
-                                                            <div class="progress progress-sm">
-                                                                <div class="progress-bar" role="progressbar"
-                                                                    style="width: {{ $four }}%"
-                                                                    aria-valuenow="{{ round($four) }}%"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                </div>
+                                                    <!-- 4.0 Progress bar and Rating -->
+                                                    <div class="col-2 col-sm-2 text-end">
+                                                        <span class="h6 fw-semibold mb-0 text-dark">4.0</span>
+                                                    </div>
+                                                    @php
+                                                        if (count(@$itemreviewdata) != 0) {
+                                                            $four = ($fourstaraverage / count(@$itemreviewdata)) * 100;
+                                                        } else {
+                                                            $four = 0;
+                                                        }
+                                                    @endphp
+                                                    <div class="col-8 col-sm-8">
+                                                        <div class="progress progress-sm">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: {{ $four }}%"
+                                                                aria-valuenow="{{ round($four) }}%" aria-valuemin="0"
+                                                                aria-valuemax="100">
                                                             </div>
                                                         </div>
-                                                        <!-- 4.0 Percentage -->
-                                                        <div
-                                                            class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
-                                                            <span
-                                                                class="h6 fw-semibold mb-0 text-dark">{{ round($four) }}%</span>
-                                                        </div>
+                                                    </div>
+                                                    <!-- 4.0 Percentage -->
+                                                    <div
+                                                        class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
+                                                        <span
+                                                            class="h6 fw-semibold mb-0 text-dark">{{ round($four) }}%</span>
+                                                    </div>
 
-                                                        <!-- 3.0 Progress bar and Rating -->
-                                                        <div class="col-2 col-sm-2 text-end">
-                                                            <span class="h6 fw-semibold mb-0 text-dark">3.0</span>
-                                                        </div>
-                                                        @php
-                                                            if (count(@$itemreviewdata) != 0) {
-                                                                $three =
-                                                                    ($threestaraverage /
-                                                                        count(@$itemreviewdata)) *
-                                                                    100;
-                                                            } else {
-                                                                $three = 0;
-                                                            }
-                                                        @endphp
-                                                        <div class="col-8 col-sm-8">
-                                                            <div class="progress progress-sm">
-                                                                <div class="progress-bar" role="progressbar"
-                                                                    style="width: {{ $three }}%"
-                                                                    aria-valuenow="{{ round($three) }}%"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                </div>
+                                                    <!-- 3.0 Progress bar and Rating -->
+                                                    <div class="col-2 col-sm-2 text-end">
+                                                        <span class="h6 fw-semibold mb-0 text-dark">3.0</span>
+                                                    </div>
+                                                    @php
+                                                        if (count(@$itemreviewdata) != 0) {
+                                                            $three =
+                                                                ($threestaraverage / count(@$itemreviewdata)) * 100;
+                                                        } else {
+                                                            $three = 0;
+                                                        }
+                                                    @endphp
+                                                    <div class="col-8 col-sm-8">
+                                                        <div class="progress progress-sm">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: {{ $three }}%"
+                                                                aria-valuenow="{{ round($three) }}%" aria-valuemin="0"
+                                                                aria-valuemax="100">
                                                             </div>
                                                         </div>
-                                                        <!-- 3.0 Percentage -->
-                                                        <div
-                                                            class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
-                                                            <span
-                                                                class="h6 fw-semibold mb-0 text-dark">{{ round($three) }}%</span>
-                                                        </div>
+                                                    </div>
+                                                    <!-- 3.0 Percentage -->
+                                                    <div
+                                                        class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
+                                                        <span
+                                                            class="h6 fw-semibold mb-0 text-dark">{{ round($three) }}%</span>
+                                                    </div>
 
-                                                        <!-- 2.0 Progress bar and Rating -->
-                                                        <div class="col-2 col-sm-2 text-end">
-                                                            <span class="h6 fw-semibold mb-0 text-dark">2.0</span>
-                                                        </div>
-                                                        @php
-                                                            if (count(@$itemreviewdata) != 0) {
-                                                                $two =
-                                                                    ($twostaraverage /
-                                                                        count(@$itemreviewdata)) *
-                                                                    100;
-                                                            } else {
-                                                                $two = 0;
-                                                            }
-                                                        @endphp
-                                                        <div class="col-8 col-sm-8">
-                                                            <div class="progress progress-sm">
-                                                                <div class="progress-bar" role="progressbar"
-                                                                    style="width: {{ $two }}%"
-                                                                    aria-valuenow="{{ round($two) }}%"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                </div>
+                                                    <!-- 2.0 Progress bar and Rating -->
+                                                    <div class="col-2 col-sm-2 text-end">
+                                                        <span class="h6 fw-semibold mb-0 text-dark">2.0</span>
+                                                    </div>
+                                                    @php
+                                                        if (count(@$itemreviewdata) != 0) {
+                                                            $two = ($twostaraverage / count(@$itemreviewdata)) * 100;
+                                                        } else {
+                                                            $two = 0;
+                                                        }
+                                                    @endphp
+                                                    <div class="col-8 col-sm-8">
+                                                        <div class="progress progress-sm">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: {{ $two }}%"
+                                                                aria-valuenow="{{ round($two) }}%" aria-valuemin="0"
+                                                                aria-valuemax="100">
                                                             </div>
                                                         </div>
-                                                        <!-- 2.0 Percentage -->
-                                                        <div
-                                                            class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
-                                                            <span
-                                                                class="h6 fw-semibold mb-0 text-dark">{{ round($two) }}%</span>
-                                                        </div>
+                                                    </div>
+                                                    <!-- 2.0 Percentage -->
+                                                    <div
+                                                        class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
+                                                        <span
+                                                            class="h6 fw-semibold mb-0 text-dark">{{ round($two) }}%</span>
+                                                    </div>
 
-                                                        <!-- 1.0 Progress bar and Rating -->
-                                                        <div class="col-2 col-sm-2 text-end">
-                                                            <span class="h6 fw-semibold mb-0 text-dark">1.0</span>
-                                                        </div>
-                                                        @php
-                                                            if (count(@$itemreviewdata) != 0) {
-                                                                $one =
-                                                                    ($onestaraverage /
-                                                                        count(@$itemreviewdata)) *
-                                                                    100;
-                                                            } else {
-                                                                $one = 0;
-                                                            }
-                                                        @endphp
-                                                        <div class="col-8 col-sm-8">
-                                                            <div class="progress progress-sm">
-                                                                <div class="progress-bar" role="progressbar"
-                                                                    style="width: {{ $one }}%"
-                                                                    aria-valuenow="{{ round($one) }}%"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                </div>
+                                                    <!-- 1.0 Progress bar and Rating -->
+                                                    <div class="col-2 col-sm-2 text-end">
+                                                        <span class="h6 fw-semibold mb-0 text-dark">1.0</span>
+                                                    </div>
+                                                    @php
+                                                        if (count(@$itemreviewdata) != 0) {
+                                                            $one = ($onestaraverage / count(@$itemreviewdata)) * 100;
+                                                        } else {
+                                                            $one = 0;
+                                                        }
+                                                    @endphp
+                                                    <div class="col-8 col-sm-8">
+                                                        <div class="progress progress-sm">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: {{ $one }}%"
+                                                                aria-valuenow="{{ round($one) }}%" aria-valuemin="0"
+                                                                aria-valuemax="100">
                                                             </div>
                                                         </div>
-                                                        <!-- 1.0 Percentage -->
-                                                        <div
-                                                            class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
-                                                            <span
-                                                                class="h6 fw-semibold mb-0 text-dark">{{ round($one) }}%</span>
-                                                        </div>
+                                                    </div>
+                                                    <!-- 1.0 Percentage -->
+                                                    <div
+                                                        class="col-2 col-sm-2 {{ session()->get('direction') == 2 ? 'text-start' : 'text-end' }}">
+                                                        <span
+                                                            class="h6 fw-semibold mb-0 text-dark">{{ round($one) }}%</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- Progress-bar END -->
                                         </div>
-                                    </div>
-                                    <!-- Customer rating -->
-                                    <div class="d-grid justify-items-center mt-4 mb-3">
-                                        @if (Auth::user() && Auth::user()->type == 2)
-                                            <button class="btn btn-primary fs-7 write-review"
-                                                data-item-id="{{ $getitemdata->id }}"
-                                                data-item-name="{{ $getitemdata->item_name }}"
-                                                data-item-image="{{ helper::image_path($getitemdata['item_image']->image_name) }}">{{ trans('labels.write_review') }}</button>
-                                        @else
-                                            <button class="btn btn-primary fs-7"
-                                                onclick="showlogin()">{{ trans('labels.write_review') }}</button>
-                                        @endif
+                                        <!-- Progress-bar END -->
                                     </div>
                                 </div>
-
-                                <!-- Customer Review -->
-                                <div class="col-md-12 col-lg-5 col-xxl-6">
-                                    <h4 class="heading mb-3 fw-600 text-dark text-truncate">
-                                        {{ trans('labels.customer_review') }}
-                                    </h4>
-                                    @if (count($itemreviewdata) > 0)
-                                        @foreach ($itemreviewdata as $reviewdata)
-                                            <div class="py-2">
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <div class="d-md-flex align-items-center">
-                                                            <!-- review avatar -->
-                                                            <div
-                                                                class="avatar avatar-lg mb-md-0 mb-2 flex-shrink-0 {{ session()->get('direction') == 2 ? ' ms-sm-3' : 'me-sm-3' }}">
-                                                                <img class="avatar-img rounded-circle w-100 h-100 object-fit-cover"
-                                                                    src="{{ $reviewdata->user_info->profile_image }}"
-                                                                    alt="avatar">
-                                                            </div>
-                                                            <!-- review avatar -->
-
-                                                            <!-- review-content -->
-                                                            <div class="w-100">
-                                                                <div
-                                                                    class="d-flex flex-wrap gap-2 justify-content-between mt-1 mt-md-0 mb-2">
-                                                                    <div>
-                                                                        <h6 class="mb-0 fw-600">
-                                                                            {{ $reviewdata->user_info->name }}
-                                                                        </h6>
-                                                                        <!-- Info -->
-                                                                        <p
-                                                                            class="text-muted fs-8 fw-500 mt-1 mb-0">
-                                                                            {{ helper::date_format($reviewdata->created_at) }}
-                                                                        </p>
-                                                                    </div>
-                                                                    <!-- Review star -->
-                                                                    <span class="fw-600 fs-6">
-                                                                        <i
-                                                                            class="fas fa-star fa-fw text-warning fs-7"></i>
-                                                                        {{ $reviewdata->ratting > 0 ? number_format($reviewdata->ratting, 1) : 0 }}</span>
-                                                                </div>
-
-                                                                <p class="text-muted fs-7 fw-normal line-2 mb-0 ">
-                                                                    {{ $reviewdata->comment }}
-                                                                </p>
-                                                            </div>
-                                                            <!-- review-content -->
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
+                                <!-- Customer rating -->
+                                <div class="d-grid justify-items-center mt-4 mb-3">
+                                    @if (Auth::user() && Auth::user()->type == 2)
+                                        <button class="btn btn-primary fs-7 write-review"
+                                            data-item-id="{{ $getitemdata->id }}"
+                                            data-item-name="{{ $getitemdata->item_name }}"
+                                            data-item-image="{{ helper::image_path($getitemdata['item_image']->image_name) }}">{{ trans('labels.write_review') }}</button>
                                     @else
-                                        @include('web.nodata')
+                                        <button class="btn btn-primary fs-7"
+                                            onclick="showlogin()">{{ trans('labels.write_review') }}</button>
                                     @endif
                                 </div>
                             </div>
+
+                            <!-- Customer Review -->
+                            <div class="col-md-12 col-lg-5 col-xxl-6">
+                                <h4 class="heading mb-3 fw-600 text-dark text-truncate">
+                                    {{ trans('labels.customer_review') }}
+                                </h4>
+                                @if (count($itemreviewdata) > 0)
+                                    @foreach ($itemreviewdata as $reviewdata)
+                                        <div class="py-2">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-md-flex align-items-center">
+                                                        <!-- review avatar -->
+                                                        <div
+                                                            class="avatar avatar-lg mb-md-0 mb-2 flex-shrink-0 {{ session()->get('direction') == 2 ? ' ms-sm-3' : 'me-sm-3' }}">
+                                                            <img class="avatar-img rounded-circle w-100 h-100 object-fit-cover"
+                                                                src="{{ $reviewdata->user_info->profile_image }}"
+                                                                alt="avatar">
+                                                        </div>
+                                                        <!-- review avatar -->
+
+                                                        <!-- review-content -->
+                                                        <div class="w-100">
+                                                            <div
+                                                                class="d-flex flex-wrap gap-2 justify-content-between mt-1 mt-md-0 mb-2">
+                                                                <div>
+                                                                    <h6 class="mb-0 fw-600">
+                                                                        {{ $reviewdata->user_info->name }}
+                                                                    </h6>
+                                                                    <!-- Info -->
+                                                                    <p class="text-muted fs-8 fw-500 mt-1 mb-0">
+                                                                        {{ helper::date_format($reviewdata->created_at) }}
+                                                                    </p>
+                                                                </div>
+                                                                <!-- Review star -->
+                                                                <span class="fw-600 fs-6">
+                                                                    <i class="fas fa-star fa-fw text-warning fs-7"></i>
+                                                                    {{ $reviewdata->ratting > 0 ? number_format($reviewdata->ratting, 1) : 0 }}</span>
+                                                            </div>
+
+                                                            <p class="text-muted fs-7 fw-normal line-2 mb-0 ">
+                                                                {{ $reviewdata->comment }}
+                                                            </p>
+                                                        </div>
+                                                        <!-- review-content -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    @include('web.nodata')
+                                @endif
+                            </div>
                         </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -775,9 +771,9 @@ $itemData = Helper::getBranch(); // ✅ works
                         <h2 class="text-capitalize fs-2 fw-600">
                             {{ trans('labels.related_items') }}</h2>
                     </div>
-                    @if(isset($county))
+                    @if (isset($county))
                         <div class="col-auto px-1 pb-2"><a
-                                href="{{ URL::to($county.'/menu/' . $getitemdata['category_info']->slug) }}"
+                                href="{{ URL::to($county . '/menu/' . $getitemdata['category_info']->slug) }}"
                                 class="btn btn-outline-primary px-4 py-2">{{ trans('labels.view_all') }}</a>
                         </div>
                     @else
@@ -805,7 +801,15 @@ $itemData = Helper::getBranch(); // ✅ works
     <script>
         $('.sp-wrap').smoothproducts();
         window.onload = function() {
-            getaddons("{{ $getitemdata['id'] }}"); // Call the function
+            getaddons("{{ $getitemdata['id'] }}");
+            @if ($getitemdata->is_price_range && $getitemdata->max_price > 0)
+                // getaddons() overwrites .subtotal_xxx with a single price — restore the range display
+                $('.subtotal_{{ $getitemdata['id'] }}')
+                    .text(
+                        "{{ helper::currency_format($price) }} - {{ helper::currency_format($getitemdata->max_price) }}"
+                    )
+                    .attr('data-price-range-locked', '1');
+            @endif
         };
 
         var topdeals = "{{ $getitemdata->is_top_deals == 1 ? 1 : 0 }}";
@@ -818,8 +822,7 @@ $itemData = Helper::getBranch(); // ✅ works
         });
     </script>
     <script>
-        function changeqty(item_slug,id, type)
-        {
+        function changeqty(item_slug, id, type) {
             var qtys = parseInt($('#item_qty_' + item_slug).val());
 
             if (type == "minus") {
@@ -838,82 +841,87 @@ $itemData = Helper::getBranch(); // ✅ works
         }
     </script>
     <script>
+        function selectPizzaSize(itemId, el) {
+            const selectedSizeId = el.value;
 
-    function selectPizzaSize(itemId, el)
-    {
-        const selectedSizeId = el.value;
+            $('#selected_size_id_' + itemId).val(selectedSizeId);
 
-        $('#selected_size_id_' + itemId).val(selectedSizeId);
+            $('.pizza-crusts').hide();
 
-        $('.pizza-crusts').hide();
+            $('#crust_container_' + selectedSizeId).show();
 
-        $('#crust_container_' + selectedSizeId).show();
+            const firstCrust = $('#crust_container_' + selectedSizeId)
+                .find('input[type=radio]')
+                .first();
 
-        const firstCrust = $('#crust_container_' + selectedSizeId)
-            .find('input[type=radio]')
-            .first();
+            firstCrust.prop('checked', true);
 
-        firstCrust.prop('checked', true);
+            $('#selected_crust_id_' + itemId).val(firstCrust.val());
 
-        $('#selected_crust_id_' + itemId).val(firstCrust.val());
-
-        calculatePizzaPrice(itemId);
-    }
-
-    function calculatePizzaPrice(itemId)
-    {
-        let qty = parseInt($('#item_qty_' + itemId).val());
-
-        if (!qty || qty < 1) {
-            qty = 1;
+            calculatePizzaPrice(itemId);
         }
 
-        // SIZE PRICE
-        let selectedSize = $('input[name="pizza_size_' + itemId + '"]:checked');
+        function calculatePizzaPrice(itemId) {
+            let qty = parseInt($('#item_qty_' + itemId).val());
 
-        let sizePrice = selectedSize.length
-            ? parseFloat(selectedSize.attr('data-size-price'))
-            : parseFloat($('#item_price_' + itemId).val());
+            if (!qty || qty < 1) {
+                qty = 1;
+            }
 
-        // CRUST PRICE
-        let selectedCrust = $('input[name="pizza_crust_' + itemId + '"]:checked');
+            // SIZE PRICE
+            let selectedSize = $('input[name="pizza_size_' + itemId + '"]:checked');
 
-        let crustPrice = selectedCrust.length
-            ? parseFloat(selectedCrust.attr('data-crust-price'))
-            : 0;
+            let sizePrice = selectedSize.length ?
+                parseFloat(selectedSize.attr('data-size-price')) :
+                parseFloat($('#item_price_' + itemId).val());
 
-        if (selectedCrust.length) {
-            $('#selected_crust_id_' + itemId).val(selectedCrust.val());
+            // CRUST PRICE
+            let selectedCrust = $('input[name="pizza_crust_' + itemId + '"]:checked');
+
+            let crustPrice = selectedCrust.length ?
+                parseFloat(selectedCrust.attr('data-crust-price')) :
+                0;
+
+            if (selectedCrust.length) {
+                $('#selected_crust_id_' + itemId).val(selectedCrust.val());
+            }
+
+            // OVERRIDE ITEM BASE PRICE
+            $('#item_price_' + itemId).val(sizePrice);
+
+            // ADDONS
+            let addonsTotal = 0;
+
+            $(".addons_chk_" + itemId + ":checked").each(function() {
+                addonsTotal += parseFloat($(this).attr('data-addons-price'));
+            });
+
+            // EXTRAS
+            let extrasTotal = 0;
+
+            $(".extras_chk_" + itemId + ":checked").each(function() {
+                extrasTotal += parseFloat($(this).attr('data-extras-price'));
+            });
+
+            let finalPrice =
+                (sizePrice + crustPrice + addonsTotal + extrasTotal) * qty;
+
+            // Don't overwrite the range display until the user picks from the dropdown
+            if ($('.subtotal_' + itemId).data('price-range-locked')) return;
+
+            $('.subtotal_' + itemId).text(currency_format(finalPrice));
         }
 
-        // OVERRIDE ITEM BASE PRICE
-        $('#item_price_' + itemId).val(sizePrice);
+        function syncAddonSelect(itemId, groupId, selectEl) {
+            if (!selectEl.value) return; // ignore blank placeholder
 
-        // ADDONS
-        let addonsTotal = 0;
+            // Unlock the subtotal so calculatePizzaPrice can update it from here on
+            $('.subtotal_' + itemId).removeData('price-range-locked').removeAttr('data-price-range-locked');
 
-        $(".addons_chk_" + itemId + ":checked").each(function () {
-            addonsTotal += parseFloat($(this).attr('data-addons-price'));
-        });
-
-        // EXTRAS
-        let extrasTotal = 0;
-
-        $(".extras_chk_" + itemId + ":checked").each(function () {
-            extrasTotal += parseFloat($(this).attr('data-extras-price'));
-        });
-
-        let finalPrice =
-            (sizePrice + crustPrice + addonsTotal + extrasTotal) * qty;
-
-        $('.subtotal_' + itemId).text(currency_format(finalPrice));
-    }
-
-    function syncAddonSelect(itemId, groupId, selectEl) {
-        $('input[name="addons_id_' + groupId + '_' + itemId + '"][value="' + selectEl.value + '"]').prop('checked', true);
-        getaddons(itemId);
-        calculatePizzaPrice(itemId);
-    }
-
-</script>
+            $('input[name="addons_id_' + groupId + '_' + itemId + '"][value="' + selectEl.value + '"]').prop('checked',
+                true);
+            getaddons(itemId);
+            calculatePizzaPrice(itemId);
+        }
+    </script>
 @endsection
