@@ -100,7 +100,8 @@ $itemData = Helper::getBranch(); // ✅ works
                                         <p class="item-price item_price m-0 text-black subtotal_{{ $getitemdata['id'] }}"
                                             @if ($getitemdata->is_price_range && $getitemdata->max_price > 0) data-price-range-locked="1" @endif>
                                             @if ($getitemdata->is_price_range && $getitemdata->max_price > 0)
-                                                {{ helper::currency_format($price) }} -
+                                                <?php $minPrice = (float) $price > 0 ? helper::currency_format($price) : helper::currency_format($getitemdata->item_price); ?>
+                                                {{ $minPrice }} -
                                                 {{ helper::currency_format($getitemdata->max_price) }}
                                             @else
                                                 {{ helper::currency_format($price) }}
@@ -806,7 +807,7 @@ $itemData = Helper::getBranch(); // ✅ works
                 // getaddons() overwrites .subtotal_xxx with a single price — restore the range display
                 $('.subtotal_{{ $getitemdata['id'] }}')
                     .text(
-                        "{{ helper::currency_format($price) }} - {{ helper::currency_format($getitemdata->max_price) }}"
+                        "{{ $minPrice ?? helper::currency_format($price) }} - {{ helper::currency_format($getitemdata->max_price) }}"
                     )
                     .attr('data-price-range-locked', '1');
             @endif
