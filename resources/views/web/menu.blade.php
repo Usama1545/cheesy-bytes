@@ -113,7 +113,11 @@ $itemData = Helper::getBranch(); // ✅ works
                                                             {{-- {{ dd($price) }} --}}
                                                             @if ($itemdata->is_price_range && $itemdata->max_price > 0)
                                                                 <span>
-                                                                    {{ helper::currency_format($price) . ' - ' . helper::currency_format($itemdata->max_price) }}
+
+                                                                    <?php
+                                                                    $minPrice = (float) $price > 0 ? helper::currency_format($price) : helper::currency_format($itemdata->price);
+                                                                    ?>
+                                                                    {{ $minPrice . ' - ' . helper::currency_format($itemdata->max_price) }}
                                                                 </span>
                                                             @else
                                                                 @if ($original_price > $price)
