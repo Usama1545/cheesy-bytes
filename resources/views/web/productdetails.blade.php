@@ -13,21 +13,21 @@ $itemData = Helper::getBranch(); // ✅ works
 @endsection
 @section('content')
     <!-- <div class="breadcrumb-sec">
-                        <div class="container">
-                            <div class="breadcrumb-sec-content">
-                                <nav class="text-dark breadcrumb-divider" aria-label="breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li
-                                            class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
-                                            <a class="text-dark fw-600" href="{{ route('home') }}">{{ trans('labels.home') }}</a>
-                                        </li>
-                                        <li class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active"
-                                            aria-current="page">{{ trans('item details') }}</li>
-                                    </ol>
-                                </nav>
+                            <div class="container">
+                                <div class="breadcrumb-sec-content">
+                                    <nav class="text-dark breadcrumb-divider" aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li
+                                                class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
+                                                <a class="text-dark fw-600" href="{{ route('home') }}">{{ trans('labels.home') }}</a>
+                                            </li>
+                                            <li class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active"
+                                                aria-current="page">{{ trans('item details') }}</li>
+                                        </ol>
+                                    </nav>
+                                </div>
                             </div>
-                        </div>
-                    </div> -->
+                        </div> -->
     <section class="mt-5">
         <div class="container">
             <div class="item-details border-bottom pb-4">
@@ -254,12 +254,12 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                 </span>
                                                             @endif
                                                         </div>
-                                                        @if ($getitemdata->is_price_range && $addons_group->selection_count == 1 && $addons_group->selection_type == 1)
+                                                        @if ($getitemdata->is_price_range && $addons_group->selection_type == 1)
                                                             {{-- Dropdown for price-range items --}}
                                                             <div class="mx-2 mt-2">
                                                                 <select class="form-select"
                                                                     onchange="syncAddonSelect('{{ $getitemdata['id'] }}', '{{ $addons_group->id }}', this)">
-                                                                    <option value="" selected>
+                                                                    <option value="" selected disabled>
                                                                         Select {{ $addons_group->name ?? 'an option' }}
                                                                     </option>
                                                                     @foreach ($availableAddons as $addon)
