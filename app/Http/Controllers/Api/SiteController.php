@@ -844,11 +844,14 @@ class SiteController extends Controller
         $pizza_crusts = [];
         
         if ($is_pizza) {
-            // Get pizza prices
-            $prices = PizzaPrice::where('item_id', $iteminfo->id)
-                ->where('branch_id', $branchId)
-                ->get();
-            
+            // Get pizza prices — filter by size when a deal restricts sizes
+            $pricesQuery = PizzaPrice::where('item_id', $iteminfo->id)
+                ->where('branch_id', $branchId);
+            if ($deal_id && !empty($size_ids)) {
+                $pricesQuery->whereIn('size_id', $size_ids);
+            }
+            $prices = $pricesQuery->get();
+
             // Get crusts
             $crustsQuery = ProductSizeCrust::where('item_id', $iteminfo->id);
             if (!empty($size_ids)) {
