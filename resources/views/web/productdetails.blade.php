@@ -13,21 +13,21 @@ $itemData = Helper::getBranch(); // ✅ works
 @endsection
 @section('content')
     <!-- <div class="breadcrumb-sec">
-                            <div class="container">
-                                <div class="breadcrumb-sec-content">
-                                    <nav class="text-dark breadcrumb-divider" aria-label="breadcrumb">
-                                        <ol class="breadcrumb">
-                                            <li
-                                                class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
-                                                <a class="text-dark fw-600" href="{{ route('home') }}">{{ trans('labels.home') }}</a>
-                                            </li>
-                                            <li class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active"
-                                                aria-current="page">{{ trans('item details') }}</li>
-                                        </ol>
-                                    </nav>
+                                <div class="container">
+                                    <div class="breadcrumb-sec-content">
+                                        <nav class="text-dark breadcrumb-divider" aria-label="breadcrumb">
+                                            <ol class="breadcrumb">
+                                                <li
+                                                    class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }}">
+                                                    <a class="text-dark fw-600" href="{{ route('home') }}">{{ trans('labels.home') }}</a>
+                                                </li>
+                                                <li class="breadcrumb-item {{ session()->get('direction') == '2' ? 'breadcrumb-item-rtl ps-0' : '' }} active"
+                                                    aria-current="page">{{ trans('item details') }}</li>
+                                            </ol>
+                                        </nav>
+                                    </div>
                                 </div>
-                            </div>
-                        </div> -->
+                            </div> -->
     <section class="mt-5">
         <div class="container">
             <div class="item-details border-bottom pb-4">
@@ -73,6 +73,11 @@ $itemData = Helper::getBranch(); // ✅ works
                                                 : 0;
                                     } else {
                                         $price = $getitemdata->item_price;
+                                        $minPrice =
+                                            (float) $price > 0
+                                                ? helper::currency_format($price)
+                                                : helper::currency_format($getitemdata->price);
+
                                         $original_price = $getitemdata->original_price;
                                         $off = $getitemdata->discount_percentage;
                                     }
@@ -100,8 +105,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                         <p class="item-price item_price m-0 text-black subtotal_{{ $getitemdata['id'] }}"
                                             @if ($getitemdata->is_price_range && $getitemdata->max_price > 0) data-price-range-locked="1" @endif>
                                             @if ($getitemdata->is_price_range && $getitemdata->max_price > 0)
-                                                {{ helper::currency_format($price) }} -
-                                                {{ helper::currency_format($getitemdata->max_price) }}
+                                                {{ $minPrice . ' - ' . helper::currency_format($getitemdata->max_price) }}
                                             @else
                                                 {{ helper::currency_format($price) }}
                                             @endif
@@ -259,7 +263,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                                             <div class="mx-2 mt-2">
                                                                 <select class="form-select"
                                                                     onchange="syncAddonSelect('{{ $getitemdata['id'] }}', '{{ $addons_group->id }}', this)">
-                                                                    <option value="" selected>
+                                                                    <option value="" selected disabled>
                                                                         Select {{ $addons_group->name ?? 'an option' }}
                                                                     </option>
                                                                     @foreach ($availableAddons as $addon)
@@ -805,9 +809,7 @@ $itemData = Helper::getBranch(); // ✅ works
             @if ($getitemdata->is_price_range && $getitemdata->max_price > 0)
                 // getaddons() overwrites .subtotal_xxx with a single price — restore the range display
                 $('.subtotal_{{ $getitemdata['id'] }}')
-                    .text(
-                        "{{ helper::currency_format($price) }} - {{ helper::currency_format($getitemdata->max_price) }}"
-                    )
+                    .text("{{ $minPrice . ' - ' . helper::currency_format($getitemdata->max_price) }}")
                     .attr('data-price-range-locked', '1');
             @endif
         };

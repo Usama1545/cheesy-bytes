@@ -4,19 +4,24 @@ use App\Helpers\Helper;
 
 $itemData = Helper::getBranch(); // ✅ works
 ?>
-@section('page_title'){{ @$categorydata->category_name }} {{ trans('labels.menu') }} | {{ $itemData->seo_name }} |@endsection
-@section('meta_description')Craving cheesy {{ strtolower(@$categorydata->category_name) }}? Enjoy fresh, delicious {{ strtolower(@$categorydata->category_name) }} at our {{ $itemData->seo_name }} location. Order now!@endsection
+@section('page_title')
+    {{ @$categorydata->category_name }} {{ trans('labels.menu') }} | {{ $itemData->seo_name }} |
+@endsection
+@section('meta_description')
+    Craving cheesy {{ strtolower(@$categorydata->category_name) }}? Enjoy fresh, delicious
+    {{ strtolower(@$categorydata->category_name) }} at our {{ $itemData->seo_name }} location. Order now!
+@endsection
 @section('content')
     @if (!empty($categorydata))
-     
+
         <section class="menu-section">
-           
+
             <div class="container">
-                 <h1  class="my-3">{{ @$categorydata->category_name }} in {{ $itemData->seo_name }}</h1>
+                <h1 class="my-3">{{ @$categorydata->category_name }} in {{ $itemData->seo_name }}</h1>
                 <div class="card  w-100 mt-3" style="background-color: #D6B62B">
                     <div class="d-flex flex-column flex-md-row justify-content-between mx-1 mx-md-5 my-1 align-items-center">
                         <h4 class="my-3 text-uppercase fw-bold">START YOUR ORDER</h4>
-                       
+
                     </div>
                 </div>
 
@@ -32,7 +37,7 @@ $itemData = Helper::getBranch(); // ✅ works
                             <!--The Cheesy Bite Lunch-->
                         </p>
                     </div>
-                 
+
                 </div>
 
 
@@ -55,22 +60,23 @@ $itemData = Helper::getBranch(); // ✅ works
 
                                                     <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
                                                         class="card-img-top border-0 rounded-0 rounded-top position-relative"
-                                                        alt="{{ $itemdata->item_name }}"
-                                                        height="190px">
+                                                        alt="{{ $itemdata->item_name }}" height="190px">
                                                 </a>
 
                                                 @php
                                                     if ($itemdata->is_top_deals == 1 && $topdeals != null) {
                                                         if (@$topdeals->offer_type == 1) {
                                                             if ($itemdata->item_price > @$topdeals->offer_amount) {
-                                                                $price = $itemdata->item_price - @$topdeals->offer_amount;
+                                                                $price =
+                                                                    $itemdata->item_price - @$topdeals->offer_amount;
                                                             } else {
                                                                 $price = $itemdata->item_price;
                                                             }
                                                         } else {
                                                             $price =
                                                                 $itemdata->item_price -
-                                                                $itemdata->item_price * (@$topdeals->offer_amount / 100);
+                                                                $itemdata->item_price *
+                                                                    (@$topdeals->offer_amount / 100);
                                                         }
 
                                                         $original_price = $itemdata->item_price;
@@ -104,9 +110,14 @@ $itemData = Helper::getBranch(); // ✅ works
                                                         </a>
 
                                                         <div class="d-flex gap-1">
-                                                            @if($itemdata->is_price_range && $itemdata->max_price > 0)
+                                                            {{-- {{ dd($price) }} --}}
+                                                            @if ($itemdata->is_price_range && $itemdata->max_price > 0)
                                                                 <span>
-                                                                    {{ $price !== '0.00' ? helper::currency_format($price) . ' - ' . helper::currency_format($itemdata->max_price) : '' }}
+
+                                                                    <?php
+                                                                    $minPrice = (float) $price > 0 ? helper::currency_format($price) : helper::currency_format($itemdata->price);
+                                                                    ?>
+                                                                    {{ $minPrice . ' - ' . helper::currency_format($itemdata->max_price) }}
                                                                 </span>
                                                             @else
                                                                 @if ($original_price > $price)
@@ -135,11 +146,9 @@ $itemData = Helper::getBranch(); // ✅ works
                                                 <div class="d-flex justify-content-between align-items-center">
 
                                                     @if ($itemdata->is_cart == 1)
-
                                                         <div class="item-quantity py-1 px-5">
 
-                                                            <button type="button"
-                                                                class="btn btn-sm fw-500"
+                                                            <button type="button" class="btn btn-sm fw-500"
                                                                 onclick="removefromcart(
                                                                     '{{ helper::branch_route('cart') }}',
                                                                     '{{ trans('messages.remove_cartitem_note') }}',
@@ -155,17 +164,12 @@ $itemData = Helper::getBranch(); // ✅ works
 
                                                             {{-- PLUS BUTTON OPENS MODAL ONLY --}}
                                                             @if (strtolower($itemdata['category_info']->category_name) == 'pizza')
-
-                                                                <a
-                                                                    class="btn btn-sm fw-500 border-0 "
-                                                                     href="{{ helper::branch_route('itemdetails', ['slug' => $itemdata->slug]) }}">
+                                                                <a class="btn btn-sm fw-500 border-0 "
+                                                                    href="{{ helper::branch_route('itemdetails', ['slug' => $itemdata->slug]) }}">
                                                                     +
                                                                 </a>
-
                                                             @else
-
-                                                                <button
-                                                                    class="btn btn-sm fw-500 border-0"
+                                                                <button class="btn btn-sm fw-500 border-0"
                                                                     onclick="showitem(
                                                                         '{{ $itemdata->slug }}',
                                                                         '{{ URL::to('/show-item') }}',
@@ -174,32 +178,27 @@ $itemData = Helper::getBranch(); // ✅ works
                                                                     )">
                                                                     +
                                                                 </button>
-
                                                             @endif
 
                                                         </div>
-
                                                     @else
-
                                                         {{-- ORDER NOW BUTTON OPENS MODAL ONLY --}}
                                                         @if (strtolower(@$categorydata->category_name) == strtolower('Pizza'))
-
-                                                            <a
-                                                                type="button"
+                                                            <a type="button"
                                                                 class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center"
-                                                               href="{{ helper::branch_route('itemdetails', ['slug' => $itemdata->slug]) }}">
+                                                                href="{{ helper::branch_route('itemdetails', ['slug' => $itemdata->slug]) }}">
 
                                                                 Order Now
 
-                                                                <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
+                                                                <i
+                                                                    class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
 
-                                                                <div class="loader d-none addon_modal_loader_{{ $itemdata->slug }}"></div>
+                                                                <div
+                                                                    class="loader d-none addon_modal_loader_{{ $itemdata->slug }}">
+                                                                </div>
                                                             </a>
-
                                                         @else
-
-                                                            <button
-                                                                type="button"
+                                                            <button type="button"
                                                                 class="btn btn-sm btn-secondary fw-500 py-2 px-4 w-100 float-end rounded-3 d-flex gap-2 justify-content-center align-items-center addon_modal_{{ $itemdata->slug }}"
                                                                 onclick="showitem(
                                                                     '{{ $itemdata->slug }}',
@@ -210,13 +209,14 @@ $itemData = Helper::getBranch(); // ✅ works
 
                                                                 Order Now
 
-                                                                <i class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
+                                                                <i
+                                                                    class="fa-solid fa-plus addon_modal_icon_{{ $itemdata->slug }}"></i>
 
-                                                                <div class="loader d-none addon_modal_loader_{{ $itemdata->slug }}"></div>
+                                                                <div
+                                                                    class="loader d-none addon_modal_loader_{{ $itemdata->slug }}">
+                                                                </div>
                                                             </button>
-
                                                         @endif
-
                                                     @endif
 
                                                 </div>
@@ -457,9 +457,8 @@ $itemData = Helper::getBranch(); // ✅ works
             }
         }
     </style>
-  
+
 
 @endsection
 @section('script')
-
 @endsection

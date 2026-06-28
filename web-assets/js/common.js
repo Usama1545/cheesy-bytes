@@ -64,7 +64,7 @@ $("#back-to-top").on("click", function (e) {
         {
             scrollTop: 0,
         },
-        "300"
+        "300",
     );
 });
 
@@ -220,7 +220,7 @@ function addtocart(addcarturl, id, buynow) {
                         group.id +
                         "_" +
                         id +
-                        "']:checked"
+                        "']:checked",
                 ).length;
                 if (group.selection_type == 1) {
                     if (selectedCount < group.min_count) {
@@ -229,12 +229,12 @@ function addtocart(addcarturl, id, buynow) {
                                 group.id +
                                 "_" +
                                 id +
-                                "'][type='checkbox']:not(:checked)"
+                                "'][type='checkbox']:not(:checked)",
                         ).prop("disabled", false);
                         $(".addons_error_" + group.id + "_" + id).text(
                             "Please select at least " +
                                 group.min_count +
-                                " addon(s)"
+                                group.name,
                         );
                         errorDetected = true; // Set flag to true indicating an error is detected
                     }
@@ -245,7 +245,7 @@ function addtocart(addcarturl, id, buynow) {
                                 group.id +
                                 "_" +
                                 id +
-                                "'][type='checkbox']:not(:checked)"
+                                "'][type='checkbox']:not(:checked)",
                         ).prop("disabled", true);
                     }
                 }
@@ -281,8 +281,8 @@ function addtocart(addcarturl, id, buynow) {
     var image_name = $("#image_name_" + id).val();
     var item_tax = $("#item_tax_" + id).val();
     var item_price = $("#item_price_" + id).val();
-    var size_id= $('#selected_size_id_' + id).val();
-    var crust_id= $('#selected_crust_id_' + id).val();
+    var size_id = $("#selected_size_id_" + id).val();
+    var crust_id = $("#selected_crust_id_" + id).val();
     var addons_id = $(".addons_chk_" + id + ":checked")
         .map(function () {
             return $(this).attr("data-addons-id");
@@ -437,7 +437,7 @@ function calladdtocart(
                     } else {
                         $(".cart-badge").html(response.data);
                         $(".item-total-qty-" + slug).val(
-                            response.total_item_count
+                            response.total_item_count,
                         );
                         toastr.success(response.message);
                         $("input:checkbox").prop("checked", false);
@@ -502,7 +502,7 @@ function showitem(slug, showurl, isPriceRange, detailsUrl) {
             $(".addon_modal_loader_" + slug).addClass("d-none");
         },
         error: function () {
-            console.log('i am wrong');
+            console.log("i am wrong");
             toastr.error(wrong);
             $(".addon_modal_" + slug).prop("disabled", false);
             $(".addon_modal_icon_" + slug).removeClass("d-none");
@@ -536,7 +536,7 @@ function showdealitem(slug, deal_id, showurl) {
             $(".addon_modal_loader_" + slug).addClass("d-none");
         },
         error: function () {
-            console.log('i am wrong');
+            console.log("i am wrong");
             toastr.error(wrong);
             $(".addon_modal_" + slug).prop("disabled", false);
             $(".addon_modal_icon_" + slug).removeClass("d-none");
@@ -571,7 +571,7 @@ function showBogoDealItem(slug, deal_id, category_id, showurl) {
             $(".addon_modal_loader_" + slug).addClass("d-none");
         },
         error: function () {
-            console.log('i am wrong');
+            console.log("i am wrong");
             toastr.error(wrong);
             $(".addon_modal_" + slug).prop("disabled", false);
             $(".addon_modal_icon_" + slug).removeClass("d-none");
@@ -592,7 +592,7 @@ function getaddons(id) {
                         group.id +
                         "_" +
                         id +
-                        "']:checked"
+                        "']:checked",
                 ).length;
                 if (group.selection_type == 1) {
                     if (selectedCount < group.min_count) {
@@ -601,14 +601,15 @@ function getaddons(id) {
                                 group.id +
                                 "_" +
                                 id +
-                                "'][type='checkbox']:not(:checked)"
+                                "'][type='checkbox']:not(:checked)",
                         ).prop("disabled", false);
                         $(".addons_error_" + group.id + "_" + id)
                             .removeClass("d-none")
                             .text(
                                 "Please select at least " +
                                     group.min_count +
-                                    " addon(s)"
+                                    " " +
+                                    group.name,
                             );
                         $("#addon_required_icon_" + group.id + "_" + id)
                             .removeClass("fa-circle-check text-success")
@@ -622,7 +623,7 @@ function getaddons(id) {
                                 group.id +
                                 "_" +
                                 id +
-                                "'][type='checkbox']:not(:checked)"
+                                "'][type='checkbox']:not(:checked)",
                         ).prop("disabled", true);
                         $(".addons_error_" + group.id + "_" + id)
                             .addClass("d-none")
@@ -639,7 +640,7 @@ function getaddons(id) {
                                 group.id +
                                 "_" +
                                 id +
-                                "'][type='checkbox']:not(:checked)"
+                                "'][type='checkbox']:not(:checked)",
                         ).prop("disabled", false);
                         $(".addons_error_" + group.id + "_" + id)
                             .addClass("d-none")
@@ -658,7 +659,7 @@ function getaddons(id) {
                                 group.id +
                                 "_" +
                                 id +
-                                "'][type='checkbox']:not(:checked)"
+                                "'][type='checkbox']:not(:checked)",
                         ).prop("disabled", true);
                     } else {
                         $(
@@ -666,7 +667,7 @@ function getaddons(id) {
                                 group.id +
                                 "_" +
                                 id +
-                                "'][type='checkbox']:not(:checked)"
+                                "'][type='checkbox']:not(:checked)",
                         ).prop("disabled", false);
                     }
                 }
@@ -754,7 +755,7 @@ $(".nav02").click(function () {
         {
             bottom: "-100vh",
         },
-        200
+        200,
     );
 });
 
@@ -765,7 +766,7 @@ $(document).ready(function () {
             {
                 bottom: "0px",
             },
-            200
+            200,
         );
         deferredPrompt = e;
     });
