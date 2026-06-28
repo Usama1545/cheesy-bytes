@@ -692,8 +692,8 @@ class SiteController extends Controller
         ]);
         $user_id = auth('sanctum')->user()->id ?? null;
         $branchId = $request->branch_id;
-        $deal_id = $request->dealId;
-        $deal_category_id = $request->dealCategoryId;
+        $deal_id = $request->dealId ??  $request->deal_id;
+        $deal_category_id = $request->dealCategoryId ?? $request->deal_category_id;
         $size_ids = $request->size_ids ? explode(',', $request->size_ids) : [];
 
         if ($deal_category_id && empty($size_ids)) {
@@ -746,7 +746,6 @@ class SiteController extends Controller
         // Handle deal pricing
         $final_price = $iteminfo->item_price ?? $iteminfo->prices;
         $dealprice = null;
-
         if ($deal_id) {
             $topDeal = TopDeals::find($deal_id);
 
@@ -756,7 +755,7 @@ class SiteController extends Controller
                     
                     // Pizza deal pricing logic
                     if ($topDeal->deal_type == 3 && $deal_category_id) {
-                        $deal_category = DealCategory::where('id', $deal_category_id)->first();
+                        $deal_category = DealCategory::where('id', $deal_category_id)->first(); 
                         
                         // Get pizza prices for the item
                         $pizzaPrices = PizzaPrice::where('item_id', $iteminfo->id)
