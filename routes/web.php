@@ -616,6 +616,7 @@ Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware','
     Route::get('/getToppings', [MenuController::class, 'getToppings']);
     Route::get('/getSauces', [MenuController::class, 'getSauces']);
     Route::get('/location', [HomeController::class, 'location'])->name('location');
+    Route::get('/location/store', fn() => redirect()->route('location', [], 301));
     Route::post('/location/store', [HomeController::class, 'location_store'])->name('location.store');
 
     Route::match(['GET', 'POST'], '/location/getDelivery/{id}', [HomeController::class, 'delivery_providers'])->name('location.delivery_providers');
