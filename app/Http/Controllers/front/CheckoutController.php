@@ -15,8 +15,10 @@ use App\Models\Address;
 use App\Models\Cart;
 use App\Models\CustomStatus;
 use App\Models\Transaction;
+use App\Models\DealCategory;
 use App\Models\Order;
 use App\Models\OrderDetails;
+use App\Models\TopDeals;
 use App\Models\User;
 use App\Models\Payment;
 use App\Models\Settings;
@@ -255,6 +257,45 @@ class CheckoutController extends Controller
 
             if ($cartdata->isEmpty()) {
                 return response()->json(['status' => 0, 'message' => trans('messages.cart_is_empty')]);
+            }
+
+            // -------------------- DEAL VALIDATION --------------------
+            $dealIdsInCart = $cartdata->whereNotNull('deal_id')->pluck('deal_id')->unique();
+            foreach ($dealIdsInCart as $dealId) {
+                $deal = TopDeals::find($dealId);
+                if (!$deal || $deal->deal_type != 3) continue;
+
+                $dealCartItems   = $cartdata->where('deal_id', $dealId);
+                $dealCategories  = DealCategory::where('deal_id', $dealId)->get();
+
+                $totalEligibleSets = null;
+                $freeLimits        = [];
+
+                foreach ($dealCategories as $category) {
+                    $categoryQty = (int) $dealCartItems->where('deal_category_id', $category->id)->sum('qty');
+
+                    if ($category->is_free) {
+                        $freeLimits[$category->id] = $category->quantity;
+                    } else {
+                        $sets = intdiv($categoryQty, $category->quantity);
+                        $totalEligibleSets = is_null($totalEligibleSets) ? $sets : min($totalEligibleSets, $sets);
+                    }
+                }
+
+                $totalEligibleSets = $totalEligibleSets ?? 0;
+
+                foreach ($dealCategories->where('is_free', 1) as $freeCategory) {
+                    $freeQty    = (int) $dealCartItems->where('deal_category_id', $freeCategory->id)->sum('qty');
+                    $maxAllowed = $totalEligibleSets * ($freeLimits[$freeCategory->id] ?? 0);
+
+                    if ($freeQty > $maxAllowed) {
+                        DB::rollback();
+                        return response()->json([
+                            'status'  => 0,
+                            'message' => 'Your cart contains more discounted items than this deal allows. Please remove the extra items and try again.',
+                        ]);
+                    }
+                }
             }
 
             // -------------------- ORDER NUMBER --------------------
