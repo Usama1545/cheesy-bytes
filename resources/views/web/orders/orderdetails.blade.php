@@ -3,6 +3,16 @@
     | {{ trans('labels.order_details') }}
 @endsection
 @section('content')
+    @if (!empty($ga4refund))
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            dataLayer.push({ ecommerce: null }); // clear previous ecommerce object
+            dataLayer.push({
+                event: 'refund',
+                ecommerce: @json($ga4refund)
+            });
+        </script>
+    @endif
     <div class="breadcrumb-sec">
         <div class="container">
             <div class="breadcrumb-sec-content">

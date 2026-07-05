@@ -100,7 +100,26 @@ class OrderController extends Controller
                     }
                 }
             }
-            return view('web.orders.orderdetails', compact('orderdata', 'ordersdetails', 'whmessage'));
+
+            // GA4 ecommerce "refund" event - fires once when the customer lands on a
+            // cancelled order, guarded by a session flag so re-visiting doesn't double count
+            $ga4refund = null;
+            if ($orderdata->status_type == 4) {
+                $ga4SessionKey = 'ga4_refund_sent_' . $orderdata->order_number;
+                if (!session()->has($ga4SessionKey)) {
+                    $ga4refund = [
+                        'transaction_id' => $orderdata->order_number,
+                        'value' => (float) $orderdata->grand_total,
+                        'tax' => (float) $orderdata->tax_amount,
+                        'shipping' => (float) $orderdata->delivery_charge,
+                        'currency' => helper::ga4_currency($orderdata->branch_id),
+                        'items' => helper::ga4_items($ordersdetails),
+                    ];
+                    session()->put($ga4SessionKey, true);
+                }
+            }
+
+            return view('web.orders.orderdetails', compact('orderdata', 'ordersdetails', 'whmessage', 'ga4refund'));
         } else {
             return redirect()->back()->with('error', trans('messages.wrong'));
         }
@@ -108,7 +127,7 @@ class OrderController extends Controller
 
     public function success(Request $request)
     {
-        $orderdata = Order::select('order_number')->where('order_number', $request->order_number)->first();
+        $orderdata = Order::where('order_number', $request->order_number)->first();
 
         if (!empty($orderdata)) {
             $whmessage = "";
@@ -121,7 +140,25 @@ class OrderController extends Controller
                     }
                 }
             }
-            return view('web.orders.success', compact('orderdata', 'whmessage'));
+
+            // GA4 ecommerce "purchase" event - built server-side so it fires once per order,
+            // not on every reload of this page (session flag guards against double counting)
+            $ga4purchase = null;
+            $ga4SessionKey = 'ga4_purchase_sent_' . $orderdata->order_number;
+            if (!session()->has($ga4SessionKey)) {
+                $orderitems = OrderDetails::where('order_id', $orderdata->id)->get();
+                $ga4purchase = [
+                    'transaction_id' => $orderdata->order_number,
+                    'value' => (float) $orderdata->grand_total,
+                    'tax' => (float) $orderdata->tax_amount,
+                    'shipping' => (float) $orderdata->delivery_charge,
+                    'currency' => helper::ga4_currency($orderdata->branch_id),
+                    'items' => helper::ga4_items($orderitems),
+                ];
+                session()->put($ga4SessionKey, true);
+            }
+
+            return view('web.orders.success', compact('orderdata', 'whmessage', 'ga4purchase'));
         } else {
             return redirect()->back()->with('error', trans('messages.wrong'));
         }

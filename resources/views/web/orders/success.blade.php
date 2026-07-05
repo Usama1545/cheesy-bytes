@@ -1,5 +1,15 @@
 @extends('web.layout.default')
 @section('content')
+    @if (!empty($ga4purchase))
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            dataLayer.push({ ecommerce: null }); // clear previous ecommerce object
+            dataLayer.push({
+                event: 'purchase',
+                ecommerce: @json($ga4purchase)
+            });
+        </script>
+    @endif
     <section class="success">
         <div class="container">
             <div class="row justify-content-center text-center">

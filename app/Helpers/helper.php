@@ -1549,6 +1549,38 @@ class helper
             ->get();
     }
 
+    // ISO currency code for GA4 ecommerce events (Settings::currency is a display symbol, not a code)
+    public static function ga4_currency($branchId = null)
+    {
+        $currency = Payment::where('is_available', 1)
+            ->where('is_activate', '1')
+            ->whereNotNull('currency')
+            ->where('currency', '!=', '')
+            ->when($branchId, fn ($q) =>
+                $q->where(function ($q) use ($branchId) {
+                    $q->where('branch_id', $branchId)
+                      ->orWhere('payment_type', 1);
+                })
+            )
+            ->orderBy('reorder_id')
+            ->value('currency');
+
+        return $currency ?: 'USD';
+    }
+
+    // Maps order_details rows to the GA4 ecommerce "items" array shape
+    public static function ga4_items($orderDetails)
+    {
+        return collect($orderDetails)->map(function ($item) {
+            return [
+                'item_id' => (string) ($item->item_id ?: ($item->deal_id ?: $item->custom_pizza_id)),
+                'item_name' => $item->item_name,
+                'price' => (float) $item->item_price,
+                'quantity' => (int) $item->qty,
+            ];
+        })->values()->all();
+    }
+
      public static function calculatePrice($item): array
     {
         if ($item->deal_type === 3 || $item->deal_type === 1) {
