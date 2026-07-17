@@ -203,6 +203,17 @@
                 </p>
             @endif
         </div>
+        @if ($orderdata->order_notes != '')
+            <div class="total-billes-amount" style="text-align: center">
+                <p
+                    class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
+                    {{ trans('labels.order_note') }} :
+                    <small class="fw-500 text-uppercase fs-10 text-center text-dark line-2">
+                        {{ $orderdata->order_notes }}
+                    </small>
+                </p>
+            </div>
+        @endif
         <table class="table table-borderless my-2 bg-transparent" style="width: 100%">
             <thead class="underline-3">
             <tr class="text-dark">

@@ -558,47 +558,47 @@ class AdminController extends Controller
             }
 
             if (!empty($orders->addons_id) || !empty($orders->extras_id)) {
-    $toppings = "";
-    $addons = "";
+                $toppings = "";
+                $addons = "";
 
-    // Process Addons
-    $addons_name = explode('| ', $orders->addons_name);
-    $addons_price = explode('| ', $orders->addons_price);
+                // Process Addons
+                $addons_name = explode('| ', $orders->addons_name);
+                $addons_price = explode('| ', $orders->addons_price);
 
-    foreach ($addons_name as $index => $addon) {
-        if (trim($addon) === '') continue; // Skip empty values
+                foreach ($addons_name as $index => $addon) {
+                    if (trim($addon) === '') continue; // Skip empty values
 
-        $price = helper::currency_format($addons_price[$index]  ?? 0);
-        if (!isset($addons_price[$index]) || $addons_price[$index] == 0) {
-            $toppings .= "   - {$addon}: {$price}\n";
-        } else {
-            $addons .= "   - {$addon}: {$price}\n";
-        }
-    }
+                    $price = helper::currency_format($addons_price[$index]  ?? 0);
+                    if (!isset($addons_price[$index]) || $addons_price[$index] == 0) {
+                        $toppings .= "   - {$addon}: {$price}\n";
+                    } else {
+                        $addons .= "   - {$addon}: {$price}\n";
+                    }
+                }
 
-    // Process Extras (Merged into Addons/Toppings)
-    $extras_name = explode('| ', $orders->extras_name);
-    $extras_price = explode('| ', $orders->extras_price);
+                // Process Extras (Merged into Addons/Toppings)
+                $extras_name = explode('| ', $orders->extras_name);
+                $extras_price = explode('| ', $orders->extras_price);
 
-    foreach ($extras_name as $index => $extra) {
-        if (trim($extra) === '' ) continue; // Skip empty values
+                foreach ($extras_name as $index => $extra) {
+                    if (trim($extra) === '' ) continue; // Skip empty values
 
-        $price = helper::currency_format($extras_price[$index] ?? 0);
-        if (!isset($extras_price[$index]) || $extras_price[$index] == 0) {
-            $toppings .= "   - {$extra}: {$price}\n";
-        } else {
-            $addons .= "   - {$extra}: {$price}\n";
-        }
-    }
+                    $price = helper::currency_format($extras_price[$index] ?? 0);
+                    if (!isset($extras_price[$index]) || $extras_price[$index] == 0) {
+                        $toppings .= "   - {$extra}: {$price}\n";
+                    } else {
+                        $addons .= "   - {$extra}: {$price}\n";
+                    }
+                }
 
-    // Append sections only if they have content
-    if (!empty($toppings)) {
-        $receipt .= "   Toppings:\n" . $toppings;
-    }
-    if (!empty($addons)) {
-        $receipt .= "   Addons:\n" . $addons;
-    }
-}
+                // Append sections only if they have content
+                if (!empty($toppings)) {
+                    $receipt .= "   Toppings:\n" . $toppings;
+                }
+                if (!empty($addons)) {
+                    $receipt .= "   Addons:\n" . $addons;
+                }
+            }
 
 
 
@@ -627,7 +627,7 @@ class AdminController extends Controller
                 $receipt .= "   Size: {$orders->custom_pizza->size->name} ({$orders->custom_pizza->size->label})\n";
                 // $receipt .= "   Special: {$orders->custom_pizza->cut} / {$orders->custom_pizza->bake} / {$orders->custom_pizza->seasoning}\n";
                 $receipt .= "   Crust: {$orders->custom_pizza->crust->name}\n";
-//                $receipt .= "   Sauce: {$orders->custom_pizza->sauce->name}\n";
+                // $receipt .= "   Sauce: {$orders->custom_pizza->sauce->name}\n";
 
                 // Adding Toppings details
                 if (isset($orders->custom_pizza->toppings)) {
@@ -654,48 +654,48 @@ class AdminController extends Controller
             }
 
             // Addons
-           if (!empty($orders->addons_id) || !empty($orders->extras_id)) {
-    $toppings = "";
-    $addons = "";
+            if (!empty($orders->addons_id) || !empty($orders->extras_id)) {
+                $toppings = "";
+                $addons = "";
 
-    // Process Addons
-    $addons_name = explode('| ', $orders->addons_name);
-    $addons_price = explode('| ', $orders->addons_price);
+                // Process Addons
+                $addons_name = explode('| ', $orders->addons_name);
+                $addons_price = explode('| ', $orders->addons_price);
 
-    foreach ($addons_name as $index => $addon) {
-        if (trim($addon) === '') continue; // Skip empty values
+                foreach ($addons_name as $index => $addon) {
+                    if (trim($addon) === '') continue; // Skip empty values
 
-        $price = helper::currency_format($addons_price[$index]  ?? 0);
-        if (!isset($addons_price[$index]) || $addons_price[$index] == 0) {
-            $toppings .= "   - {$addon}: {$price}\n";
-        } else {
-            $addons .= "   - {$addon}: {$price}\n";
-        }
-    }
+                    $price = helper::currency_format($addons_price[$index]  ?? 0);
+                    if (!isset($addons_price[$index]) || $addons_price[$index] == 0) {
+                        $toppings .= "   - {$addon}: {$price}\n";
+                    } else {
+                        $addons .= "   - {$addon}: {$price}\n";
+                    }
+                }
 
-    // Process Extras (Merged into Addons/Toppings)
-    $extras_name = explode('| ', $orders->extras_name);
-    $extras_price = explode('| ', $orders->extras_price);
+                // Process Extras (Merged into Addons/Toppings)
+                $extras_name = explode('| ', $orders->extras_name);
+                $extras_price = explode('| ', $orders->extras_price);
 
-    foreach ($extras_name as $index => $extra) {
-        if (trim($extra) === '') continue; // Skip empty values
+                foreach ($extras_name as $index => $extra) {
+                    if (trim($extra) === '') continue; // Skip empty values
 
-        $price = helper::currency_format($extras_price[$index]  ?? 0);
-        if (!isset($extras_price[$index]) || $extras_price[$index] == 0) {
-            $toppings .= "   - {$extra}: {$price}\n";
-        } else {
-            $addons .= "   - {$extra}: {$price}\n";
-        }
-    }
+                    $price = helper::currency_format($extras_price[$index]  ?? 0);
+                    if (!isset($extras_price[$index]) || $extras_price[$index] == 0) {
+                        $toppings .= "   - {$extra}: {$price}\n";
+                    } else {
+                        $addons .= "   - {$extra}: {$price}\n";
+                    }
+                }
 
-    // Append sections only if they have content
-    if (!empty($toppings)) {
-        $receipt .= "   Toppings:\n" . $toppings;
-    }
-    if (!empty($addons)) {
-        $receipt .= "   Addons:\n" . $addons;
-    }
-}
+                // Append sections only if they have content
+                if (!empty($toppings)) {
+                    $receipt .= "   Toppings:\n" . $toppings;
+                }
+                if (!empty($addons)) {
+                    $receipt .= "   Addons:\n" . $addons;
+                }
+            }
 
 
 
@@ -707,7 +707,7 @@ class AdminController extends Controller
             $receipt .= str_repeat("-", $width) . "\n";
         }
         $receipt .= str_repeat("-", $width) . "\n";
-            $receipt .= "Customer Note: " . $orderdata->order_notes . "\n";
+        $receipt .= "Customer Note: " . $orderdata->order_notes . "\n";
         $receipt .= str_repeat("-", $width) . "\n";
 
 
