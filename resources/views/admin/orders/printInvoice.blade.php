@@ -206,7 +206,7 @@
                     </p>
                 @endif
             </div>
-            @if ($orderdata->order_notes != '' && $orderdata->order_notes != null)
+            @if ($orderdata->order_notes != '')
                 <div class="total-billes-amount" style="text-align: center">
                     <p
                         class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
