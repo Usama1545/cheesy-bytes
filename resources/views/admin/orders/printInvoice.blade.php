@@ -209,7 +209,7 @@
             @if ($orderdata->order_notes != '' && $orderdata->order_notes != null)
                 <div class="total-billes-amount" style="text-align: center">
                     <p
-                        class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
+                        class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark">
                         {{ trans('labels.order_note') }} :
                         <small class="fw-500 text-uppercase fs-10 text-center text-dark line-2">
                             {{ $orderdata->order_notes }}
@@ -302,7 +302,7 @@
                                     @endif
 
                                     @if ($orders->custom_pizza_id != null)
-                                        <?php $data = (new App\Helpers\helper())->getCustomPizzaDetails($orders->custom_pizza_id); ?>
+                                        <?php $data = new App\Helpers\helper()->getCustomPizzaDetails($orders->custom_pizza_id); ?>
                                         <div class="mt-2 border-bottom" id="extras">
                                             <p class="m-0 ">Size: <small class="text-muted">{{ $data->size->label }}
                                                     ({{ $data->size->name }}")</small></p>
