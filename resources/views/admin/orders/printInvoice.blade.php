@@ -302,7 +302,7 @@
                                     @endif
 
                                     @if ($orders->custom_pizza_id != null)
-                                        <?php $data = new App\Helpers\helper()->getCustomPizzaDetails($orders->custom_pizza_id); ?>
+                                        <?php $data = (new App\Helpers\helper())->getCustomPizzaDetails($orders->custom_pizza_id); ?>
                                         <div class="mt-2 border-bottom" id="extras">
                                             <p class="m-0 ">Size: <small class="text-muted">{{ $data->size->label }}
                                                     ({{ $data->size->name }}")</small></p>
