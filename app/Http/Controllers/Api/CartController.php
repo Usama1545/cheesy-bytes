@@ -815,6 +815,8 @@ class CartController extends Controller
                 ? Cart::where('user_id', Auth::id())
                 : Cart::where('session_id', $sessionId);
 
+            $needsAutoAdd = false;
+
             if ($checkcart->qty == 1 && $request->type == "minus") {
                 // Delete the item if quantity would become 0
                 $checkcart->delete();
@@ -847,16 +849,23 @@ class CartController extends Controller
 
                         // Find which category this cart item belongs to
                         $currentItemCategory = $dealCategories->firstWhere('id', $checkcart->deal_category_id);
-                        
+
+                        if ($currentItemCategory && $currentItemCategory->is_required) {
+                            // Bumping a required item's qty can unlock another free item.
+                            // Settle it against THIS item now, instead of leaving the credit
+                            // to be claimed by whatever product is added to the cart next.
+                            $needsAutoAdd = true;
+                        }
+
                         if ($currentItemCategory && $currentItemCategory->is_free) {
                             // This is a FREE item - check if we can add more
                             $requiredCategories = $dealCategories->where('is_required', true);
-                            
+
                             $totalEligibleSets = null;
-                            
+
                             foreach ($requiredCategories as $requiredCategory) {
                                 $requiredItemIds = DealItem::where('deal_category_id', $requiredCategory->id)->pluck('item_id');
-                                
+
                                 $cartQty = (clone $cartQuery)
                                     ->where('deal_id', $deal->id)
                                     ->where('deal_category_id', $requiredCategory->id)
@@ -873,7 +882,7 @@ class CartController extends Controller
 
                             if ($totalEligibleSets > 0) {
                                 $maxFreeAllowed = $totalEligibleSets * $currentItemCategory->quantity;
-                                
+
                                 $currentFreeQty = (clone $cartQuery)
                                     ->where('deal_id', $deal->id)
                                     ->where('deal_category_id', $currentItemCategory->id)
@@ -961,7 +970,11 @@ class CartController extends Controller
             }
 
             $checkcart->save();
-            
+
+            if ($needsAutoAdd) {
+                BogoAutoAddService::autoAddFreeItems($checkcart);
+            }
+
             $cart_count = $cartQuery->count();
             $cart_total = $cartQuery->sum('qty');
             

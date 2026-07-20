@@ -73,6 +73,7 @@ class CartController extends Controller
     }
     public function addtocart(Request $request)
     {
+        
         log::info('yes i am hit');
         $branchId = Session::get('branch_id');
 
@@ -566,6 +567,8 @@ class CartController extends Controller
         ? Cart::where('user_id', Auth::id())->sum('qty')
         : Cart::where('session_id', Session::getId())->sum('qty');
 
+    $needsAutoAdd = false;
+
     try {
         if ($checkcart->qty == 1 && $request->type == "minus") {
             $checkcart->delete();
@@ -587,7 +590,14 @@ class CartController extends Controller
 
                         // Find which category this cart item belongs to
                         $currentItemCategory = $dealCategories->firstWhere('id', $checkcart->deal_category_id);
-                        
+
+                        if ($currentItemCategory && $currentItemCategory->is_required) {
+                            // Bumping a required item's qty can unlock another free item.
+                            // Settle it against THIS item now, instead of leaving the credit
+                            // to be claimed by whatever product is added to the cart next.
+                            $needsAutoAdd = true;
+                        }
+
                         if ($currentItemCategory && $currentItemCategory->is_free) {
                             // This is a FREE item - check if we can add more
                             $requiredCategories = $dealCategories->where('is_required', true);
@@ -705,6 +715,10 @@ class CartController extends Controller
             }
 
             $checkcart->save();
+
+            if ($needsAutoAdd) {
+                BogoAutoAddService::autoAddFreeItems($checkcart);
+            }
         }
 
         return response()->json(['status' => 1, 'message' => trans('messages.success')]);
