@@ -75,6 +75,7 @@ return [
     "once_per_user"=>"The Coupon Is Applicable Only Once Per User",
     "usage_limit_exceeded"=>"Coupon usage limit has been exceeded.",
     "offer_expired"=>"Coupon has been expired.",
+    "session_expired"=>"Your session has expired. Please login again.",
     "invalid_order"=>"Invalid order!",
     "order_amount_greater_then"=>"Order Amount must be greater then ",
     "order_type_selection_required"=>"Order type selection is required",

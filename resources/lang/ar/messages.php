@@ -75,6 +75,7 @@ return [
     "once_per_user"=>"تنطبق القسيمة مرة واحدة فقط لكل مستخدم",
     "usage_limit_exceeded"=>"تم تجاوز حد استخدام القسيمة.",
     "offer_expired"=>"لقد انتهت صلاحية القسيمة.",
+    "session_expired"=>"لقد انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
     "invalid_order"=>"طلب غير صالح!",
     "order_amount_greater_then"=>"يجب أن يكون مبلغ الطلب أكبر بعد ذلك",
     "order_type_selection_required"=>"مطلوب اختيار نوع الطلب",

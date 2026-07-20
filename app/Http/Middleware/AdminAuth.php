@@ -25,6 +25,9 @@ class AdminAuth
             return $next($request);
         }
         Auth::logout();
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
         return redirect('admin');
     }
 }

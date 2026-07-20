@@ -14,6 +14,8 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\OrderDetails;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+
 
 class OrderController extends Controller
 {
@@ -373,9 +375,10 @@ class OrderController extends Controller
     {
 
         $deletedOrders = Order::where('transaction_type', 15)
-            ->where('payment_status', '!=', 2) // Unpaid prebookings
+            ->where('payment_status', '!=', 2)
             ->where('order_from', 'web')
-            ->whereNull('user_id') // fast checkout (no registered user)
+            ->whereNull('user_id')
+            ->where('created_at', '<=', Carbon::now()->subDays(3))
             ->delete();
     
         return response()->json(['message'=>'deleted successfully']);

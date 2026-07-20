@@ -193,11 +193,17 @@
 
         function playNotificationSound(audioFile) {
             let audio = new Audio(audioFile);
+            audio.loop = true;
             audio.play().then(() => {
                 console.log("Sound played successfully.");
             }).catch(error => {
                 console.error("Audio play error:", error);
             });
+
+            setTimeout(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }, 30000);
         }
 
         toastr.options = {
@@ -214,6 +220,7 @@
 
         // New Notification
         var noticount = 0;
+        let sessionExpiredNotice = false;
         (function noti() {
             $.ajax({
                 headers: {
@@ -241,8 +248,26 @@
                     } else {
                         localStorage.setItem("count", response.count);
                     }
-
-                    setTimeout(noti, 30000);
+                },
+                error: function(xhr) {
+                    console.error("Notification poll failed:", xhr.status);
+                    // Session expired: the AdminAuth middleware returns 401 for ajax
+                    // requests instead of redirecting, so we can surface it instead
+                    // of silently failing to parse a login-page response as JSON.
+                    if (xhr.status === 401 && !sessionExpiredNotice) {
+                        sessionExpiredNotice = true;
+                        toastr.error("{{ trans('messages.session_expired') }}");
+                        setTimeout(function() {
+                            window.location.href = "{{ url('admin') }}";
+                        }, 2000);
+                    }
+                },
+                complete: function(xhr) {
+                    // Always reschedule so a single failed poll (network blip,
+                    // transient 5xx, etc.) doesn't permanently kill notifications.
+                    if (xhr.status !== 401) {
+                        setTimeout(noti, 30000);
+                    }
                 }
             });
         })();
