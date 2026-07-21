@@ -12,6 +12,9 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DealController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\front\StripeWebhookController;
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 Route::post('/print-job/{jobId}/acknowledge', [PrintController::class, 'acknowledgePrintJob']);
 Route::get('/fetch-job', [PrintController::class, 'fetchPrintJob']);

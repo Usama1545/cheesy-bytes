@@ -20,6 +20,7 @@ class Branch extends Model
         'zip',
         'printer_id',
         'mac_id',
+        'webhook_secret',
         'is_mobile',
         'is_web',
         'seo_name'

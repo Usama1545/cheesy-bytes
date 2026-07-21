@@ -73,6 +73,23 @@
                                 <input type="text" class="form-control " name="secret_key"
                                        placeholder="Print node api" required>
                             </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Webhook Secret<span
+                                        class="text-danger"> * </span></label>
+                                <input type="text" class="form-control " name="webhook_secret"
+                                       value="{{ old('webhook_secret') }}"
+                                       placeholder="whsec_..." required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Webhook Endpoint URL</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="webhook_endpoint_url"
+                                           value="{{ url('/api/stripe/webhook') }}" readonly>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="copyWebhookEndpoint()">Copy</button>
+                                </div>
+                                <small class="text-muted">Use this same URL for every branch's Stripe webhook configuration.</small>
+                            </div>
                             <div
                                 class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                 <a href="{{ URL::to('admin/branches') }}"
@@ -87,4 +104,12 @@
             </div>
         </div>
     </div>
+    <script>
+        function copyWebhookEndpoint() {
+            const input = document.getElementById('webhook_endpoint_url');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value);
+        }
+    </script>
 @endsection

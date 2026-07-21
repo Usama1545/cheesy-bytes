@@ -386,7 +386,9 @@ class CheckoutController extends Controller
                 ]],
                 'metadata' => [
                     'company_name' => 'CheesyBite',
-                    'logo_url' => 'https://thecheesybite.com/assets/images/logo.png'
+                    'logo_url' => 'https://thecheesybite.com/assets/images/logo.png',
+                    'order_number' => $order_number,
+                    'branch_id' => $branchId,
                 ],
                 'mode' => 'payment',
                 'success_url' => route('payment.success', ['order' => $order_number]),
