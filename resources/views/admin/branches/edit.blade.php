@@ -93,6 +93,16 @@
                                 </div>
                                 <small class="text-muted">Use this same URL for every branch's Stripe webhook configuration.</small>
                             </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Webhook Events to Select</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="webhook_events"
+                                           value="checkout.session.completed,checkout.session.async_payment_succeeded" readonly>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="copyWebhookEvents()">Copy</button>
+                                </div>
+                                <small class="text-muted">In Stripe Dashboard &rarr; Webhooks &rarr; add endpoint, select only these events: <code>checkout.session.completed</code> and <code>checkout.session.async_payment_succeeded</code>.</small>
+                            </div>
 
                             <div
                                 class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
@@ -110,6 +120,12 @@
     <script>
         function copyWebhookEndpoint() {
             const input = document.getElementById('webhook_endpoint_url');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value);
+        }
+        function copyWebhookEvents() {
+            const input = document.getElementById('webhook_events');
             input.select();
             input.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(input.value);
