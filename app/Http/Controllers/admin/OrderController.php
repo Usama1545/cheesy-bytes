@@ -363,6 +363,18 @@ class OrderController extends Controller
         return redirect()->back()->with('success', trans('messages.success'));
     }
 
+    public function updatePaymentStatus(Request $request)
+    {
+        $orderdata = Order::find($request->id);
+        $orderdata->payment_status = $request->payment_status;
+
+        if ($orderdata->save()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     public function deleteOrder($id)
     {
         $order = Order::where('id',$id)->first();

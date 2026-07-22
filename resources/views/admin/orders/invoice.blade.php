@@ -4,9 +4,19 @@
     @include('admin.breadcrumb')
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-12 my-2 d-flex justify-content-end">
+            <div class="col-md-12 my-2 d-flex justify-content-end gap-2">
 
-
+                <button type="button"
+                    class="btn px-4 py-2 dropdown-toggle {{ $orderdata->payment_status == 2 ? 'btn-success' : 'btn-danger' }}"
+                    data-bs-toggle="dropdown">{{ $orderdata->payment_status == 2 ? trans('labels.paid') : trans('labels.unpaid') }}</button>
+                <div class="dropdown-menu dropdown-menu-right cursor-pointer">
+                    <a class="dropdown-item w-auto @if ($orderdata->payment_status == 2) fw-600 @endif"
+                        onclick="PaymentStatusUpdate('{{ $orderdata->id }}','2','{{ URL::to('admin/orders/update-payment-status') }}')">
+                        {{ trans('labels.paid') }} </a>
+                    <a class="dropdown-item w-auto @if ($orderdata->payment_status == 1) fw-600 @endif"
+                        onclick="PaymentStatusUpdate('{{ $orderdata->id }}','1','{{ URL::to('admin/orders/update-payment-status') }}')">
+                        {{ trans('labels.unpaid') }} </a>
+                </div>
 
                 <button type="button" class="btn btn-dark dropdown-toggle px-4 py-2"
                     data-bs-toggle="dropdown">{{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? trans('labels.action') : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}</button>

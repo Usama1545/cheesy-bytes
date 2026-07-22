@@ -397,6 +397,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::post('orders/customerbillinfo', [OrderController::class, 'customerbillinfo']);
         Route::post('orders/order_note', [OrderController::class, 'order_note']);
         Route::post('orders/update', [OrderController::class, 'update']);
+        Route::post('orders/update-payment-status', [OrderController::class, 'updatePaymentStatus']);
         Route::post('orders/assign-driver', [OrderController::class, 'assign_driver']);
         Route::get('report', [OrderController::class, 'get_reports']);
         Route::post('orders/payment_status-{status}', [OrderController::class, 'payment_status']);
