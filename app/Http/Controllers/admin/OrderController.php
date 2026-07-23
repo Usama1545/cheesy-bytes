@@ -30,7 +30,7 @@ class OrderController extends Controller
             ])
             ->where(function ($q) {
                 $q->where(function ($q) {
-                    $q->where('transaction_type', 15);
+                    $q->where('transaction_type', 15)->where('payment_status', 2);
                 })->orWhere('transaction_type', '!=', 15);
             });
 

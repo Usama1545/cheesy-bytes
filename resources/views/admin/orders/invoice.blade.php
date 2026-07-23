@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-md-12 my-2 d-flex justify-content-end gap-2">
 
-                <button type="button"
+                {{-- <button type="button"
                     class="btn px-4 py-2 dropdown-toggle {{ $orderdata->payment_status == 2 ? 'btn-success' : 'btn-danger' }}"
                     data-bs-toggle="dropdown">{{ $orderdata->payment_status == 2 ? trans('labels.paid') : trans('labels.unpaid') }}</button>
                 <div class="dropdown-menu dropdown-menu-right cursor-pointer">
@@ -16,7 +16,7 @@
                     <a class="dropdown-item w-auto @if ($orderdata->payment_status == 1) fw-600 @endif"
                         onclick="PaymentStatusUpdate('{{ $orderdata->id }}','1','{{ URL::to('admin/orders/update-payment-status') }}')">
                         {{ trans('labels.unpaid') }} </a>
-                </div>
+                </div> --}}
 
                 <button type="button" class="btn btn-dark dropdown-toggle px-4 py-2"
                     data-bs-toggle="dropdown">{{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? trans('labels.action') : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}</button>
@@ -322,24 +322,27 @@
                                                 @php
                                                     $imagePath = '';
                                                     $itemImage = $orders->item_image;
-                                                    
-                                                    // Check if it's a JSON string
-                                                    if (is_string($itemImage) && !empty($itemImage)) {
-                                                        $decoded = json_decode($itemImage, true); // true for array, false for object
-                                                        
-                                                        if (json_last_error() === JSON_ERROR_NONE) {
-                                                            // It's valid JSON - use thumbnail if exists
-                                                            $imagePath = $decoded['image_url'] ?? $decoded['image_url'] ?? $itemImage;
-                                                            $imagePath = helper::image_path($itemImage);
 
+                                                    // Check if it's a JSON string
+if (is_string($itemImage) && !empty($itemImage)) {
+    $decoded = json_decode($itemImage, true); // true for array, false for object
+
+    if (json_last_error() === JSON_ERROR_NONE) {
+        // It's valid JSON - use thumbnail if exists
+                                                            $imagePath =
+                                                                $decoded['image_url'] ??
+                                                                ($decoded['image_url'] ?? $itemImage);
+                                                            $imagePath = helper::image_path($itemImage);
                                                         } else {
                                                             // Not JSON, treat as string
                                                             $imagePath = helper::image_path($itemImage);
                                                         }
                                                     } elseif (is_object($itemImage)) {
-                                                        $imagePath = $itemImage->thumbnail ?? $itemImage->image_url ?? '';
+                                                        $imagePath =
+                                                            $itemImage->thumbnail ?? ($itemImage->image_url ?? '');
                                                     } elseif (is_array($itemImage)) {
-                                                        $imagePath = $itemImage['image_url'] ?? $itemImage['image_url'] ?? '';
+                                                        $imagePath =
+                                                            $itemImage['image_url'] ?? ($itemImage['image_url'] ?? '');
                                                         $imagePath = helper::image_path($itemImage);
                                                     } else {
                                                         $imagePath = helper::image_path($itemImage);
