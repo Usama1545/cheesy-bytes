@@ -9,6 +9,7 @@ use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Item;
+use App\Models\ProductSizeCrust;
 use App\Helpers\helper;
 use App\Services\BogoAutoAddService;
 use App\Models\Settings;
@@ -92,6 +93,8 @@ class CartController extends Controller
                         ->where('item_prices.branch_id', '=', $branchId);
                 })->first();
 
+            $serverItemPrice = $itemdata->item_price;
+
             if ($request->deal_id) {
                 $deal = TopDeals::where('id', $request->deal_id)->first();
 
@@ -169,18 +172,8 @@ class CartController extends Controller
 
 
                         if ($existingDiscountedQty + $requestedQty <= $maxDiscountedAllowed) {
-                            // Apply discount
-                            if ($deal->offer_type == 1) {
-                                $discount = min($deal->offer_amount, $request->item_price);
-                            } else {
-                                // $price = $request->item_price - $request->item_price * ($deal->offer_amount / 100);
-                            }
-                            $price = $request->item_price;
-
-                            $request->merge([
-                                'item_price' => $price,
-                                'is_discounted' => true,
-                            ]);
+                            $serverItemPrice = 0;
+                            $request->merge(['is_discounted' => true]);
                         } else {
                             return response()->json([
                                 'status' => 0,
@@ -212,7 +205,7 @@ class CartController extends Controller
             $cart->crust_id = $request->crust_id;
             $cart->deal_category_id = $request->deal_category_id ?? null;
             $cart->tax = $request->tax;
-            $cart->item_price = helper::number_format($request->item_price);
+            $cart->item_price = helper::number_format($serverItemPrice);
             $cart->addons_id = $request->addons_id == null ? null : $request->addons_id;
             $cart->addons_name = $request->addons_name == null ? null : $request->addons_name;
             $cart->addons_price = $request->addons_price == null ? null : $request->addons_price;
@@ -308,6 +301,30 @@ class CartController extends Controller
                 $dippingQuantity = null;
             }
             $itemdata = Item::where('slug', $validated['slug'])->first();
+
+            if (!$itemdata) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Item not found.',
+                    'buynow' => $request->buynow
+                ], 404);
+            }
+
+            $sizeCrustPrice = ProductSizeCrust::where('item_id', $itemdata->id)
+                ->where('size_id', $validated['size_id'])
+                ->where('crust_id', $validated['crust_id'])
+                ->value('price');
+
+            if ($sizeCrustPrice === null) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Selected size/crust combination is not available for this item.',
+                    'buynow' => $request->buynow
+                ], 400);
+            }
+
+            $serverItemPrice = $sizeCrustPrice;
+
             $cart = new Cart();
             if (Auth::user() && Auth::user()->type == 2) {
                 $cart->user_id = Auth::user()->id;
@@ -389,20 +406,8 @@ class CartController extends Controller
 
 
                         if ($existingDiscountedQty + $requestedQty <= $maxDiscountedAllowed) {
-                            // Apply discount
-                            // if ($deal->offer_type == 1) {
-                            //     $discount = min($deal->offer_amount, $request->item_price);
-                            //     $price = $request->item_price - $discount;
-                            // } else {
-                            //     $price = $request->item_price - $request->item_price * ($deal->offer_amount / 100);
-                            // }
-                            
-                            $price = $request->item_price ;
-                            
-                            $request->merge([
-                                'item_price' => $price,
-                                'is_discounted' => true,
-                            ]);
+                            $serverItemPrice = 0;
+                            $request->merge(['is_discounted' => true]);
                         } else {
                             return response()->json([
                                 'status' => 0,
@@ -422,7 +427,7 @@ class CartController extends Controller
             $cart->item_image = $request->image_name;
             $cart->tax = $itemdata->tax;
             $cart->deal_category_id = $request->deal_category_id ?? null;
-            $cart->item_price = helper::number_format($request->item_price / $validated['qty']);
+            $cart->item_price = helper::number_format($serverItemPrice);
             $cart->addons_id = $request->addons_id == null ? null : str_replace('|', '| ', $request->addons_id) ;
             $cart->addons_name = $addons_name;
             $cart->addons_price = $addons_price;
@@ -458,7 +463,11 @@ class CartController extends Controller
     }
     public function deletecartitem(Request $request)
     {
-        $checkcart = Cart::find($request->id);
+        $cartQuery = Auth::check() && Auth::user()->type == 2
+            ? Cart::where('user_id', Auth::id())
+            : Cart::where('session_id', Session::getId());
+
+        $checkcart = (clone $cartQuery)->where('id', $request->id)->first();
 
         if (!$checkcart) {
             return 0;
@@ -488,10 +497,6 @@ class CartController extends Controller
         }
 
         // ✅ Required item — need to check validation
-        $cartQuery = Auth::check() && Auth::user()->type == 2
-            ? Cart::where('user_id', Auth::id())
-            : Cart::where('session_id', Session::getId());
-
         // Get all deal categories for this deal
         $dealCategories = DealCategory::where('deal_id', $deal->id)->get();
 
@@ -556,16 +561,18 @@ class CartController extends Controller
 
     public function qtyupdate(Request $request)
 {
-    $checkcart = Cart::find($request->id);
+    $cartQuery = Auth::check() && Auth::user()->type == 2
+        ? Cart::where('user_id', Auth::id())
+        : Cart::where('session_id', Session::getId());
+
+    $checkcart = (clone $cartQuery)->where('id', $request->id)->first();
 
     if (!$checkcart) {
         return response()->json(['status' => 0, 'message' => trans('messages.invalid_cart')], 200);
     }
 
     // Determine total cart quantity
-    $total_count = Auth::check() && Auth::user()->type == 2
-        ? Cart::where('user_id', Auth::id())->sum('qty')
-        : Cart::where('session_id', Session::getId())->sum('qty');
+    $total_count = (clone $cartQuery)->sum('qty');
 
     $needsAutoAdd = false;
 
@@ -580,11 +587,6 @@ class CartController extends Controller
                     $deal = TopDeals::find($checkcart->deal_id);
 
                     if ($deal && $deal->deal_type == 3) {
-                        // Base cart query
-                        $cartQuery = Auth::check() && Auth::user()->type == 2
-                            ? Cart::where('user_id', Auth::id())
-                            : Cart::where('session_id', Session::getId());
-
                         // Fetch deal categories
                         $dealCategories = DealCategory::where('deal_id', $deal->id)->get();
 

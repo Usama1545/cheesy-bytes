@@ -4,12 +4,15 @@ namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\Banner;
 use App\Models\Item;
 use App\Models\Category;
 
 class BannerController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index()
     {
         $getbanner = Banner::orderBy('reorder_id')->get();
@@ -23,6 +26,7 @@ class BannerController extends Controller
     }
     public function store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
         $image = 'banner-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/banner', $image);
         $banner = new Banner;
@@ -71,6 +75,7 @@ class BannerController extends Controller
         }
         if (isset($request->image)) {
             if ($request->hasFile('image')) {
+                $this->assertValidImage($request, 'image', true);
                 if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/banner/' . $banner->image)) {
                     unlink(env('ASSETSPATHURL') . 'admin-assets/images/banner/' . $banner->image);
                 }

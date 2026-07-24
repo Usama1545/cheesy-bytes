@@ -321,12 +321,21 @@ class CheckoutController extends Controller
 
             $baseAmount = max(0, $totalCartValue - $discountAmount);
 
+            // Check user wallet if authenticated
+            if ($user && $user->type == 2) {
+                $checkuser = User::where('is_available', 1)
+                    ->where('id', $user->id)
+                    ->first();
+            } else {
+                $checkuser = null;
+            }
+
             $credit_discount = 0;
             $creditsRequested = (int) $request->credits_used;
 
-            if ($user && $creditsRequested > 0) {
+            if ($checkuser && $creditsRequested > 0) {
                 $settings = Settings::first();
-                $creditsRequested = min($creditsRequested, $user->wallet);
+                $creditsRequested = min($creditsRequested, $checkuser->wallet);
                 $maxCreditsAllowed = floor(
                     $baseAmount / $settings->dollar_per_point
                 );
@@ -339,7 +348,7 @@ class CheckoutController extends Controller
                 $creditsToUse = min($creditsRequested, $maxCreditsAllowed);
 
                 $credit_discount = $creditsToUse * $settings->dollar_per_point;
-                $user->wallet = max(0, $user->wallet - $creditsToUse);
+                $checkuser->wallet = max(0, $checkuser->wallet - $creditsToUse);
             }
 
             $grandTotal = max(
@@ -354,15 +363,6 @@ class CheckoutController extends Controller
                     'status' => false,
                     'message' => 'Order total cannot be zero'
                 ]);
-            }
-
-            // Check user wallet if authenticated
-            if ($user && $user->type == 2) {
-                $checkuser = User::where('is_available', 1)
-                    ->where('id', $user->id)
-                    ->first();
-            } else {
-                $checkuser = null;
             }
 
             // Create order
@@ -598,8 +598,7 @@ class CheckoutController extends Controller
             ]);
 
             // Save Stripe payment intent ID to order
-            // $order->stripe_payment_intent_id = $paymentIntent->id;
-            // $order->stripe_client_secret = $paymentIntent->client_secret;
+            $order->stripe_payment_intent_id = $paymentIntent->id;
             $order->save();
 
             return [
@@ -640,7 +639,6 @@ class CheckoutController extends Controller
             
         } catch (\Stripe\Exception\InvalidRequestException $e) {
             // Invalid parameters were supplied to Stripe's API
-            dd($e);
             Log::error('Stripe Invalid Request: ' . $e->getMessage());
             
             return [
@@ -680,7 +678,6 @@ class CheckoutController extends Controller
             ];
             
         } catch (\Exception $e) {
-            dd($e);
             Log::error('Stripe payment intent creation failed: ' . $e->getMessage());
             
             return [
@@ -793,6 +790,31 @@ class CheckoutController extends Controller
     public function paymentsuccess($id)
     {
         try {
+
+            $order = Order::findOrFail($id);
+
+            $authUser = auth('sanctum')->user();
+            if ($authUser && $order->user_id && (int) $order->user_id !== (int) $authUser->id) {
+                return response()->json(['status' => 0, 'msg' => 'Order not found'], 404);
+            }
+
+            if ((int) $order->payment_status !== 2) {
+                if (!$order->stripe_payment_intent_id) {
+                    return response()->json(['status' => 0, 'msg' => 'Payment cannot be verified'], 422);
+                }
+
+                $stripeKey = helper::branch_stripe_data($order->branch_id);
+                if (!$stripeKey) {
+                    return response()->json(['status' => 0, 'msg' => 'Payment cannot be verified'], 422);
+                }
+
+                \Stripe\Stripe::setApiKey($stripeKey->secret_key);
+                $paymentIntent = \Stripe\PaymentIntent::retrieve($order->stripe_payment_intent_id);
+
+                if ($paymentIntent->status !== 'succeeded') {
+                    return response()->json(['status' => 0, 'msg' => 'Payment has not been completed'], 422);
+                }
+            }
 
             DB::transaction(function () use ($id) {
 

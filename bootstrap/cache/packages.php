@@ -98,24 +98,6 @@
       'Excel' => 'Maatwebsite\\Excel\\Facades\\Excel',
     ),
   ),
-  'mollie/laravel-mollie' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Mollie\\Laravel\\MollieServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Mollie' => 'Mollie\\Laravel\\Facades\\Mollie',
-    ),
-  ),
-  'myfatoorah/laravel-package' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'MyFatoorah\\LaravelPackage\\MyFatoorahServiceProvider',
-    ),
-  ),
   'nesbot/carbon' => 
   array (
     'providers' => 

@@ -75,7 +75,6 @@ Route::post('add-on/session/save', [AdminController::class, 'sessionsave']);
 Route::get('/auth', function () {
     return view('/auth');
 });
-Route::post('auth', 'HomeController@auth');
 Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
     Route::get('/', function () {
         return view('admin.auth.login');
@@ -87,7 +86,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         return view('admin.auth.forgot_password');
     });
     Route::post('send-pass', [AdminController::class, 'send_pass']);
-    Route::post('auth', [AdminController::class, 'auth']);
 
     Route::group(['middleware' => 'AdminAuth'], function () {
 
@@ -570,40 +568,7 @@ Route::group(['namespace' => 'front', 'middleware' => ['MaintenanceMiddleware','
     		Route::post('/managefavorite', [FavoriteController::class, 'managefavorite']);
     	});
 
-        Route::get('/payment-success/{order}', function ($orderId) {
-            $updated = Order::where('order_number', $orderId)->update(['payment_status' => 2]);
-
-            if (!$updated) {
-                dd("Order not found for order_number: " . $orderId);
-            }
-            $order = Order::where('order_number', $orderId)->first();
-
-
-
-            if (Auth::check()) {
-                $user = Auth::user();
-                Cart::where('user_id', $user->id)->delete();
-
-                if ($user->is_notification == 1) {
-                    $title = trans('labels.order_placed');
-                    $body = "Your Order " . $orderId . " has been placed.";
-                    Helper::push_notification($user->token, $title, $body, "order", $order->id);
-                }
-            } else {
-                $sessionId = Session::getId();
-                Cart::where('session_id', $sessionId)->delete();
-
-                $title = trans('labels.order_placed');
-                $body = "Your Order " . $orderId . " has been placed.";
-                Helper::push_notification($sessionId, $title, $body, "order", $order->id);
-            }
-
-            $branchId = Session::get('branch_id');
-            $location = Branch::where('id', $branchId)->first()->slug;
-
-            return redirect(url("/$location/success-$orderId"));
-
-        })->name('payment.success');
+        Route::get('/payment-success/{order}', [CheckoutController::class, 'stripeCheckoutSuccess'])->name('payment.success');
 
     Route::get('/payment-cancel/{order}', function ($orderId) {
         $branchId = Session::get('branch_id');

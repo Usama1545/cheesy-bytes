@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\admin;
   
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use Illuminate\Http\Request;
 use App;
 use App\Models\Languages;
 use Illuminate\Support\Facades\Validator;
-  
+
 class LangController extends Controller
 {
+    use ValidatesImageUploads;
+
     /**
      * Display a listing of the resource.
      *
@@ -163,6 +166,7 @@ class LangController extends Controller
                 $language->layout = $request->layout;
                 $language->is_default = @$default;
                 if ($request->has('image')) {
+                    $this->assertValidImage($request, 'image', true);
                     $flagimage = 'flag-' . uniqid() . "." .$request->file('image')->getClientOriginalExtension();
                     $request->file('image')->move(env('ASSETSPATHURL').'admin-assets/images/language/',$flagimage);
                     $language->image = $flagimage;

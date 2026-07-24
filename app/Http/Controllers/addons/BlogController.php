@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\addons;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\Blogs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -10,6 +11,8 @@ use App\Helpers\helper;
 
 class BlogController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index(Request $request)
     {
             $getblogs = Blogs::orderBy('reorder_id')->get();
@@ -23,6 +26,7 @@ class BlogController extends Controller
     }
     public function store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
         $image = 'blog-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $image);
         $blog = new Blogs;
@@ -43,6 +47,7 @@ class BlogController extends Controller
     {
         $blog = Blogs::find($request->id);
         if ($request->file('image') != "") {
+            $this->assertValidImage($request, 'image', true);
             if (file_exists(storage_path() . "/app/public/admin-assets/images/about/" . $blog->image)) {
                 unlink(storage_path() . "/app/public/admin-assets/images/about/" . $blog->image);
             }

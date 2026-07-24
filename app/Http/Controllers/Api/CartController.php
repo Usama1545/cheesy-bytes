@@ -9,6 +9,7 @@ use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Item;
+use App\Models\ProductSizeCrust;
 use App\Helpers\helper;
 use App\Models\Settings;
 use Illuminate\Support\Facades\Auth;
@@ -76,6 +77,8 @@ class CartController extends Controller
                     'buynow' => $request->buynow ?? 0
                 ], 404);
             }
+
+            $serverItemPrice = $itemdata->item_price;
 
             // Validate deal if provided
             if ($request->has('deal_id') && $request->deal_id) {
@@ -152,11 +155,8 @@ class CartController extends Controller
                             ->sum('qty');
 
                         if ($existingDiscountedQty + $requestedQty <= $maxDiscountedAllowed) {
-                            $price = $validated['item_price'];
-                            $request->merge([
-                                'item_price' => $price,
-                                'is_discounted' => true,
-                            ]);
+                            $serverItemPrice = 0;
+                            $request->merge(['is_discounted' => true]);
                         } else {
                             return response()->json([
                                 'status' => 0,
@@ -247,7 +247,7 @@ class CartController extends Controller
             
             $cart->tax = $itemdata->tax ?? 0;
 
-            $cart->item_price = helper::number_format($validated['item_price']);
+            $cart->item_price = helper::number_format($serverItemPrice);
             $cart->addons_id           = $addonsIds;
             $cart->addons_name         = $addonsNames;
             $cart->addons_price        = $addonsPrices;
@@ -424,7 +424,7 @@ class CartController extends Controller
             }
             
             $itemdata = Item::where('slug', $validated['slug'])->first();
-            
+
             if (!$itemdata) {
                 return response()->json([
                     'status' => 0,
@@ -432,7 +432,22 @@ class CartController extends Controller
                     'buynow' => $request->buynow ?? 0
                 ], 404);
             }
-            
+
+            $sizeCrustPrice = ProductSizeCrust::where('item_id', $itemdata->id)
+                ->where('size_id', $validated['size_id'])
+                ->where('crust_id', $validated['crust_id'])
+                ->value('price');
+
+            if ($sizeCrustPrice === null) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Selected size/crust combination is not available for this item.',
+                    'buynow' => $request->buynow ?? 0
+                ], 400);
+            }
+
+            $serverItemPrice = $sizeCrustPrice;
+
             // Validate deal if provided
             if ($request->has('deal_id') && $request->deal_id) {
                 $request->validate([
@@ -504,11 +519,8 @@ class CartController extends Controller
                             ->sum('qty');
 
                         if ($existingDiscountedQty + $requestedQty <= $maxDiscountedAllowed) {
-                            $price = $validated['item_price'];
-                            $request->merge([
-                                'item_price' => $price,
-                                'is_discounted' => true,
-                            ]);
+                            $serverItemPrice = 0;
+                            $request->merge(['is_discounted' => true]);
                         } else {
                             return response()->json([
                                 'status' => 0,
@@ -539,7 +551,7 @@ class CartController extends Controller
             $cart->item_image = $request->image_name ?? $itemdata->image ?? null;
             $cart->tax = $itemdata->tax ?? 0;
             $cart->deal_category_id = $request->deal_category_id ?? null;
-            $cart->item_price = helper::number_format($validated['item_price'] / $validated['qty']);
+            $cart->item_price = helper::number_format($serverItemPrice);
             $cart->addons_id = $request->addons_id == null ? null : str_replace('|', '| ', $request->addons_id);
             $cart->addons_name = $addons_name;
             $cart->addons_price = $addons_price;
@@ -617,7 +629,11 @@ class CartController extends Controller
                 'id' => 'required|integer|exists:cart,id'
             ]);
 
-            $checkcart = Cart::find($request->id);
+            $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
+                ? Cart::where('user_id', Auth::id())
+                : Cart::where('session_id', $sessionId);
+
+            $checkcart = (clone $cartQuery)->where('id', $request->id)->first();
 
             if (!$checkcart) {
                 return response()->json([
@@ -625,10 +641,6 @@ class CartController extends Controller
                     'message' => 'Cart item not found'
                 ], 404);
             }
-
-            $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
-                ? Cart::where('user_id', Auth::id())
-                : Cart::where('session_id', $sessionId);
 
             if (!$checkcart->deal_id) {
                 $checkcart->delete();
@@ -801,7 +813,12 @@ class CartController extends Controller
                 'type' => 'required|in:plus,minus'
             ]);
 
-            $checkcart = Cart::find($request->id);
+            // Determine cart query for totals
+            $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
+                ? Cart::where('user_id', Auth::id())
+                : Cart::where('session_id', $sessionId);
+
+            $checkcart = (clone $cartQuery)->where('id', $request->id)->first();
 
             if (!$checkcart) {
                 return response()->json([
@@ -809,11 +826,6 @@ class CartController extends Controller
                     'message' => 'Cart item not found'
                 ], 404);
             }
-
-            // Determine cart query for totals
-            $cartQuery = Auth::check() && auth('sanctum')->user()->type == 2
-                ? Cart::where('user_id', Auth::id())
-                : Cart::where('session_id', $sessionId);
 
             $needsAutoAdd = false;
 

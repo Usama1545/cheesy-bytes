@@ -303,7 +303,8 @@ class CustomPizzaController extends Controller
             return response()->json(['status' => 1, 'message' => trans('messages.success'), 'data' => $total_count, 'total_item_count' => helper::get_item_cart($pizza->id)], 200);
         } catch (\Exception $e)
         {
-            dd($e->getMessage());
+            \Log::error('Custom pizza add-to-cart failed: ' . $e->getMessage());
+            return response()->json(['status' => 0, 'message' => trans('messages.wrong')], 200);
         }
 
     }

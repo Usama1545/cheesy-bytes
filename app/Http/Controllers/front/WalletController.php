@@ -53,37 +53,31 @@ class WalletController extends Controller
             if ($amount == "") {
                 return response()->json(["status" => 0, "message" => trans('messages.enter_amount')], 200);
             }
-            if ($transaction_type == 4) {
-                try {
-                    $stripekey = helper::stripe_data()->secret_key;
-                    Stripe\Stripe::setApiKey($stripekey);
-                    $token = $request->transaction_id;
-                    $charge = Stripe\Charge::create([
-                        'amount' => round($amount * 100),
-                        'currency' => helper::stripe_data()->currency,
-                        "description" => "SingleReastaurant-WalletRecharge",
-                        'source' => $token,
-                    ]);
-                    $transaction_id = $charge->id;
-                } catch (\Exception $e) {
-                    return response()->json(['status' => 0, 'message' => trans('messages.unable_to_complete_payment')], 200);
-                }
-            } else {
-                if ($request->transaction_id == "") {
-                    return response()->json(["status" => 0, "message" => trans('messages.enter_transaction_id')], 200);
-                }
-                $transaction_id = $request->transaction_id;
+            if ($transaction_type != 4) {
+                return response()->json(["status" => 0, "message" => trans('messages.payment_selection_required')], 200);
             }
+
+            if (Transaction::where('transaction_id', $request->transaction_id)->where('transaction_type', 4)->exists()) {
+                return response()->json(['status' => 0, 'message' => trans('messages.wrong')], 200);
+            }
+
+            try {
+                $stripekey = helper::stripe_data()->secret_key;
+                Stripe\Stripe::setApiKey($stripekey);
+                $token = $request->transaction_id;
+                $charge = Stripe\Charge::create([
+                    'amount' => round($amount * 100),
+                    'currency' => helper::stripe_data()->currency,
+                    "description" => "SingleReastaurant-WalletRecharge",
+                    'source' => $token,
+                ]);
+                $transaction_id = $charge->id;
+            } catch (\Exception $e) {
+                return response()->json(['status' => 0, 'message' => trans('messages.unable_to_complete_payment')], 200);
+            }
+
             $checkuser->wallet += $amount;
             $checkuser->save();
-            // 3 = added-money-wallet-using- Razorpay 
-            // 4 = added-money-wallet-using- Stripe 
-            // 5 = added-money-wallet-using- Flutterwave 
-            // 6 = added-money-wallet-using- Paystack
-            // 7 = added-money-wallet-using- mecadopago
-            // 8 = added-money-wallet-using- myfatoorah
-            // 9 = added-money-wallet-using- paypal
-            // 10 = added-money-wallet-using- toyyibpay
 
             $transaction = new Transaction();
             $transaction->user_id = $checkuser->id;
@@ -92,14 +86,9 @@ class WalletController extends Controller
             $transaction->amount = $amount;
             $transaction->save();
 
-
-            if ($transaction_type == 7 || $transaction_type == 8 || $transaction_type == 9 || $transaction_type == 10 || $transaction_type == 11 || $transaction_type == 12 || $transaction_type == 13 || $transaction_type == 14) {
-                return redirect('wallet')->with('success', trans('messages.add_money_success'));
-            }
-
             return response()->json(['status' => 1, 'message' => trans('messages.success')], 200);
         } catch (\Throwable $th) {
-            dd($th);
+            \Log::error('Wallet top-up failed: ' . $th->getMessage());
             return response()->json(['status' => 0, 'message' => trans('messages.wrong')], 200);
         }
     }
@@ -120,46 +109,6 @@ class WalletController extends Controller
             if ($request->has('transaction_id')) {
                 $paymentId = request('transaction_id');
                 $response = ['status' => 1, 'msg' => 'paid', 'transaction_id' => $paymentId];
-            }
-
-            if (Session::get('payment_type') == "11") {
-                $checkstatus = app('App\Http\Controllers\addons\PayTabController')->checkpaymentstatus(Session::get('tran_ref'));
-                if ($checkstatus == "A") {
-                    $paymentId = Session::get('tran_ref');
-                    $response = ['status' => '1', 'msg' => 'paid', 'transaction_id' => $paymentId];
-                } else {
-                    return redirect('/wallet')->with('error', trans('messages.unable_to_complete_payment'));
-                }
-            }
-
-            if (Session::get('payment_type') == "12") {
-                if ($request->code == "PAYMENT_SUCCESS") {
-                    $paymentId = $request->transactionId;
-                    $response = ['status' => 1, 'msg' => 'paid', 'transaction_id' => $paymentId];
-                } else {
-                    return redirect('/wallet')->with('error', trans('messages.unable_to_complete_payment'));
-                }
-            }
-
-            if (Session::get('payment_type') == "13") {
-                $checkstatus = app('App\Http\Controllers\addons\MollieController')->checkpaymentstatus(Session::get('tran_ref'));
-
-                if ($checkstatus == "A") {
-                    $paymentId = Session::get('tran_ref');
-                    $response = ['status' => 1, 'msg' => 'paid', 'transaction_id' => $paymentId];
-                } else {
-                    return redirect('/wallet')->with('error', trans('messages.unable_to_complete_payment'));
-                }
-            }
-
-            if (Session::get('payment_type') == "14") {
-
-                if ($request->status == "Completed") {
-                    $paymentId = $request->transaction_id;
-                    $response = ['status' => 1, 'msg' => 'paid', 'transaction_id' => $paymentId];
-                } else {
-                    return redirect('/wallet')->with('error', trans('messages.unable_to_complete_payment'));
-                }
             }
         } catch (\Exception $e) {
             $response = ['status' => 0, 'msg' => $e->getMessage()];
