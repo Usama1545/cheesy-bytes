@@ -21,6 +21,7 @@ class Branch extends Model
         'printer_id',
         'mac_id',
         'webhook_secret',
+        'print_method',
         'is_mobile',
         'is_web',
         'seo_name'

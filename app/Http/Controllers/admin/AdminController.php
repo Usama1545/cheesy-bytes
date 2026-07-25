@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PrintJob;
+use App\Services\OrderPrintEligibility;
 use Illuminate\Http\Request;
 use App\Helpers\helper;
 use App\Models\User;
@@ -450,19 +451,18 @@ class AdminController extends Controller
     {
         $printJobs = PrintJob::where('status', 'pending')
                             ->whereHas('order', function($query) {
-                                $query->where(function($query) {
-                                    // Orders with payment_type 15 and payment_status 2
-                                    $query->where('transaction_type', 15)
-                                          ->where('payment_status', 2);
-                                })
-                                ->orWhere(function($query) {
-                                    // Orders with payment_type not equal to 15 (ignore payment_status)
-                                    $query->where('transaction_type', '!=', 15);
-                                });
+                                OrderPrintEligibility::apply($query);
                             })
+                            ->with('order.branch')
                             ->get();
-    
+
         foreach ($printJobs as $job) {
+            // Branches set to print via the desktop companion are printed
+            // locally by that app instead of through PrintNode.
+            if ($job->order && $job->order->branch && $job->order->branch->print_method === 'companion') {
+                continue;
+            }
+
             $this->printRecipt($job);
         }
     }

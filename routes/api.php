@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\PrintController;
+use App\Http\Controllers\Api\DesktopSyncController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Item;
 use Illuminate\Support\Facades\Artisan;
@@ -20,6 +21,8 @@ Route::post('/print-job/{jobId}/acknowledge', [PrintController::class, 'acknowle
 Route::get('/fetch-job', [PrintController::class, 'fetchPrintJob']);
 Route::get('/fetchJob',[PrintController::class,'fetchConPrintJob']);
 Route::get('print-orders', [AdminController::class, 'printOrders']);
+Route::get('desktop/sync', [DesktopSyncController::class, 'sync']);
+Route::get('desktop/branches', [DesktopSyncController::class, 'branches']);
 Route::get('deleteUnpaidPreBookings', [OrderController::class, 'deleteUnpaidPreBookings']);
 Route::get('refund-policy', [SiteController::class, 'refundpolicy']);
 Route::get('about-us', [SiteController::class, 'aboutus']);

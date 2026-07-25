@@ -59,6 +59,18 @@
                                 <input type="text" class="form-control " name="mac_id"
                                        placeholder="Print node api" required>
                             </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label">Receipt Printing<span
+                                        class="text-danger"> * </span></label>
+                                <select class="form-control" name="print_method" required>
+                                    <option value="printnode" {{ old('print_method', 'printnode') == 'printnode' ? 'selected' : '' }}>
+                                        PrintNode (cloud, uses Printer Name / Print node api above)
+                                    </option>
+                                    <option value="companion" {{ old('print_method') == 'companion' ? 'selected' : '' }}>
+                                        Desktop Companion (local Windows printer)
+                                    </option>
+                                </select>
+                            </div>
                             <hr />
 
                             <div class="form-group col-md-6">
