@@ -79,7 +79,7 @@ class UserController extends Controller
     }
     public function show_customers(Request $request)
     {
-        $customersdata = User::find($request->id);
+        $customersdata = User::where('id', $request->id)->where('type', 2)->first();
         return view('admin.users.update', compact('customersdata'));
     }
     public function update_customers(Request $request)
@@ -97,7 +97,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         } else {
-            $customersdata = User::find($request->id);
+            $customersdata = User::where('id', $request->id)->where('type', 2)->first();
             $customersdata->name = $request->name;
             $customersdata->email = $request->email;
             $customersdata->mobile = $request->mobile;
@@ -158,7 +158,8 @@ class UserController extends Controller
             $noti = helper::push_notification($checkuser->token, $title, $body, "wallet", "");
             return response()->json(['success' => 1, 'message' => trans('messages.success'), 'wallet' => helper::currency_format($checkuser->wallet)], 200);
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            \Log::error('Wallet add/deduct failed: ' . $e->getMessage());
+            return response()->json(['success' => 0, 'message' => trans('messages.wrong')], 200);
         }
     }
 

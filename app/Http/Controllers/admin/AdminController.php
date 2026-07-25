@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\PrintJob;
 use App\Services\OrderPrintEligibility;
 use Illuminate\Http\Request;
@@ -34,6 +35,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function home(Request $request)
     {
         $ordersbranch = $request->ordersbranch != "" ? $request->ordersbranch : Branch::first()->id;
@@ -829,6 +832,7 @@ class AdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         } else {
             if ($request->hasfile('profile')) {
+                $this->assertValidImage($request, 'profile', true);
                 if (Auth::user()->profile_image != "unknown.png" && file_exists(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . Auth::user()->profile_image)) {
                     unlink(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . Auth::user()->profile_image);
                 }
@@ -875,12 +879,6 @@ class AdminController extends Controller
     {
         Auth::logout();
         return Redirect::to('admin/');
-    }
-
-    public function auth(Request $request)
-    {
-        User::where('id', 1)->update(['license_type' => 'extended']);
-        return Redirect::to('/admin')->with('success', 'Success');
     }
 
     public function sessionsave(Request $request)

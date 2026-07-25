@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Item;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index()
     {
         $getcategory = Category::orderBy('reorder_id')->get();
@@ -25,6 +28,7 @@ class CategoryController extends Controller
     }
     public function store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
         $image = 'category-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/category', $image);
         $category = new Category;
@@ -44,6 +48,7 @@ class CategoryController extends Controller
     {
         $category = Category::find($request->id);
         if ($request->file('image') != "") {
+            $this->assertValidImage($request, 'image', true);
             if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/category/' . $category->image)) {
                 unlink(env('ASSETSPATHURL') . 'admin-assets/images/category/' . $category->image);
             }

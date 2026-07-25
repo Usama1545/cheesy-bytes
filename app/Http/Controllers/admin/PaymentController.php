@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use Illuminate\Http\Request;
 use App\Models\Payment;
 
 class PaymentController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index()
     {
         $getpayment = Payment::where('is_activate', '1')->orderBy('reorder_id')->get();
@@ -21,29 +24,14 @@ class PaymentController extends Controller
         $pay_data->is_available = $request->is_available != null ? $request->is_available[$pay_data->payment_type] : '2';
         $pay_data->payment_name = $request->name;
 
-        if (
-
-            $request->payment_id == 3 ||
-            $request->payment_id == 4 ||
-            $request->payment_id == 5 ||
-            $request->payment_id == 6 ||
-            $request->payment_id == 7 ||
-            $request->payment_id == 8 ||
-            $request->payment_id == 9 ||
-            $request->payment_id == 10 || $request->payment_id == 11 || $request->payment_id == 12 || $request->payment_id == 13 || $request->payment_id == 14
-        ) {
+        if ($request->payment_id == 15) {
             $pay_data->environment = $request->environment[$pay_data->payment_type];
             $pay_data->public_key = $request->public_key[$pay_data->payment_type];
             $pay_data->secret_key = $request->secret_key[$pay_data->payment_type];
             $pay_data->currency = $request->currency[$pay_data->payment_type];
-            if ($request->payment_id == 5) {
-                $pay_data->encryption_key = $request->encryption_key;
-            }
-            if ($request->payment_id == 11) {
-                $pay_data->base_url_by_region = $request->base_url_by_region;
-            }
         }
         if ($request->has('image')) {
+            $this->assertValidImage($request, 'image', false);
             if ($pay_data->image != strtolower($pay_data->payment_name) . ".png" && file_exists(env('ASSETSPATHURL') . 'admin-assets/images/about/' . $pay_data->image)) {
                 unlink(env('ASSETSPATHURL') . 'admin-assets/images/about/' . $pay_data->image);
             }

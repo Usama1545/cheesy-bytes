@@ -84,39 +84,6 @@
                                             class="btn btn-primary w-100">{{ trans('labels.signin') }}</button>
                                 </div>
                             </div>
-                            <div class="or_section">
-                                <div class="line ms-4"></div>
-                                <p class="mb-0 fw-light text-white">{{ trans('labels.or') }}</p>
-                                <div class="line me-4"></div>
-                            </div>
-                            <div class="row social_icon">
-                                <div class="col d-sm-flex justify-content-center text-center d-sm-flex p-0">
-                                    @if (@helper::checkaddons('google_login'))
-                                        @if (helper::appdata()->google_mode == 1)
-                                            <div class="col-sm-5 col bg-white rounded-2 py-2 m-2">
-                                                <a
-                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else href="{{ URL::to('login/google') }}" @endif>
-                                                    <img src="{{ helper::web_image_path('google.svg') }}"
-                                                         alt="social-icon" class="brands-logo"><span
-                                                        class="text-dark px-1">Sign in</span>
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endif
-                                    @if (@helper::checkaddons('facebook_login'))
-                                        @if (helper::appdata()->facebook_mode == 1)
-                                            <div class="col-sm-5 col bg-white rounded-2 py-2 m-2">
-                                                <a
-                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else href="{{ URL::to('login/facebook') }}" @endif>
-                                                    <img src="{{ helper::web_image_path('facebook.svg') }}"
-                                                         alt="social-icon" class="brands-logo"><span
-                                                        class="text-dark px-1">Sign in</span>
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endif
-                                </div>
-                            </div>
                             <div class="m-3 text-center">
                                 <p class="text-white mb-0 fs-7">
                                     {{ trans('labels.dont_account') }}

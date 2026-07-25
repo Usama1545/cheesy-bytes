@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use Illuminate\Http\Request;
 use App\Models\FooterFeatures;
 use App\Models\Order;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Validator;
 
 class SettingController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index()
     {
         $getsettings = Settings::first();
@@ -56,6 +59,7 @@ class SettingController extends Controller
         }
         if ($request->whychooseus_update) {
             if ($request->hasFile('why_choose_image')) {
+                $this->assertValidImage($request, 'why_choose_image', true);
                 $why_choose_image = 'why_choose_image-' . uniqid() . '.' . $request->why_choose_image->getClientOriginalExtension();
                 $request->why_choose_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $why_choose_image);
                 $setting = Settings::first();
@@ -81,6 +85,7 @@ class SettingController extends Controller
         }
         if ($request->seo_update) {
             if ($request->hasFile('og_image')) {
+                $this->assertValidImage($request, 'og_image', true);
                 $og_image = 'og_image-' . uniqid() . '.' . $request->og_image->getClientOriginalExtension();
                 $request->og_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $og_image);
                 $setting = Settings::first();
@@ -170,6 +175,7 @@ class SettingController extends Controller
         }
         if ($request->mobileapp_update) {
             if ($request->hasFile('app_bottom_image')) {
+                $this->assertValidImage($request, 'app_bottom_image', true);
                 $app_bottom_image = 'app_bottom_image-' . uniqid() . '.' . $request->app_bottom_image->getClientOriginalExtension();
                 $request->app_bottom_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $app_bottom_image);
                 $setting = Settings::first();
@@ -184,6 +190,7 @@ class SettingController extends Controller
                 $setting->save();
             }
             if ($request->hasFile('mobile_app_image')) {
+                $this->assertValidImage($request, 'mobile_app_image', true);
                 $mobile_app_image = 'mobile_app_image-' . uniqid() . '.' . $request->mobile_app_image->getClientOriginalExtension();
                 $request->mobile_app_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $mobile_app_image);
                 $setting = Settings::first();
@@ -228,6 +235,7 @@ class SettingController extends Controller
         }
         if ($request->web_update) {
             if ($request->hasFile('favicon')) {
+                $this->assertValidImage($request, 'favicon', true);
                 $favicon = 'favicon-' . uniqid() . '.' . $request->favicon->getClientOriginalExtension();
                 $request->favicon->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $favicon);
                 $setting = Settings::first();
@@ -242,6 +250,7 @@ class SettingController extends Controller
                 $setting->save();
             }
             if ($request->hasFile('logo')) {
+                $this->assertValidImage($request, 'logo', true);
                 $logo = 'logo-' . uniqid() . '.' . $request->logo->getClientOriginalExtension();
                 $request->logo->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $logo);
                 $setting = Settings::first();
@@ -288,6 +297,7 @@ class SettingController extends Controller
         }
         if ($request->footer_settings_update) {
             if ($request->hasFile('footer_logo')) {
+                $this->assertValidImage($request, 'footer_logo', true);
                 $footer_logo = 'footer-' . uniqid() . '.' . $request->footer_logo->getClientOriginalExtension();
                 $request->footer_logo->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $footer_logo);
                 $setting = Settings::first();
@@ -340,6 +350,7 @@ class SettingController extends Controller
         }
         if ($request->other_update) {
             if ($request->hasFile('faqs_image')) {
+                $this->assertValidImage($request, 'faqs_image', true);
                 $faqs_image = 'faqs_image-' . uniqid() . '.' . $request->faqs_image->getClientOriginalExtension();
                 $request->faqs_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $faqs_image);
                 $setting = Settings::first();
@@ -354,6 +365,7 @@ class SettingController extends Controller
                 $setting->save();
             }
             if ($request->hasFile('auth_bg_image')) {
+                $this->assertValidImage($request, 'auth_bg_image', true);
                 $auth_bg_image = 'auth_bg_image-' . uniqid() . '.' . $request->auth_bg_image->getClientOriginalExtension();
                 $request->auth_bg_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $auth_bg_image);
                 $setting = Settings::first();
@@ -368,6 +380,7 @@ class SettingController extends Controller
                 $setting->save();
             }
             if ($request->hasFile('booknow_bg_image')) {
+                $this->assertValidImage($request, 'booknow_bg_image', true);
                 $booknow_bg_image = 'booknow_bg_image-' . uniqid() . '.' . $request->booknow_bg_image->getClientOriginalExtension();
                 $request->booknow_bg_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $booknow_bg_image);
                 $setting = Settings::first();
@@ -382,6 +395,7 @@ class SettingController extends Controller
                 $setting->save();
             }
             if ($request->hasFile('refer_earn_bg_image')) {
+                $this->assertValidImage($request, 'refer_earn_bg_image', true);
                 $refer_earn_bg_image = 'refer_earn_bg_image-' . uniqid() . '.' . $request->refer_earn_bg_image->getClientOriginalExtension();
                 $request->refer_earn_bg_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $refer_earn_bg_image);
                 $setting = Settings::first();
@@ -396,6 +410,7 @@ class SettingController extends Controller
                 $setting->save();
             }
             if ($request->hasFile('subscribe_newsletter_image')) {
+                $this->assertValidImage($request, 'subscribe_newsletter_image', true);
                 $subscribe_newsletter_image = 'subscribe_newsletter_image-' . uniqid() . '.' . $request->subscribe_newsletter_image->getClientOriginalExtension();
                 $request->subscribe_newsletter_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $subscribe_newsletter_image);
                 $setting = Settings::first();
@@ -410,6 +425,7 @@ class SettingController extends Controller
                 $setting->save();
             }
             if ($request->hasFile('no_data_image')) {
+                $this->assertValidImage($request, 'no_data_image', true);
                 $no_data_image = 'no_data_image-' . uniqid() . '.' . $request->no_data_image->getClientOriginalExtension();
                 $request->no_data_image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $no_data_image);
                 $setting = Settings::first();

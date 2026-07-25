@@ -145,6 +145,7 @@ class ItemController extends Controller
                 }
             }
             }
+            $request->validate(['image.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
             foreach ($request->file('image') as $img) {
                 $itemimage = new ItemImages;
                 // Original image
@@ -175,7 +176,7 @@ class ItemController extends Controller
     public function storeimages(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'file.*' => 'required'
+            'file.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
         ]);
         $error_array = array();
         $success_output = '';

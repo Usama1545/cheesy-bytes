@@ -36,16 +36,6 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
             ->prefix(env('APP_DIR'))
                 ->group(base_path('routes/web.php'));
-            
-            //Coupon
-            Route::middleware('web')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/coupon.php'));
-          
-            //Top Deals
-            Route::middleware('web')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/top_deals.php'));
 
             Route::middleware('web')
                 ->namespace($this->namespace)
