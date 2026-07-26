@@ -110,6 +110,19 @@ class DesktopSyncController extends Controller
                 'extras' => [],
                 'line_total' => (float) (($line->item_price + $line->addons_total_price + $line->extras_total_price) * $line->qty),
             ]);
+        $taxArray = [];
+
+        if ($order->tax_amount && $order->tax_name) {
+            $tax = explode('|', $order->tax_amount);
+            $tax_name = explode('|', $order->tax_name);
+
+            foreach ($tax as $key => $tax_value) {
+                $taxArray[] = [
+                    'name' => $tax_name[$key] ?? '',
+                    'amount' => (float) $tax_value,
+                ];
+            }
+        }
 
         return [
             'order_id' => $order->id,
@@ -139,10 +152,7 @@ class DesktopSyncController extends Controller
                 'tax_name' => $order->tax_name,
                 'tip' => (float) $order->tip,
                 'grand_total' => (float) $order->grand_total,
-                'taxes' => [
-                    'name' => $order->tax_name,
-                    'amount' => $order->tax_amount,
-                ],
+                'taxes' => $taxArray,
             ],
         ];
     }
