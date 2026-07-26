@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Item;
 use App\Models\ProductSizeCrust;
+use App\Models\PizzaPrice;
 use App\Helpers\helper;
 use App\Services\BogoAutoAddService;
 use App\Models\Settings;
@@ -310,12 +311,19 @@ class CartController extends Controller
                 ], 404);
             }
 
+            $branchId = Session::get('branch_id');
+
+            $pizzaBasePrice = PizzaPrice::where('item_id', $itemdata->id)
+                ->where('branch_id', $branchId)
+                ->where('size_id', $validated['size_id'])
+                ->value('price');
+
             $sizeCrustPrice = ProductSizeCrust::where('item_id', $itemdata->id)
                 ->where('size_id', $validated['size_id'])
                 ->where('crust_id', $validated['crust_id'])
                 ->value('price');
 
-            if ($sizeCrustPrice === null) {
+            if ($pizzaBasePrice === null || $sizeCrustPrice === null) {
                 return response()->json([
                     'status' => 0,
                     'message' => 'Selected size/crust combination is not available for this item.',
@@ -323,7 +331,7 @@ class CartController extends Controller
                 ], 400);
             }
 
-            $serverItemPrice = $sizeCrustPrice;
+            $serverItemPrice = $pizzaBasePrice + $sizeCrustPrice;
 
             $cart = new Cart();
             if (Auth::user() && Auth::user()->type == 2) {
