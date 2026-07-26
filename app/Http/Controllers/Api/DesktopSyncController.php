@@ -79,7 +79,7 @@ class DesktopSyncController extends Controller
     {
         $items = OrderDetails::where('order_id', $order->id)
             ->whereNull('custom_pizza_id')
-            ->with('size', 'crust')
+            ->with('size', 'crust','items')
             ->get()
             ->map(fn (OrderDetails $line) => [
                 'name' => $line->item_name,
@@ -87,6 +87,8 @@ class DesktopSyncController extends Controller
                 'crust' => $line->crust->name ?? null,
                 'qty' => (int) $line->qty,
                 'price' => (float) $line->item_price,
+                'category' => $line->items->category_info->category_name ?? null,
+                'sub_category' => $line->items->subcategory_info->name ?? null,
                 'addons' => $this->splitPipeList($line->addons_name, $line->addons_price),
                 'extras' => $this->splitPipeList($line->extras_name, $line->extras_price),
                 'line_total' => (float) (($line->item_price + $line->addons_total_price + $line->extras_total_price) * $line->qty),
@@ -127,7 +129,9 @@ class DesktopSyncController extends Controller
             'delivery_time' => $order->delivery_time,
             'address' => $order->address,
             'items' => $items->concat($customItems)->values(),
-            'totals' => [
+            'order_notes' => $order->order_notes,
+            'payment_method' => "Card(stripe)",
+            'totals' =>  [
                 'discount_amount' => (float) $order->discount_amount,
                 'offer_code' => $order->offer_code,
                 'delivery_charge' => (float) $order->delivery_charge,
@@ -135,6 +139,10 @@ class DesktopSyncController extends Controller
                 'tax_name' => $order->tax_name,
                 'tip' => (float) $order->tip,
                 'grand_total' => (float) $order->grand_total,
+                'taxes' => [
+                    'name' => $order->tax_name,
+                    'amount' => $order->tax_amount,
+                ],
             ],
         ];
     }

@@ -15,10 +15,10 @@ class OrderPrintEligibility
     public static function apply(Builder $query): Builder
     {
         return $query->where(function (Builder $query) {
-            $query->where(function (Builder $query) {
+            $query->where(function (Builder $query) { 
                 $query->where('transaction_type', 15)
                     ->where('payment_status', 2);
-            })->orWhere('transaction_type', '!=', 15);
+            });
         });
     }
 }
