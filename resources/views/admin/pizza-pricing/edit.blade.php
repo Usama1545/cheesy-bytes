@@ -15,8 +15,7 @@
                             <input type="hidden" name="id" value="{{ $id }}">
                             <div class="d-flex justify-content-between align-items-center col-12 mb-3">
                                 <label for="name" class="fw-bold col-form-label">Pizza Size Price
-                                    ({{ $pizza->name }})span
-                                    class="text-danger">*</span></label>
+                                    ({{ $pizza->name }})<span class="text-danger">*</span></label>
                                 <button type="button" title="Add Size Price"
                                     class="btn btn--primary add_additional_price_option">
                                     <i class="fa fa-plus"></i>
