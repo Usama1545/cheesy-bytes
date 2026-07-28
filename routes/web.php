@@ -57,6 +57,7 @@ use App\Http\Controllers\admin\WhyChooseUsController;
 use App\Http\Controllers\addons\BlogController;
 use App\Http\Controllers\admin\ScriptController;
 use App\Http\Controllers\admin\DealNotificationController;
+use App\Http\Controllers\Api\DesktopSyncController;
 use Illuminate\Support\Facades\Artisan;
 
 /*
@@ -150,6 +151,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         // others
         Route::get('home', [AdminController::class, 'home'])->name('dashboard');
         Route::get('mobile-home', [AdminController::class, 'mobileHome'])->name('mobile-dashboard');
+        Route::get('desktop-companion-status', [DesktopSyncController::class, 'status']);
         Route::post('change-password', [AdminController::class, 'changepassword']);
         Route::post('edit-profile', [AdminController::class, 'editprofile']);
         Route::get('getorder', [AdminController::class, 'getorder']);

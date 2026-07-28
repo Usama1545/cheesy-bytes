@@ -27,16 +27,80 @@ class DesktopSyncController extends Controller
     }
 
     /**
+     * Per-branch desktop companion status for the admin dashboard: whether a
+     * branch currently has the companion open, its printer/buzzer status,
+     * and whether it's reachable over the internet.
+     *
+     * A branch counts as "online" only if it heartbeated (via sync()) within
+     * its own poll interval, times 3 (missing a couple of cycles tolerates a
+     * blip without flapping the badge), floored at 30s. Internet status is
+     * derived the same way rather than self-reported, since a companion that
+     * can't reach the internet can't reach this endpoint to say so.
+     */
+    public function status()
+    {
+        $branches = Branch::orderBy('name')->get(['id', 'name']);
+        $states = DesktopOrderState::whereIn('branch_id', $branches->pluck('id'))
+            ->get()
+            ->keyBy('branch_id');
+
+        $now = now();
+
+        $data = $branches->map(function (Branch $branch) use ($states, $now) {
+            $state = $states->get($branch->id);
+            $lastSeenAt = $state?->updated_at;
+            $thresholdSeconds = max((int) ($state->poll_interval_seconds ?? 5) * 3, 30);
+            $isOnline = $lastSeenAt && $lastSeenAt->gt($now->copy()->subSeconds($thresholdSeconds));
+
+            return [
+                'branch_id' => $branch->id,
+                'branch_name' => $branch->name,
+                'branch_status' => $isOnline ? 'online' : 'offline',
+                'printer_status' => $isOnline ? ($state->printer_status ?? 'not-configured') : 'offline',
+                'printer_name' => $isOnline ? ($state->printer_name ?? null) : null,
+                'buzzer_status' => $isOnline ? ($state->buzzer_status ?? 'stopped') : 'stopped',
+                'internet_status' => $isOnline ? 'connected' : 'offline',
+                'last_seen_at' => $lastSeenAt?->toIso8601String(),
+            ];
+        })->values();
+
+        return response()->json(['branches' => $data]);
+    }
+
+    /**
      * Return any orders that are new since this branch's desktop companion
      * last checked in, and advance its notification/print cursors.
      */
     public function sync(Request $request)
     {
-        $branchId = (int) $request->validate([
+        $validated = $request->validate([
             'branch_id' => 'required|integer|exists:branches,id',
-        ])['branch_id'];
+            'printer_status' => 'nullable|string|in:not-configured,ready,not-found,error,checking',
+            'printer_name' => 'nullable|string|max:255',
+            'service_running' => 'nullable|boolean',
+            'poll_interval_seconds' => 'nullable|integer|min:1|max:3600',
+        ]);
+        $branchId = (int) $validated['branch_id'];
 
         $state = DesktopOrderState::firstOrCreate(['branch_id' => $branchId]);
+
+        // Heartbeat: the desktop companion polls this endpoint on a timer, so
+        // every request also reports its current local status. `updated_at`
+        // (bumped by the unconditional save() below) doubles as "last seen",
+        // used by DesktopSyncController::status() to derive branch/internet
+        // online-ness for the admin dashboard.
+        if (array_key_exists('printer_status', $validated)) {
+            $state->printer_status = $validated['printer_status'];
+        }
+        if (array_key_exists('printer_name', $validated)) {
+            $state->printer_name = $validated['printer_name'];
+        }
+        if (array_key_exists('service_running', $validated)) {
+            $state->buzzer_status = $validated['service_running'] ? 'running' : 'stopped';
+        }
+        if (array_key_exists('poll_interval_seconds', $validated)) {
+            $state->poll_interval_seconds = $validated['poll_interval_seconds'];
+        }
 
         $notifyOrders = OrderPrintEligibility::apply(
             Order::where('branch_id', $branchId)

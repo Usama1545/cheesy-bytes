@@ -3,6 +3,36 @@
     @include('admin.breadcrumb')
     <div class="container-fluid">
         @if (Auth::user()->type == 1 || in_array(0, explode(',', helper::get_roles())))
+            <style>
+                .companion-card { border-radius: 12px; }
+                .companion-card .companion-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+                .companion-card .companion-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #f1f2f6; color: #6c5ce7; margin-right: 10px; }
+                .companion-card .companion-title { display: flex; align-items: center; }
+                .companion-card .companion-name { font-weight: 600; margin: 0; }
+                .companion-pill { font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 3px 10px; border-radius: 20px; }
+                .companion-pill.online { background: #e5f8ee; color: #1e9e5a; }
+                .companion-pill.offline { background: #fdecec; color: #de1616; }
+                .companion-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 5px 0; color: #6b7280; }
+                .companion-row .companion-value { display: flex; align-items: center; font-weight: 500; }
+                .companion-value.state-online, .companion-value.state-connected, .companion-value.state-running, .companion-value.state-ready { color: #1e9e5a; }
+                .companion-value.state-offline, .companion-value.state-stopped, .companion-value.state-error, .companion-value.state-not-found { color: #de1616; }
+                .companion-value.state-not-configured, .companion-value.state-checking { color: #b58900; }
+                .companion-value .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin-right: 6px; display: inline-block; }
+                .companion-card .companion-updated { font-size: 12px; color: #9ca3af; margin-top: 10px; }
+            </style>
+            <div class="row" id="companion-status-section">
+                <div class="col-md-12">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <h5 class="mb-0">Branch Companion Status</h5>
+                            <small class="text-muted">Real-time overview of all branches</small>
+                        </div>
+                    </div>
+                    <div class="row" id="companion-status-cards" data-url="{{ url('admin/desktop-companion-status') }}">
+                        <div class="col-12 text-muted">Loading branch status…</div>
+                    </div>
+                </div>
+            </div>
             {{-- @include('admin.plugin') --}}
             <div class="row">
                 <div class="col-md-12">
@@ -581,5 +611,85 @@
                 earningschart = new Chart(document.getElementById('earningschart'), config);
             }
         }
+
+        // Branch companion status
+        (function() {
+            var $cards = $('#companion-status-cards');
+            if ($cards.length === 0) return;
+
+            var statusUrl = $cards.data('url');
+
+            var printerLabels = {
+                'not-configured': 'Not Set Up',
+                'ready': 'Online',
+                'not-found': 'Not Found',
+                'error': 'Error',
+                'offline': 'Offline',
+                'checking': 'Checking…'
+            };
+            var buzzerLabels = { running: 'Running', stopped: 'Stopped' };
+            var internetLabels = { connected: 'Connected', offline: 'Offline' };
+            var branchLabels = { online: 'Online', offline: 'Offline' };
+
+            function statusRow(label, value, labels) {
+                var text = labels[value] || value || '—';
+                return '<div class="companion-row">' +
+                    '<span>' + label + '</span>' +
+                    '<span class="companion-value state-' + value + '"><span class="dot"></span>' + text + '</span>' +
+                    '</div>';
+            }
+
+            function renderCards(branches) {
+                if (!branches || branches.length === 0) {
+                    $cards.html('<div class="col-12 text-muted">No branches found.</div>');
+                    return;
+                }
+
+                var html = branches.map(function(branch) {
+                    var printerValue = branch.printer_status === 'ready' && branch.printer_name
+                        ? 'ready'
+                        : branch.printer_status;
+
+                    return '<div class="col-md-3 mb-3">' +
+                        '<div class="card border-0 box-shadow h-100 companion-card">' +
+                        '<div class="card-body">' +
+                        '<div class="companion-card-header">' +
+                        '<div class="companion-title">' +
+                        '<span class="companion-icon"><i class="fa fa-store"></i></span>' +
+                        '<p class="companion-name">' + branch.branch_name + '</p>' +
+                        '</div>' +
+                        '<span class="companion-pill ' + branch.branch_status + '">' + branchLabels[branch.branch_status] + '</span>' +
+                        '</div>' +
+                        statusRow('Branch Status', branch.branch_status, branchLabels) +
+                        statusRow('Printer Status', printerValue, printerLabels) +
+                        statusRow('Buzzer Status', branch.buzzer_status, buzzerLabels) +
+                        statusRow('Internet Status', branch.internet_status, internetLabels) +
+                        '<div class="companion-updated">' +
+                        (branch.last_seen_at ? 'Last seen: ' + new Date(branch.last_seen_at).toLocaleString() : 'Never connected') +
+                        '</div>' +
+                        '</div></div></div>';
+                }).join('');
+
+                $cards.html(html);
+            }
+
+            function loadCompanionStatus() {
+                $.ajax({
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    url: statusUrl,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        renderCards(response.branches);
+                    },
+                    error: function(xhr) {
+                        console.error('Companion status poll failed:', xhr.status);
+                    }
+                });
+            }
+
+            loadCompanionStatus();
+            setInterval(loadCompanionStatus, 15000);
+        })();
     </script>
 @endsection
