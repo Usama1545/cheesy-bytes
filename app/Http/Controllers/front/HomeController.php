@@ -396,7 +396,7 @@ class HomeController extends Controller
                 'session_id' => $sessionId
             ]);
 
-            if (Auth::check()) {
+            if (Auth::check() && Auth::user()->type == 2) {
                 Cart::where('user_id', auth()->id())->delete();
             } else {
                 Cart::where('session_id', $sessionId)->delete();
