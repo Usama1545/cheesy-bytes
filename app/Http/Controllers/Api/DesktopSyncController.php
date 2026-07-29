@@ -81,7 +81,6 @@ class DesktopSyncController extends Controller
             'service_running' => 'nullable|boolean',
             'poll_interval_seconds' => 'nullable|integer|min:1|max:3600',
         ]);
-        log::info('Desktop sync', $validated);
         $branchId = (int) $validated['branch_id'];
 
         $state = DesktopOrderState::firstOrCreate(['branch_id' => $branchId]);
