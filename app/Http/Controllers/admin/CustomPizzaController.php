@@ -27,7 +27,7 @@ use App\Models\Tax;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Session;
+use Illuminate\Support\Facades\Session;
 
 class CustomPizzaController extends Controller
 {

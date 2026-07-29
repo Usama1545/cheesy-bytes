@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Carbon\Carbon;
 use DateTime;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Console\Command;
 use Barryvdh\DomPDF\Facade\Pdf;
 

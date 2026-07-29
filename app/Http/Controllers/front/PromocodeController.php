@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use App\Helpers\helper;
 use App\Models\Promocode;
 use App\Models\Order;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;

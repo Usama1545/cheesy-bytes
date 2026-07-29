@@ -26,8 +26,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -390,6 +391,10 @@ class HomeController extends Controller
 
         if ($branch) {
             $sessionId = Session::getId();
+
+            log::info('session_id', [
+                'session_id' => $sessionId
+            ]);
 
             if (Auth::check()) {
                 Cart::where('user_id', auth()->id())->delete();

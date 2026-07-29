@@ -18,7 +18,7 @@ use App\Models\DealItem;
 use App\Models\Addons;
 use App\Models\Extra;
 use App\Services\BogoAutoAddService;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\log;
 
 class CartController extends Controller

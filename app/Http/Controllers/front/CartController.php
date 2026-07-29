@@ -17,7 +17,7 @@ use App\Models\Settings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\DealItem;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\log;
 
 class CartController extends Controller
@@ -120,15 +120,15 @@ class CartController extends Controller
     }
     public function addtocart(Request $request)
     {
-        
-        log::info('yes i am hit');
         $branchId = Session::get('branch_id');
 
         try {
             if ($request->buynow == 1) {
                 if (Auth::user() && Auth::user()->type == 2) {
+                    log::info('user_id', ['user_id' => Auth::user()->id]);
                     Cart::where('buynow', 1)->where('user_id', Auth::user()->id)->delete();
                 } else {
+                    log::info('session_id', ['session_id' => Session::getId()]);
                     Cart::where('buynow', 1)->where('session_id', Session::getId())->delete();
                 }
             }

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\ApiCacheHelper;
 use Illuminate\Support\Facades\Cache;
-use Session;
+use Illuminate\Support\Facades\Session;
 class Category extends Model
 {
     protected $table = 'categories';

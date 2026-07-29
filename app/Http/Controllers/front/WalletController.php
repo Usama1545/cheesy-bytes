@@ -9,7 +9,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Stripe;
 
 class WalletController extends Controller
