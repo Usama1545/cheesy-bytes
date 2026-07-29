@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Services\OrderPrintEligibility;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DesktopSyncController extends Controller
 {
@@ -80,6 +81,7 @@ class DesktopSyncController extends Controller
             'service_running' => 'nullable|boolean',
             'poll_interval_seconds' => 'nullable|integer|min:1|max:3600',
         ]);
+        log::info('Desktop sync', $validated);
         $branchId = (int) $validated['branch_id'];
 
         $state = DesktopOrderState::firstOrCreate(['branch_id' => $branchId]);
@@ -90,16 +92,33 @@ class DesktopSyncController extends Controller
         // used by DesktopSyncController::status() to derive branch/internet
         // online-ness for the admin dashboard.
         if (array_key_exists('printer_status', $validated)) {
+            // Log::info('Printer status updated.', [
+            //     'printer_status' => $validated['printer_status'],
+            // ]);
+
             $state->printer_status = $validated['printer_status'];
+            $state->updated_at = now();
         }
         if (array_key_exists('printer_name', $validated)) {
+            // Log::info('Printer name updated.', [
+            //     'printer_name' => $validated['printer_name'],
+            // ]);
             $state->printer_name = $validated['printer_name'];
+            $state->updated_at = now();
         }
         if (array_key_exists('service_running', $validated)) {
+            // Log::info('Service status updated.', [
+            //     'service_running' => $validated['service_running'],
+            // ]);
             $state->buzzer_status = $validated['service_running'] ? 'running' : 'stopped';
+            $state->updated_at = now();
         }
         if (array_key_exists('poll_interval_seconds', $validated)) {
+            // Log::info('Poll interval updated.', [
+            //     'poll_interval_seconds' => $validated['poll_interval_seconds'],
+            // ]);
             $state->poll_interval_seconds = $validated['poll_interval_seconds'];
+            $state->updated_at = now();
         }
 
         $notifyOrders = OrderPrintEligibility::apply(
