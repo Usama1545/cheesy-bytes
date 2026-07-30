@@ -21,7 +21,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                 
                                 <img src="{{ helper::image_path($sliderdata->image) }}"
                                     class="d-block img-fluid w-100"
-                                    alt="slider">
+                                    alt="slider" @if ($key == 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
                             </picture>
 
                             <div class="carousel-caption d-flex h-100 align-items-center justify-content-center flex-column">
@@ -90,7 +90,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                         <div class="d-flex justify-content-center">
                                             <div class="cat rounded-circle">
                                                 <img src="{{ helper::image_path($categorydata->image) }}"
-                                                    class="rounded-circle h-100 object-fit-cover" alt="category">
+                                                    class="rounded-circle h-100 object-fit-cover" alt="category" loading="lazy" decoding="async">
                                             </div>
                                         </div>
                                     </a>
@@ -106,10 +106,10 @@ $itemData = Helper::getBranch(); // ✅ works
                 </div>
             </div>
             <div class="burger-shape d-md-block d-none">
-                <img src="https://modinatheme.com/html/foodking-html/assets/img/shape/burger-shape-2.png" alt="shape-img">
+                <img src="https://modinatheme.com/html/foodking-html/assets/img/shape/burger-shape-2.png" alt="shape-img" loading="lazy" decoding="async">
             </div>
             <div class="fry-shape d-xl-block d-none">
-                <img src="https://modinatheme.com/html/foodking-html/assets/img/shape/fry-shape.png" alt="shape-img">
+                <img src="https://modinatheme.com/html/foodking-html/assets/img/shape/fry-shape.png" alt="shape-img" loading="lazy" decoding="async">
             </div>
         </section>
     @endif
@@ -161,21 +161,21 @@ $itemData = Helper::getBranch(); // ✅ works
                             <div class="d-flex gap-3 flex-wrap">
                                 <a href="https://apps.apple.com/us/app/cheesy-bite/id6759533522" target="_blank">
                                     <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-                                        height="45">
+                                        height="45" loading="lazy" decoding="async">
                                 </a>
 
                                 <a href="https://play.google.com/store/apps/details?id=com.rohailcheesybite.app" target="_blank">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                                        height="45">
+                                        height="45" loading="lazy" decoding="async">
                                 </a>
                             </div>
                         </div>
 
                         <!-- Right Images -->
                         <div class="col-md-6 text-center mt-4 mt-md-0 app-phones">
-                            <img src="{{ asset('web-assets/images/app1.jpg') }}" class="phone-img">
-                            <img src="{{ asset('web-assets/images/app2.jpg') }}" class="phone-img phone-center">
-                            <img src="{{ asset('web-assets/images/app3.jpg') }}" class="phone-img">
+                            <img src="{{ asset('web-assets/images/app1.jpg') }}" class="phone-img" loading="lazy" decoding="async">
+                            <img src="{{ asset('web-assets/images/app2.jpg') }}" class="phone-img phone-center" loading="lazy" decoding="async">
+                            <img src="{{ asset('web-assets/images/app3.jpg') }}" class="phone-img" loading="lazy" decoding="async">
                         </div>
 
                     </div>
@@ -194,7 +194,7 @@ $itemData = Helper::getBranch(); // ✅ works
                             class="d-block text-decoration-none">
                             <div class="position-relative">
                                 <img src="{{ helper::image_path($categorydata->image) }}" class="rounded-4 img-fluid"
-                                    alt="category" style="height: 340px;width:100%">
+                                    alt="category" style="height: 340px;width:100%" loading="lazy" decoding="async">
                                 <div
                                     class="position-absolute top-50 start-50 translate-middle text-black fw-bold px-3 rounded text-center">
                                     <!--<p class="m-0" style="font-size: 16px;">Restaurant</p>-->

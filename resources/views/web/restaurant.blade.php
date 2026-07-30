@@ -83,21 +83,21 @@
                                 <div class="d-flex gap-3 flex-wrap">
                                     <a href="https://apps.apple.com/us/app/cheesy-bite/id6759533522" target="_blank">
                                         <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-                                            height="45">
+                                            height="45" loading="lazy" decoding="async">
                                     </a>
 
                                     <a href="https://play.google.com/store/apps/details?id=com.rohailcheesybite.app" target="_blank">
                                         <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                                            height="45">
+                                            height="45" loading="lazy" decoding="async">
                                     </a>
                                 </div>
                             </div>
 
                             <!-- Right Images -->
                             <div class="col-md-6 text-center mt-4 mt-md-0 app-phones">
-                                <img src="{{ asset('web-assets/images/app1.jpg') }}" class="phone-img">
-                                <img src="{{ asset('web-assets/images/app2.jpg') }}" class="phone-img phone-center">
-                                <img src="{{ asset('web-assets/images/app3.jpg') }}" class="phone-img">
+                                <img src="{{ asset('web-assets/images/app1.jpg') }}" class="phone-img" loading="lazy" decoding="async">
+                                <img src="{{ asset('web-assets/images/app2.jpg') }}" class="phone-img phone-center" loading="lazy" decoding="async">
+                                <img src="{{ asset('web-assets/images/app3.jpg') }}" class="phone-img" loading="lazy" decoding="async">
                             </div>
 
                         </div>

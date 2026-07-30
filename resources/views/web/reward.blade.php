@@ -27,7 +27,7 @@
                 <!-- Card 1 -->
                 <div class="col-md-4">
                     <div class="card border p-3 rounded shadow-sm mb-5">
-                        <img src="{{ asset('assets/images/default.png') }}" alt="default"/>
+                        <img src="{{ asset('assets/images/default.png') }}" alt="default" loading="lazy" decoding="async" />
                         <p class="mt-4"><strong>CHOOSE FROM:</strong> Free Dip Cup, 16-Piece Bread Bites, or 20 Oz Drink
                         </p>
                     </div>
@@ -35,7 +35,7 @@
                 <!-- Card 2 -->
                 <div class="col-md-4">
                     <div class="card border p-3 rounded shadow-sm mb-5">
-                        <img src="{{ asset('assets/images/default.png') }}" alt="default"/>
+                        <img src="{{ asset('assets/images/default.png') }}" alt="default" loading="lazy" decoding="async" />
 
                         <p class="mt-4"><strong>CHOOSE FROM:</strong> Free Bread Twists OR Stuffed Cheesy Bread</p>
                     </div>
@@ -43,7 +43,7 @@
                 <!-- Card 3 -->
                 <div class="col-md-4">
                     <div class="card border p-3 rounded shadow-sm mb-5">
-                        <img src="{{ asset('assets/images/default.png') }}" alt="default"/>
+                        <img src="{{ asset('assets/images/default.png') }}" alt="default" loading="lazy" decoding="async" />
 
                         <p class="mt-4">
                             <strong>CHOOSE FROM:</strong> Free Medium 2-Topping Pizza, Pasta, Oven-Baked Sandwich,

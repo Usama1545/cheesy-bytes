@@ -60,7 +60,7 @@ $itemData = Helper::getBranch(); // ✅ works
 
                                                     <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
                                                         class="card-img-top border-0 rounded-0 rounded-top position-relative"
-                                                        alt="{{ $itemdata->item_name }}" height="190px">
+                                                        alt="{{ $itemdata->item_name }}" height="190px" loading="lazy" decoding="async">
                                                 </a>
 
                                                 @php

@@ -40,7 +40,7 @@
                             <!-- Authentication Form Inner Content -->
                             <a href="{{ route('home') }}">
                                 <img src="{{ helper::image_path(@helper::appdata()->logo) }}" alt=""
-                                     class="login-form-logo"></a>
+                                     class="login-form-logo" loading="lazy" decoding="async"></a>
                             <h5 class="bottom-line py-2 mt-3 mb-0 fw-bold w-auto text-white">{{ trans('labels.signup') }}</h5>
                             <h6 class="fs-7 text-white">{{ trans('labels.signup_note') }}</h6>
                             <div class="form-body mt-4">
@@ -148,7 +148,7 @@
                         </form>
                     </div>
                     <div class="image col-8 d-none d-md-block" >
-                        <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100" style="border-radius: 0px">
+                        <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100" style="border-radius: 0px" loading="lazy" decoding="async">
                     </div>
                 </div>
             </div>

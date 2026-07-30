@@ -31,7 +31,7 @@
                                 <div class="team-card rounded-4 overflow-hidden">
                                     <div class="member-img overflow-hidden position-relative">
                                         <img src="{{ helper::image_path($teamdata->image) }}"
-                                            class="img-circle img-responsive" />
+                                            class="img-circle img-responsive" loading="lazy" decoding="async" />
                                         <div class="team-social">
                                             @if ($teamdata->fb != '')
                                                 <div class="icons">

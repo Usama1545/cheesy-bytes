@@ -15,7 +15,7 @@
             <div class="row justify-content-center text-center">
                 <div class="col-12">
                     <div class="success-image">
-                        <img src="{{ url(env('ASSETSPATHURL') . 'web-assets/images/success.gif') }}" alt="">
+                        <img src="{{ url(env('ASSETSPATHURL') . 'web-assets/images/success.gif') }}" alt="" loading="lazy" decoding="async">
                     </div>
                     <div class="">
                         <h3 class="fw-600 mb-3">{{ trans('labels.order_placed') }}</h3>

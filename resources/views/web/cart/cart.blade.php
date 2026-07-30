@@ -67,7 +67,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                                             <div class="item-img">
                                                                 <img
                                                                     src="{{ helper::image_path($cartitems->item_image) }}"
-                                                                    alt="item-image">
+                                                                    alt="item-image" loading="lazy" decoding="async">
                                                             </div>
                                                         </div>
                                                         <div class="tbl_cart_product_caption">
@@ -196,7 +196,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                                         <img
                                                             src="{{ @helper::image_path($itemdata->item_image->image_name) }}"
                                                             class="card-img-top border-0 rounded-0 rounded-top position-relative"
-                                                            alt="dishes" height="190px">
+                                                            alt="dishes" height="190px" loading="lazy" decoding="async">
 
 
                                                     <div class="card-body pb-0 border-bottom">

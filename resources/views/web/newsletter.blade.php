@@ -11,7 +11,7 @@
                 </div>
             </div>
             <div class="newsletter-img col-4 d-md-block d-none">
-                <img src="{{url(env('ASSETSPATHURL').'web-assets/images/files.png')}}" class="w-100">
+                <img src="{{url(env('ASSETSPATHURL').'web-assets/images/files.png')}}" class="w-100" loading="lazy" decoding="async">
             </div>
         </div>
     </div>

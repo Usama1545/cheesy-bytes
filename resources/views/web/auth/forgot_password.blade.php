@@ -37,7 +37,7 @@
                                 <div>
                                     <a href="{{ route('home') }}">
                                         <img src="{{ helper::image_path(@helper::appdata()->logo) }}" alt=""
-                                            class="login-form-logo">
+                                            class="login-form-logo" loading="lazy" decoding="async">
                                     </a>
                                 </div>
                                 <div class="mb-3">
@@ -73,7 +73,7 @@
                             </form>
                         </div>
                         <div class="image col-8">
-                            <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100">
+                            <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100" loading="lazy" decoding="async">
                         </div>
                     </div>
                 </div>

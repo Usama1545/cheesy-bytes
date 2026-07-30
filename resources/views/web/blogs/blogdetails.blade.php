@@ -29,7 +29,7 @@
             <div class="col-12 d-flex my-5">
                 <div class="blog-details">
                     <div class="card">
-                        <img src="{{ helper::image_path($getblogdata->image) }}" class="card-img-top" alt="...">
+                        <img src="{{ helper::image_path($getblogdata->image) }}" class="card-img-top" alt="..." loading="lazy" decoding="async">
                         <div class="card-body">
                             <div class="row justify-content-between">
                                 <div class="col-auto blog-date mb-3">

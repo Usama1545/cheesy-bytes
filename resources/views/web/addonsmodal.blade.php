@@ -2,7 +2,7 @@
     <div class="">
         <div class="d-flex gap-1">
             <span>
-                <img src="{{ $itemdata['item_type_image'] }}" class="item-type-image" alt="">
+                <img src="{{ $itemdata['item_type_image'] }}" class="item-type-image" alt="" loading="lazy" decoding="async">
             </span>
             <div class="d-grid">
                 <p class="modal-title fs-6 fw-600">{{ $itemdata['item_name'] }}</p>

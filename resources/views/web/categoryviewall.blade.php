@@ -31,11 +31,11 @@ $itemData = Helper::getBranch(); // ✅ works
                     <div class="category-wrapper mx-2">
                         @if(isset($county))
                             <a href="{{ URL::to($county.'/menu/' . $categorydata->slug) }}">
-                                <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category">
+                                <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category" loading="lazy" decoding="async">
                             </a>
                         @else
                             <a href="{{ helper::branch_route('menu', ['category' => $categorydata->slug]) }}">
-                                <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category">
+                                <img src="{{ helper::image_path($categorydata->image) }}" class="category-image" alt="category" loading="lazy" decoding="async">
                             </a>
                         @endif
                         <p class="my-2 text-start">{{ $categorydata->category_name }}</p>

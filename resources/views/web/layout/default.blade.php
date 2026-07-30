@@ -86,12 +86,12 @@
     </script>
     <!-- End Meta Pixel Code -->
     <noscript><img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=714068061098147&ev=PageView&noscript=1" /></noscript>
+            src="https://www.facebook.com/tr?id=714068061098147&ev=PageView&noscript=1" loading="lazy" decoding="async" /></noscript>
     <!-- End Meta Pixel Code -->
 <meta name="google-site-verification" content="JMp4fvFTm4an5uvdb7-AKDhAV9AVFm_RbYVPc4V3DnU">
 
     <noscript><img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=2425470157809730&ev=PageView&noscript=1" /></noscript>
+            src="https://www.facebook.com/tr?id=2425470157809730&ev=PageView&noscript=1" loading="lazy" decoding="async" /></noscript>
     <!-- End Meta Pixel Code -->
 
     @foreach (@helper::getScripts() as $script)
@@ -243,7 +243,7 @@
                         <!--                <img src="{{ helper::image_path($dipping->image) }}"-->
                         <!--                     alt="Dipping Sauce"-->
                         <!--                     class="img-fluid rounded h-70px"-->
-                        <!--                     style="object-fit: fill;width:40px;height:40px">-->
+                        <!--                     style="object-fit: fill;width:40px;height:40px" loading="lazy" decoding="async">-->
 
                         <!-- Dipping Name -->
                         <!--                <span class="flex-grow-1 text-sm">{{ $dipping->name }}</span>-->
@@ -366,7 +366,7 @@
                         <!--                     alt="Dipping Sauce"-->
                         <!--                     class="img-fluid rounded h-70px"-->
 
-                        <!--                     style="object-fit: fill;width: 40px;height: 40px">-->
+                        <!--                     style="object-fit: fill;width: 40px;height: 40px" loading="lazy" decoding="async">-->
 
                         <!-- Dipping Name -->
                         <!--                <span class="flex-grow-1 text-sm">{{ $dipping->name }}</span>-->
@@ -518,7 +518,7 @@
                     <div class="row g-0 align-items-center justify-content-between">
                         <div class="col-6 d-none d-lg-block">
                             <img src="{{ helper::image_path(@helper::appdata()->subscribe_newsletter_image) }}"
-                                alt="" class="w-100 object-fit-cover newslatter-img">
+                                alt="" class="w-100 object-fit-cover newslatter-img" loading="lazy" decoding="async">
                         </div>
                         <div class="col-lg-6 col-12">
                             <div class="py-5 px-4 px-sm-5">
@@ -651,7 +651,7 @@
                             <div class="form-group col-lg-12">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="review-modal-img">
-                                        <img src="" class="h-100 w-100 object-fit-cover rounded-4 border" />
+                                        <img src="" class="h-100 w-100 object-fit-cover rounded-4 border" loading="lazy" decoding="async" />
                                     </div>
                                     <p class="fw-600 mb-0" id="data-item-name"></p>
                                 </div>
@@ -1593,7 +1593,7 @@
                                 src="${response.responce.item_detail.item_image.image_url}"
                                 class="card-img-top border-0 rounded-0 rounded-top position-relative"
                                 alt="${response.responce.item_detail.item_name}"
-                                height="190px">
+                                height="190px" loading="lazy" decoding="async">
                         </div>
                     `;
                         $('#img-container').html(itemCard); //

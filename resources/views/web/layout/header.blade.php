@@ -7,11 +7,11 @@
             <div class="container navbar-container">
                 <a class="navbar-brand" href="{{ helper::branch_route('home') }}">
                     <img class="img-resposive img-fluid" src="{{ asset('assets/images/logo.png') }}"
-                         alt="logo">
+                         alt="logo" fetchpriority="high" decoding="async">
                 </a>
                                 <a class="d-md-none navbar-brand" href="{{ helper::branch_route('home') }}">
                     <img class="img-resposive img-fluid" src="{{ asset('assets/images/halal.png') }}"
-                         alt="logo">
+                         alt="logo" loading="lazy" decoding="async">
                 </a>
                 <!-- language-btn -->
                 {{--                @if (@helper::checkaddons('language'))--}}
@@ -27,7 +27,7 @@
                 {{--                                        <a class="dropdown-item text-dark d-flex gap-2"--}}
                 {{--                                            href="{{ URL::to('/language-' . $lang->code) }}">--}}
                 {{--                                            <img src="{{ helper::image_path($lang->image) }}"--}}
-                {{--                                                class="img-fluid lag-img rounded-5" alt="">{{ $lang->name }}--}}
+                {{--                                                class="img-fluid lag-img rounded-5" alt="" loading="lazy" decoding="async">{{ $lang->name }}--}}
                 {{--                                        </a>--}}
                 {{--                                    </li>--}}
                 {{--                                @endforeach--}}
@@ -128,7 +128,7 @@
                             </div>
                             <div >
                                 <a href="#" class="text-white">
-                                    <img src="{{ asset('assets/images/halal.png') }}" alt="Halal" style="width: 50px;margin-top: 5px;margin-left:50px">
+                                    <img src="{{ asset('assets/images/halal.png') }}" alt="Halal" style="width: 50px;margin-top: 5px;margin-left:50px" loading="lazy" decoding="async">
                                 </a>
                             </div>
                         </div>
@@ -151,7 +151,7 @@
 
 <!--           <button class="btn btn-primary offer-button" style="padding: 0px 40px 1px 1px !important;" type="button" data-bs-toggle="offcanvas"-->
 <!--                data-bs-target="" aria-controls="offcanvasOffer">-->
-<!--            <img src="{{ asset('assets/images/halal.png') }}" alt="Halal" style="width: 45px">-->
+<!--            <img src="{{ asset('assets/images/halal.png') }}" alt="Halal" style="width: 45px" loading="lazy" decoding="async">-->
 <!--            </button>-->
 
 <!--</div>-->

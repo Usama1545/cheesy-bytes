@@ -4,14 +4,14 @@
             <div class="p-2 item-type">
                 @if ($itemdata->item_type == 1)
                     <img src="{{ helper::image_path('veg.svg') }}" alt=""
-                        class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}">
+                        class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}" loading="lazy" decoding="async">
                 @else
-                    <img src="{{ helper::image_path('nonveg.svg') }}" alt="">
+                    <img src="{{ helper::image_path('nonveg.svg') }}" alt="" loading="lazy" decoding="async">
                 @endif
             </div>
             <div class="card-image card-one position-relative">
                 <img src="{{ $itemdata['item_image']->image_url }}" class="card-img-top border-0 rounded-0 rounded-top"
-                    alt="dishes">
+                    alt="dishes" loading="lazy" decoding="async">
                 @if ($itemdata->available_qty <= 0 && $itemdata->has_variation == 2)
                     <h4 class="rounded-top text-overlay-centered">{{ trans('labels.out_of_stock') }}</h4>
                 @endif

@@ -26,7 +26,7 @@
                     @foreach ($getgalleries as $image)
                         <div data-src="{{ $image->image_url }}" data-fancybox="gallery"
                             data-thumb="{{ $image->image_url }}">
-                            <img src="{{ $image->image_url }}" width="200" height="150" />
+                            <img src="{{ $image->image_url }}" width="200" height="150" loading="lazy" decoding="async" />
                         </div>
                     @endforeach
                 </div>

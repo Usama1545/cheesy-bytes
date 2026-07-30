@@ -37,7 +37,7 @@
                                                 <div class="card-image">
                                                     <img src="{{ $itemdata['item_image']->image_url }}"
                                                         class="card-img-top border-0 rounded-0 rounded-top position-relative"
-                                                        alt="dishes">
+                                                        alt="dishes" loading="lazy" decoding="async">
                                                 </div>
                                             </a>
                                             <div class="card-body pb-0 border-bottom">
@@ -57,10 +57,10 @@
                                                 <h5 class="item-card-title pb-3 fs-6 d-flex">
                                                     @if ($itemdata->item_type == 1)
                                                         <img src="{{ helper::image_path('veg.svg') }}" alt=""
-                                                            class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}">
+                                                            class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}" loading="lazy" decoding="async">
                                                     @else
                                                         <img src="{{ helper::image_path('nonveg.svg') }}" alt=""
-                                                            class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}">
+                                                            class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}" loading="lazy" decoding="async">
                                                     @endif
                                                     <div class="d-flex align-items-center gap-1">
                                                         <a href="{{ URL::to('item-' . $itemdata->slug) }}">

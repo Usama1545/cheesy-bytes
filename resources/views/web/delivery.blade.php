@@ -40,7 +40,7 @@
                                         <div class="d-flex align-items-center justify-content-between py-2 px-3 bg-light rounded mb-2">
                                             <div>
                                                 <h6 class="mb-1 text-secondary">
-                                                    <img src="{{ helper::image_path($carrier['image']) }}" alt="{{ $carrier['name'] }}" class="img-fluid rounded h-50px mt-1" style="height: 45px">
+                                                    <img src="{{ helper::image_path($carrier['image']) }}" alt="{{ $carrier['name'] }}" class="img-fluid rounded h-50px mt-1" style="height: 45px" loading="lazy" decoding="async">
                                                      {{ $carrier['name'] }}
                                                      @if(isset($carrier['description']) && $carrier['description'] !== "")
                                                         <small>({{ $carrier['description'] }} )</small>

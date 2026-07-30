@@ -143,136 +143,136 @@
         @endforeach
     @endif
     <script type="text/javascript">
-    let are_you_sure = "{{ trans('messages.are_you_sure') }}";
-    let yes = "{{ trans('messages.yes') }}";
-    let no = "{{ trans('messages.no') }}";
-    let wrong = "{{ trans('messages.wrong') }}";
-    let cannot_delete = "{{ trans('messages.cannot_delete') }}";
-    let last_image = "{{ trans('messages.last_image') }}";
-    let record_safe = "{{ trans('messages.record_safe') }}";
-    let select = "{{ trans('labels.select') }}";
-    let variation = "{{ trans('labels.variation') }}";
-    let enter_variation = "{{ trans('labels.variation') }}";
-    let product_price = "{{ trans('labels.product_price') }}";
-    let enter_product_price = "{{ trans('labels.product_price') }}";
-    let sale_price = "{{ trans('labels.sale_price') }}";
-    let enter_sale_price = "{{ trans('labels.sale_price') }}";
+        let are_you_sure = "{{ trans('messages.are_you_sure') }}";
+        let yes = "{{ trans('messages.yes') }}";
+        let no = "{{ trans('messages.no') }}";
+        let wrong = "{{ trans('messages.wrong') }}";
+        let cannot_delete = "{{ trans('messages.cannot_delete') }}";
+        let last_image = "{{ trans('messages.last_image') }}";
+        let record_safe = "{{ trans('messages.record_safe') }}";
+        let select = "{{ trans('labels.select') }}";
+        let variation = "{{ trans('labels.variation') }}";
+        let enter_variation = "{{ trans('labels.variation') }}";
+        let product_price = "{{ trans('labels.product_price') }}";
+        let enter_product_price = "{{ trans('labels.product_price') }}";
+        let sale_price = "{{ trans('labels.sale_price') }}";
+        let enter_sale_price = "{{ trans('labels.sale_price') }}";
 
-    function currency_format(price) {
-        if ("{{ @helper::appdata()->currency_position }}" == 1) {
-            return "{{ @helper::appdata()->currency }}" + parseFloat(price).toFixed(2);
-        } else {
-            return parseFloat(price).toFixed(2) + "{{ @helper::appdata()->currency }}";
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let isAudioEnabled = false;
-
-        function enableAudio() {
-            if (audioContext.state === "suspended") {
-                audioContext.resume().then(() => {
-                    console.log("Audio enabled");
-                    isAudioEnabled = true;
-                });
+        function currency_format(price) {
+            if ("{{ @helper::appdata()->currency_position }}" == 1) {
+                return "{{ @helper::appdata()->currency }}" + parseFloat(price).toFixed(2);
+            } else {
+                return parseFloat(price).toFixed(2) + "{{ @helper::appdata()->currency }}";
             }
         }
 
-        // Listen for user interaction to enable autoplay
-        document.addEventListener("click", enableAudio, { once: true });
-        document.addEventListener("keydown", enableAudio, { once: true });
-        document.addEventListener("scroll", enableAudio, { once: true });
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        //     let isAudioEnabled = false;
 
-        // If tab is inactive, ensure audio starts when it becomes active
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
-                enableAudio();
-            }
-        });
+        //     function enableAudio() {
+        //         if (audioContext.state === "suspended") {
+        //             audioContext.resume().then(() => {
+        //                 console.log("Audio enabled");
+        //                 isAudioEnabled = true;
+        //             });
+        //         }
+        //     }
 
-        function playNotificationSound(audioFile) {
-            let audio = new Audio(audioFile);
-            audio.loop = true;
-            audio.play().then(() => {
-                console.log("Sound played successfully.");
-            }).catch(error => {
-                console.error("Audio play error:", error);
-            });
+        //     // Listen for user interaction to enable autoplay
+        //     document.addEventListener("click", enableAudio, { once: true });
+        //     document.addEventListener("keydown", enableAudio, { once: true });
+        //     document.addEventListener("scroll", enableAudio, { once: true });
 
-            setTimeout(() => {
-                audio.pause();
-                audio.currentTime = 0;
-            }, 30000);
-        }
+        //     // If tab is inactive, ensure audio starts when it becomes active
+        //     document.addEventListener("visibilitychange", () => {
+        //         if (document.visibilityState === "visible") {
+        //             enableAudio();
+        //         }
+        //     });
 
-        toastr.options = {
-            "closeButton": true,
-            "progressBar": true
-        };
+        //     function playNotificationSound(audioFile) {
+        //         let audio = new Audio(audioFile);
+        //         audio.loop = true;
+        //         audio.play().then(() => {
+        //             console.log("Sound played successfully.");
+        //         }).catch(error => {
+        //             console.error("Audio play error:", error);
+        //         });
 
-        @if (Session::has('success'))
-            toastr.success("{{ session('success') }}");
-        @endif
-        @if (Session::has('error'))
-            toastr.error("{{ session('error') }}");
-        @endif
+        //         setTimeout(() => {
+        //             audio.pause();
+        //             audio.currentTime = 0;
+        //         }, 30000);
+        //     }
 
-        // New Notification
-        var noticount = 0;
-        let sessionExpiredNotice = false;
-        (function noti() {
-            $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                url: "{{ url('admin/getorder') }}",
-                method: 'GET',
-                dataType: "json",
-                success: function(response) {
-                    noticount = localStorage.getItem("count") || 0;
+        //     toastr.options = {
+        //         "closeButton": true,
+        //         "progressBar": true
+        //     };
 
-                    if (response.count > 9) {
-                        $('#notificationcount').text(response.count + "+");
-                    } else {
-                        $('#notificationcount').text(response.count);
-                    }
+        //     @if (Session::has('success'))
+        //         toastr.success("{{ session('success') }}");
+        //     @endif
+        //     @if (Session::has('error'))
+        //         toastr.error("{{ session('error') }}");
+        //     @endif
 
-                    if (response.count != 0 && noticount != response.count) {
-                        localStorage.setItem("count", response.count);
-                        jQuery("#order-modal").modal('show');
+        //     // New Notification
+        //     var noticount = 0;
+        //     let sessionExpiredNotice = false;
+        //     (function noti() {
+        //         $.ajax({
+        //             headers: {
+        //                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        //             },
+        //             url: "{{ url('admin/getorder') }}",
+        //             method: 'GET',
+        //             dataType: "json",
+        //             success: function(response) {
+        //                 noticount = localStorage.getItem("count") || 0;
 
-                        let audioFile = "{{ asset('admin-assets/notification/') }}" + "/" + response.noti;
-                        console.log("New Order Detected. Playing Sound:", audioFile);
-                        playNotificationSound(audioFile);
-                    } else {
-                        localStorage.setItem("count", response.count);
-                    }
-                },
-                error: function(xhr) {
-                    console.error("Notification poll failed:", xhr.status);
-                    // Session expired: the AdminAuth middleware returns 401 for ajax
-                    // requests instead of redirecting, so we can surface it instead
-                    // of silently failing to parse a login-page response as JSON.
-                    if (xhr.status === 401 && !sessionExpiredNotice) {
-                        sessionExpiredNotice = true;
-                        toastr.error("{{ trans('messages.session_expired') }}");
-                        setTimeout(function() {
-                            window.location.href = "{{ url('admin') }}";
-                        }, 2000);
-                    }
-                },
-                complete: function(xhr) {
-                    // Always reschedule so a single failed poll (network blip,
-                    // transient 5xx, etc.) doesn't permanently kill notifications.
-                    if (xhr.status !== 401) {
-                        setTimeout(noti, 30000);
-                    }
-                }
-            });
-        })();
-    });
-</script>
+        //                 if (response.count > 9) {
+        //                     $('#notificationcount').text(response.count + "+");
+        //                 } else {
+        //                     $('#notificationcount').text(response.count);
+        //                 }
+
+        //                 if (response.count != 0 && noticount != response.count) {
+        //                     localStorage.setItem("count", response.count);
+        //                     jQuery("#order-modal").modal('show');
+
+        //                     let audioFile = "{{ asset('admin-assets/notification/') }}" + "/" + response.noti;
+        //                     console.log("New Order Detected. Playing Sound:", audioFile);
+        //                     playNotificationSound(audioFile);
+        //                 } else {
+        //                     localStorage.setItem("count", response.count);
+        //                 }
+        //             },
+        //             error: function(xhr) {
+        //                 console.error("Notification poll failed:", xhr.status);
+        //                 // Session expired: the AdminAuth middleware returns 401 for ajax
+        //                 // requests instead of redirecting, so we can surface it instead
+        //                 // of silently failing to parse a login-page response as JSON.
+        //                 if (xhr.status === 401 && !sessionExpiredNotice) {
+        //                     sessionExpiredNotice = true;
+        //                     toastr.error("{{ trans('messages.session_expired') }}");
+        //                     setTimeout(function() {
+        //                         window.location.href = "{{ url('admin') }}";
+        //                     }, 2000);
+        //                 }
+        //             },
+        //             complete: function(xhr) {
+        //                 // Always reschedule so a single failed poll (network blip,
+        //                 // transient 5xx, etc.) doesn't permanently kill notifications.
+        //                 if (xhr.status !== 401) {
+        //                     setTimeout(noti, 30000);
+        //                 }
+        //             }
+        //         });
+        //     })();
+        // });
+    </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/common.js') }}"></script><!-- Common JS -->

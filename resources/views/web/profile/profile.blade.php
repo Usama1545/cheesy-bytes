@@ -43,7 +43,7 @@
                                         <div class="avatar-preview">
                                             <div id="imagepreview">
                                                 <img src="{{ helper::image_path(Auth::user()->profile_image) }}"
-                                                    alt="" id="imgupload">
+                                                    alt="" id="imgupload" loading="lazy" decoding="async">
                                             </div>
                                         </div>
                                     </div>

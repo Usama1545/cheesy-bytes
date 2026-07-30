@@ -23,11 +23,11 @@
                     data-currency="{{ $pmdata->currency }}" {{ $i++ == 0 ? 'checked' : '' }}>
                 <div class="payment-gateway mb-0 justify-content-between">
                     @if(in_array($transaction_type, [15])) 
-                    <span> <img src="{{ helper::image_path($pmdata->image) }}" class="{{ session()->get('direction') == '2' ? 'ms-2' : 'me-2' }}" style="width:300px;height: 50px;" alt="">
+                    <span> <img src="{{ helper::image_path($pmdata->image) }}" class="{{ session()->get('direction') == '2' ? 'ms-2' : 'me-2' }}" style="width:300px;height: 50px;" alt="" loading="lazy" decoding="async">
                         {{ ucfirst($pmdata->payment_name) }}
                     </span>
                     @else
-                    <span> <img src="{{ helper::image_path($pmdata->image) }}" class="{{ session()->get('direction') == '2' ? 'ms-2' : 'me-2' }}" alt="">
+                    <span> <img src="{{ helper::image_path($pmdata->image) }}" class="{{ session()->get('direction') == '2' ? 'ms-2' : 'me-2' }}" alt="" loading="lazy" decoding="async">
                         {{ ucfirst($pmdata->payment_name) }}
                     </span>
                     @endif

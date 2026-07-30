@@ -445,7 +445,7 @@ class AdminController extends Controller
         $noti = $data->notification_tune ?? null;
 
 
-        return response()->json(['count' => $orderCount, 'noti' => $noti]);
+        return response()->json(['count' => 0, 'noti' => null]);
     }
 
 

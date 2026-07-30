@@ -4,7 +4,7 @@
             <div class="avatar-upload mx-auto d-flex justify-content-center">
                 <div class="avatar-preview-two ">
                     <div id="imagepreview-two">
-                        <img src="{{ helper::image_path(Auth::user()->profile_image) }}" alt="">
+                        <img src="{{ helper::image_path(Auth::user()->profile_image) }}" alt="" loading="lazy" decoding="async">
                     </div>
                 </div>
             </div>

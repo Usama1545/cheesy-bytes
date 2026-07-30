@@ -59,7 +59,7 @@ $count = count($itemData);
                         <div class="carousel-item @if ($i == 0) active @endif">
                             <div class="carousel-card position-relative overflow-hidden rounded">
                                 <img src="{{ @helper::image_path($item->web_image) }}"
-                                    class="w-100 h-100 object-fit-cover" alt="{{ $item->product->item_name }}">
+                                    class="w-100 h-100 object-fit-cover" alt="{{ $item->product->item_name }}" loading="lazy" decoding="async">
                                 <div
                                     class="position-absolute top-0 start-0 w-100 h-100 bg-transparent p-3 d-flex flex-column justify-content-between text-white">
                                     <div>
