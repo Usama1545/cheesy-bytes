@@ -119,29 +119,11 @@
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
     ),
   ),
-  'rachidlaasri/laravel-installer' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'RachidLaasri\\LaravelInstaller\\Providers\\LaravelInstallerServiceProvider',
-    ),
-  ),
   'spatie/laravel-cookie-consent' => 
   array (
     'providers' => 
     array (
       0 => 'Spatie\\CookieConsent\\CookieConsentServiceProvider',
-    ),
-  ),
-  'spatie/laravel-ignition' => 
-  array (
-    'aliases' => 
-    array (
-      'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
-    ),
-    'providers' => 
-    array (
-      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
   'spatie/laravel-sitemap' => 
