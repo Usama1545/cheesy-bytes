@@ -166,112 +166,69 @@
             }
         }
 
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        //     let isAudioEnabled = false;
+        document.addEventListener("DOMContentLoaded", function () {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true
+            };
 
-        //     function enableAudio() {
-        //         if (audioContext.state === "suspended") {
-        //             audioContext.resume().then(() => {
-        //                 console.log("Audio enabled");
-        //                 isAudioEnabled = true;
-        //             });
-        //         }
-        //     }
+            @if (Session::has('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+            @if (Session::has('error'))
+                toastr.error("{{ session('error') }}");
+            @endif
 
-        //     // Listen for user interaction to enable autoplay
-        //     document.addEventListener("click", enableAudio, { once: true });
-        //     document.addEventListener("keydown", enableAudio, { once: true });
-        //     document.addEventListener("scroll", enableAudio, { once: true });
+            // New Notification
+            var noticount = 0;
+            let sessionExpiredNotice = false;
+            (function noti() {
+                $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    url: "{{ url('admin/getorder') }}",
+                    method: 'GET',
+                    dataType: "json",
+                    success: function(response) {
+                        noticount = localStorage.getItem("count") || 0;
 
-        //     // If tab is inactive, ensure audio starts when it becomes active
-        //     document.addEventListener("visibilitychange", () => {
-        //         if (document.visibilityState === "visible") {
-        //             enableAudio();
-        //         }
-        //     });
+                        if (response.count > 9) {
+                            $('#notificationcount').text(response.count + "+");
+                        } else {
+                            $('#notificationcount').text(response.count);
+                        }
 
-        //     function playNotificationSound(audioFile) {
-        //         let audio = new Audio(audioFile);
-        //         audio.loop = true;
-        //         audio.play().then(() => {
-        //             console.log("Sound played successfully.");
-        //         }).catch(error => {
-        //             console.error("Audio play error:", error);
-        //         });
-
-        //         setTimeout(() => {
-        //             audio.pause();
-        //             audio.currentTime = 0;
-        //         }, 30000);
-        //     }
-
-        //     toastr.options = {
-        //         "closeButton": true,
-        //         "progressBar": true
-        //     };
-
-        //     @if (Session::has('success'))
-        //         toastr.success("{{ session('success') }}");
-        //     @endif
-        //     @if (Session::has('error'))
-        //         toastr.error("{{ session('error') }}");
-        //     @endif
-
-        //     // New Notification
-        //     var noticount = 0;
-        //     let sessionExpiredNotice = false;
-        //     (function noti() {
-        //         $.ajax({
-        //             headers: {
-        //                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //             },
-        //             url: "{{ url('admin/getorder') }}",
-        //             method: 'GET',
-        //             dataType: "json",
-        //             success: function(response) {
-        //                 noticount = localStorage.getItem("count") || 0;
-
-        //                 if (response.count > 9) {
-        //                     $('#notificationcount').text(response.count + "+");
-        //                 } else {
-        //                     $('#notificationcount').text(response.count);
-        //                 }
-
-        //                 if (response.count != 0 && noticount != response.count) {
-        //                     localStorage.setItem("count", response.count);
-        //                     jQuery("#order-modal").modal('show');
-
-        //                     let audioFile = "{{ asset('admin-assets/notification/') }}" + "/" + response.noti;
-        //                     console.log("New Order Detected. Playing Sound:", audioFile);
-        //                     playNotificationSound(audioFile);
-        //                 } else {
-        //                     localStorage.setItem("count", response.count);
-        //                 }
-        //             },
-        //             error: function(xhr) {
-        //                 console.error("Notification poll failed:", xhr.status);
-        //                 // Session expired: the AdminAuth middleware returns 401 for ajax
-        //                 // requests instead of redirecting, so we can surface it instead
-        //                 // of silently failing to parse a login-page response as JSON.
-        //                 if (xhr.status === 401 && !sessionExpiredNotice) {
-        //                     sessionExpiredNotice = true;
-        //                     toastr.error("{{ trans('messages.session_expired') }}");
-        //                     setTimeout(function() {
-        //                         window.location.href = "{{ url('admin') }}";
-        //                     }, 2000);
-        //                 }
-        //             },
-        //             complete: function(xhr) {
-        //                 // Always reschedule so a single failed poll (network blip,
-        //                 // transient 5xx, etc.) doesn't permanently kill notifications.
-        //                 if (xhr.status !== 401) {
-        //                     setTimeout(noti, 30000);
-        //                 }
-        //             }
-        //         });
-        //     })();
-        // });
+                        if (response.count != 0 && noticount != response.count) {
+                            localStorage.setItem("count", response.count);
+                            jQuery("#order-modal").modal('show');
+                        } else {
+                            localStorage.setItem("count", response.count);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Notification poll failed:", xhr.status);
+                        // Session expired: the AdminAuth middleware returns 401 for ajax
+                        // requests instead of redirecting, so we can surface it instead
+                        // of silently failing to parse a login-page response as JSON.
+                        if (xhr.status === 401 && !sessionExpiredNotice) {
+                            sessionExpiredNotice = true;
+                            toastr.error("{{ trans('messages.session_expired') }}");
+                            setTimeout(function() {
+                                window.location.href = "{{ url('admin') }}";
+                            }, 2000);
+                        }
+                    },
+                    complete: function(xhr) {
+                        // Always reschedule so a single failed poll (network blip,
+                        // transient 5xx, etc.) doesn't permanently kill notifications.
+                        if (xhr.status !== 401) {
+                            setTimeout(noti, 30000);
+                        }
+                    }
+                });
+            })();
+        });
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
