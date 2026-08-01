@@ -709,11 +709,6 @@ $(document).ready(function () {
     });
 });
 
-// PWA animation js
-window.addEventListener("load", function () {
-    document.querySelector(".pwa").classList.add("animate");
-});
-
 document.addEventListener("DOMContentLoaded", function () {
     // Detect Safari
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -722,10 +717,4 @@ document.addEventListener("DOMContentLoaded", function () {
             .querySelector("#install-app-div")
             .classList.add("hide-on-safari");
     }
-});
-
-// Quick call JavaScript
-const button = document.getElementById("quick-btn");
-button.addEventListener("click", function () {
-    this.classList.toggle("expanded");
 });

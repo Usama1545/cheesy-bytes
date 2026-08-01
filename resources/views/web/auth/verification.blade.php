@@ -40,7 +40,7 @@
                                 <div class="text-center">
                                     <a href="{{ route('home') }}">
                                         <img src="{{ helper::image_path(@helper::appdata()->logo) }}" alt=""
-                                            class="login-form-logo pb-2">
+                                            class="login-form-logo pb-2" loading="lazy" decoding="async">
                                     </a>
                                     <h5 class="p-3 text-white bottom-line fw-bold w-auto text-white">
                                         {{ @helper::appdata()->short_title }}</h5>
@@ -74,7 +74,7 @@
                             </div>
                         </div>
                         <div class="image col-8">
-                            <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100">
+                            <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100" loading="lazy" decoding="async">
                         </div>
                     </div>
                 </div>

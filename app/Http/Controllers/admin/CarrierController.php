@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Models\Carrier;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Item;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class CarrierController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index()
     {
         $getcategory = Carrier::orderBy('reorder_id')->get();
@@ -26,6 +29,7 @@ class CarrierController extends Controller
     }
     public function store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
         $image = 'category-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/category', $image);
         $category = new Carrier;
@@ -52,6 +56,7 @@ class CarrierController extends Controller
     {
         $category = Carrier::find($request->id);
         if ($request->file('image') != "") {
+            $this->assertValidImage($request, 'image', true);
             if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/category/' . $category->image)) {
                 unlink(env('ASSETSPATHURL') . 'admin-assets/images/category/' . $category->image);
             }

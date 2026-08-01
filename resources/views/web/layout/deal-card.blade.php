@@ -19,7 +19,7 @@
     <!-- Image container to handle any image size -->
     <div class="image-container">
         <img src="{{ helper::image_path($item->web_image) }}" alt="{{ $item->product->item_name ?? 'Deal' }}"
-            class="deal-image" onerror="this.src='{{ asset('images/placeholder.jpg') }}'">
+            class="deal-image" onerror="this.src='{{ asset('images/placeholder.jpg') }}'" loading="lazy" decoding="async">
     </div>
 
     <div class="deal-overlay">

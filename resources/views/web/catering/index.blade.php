@@ -9,7 +9,7 @@
                     @foreach ($sliders as $key => $sliderdata)
                         <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
                             <img src="{{ helper::image_path($sliderdata->image) }}" class="d-block img-fluid"
-                                 alt="slider">
+                                 alt="slider" loading="lazy" decoding="async">
                             <div
                                 class="carousel-caption d-flex h-100 align-items-center justify-content-center flex-column">
                                 <h5 class="animate__animated animate__fadeInUp mb-3">{{ $sliderdata->title }}</h5>
@@ -50,7 +50,7 @@
                     <div class="col-lg-6 d-md-block d-none">
                         <div class="about-img h-100"><img
                                 src="{{ helper::image_path(helper::appdata()->why_choose_image) }}"
-                                class="w-100 h-100 object-fit-cover rounded-4" alt=""></div>
+                                class="w-100 h-100 object-fit-cover rounded-4" alt="" loading="lazy" decoding="async"></div>
                     </div>
                     <div class="col-lg-6">
                         <div class="h-100 d-flex align-items-center py-md-4">
@@ -65,7 +65,7 @@
                                         <div class="d-flex align-items-center">
                                             <div class="service-icon">
                                                 <img src="{{ helper::image_path($whychooseus->image) }}" alt=""
-                                                     class="w-100 h-100">
+                                                     class="w-100 h-100" loading="lazy" decoding="async">
                                             </div>
                                             <div class="{{ session()->get('direction') == '2' ? 'pe-3' : 'ps-3' }}">
                                                 <h4 class="service-name mb-1 line-1">{{ $whychooseus->title }}</h4>
@@ -199,7 +199,7 @@
                     </div>
                     <div class="col-md-6 d-lg-block d-none table-booking-1 p-0">
                         <img src="{{ helper::image_path(@helper::appdata()->booknow_bg_image) }}"
-                             class="w-100 object-fit-cover rounded-5" alt="table booking">
+                             class="w-100 object-fit-cover rounded-5" alt="table booking" loading="lazy" decoding="async">
                     </div>
                 </div>
             </div>
@@ -221,7 +221,7 @@
                 @foreach ($getgalleries as $image)
                     <div class="item" data-src="{{ $image->image_url }}" data-fancybox="gallery"
                          data-thumb="{{ $image->image_url }}">
-                        <img src="{{ helper::image_path($image->image) }}" class="rounded-4" alt="">
+                        <img src="{{ helper::image_path($image->image) }}" class="rounded-4" alt="" loading="lazy" decoding="async">
                     </div>
                 @endforeach
             </div>

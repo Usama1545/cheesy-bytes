@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use Illuminate\Http\Request;
 use App\Models\Gallery;
 use App\Models\Team;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Validator;
 
 class OtherPagesController extends Controller
 {
+    use ValidatesImageUploads;
+
     // OUR-TEAM
     public function our_team_index(Request $request)
     {
@@ -25,6 +28,7 @@ class OtherPagesController extends Controller
     }
     public function our_team_store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
         $image = 'team-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $image);
         $team = new Team;
@@ -48,6 +52,7 @@ class OtherPagesController extends Controller
     {
         $team = Team::find($request->id);
         if ($request->file('image') != "") {
+            $this->assertValidImage($request, 'image', true);
             if (file_exists(storage_path() . "/app/public/admin-assets/images/about/" . $team->image)) {
                 unlink(storage_path() . "/app/public/admin-assets/images/about/" . $team->image);
             }
@@ -102,6 +107,7 @@ class OtherPagesController extends Controller
     }
     public function tutorial_store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
         $image = 'tutorial-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $image);
         $team = new Tutorial;
@@ -120,6 +126,7 @@ class OtherPagesController extends Controller
     {
         $team = Tutorial::find($request->id);
         if ($request->file('image') != "") {
+            $this->assertValidImage($request, 'image', true);
             if (file_exists(storage_path() . "/app/public/admin-assets/images/about/" . $team->image)) {
                 unlink(storage_path() . "/app/public/admin-assets/images/about/" . $team->image);
             }
@@ -209,6 +216,10 @@ class OtherPagesController extends Controller
     }
     public function gallery_store(Request $request)
     {
+        $request->validate([
+            'image' => 'required|array',
+            'image.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
         foreach ($request->image as $img) {
             $image = 'gallery-' . uniqid() . '.' . $img->getClientOriginalExtension();
             $img->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $image);
@@ -226,6 +237,7 @@ class OtherPagesController extends Controller
     public function gallery_update(Request $request)
     {
         $gallery = Gallery::find($request->id);
+        $this->assertValidImage($request, 'image', true);
         if (file_exists(storage_path() . "/app/public/admin-assets/images/about/" . $gallery->image)) {
             unlink(storage_path() . "/app/public/admin-assets/images/about/" . $gallery->image);
         }

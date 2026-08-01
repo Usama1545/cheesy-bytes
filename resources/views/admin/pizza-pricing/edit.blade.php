@@ -1,7 +1,7 @@
 @extends('admin.theme.default')
 @section('styles')
     <link rel="stylesheet"
-          href="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/css/bootstrap/bootstrap-select.v1.14.0-beta2.min.css') }}">
+        href="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/css/bootstrap/bootstrap-select.v1.14.0-beta2.min.css') }}">
 @endsection
 @section('content')
     @include('admin.breadcrumb')
@@ -14,23 +14,27 @@
                         <div class="row">
                             <input type="hidden" name="id" value="{{ $id }}">
                             <div class="d-flex justify-content-between align-items-center col-12 mb-3">
-                                <label for="name" class="fw-bold col-form-label">Pizza Size Price<span
-                                        class="text-danger">*</span></label>
+                                <label for="name" class="fw-bold col-form-label">Pizza Size Price
+                                    ({{ $pizza->item_name }})<span class="text-danger">*</span></label>
                                 <button type="button" title="Add Size Price"
-                                        class="btn btn--primary add_additional_price_option">
+                                    class="btn btn--primary add_additional_price_option">
                                     <i class="fa fa-plus"></i>
                                 </button>
                             </div>
                             @foreach ($sizes as $index => $option)
-                                <div class="row price-amenities align-items-center mb-3" data-index="edit_{{ $index }}">
+                                <div class="row price-amenities align-items-center mb-3"
+                                    data-index="edit_{{ $index }}">
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="size_{{ $index }}" class="col-form-label">
                                                 Size <span class="text-danger">*</span>
                                             </label>
-                                            <select name="size_prices[edit_{{ $index }}][size]" class="form-control selectpicker" required data-live-search="true" id="size_edit_{{ $index }}">
+                                            <select name="size_prices[edit_{{ $index }}][size]"
+                                                class="form-control selectpicker" required data-live-search="true"
+                                                id="size_edit_{{ $index }}">
                                                 @foreach (helper::get_sizes() as $branch)
-                                                    <option value="{{ $branch->id }}" {{ $branch->id === $option['size_id'] ? 'selected' : '' }}>
+                                                    <option value="{{ $branch->id }}"
+                                                        {{ $branch->id === $option['size_id'] ? 'selected' : '' }}>
                                                         {{ $branch->name }}
                                                     </option>
                                                 @endforeach
@@ -40,11 +44,14 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="crust_edit_{{ $index }}" class="col-form-label">
-                                                Crust <span class="text-danger">*</span>
+                                                Branch <span class="text-danger">*</span>
                                             </label>
-                                            <select name="size_prices[edit_{{ $index }}][branch_id]" class="form-control selectpicker" multiple required data-live-search="true" id="branch_edit_{{ $index }}">
+                                            <select name="size_prices[edit_{{ $index }}][branch_id]"
+                                                class="form-control selectpicker" multiple required data-live-search="true"
+                                                id="branch_edit_{{ $index }}">
                                                 @foreach (helper::get_branchs() as $crust)
-                                                    <option value="{{ $crust->id }}" {{ $crust->id ===  $option['branch_id'] ? 'selected' : '' }}>
+                                                    <option value="{{ $crust->id }}"
+                                                        {{ $crust->id === $option['branch_id'] ? 'selected' : '' }}>
                                                         {{ $crust->name }}
                                                     </option>
                                                 @endforeach
@@ -56,7 +63,10 @@
                                             <label for="price_edit_{{ $index }}" class="col-form-label">
                                                 Price <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number"    step="0.01"  name="size_prices[edit_{{ $index }}][price]" class="form-control" value="{{ $option['price'] }}" placeholder="Price" required id="price_edit_{{ $index }}">
+                                            <input type="number" step="0.01"
+                                                name="size_prices[edit_{{ $index }}][price]" class="form-control"
+                                                value="{{ $option['price'] }}" placeholder="Price" required
+                                                id="price_edit_{{ $index }}">
                                         </div>
                                     </div>
                                     <div class="col-12 col-lg-1 d-flex align-items-center">
@@ -72,12 +82,11 @@
                             <div class="col-12">
                                 <div id="additionalPriceOptions"></div>
                             </div>
-                            <div
-                                class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
+                            <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                 <a href="{{ URL::to('admin/sizes') }}"
-                                   class="btn btn-danger">{{ trans('labels.cancel') }}</a>
+                                    class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                 <button class="btn btn-primary "
-                                        @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
+                                    @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
                                         @else type="submit" @endif>{{ trans('labels.save') }}</button>
                             </div>
                         </div>
@@ -94,20 +103,24 @@
                                 <label for="name" class="fw-bold col-form-label">Pizza Size and Crust<span
                                         class="text-danger">*</span></label>
                                 <button type="button" title="Add Topping"
-                                        class="btn btn--primary add_additional_crust_option">
+                                    class="btn btn--primary add_additional_crust_option">
                                     <i class="fa fa-plus"></i>
                                 </button>
                             </div>
                             @foreach ($groupedData as $index => $option)
-                                <div class="row data-amenities align-items-center mb-3" data-index="edit_{{ $index }}">
+                                <div class="row data-amenities align-items-center mb-3"
+                                    data-index="edit_{{ $index }}">
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="size_edit_{{ $index }}" class="col-form-label">
                                                 Size <span class="text-danger">*</span>
                                             </label>
-                                            <select name="size_crusts[edit_{{ $index }}][size]" class="form-control selectpicker" required data-live-search="true" id="size_edit_{{ $index }}">
+                                            <select name="size_crusts[edit_{{ $index }}][size]"
+                                                class="form-control selectpicker" required data-live-search="true"
+                                                id="size_edit_{{ $index }}">
                                                 @foreach (helper::get_sizes() as $branch)
-                                                    <option value="{{ $branch->id }}" {{ $branch->id === $option['size_id'] ? 'selected' : '' }}>
+                                                    <option value="{{ $branch->id }}"
+                                                        {{ $branch->id === $option['size_id'] ? 'selected' : '' }}>
                                                         {{ $branch->name }}
                                                     </option>
                                                 @endforeach
@@ -119,9 +132,12 @@
                                             <label for="crust_edit_{{ $index }}" class="col-form-label">
                                                 Crust <span class="text-danger">*</span>
                                             </label>
-                                            <select name="size_crusts[edit_{{ $index }}][crusts][]" class="form-control selectpicker" multiple required data-live-search="true" id="crust_edit_{{ $index }}">
+                                            <select name="size_crusts[edit_{{ $index }}][crusts][]"
+                                                class="form-control selectpicker" multiple required data-live-search="true"
+                                                id="crust_edit_{{ $index }}">
                                                 @foreach (helper::get_crusts() as $crust)
-                                                    <option value="{{ $crust->id }}" {{ in_array($crust->id, $option['crust_ids']) ? 'selected' : '' }}>
+                                                    <option value="{{ $crust->id }}"
+                                                        {{ in_array($crust->id, $option['crust_ids']) ? 'selected' : '' }}>
                                                         {{ $crust->name }}
                                                     </option>
                                                 @endforeach
@@ -133,7 +149,10 @@
                                             <label for="price_edit_{{ $index }}" class="col-form-label">
                                                 Price <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number"    step="0.01"  name="size_crusts[edit_{{ $index }}][price]" class="form-control" value="{{ $option['price'] }}" placeholder="Price" required id="price_edit_{{ $index }}">
+                                            <input type="number" step="0.01"
+                                                name="size_crusts[edit_{{ $index }}][price]" class="form-control"
+                                                value="{{ $option['price'] }}" placeholder="Price" required
+                                                id="price_edit_{{ $index }}">
                                         </div>
                                     </div>
                                     <div class="col-12 col-lg-1 d-flex align-items-center">
@@ -149,12 +168,11 @@
                             <div class="col-12">
                                 <div id="additionalCrustOptions"></div>
                             </div>
-                            <div
-                                class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
+                            <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                 <a href="{{ URL::to('admin/sizes') }}"
-                                   class="btn btn-danger">{{ trans('labels.cancel') }}</a>
+                                    class="btn btn-danger">{{ trans('labels.cancel') }}</a>
                                 <button class="btn btn-primary "
-                                        @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
+                                    @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()"
                                         @else type="submit" @endif>{{ trans('labels.save') }}</button>
                             </div>
                         </div>
@@ -178,10 +196,10 @@
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/additem.js') }}"></script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let crustAdded = $('.data-amenities').length;
 
-            $('.add_additional_crust_option').on('click', function () {
+            $('.add_additional_crust_option').on('click', function() {
                 crustAdded++;
 
                 const uniqueIndex = `crustOption_${crustAdded}`; // Unique identifier for each set
@@ -224,17 +242,17 @@
                 $('.selectpicker').selectpicker('refresh');
             });
 
-            $(document).on('click', '.deleteCrustOption', function () {
+            $(document).on('click', '.deleteCrustOption', function() {
                 $(this).closest('.data-amenities').remove();
                 crustAdded--;
             });
         });
     </script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let priceAdded = $('.price-amenities').length;
 
-            $('.add_additional_price_option').on('click', function () {
+            $('.add_additional_price_option').on('click', function() {
                 priceAdded++;
 
                 const uniqueIndex = `crustOption_${priceAdded}`; // Unique identifier for each set
@@ -277,7 +295,7 @@
                 $('.selectpicker').selectpicker('refresh');
             });
 
-            $(document).on('click', '.deletePriceOption', function () {
+            $(document).on('click', '.deletePriceOption', function() {
                 $(this).closest('.price-amenities').remove();
                 priceAdded--;
             });

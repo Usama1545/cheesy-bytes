@@ -1,7 +1,7 @@
 <div class="col-lg-4 col-md-6 col-auto">
     <div class="card rounded-4 overflow-hidden">
         <a href="{{helper::branch_route('bblogdetails', ['slug' => $bloglist->slug]) }}"><img src="{{ helper::image_path($bloglist->image) }}"
-                class="card-img-top" alt="..."></a>
+                class="card-img-top" alt="..." loading="lazy" decoding="async"></a>
         <div class="blog-layer">
         </div>
         <div class="card-body w-100">

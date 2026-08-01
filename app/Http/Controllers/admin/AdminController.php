@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\PrintJob;
+use App\Services\OrderPrintEligibility;
 use Illuminate\Http\Request;
 use App\Helpers\helper;
 use App\Models\User;
@@ -26,13 +28,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Carbon\Carbon;
 use DateTime;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Console\Command;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class AdminController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function home(Request $request)
     {
         $ordersbranch = $request->ordersbranch != "" ? $request->ordersbranch : Branch::first()->id;
@@ -441,7 +445,7 @@ class AdminController extends Controller
         $noti = $data->notification_tune ?? null;
 
 
-        return response()->json(['count' => $orderCount, 'noti' => $noti]);
+        return response()->json(['count' => 0, 'noti' => null]);
     }
 
 
@@ -450,19 +454,18 @@ class AdminController extends Controller
     {
         $printJobs = PrintJob::where('status', 'pending')
                             ->whereHas('order', function($query) {
-                                $query->where(function($query) {
-                                    // Orders with payment_type 15 and payment_status 2
-                                    $query->where('transaction_type', 15)
-                                          ->where('payment_status', 2);
-                                })
-                                ->orWhere(function($query) {
-                                    // Orders with payment_type not equal to 15 (ignore payment_status)
-                                    $query->where('transaction_type', '!=', 15);
-                                });
+                                OrderPrintEligibility::apply($query);
                             })
+                            ->with('order.branch')
                             ->get();
-    
+
         foreach ($printJobs as $job) {
+            // Branches set to print via the desktop companion are printed
+            // locally by that app instead of through PrintNode.
+            if ($job->order && $job->order->branch && $job->order->branch->print_method === 'companion') {
+                continue;
+            }
+
             $this->printRecipt($job);
         }
     }
@@ -829,6 +832,7 @@ class AdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         } else {
             if ($request->hasfile('profile')) {
+                $this->assertValidImage($request, 'profile', true);
                 if (Auth::user()->profile_image != "unknown.png" && file_exists(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . Auth::user()->profile_image)) {
                     unlink(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . Auth::user()->profile_image);
                 }
@@ -875,12 +879,6 @@ class AdminController extends Controller
     {
         Auth::logout();
         return Redirect::to('admin/');
-    }
-
-    public function auth(Request $request)
-    {
-        User::where('id', 1)->update(['license_type' => 'extended']);
-        return Redirect::to('/admin')->with('success', 'Success');
     }
 
     public function sessionsave(Request $request)

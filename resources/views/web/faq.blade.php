@@ -48,7 +48,7 @@
                         </div>
                         <div class="col-lg-6 col-12 d-md-block d-none">
                             <img src="{{ helper::image_path(@helper::appdata()->faqs_image) }}"
-                                class="w-100 object-fit-cover rounded-4" alt="">
+                                class="w-100 object-fit-cover rounded-4" alt="" loading="lazy" decoding="async">
                         </div>
                     </div>
                 </div>

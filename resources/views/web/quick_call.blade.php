@@ -15,7 +15,7 @@
     <div class="call_info pb-0">
         @if(helper::appdata()->quick_call_image != "")
         <img src="{{ helper::image_path(helper::appdata()->quick_call_image) }}"
-            class="caller_img mx-auto" alt="">
+            class="caller_img mx-auto" alt="" loading="lazy" decoding="async">
             @endif
         <h6>{{helper::appdata()->quick_call_name}}</h6>
         <p class="text-center mb-0 mt-1 fs-8">{{helper::appdata()->quick_call_description}}</p>

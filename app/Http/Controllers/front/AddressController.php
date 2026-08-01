@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Address;
 use Illuminate\Support\Facades\Auth;
-use Session;
+use Illuminate\Support\Facades\Session;
 
 class AddressController extends Controller
 {
@@ -56,7 +56,7 @@ class AddressController extends Controller
     {
         session()->put('previous_url', url()->previous());
         if (Auth::user()) {
-            $addressdata = Address::find($request->id);
+            $addressdata = Address::where('id', $request->id)->where('user_id', Auth::user()->id)->first();
         } else {
             $addressdata = Session::get('addressdata');
         }
@@ -76,7 +76,7 @@ class AddressController extends Controller
                 $checkdefault->is_default = 2;
                 $checkdefault->update();
             }
-            $checkaddress = Address::find($request->id);
+            $checkaddress = Address::where('id', $request->id)->where('user_id', Auth::user()->id)->first();
             $checkaddress->address = $request->address;
             $checkaddress->title = $request->title;
             $checkaddress->landmark = $request->landmark;
@@ -99,7 +99,7 @@ class AddressController extends Controller
     public function deleteaddress(Request $request)
     {
         if (Auth::user()) {
-            $checkaddress = Address::find($request->id);
+            $checkaddress = Address::where('id', $request->id)->where('user_id', Auth::user()->id)->first();
             if (!empty($checkaddress)) {
                 $checkaddress->delete();
                 return 1;
@@ -120,7 +120,7 @@ class AddressController extends Controller
                 $findaddress->is_default = 2;
                 $findaddress->update();
             }
-            Address::where('id', $request->id)->update(array('is_default' => $request->status));
+            Address::where('id', $request->id)->where('user_id', Auth::user()->id)->update(array('is_default' => $request->status));
             return 1;
         } catch (\Throwable $th) {
 

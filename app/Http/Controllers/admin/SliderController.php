@@ -4,12 +4,15 @@ namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\Slider;
 use App\Models\Item;
 use App\Models\Category;
 
 class SliderController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index()
     {
         $getslider = Slider::orderBy('reorder_id')->get();
@@ -28,6 +31,8 @@ class SliderController extends Controller
     }
     public function store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
+        $this->assertValidImage($request, 'mobile_image', true);
         $image = 'slider-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $mobile_image = 'slider-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/slider', $image);
@@ -66,6 +71,7 @@ class SliderController extends Controller
     {
         $slider = Slider::find($request->id);
         if ($request->file('image') != "") {
+            $this->assertValidImage($request, 'image', true);
             if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/slider/' . $slider->image)) {
                 unlink(env('ASSETSPATHURL') . 'admin-assets/images/slider/' . $slider->image);
             }
@@ -75,6 +81,7 @@ class SliderController extends Controller
             $slider->save();
         }
         if ($request->file('mobile_image') != "") {
+            $this->assertValidImage($request, 'mobile_image', true);
             $mobile_image = 'slider-' . uniqid() . '.' . $request->mobile_image->getClientOriginalExtension();
             $request->mobile_image->move(env('ASSETSPATHURL') . 'admin-assets/images/slider', $mobile_image);
             $slider->mobile_image = $mobile_image;

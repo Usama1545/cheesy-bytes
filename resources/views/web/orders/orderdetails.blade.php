@@ -225,10 +225,10 @@
                                 ?>
                                     <tr>
                                         <td><img src="{{ helper::image_path($orders->item_image) }}" class="rounded hw-50"
-                                                alt=""></td>
+                                                alt="" loading="lazy" decoding="async"></td>
                                         <td>
                                             <img @if ($orders['item_type'] == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
-                                                class="item-type-img" alt="">
+                                                class="item-type-img" alt="" loading="lazy" decoding="async">
                                             <span class="fs-7">{{ $orders->item_name }}</span>
                                             <p class="mb-0 mt-1">
                                                 @if ($orders['addons_id'] != '' || $orders['extras_id'] != '')

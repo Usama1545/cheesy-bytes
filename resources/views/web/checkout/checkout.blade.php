@@ -4,7 +4,9 @@ use App\Helpers\Helper;
 
 $itemData = Helper::getBranch(); // ✅ works
 ?>
-@section('page_title'){{ trans('labels.checkout') }} | {{ $itemData->name }} |@endsection
+@section('page_title')
+    {{ trans('labels.checkout') }} | {{ $itemData->name }} |
+@endsection
 @section('content')
     <div class="breadcrumb-sec">
         <div class="container">
@@ -56,36 +58,36 @@ $itemData = Helper::getBranch(); // ✅ works
                                             <h5>{{ trans('labels.order_type') }}</h5>
                                         </div>
                                         <div class="col-12 d-flex gap-3">
-{{--                                                <div class="form-check form-check-inline mb-0">--}}
-{{--                                                    <input class="form-check-input" type="radio" name="order_type" value="1" id="delivery"--}}
-{{--                                                        {{ $address->address_type === 'delivery' ? 'checked' : ($address->address_type === 'carryout' ? '' : 'checked')  }}>--}}
-{{--                                                    <label class="form-check-label fs-7 fw-500" for="delivery">--}}
-{{--                                                        {{ trans('labels.delivery') }}--}}
-{{--                                                    </label>--}}
-{{--                                                </div>--}}
-                                                <div class="form-check form-check-inline mb-0">
-                                                    <input class="form-check-input" type="radio" name="order_type"
-                                                        value="2" id="pickup"  checked>
-                                                    <label class="form-check-label fs-7 fw-500" for="pickup">
-                                                        {{ trans('labels.take_away') }}
-                                                    </label>
-                                                </div>
-{{--                                            @elseif($getsettings->pickup_delivery == 2)--}}
-{{--                                                <div class="form-check form-check-inline mb-0">--}}
-{{--                                                    <input class="form-check-input" type="radio" name="order_type"--}}
-{{--                                                        value="1" checked id="delivery">--}}
-{{--                                                    <label class="form-check-label fs-7 fw-500" for="delivery">--}}
-{{--                                                        {{ trans('labels.delivery') }}--}}
-{{--                                                    </label>--}}
-{{--                                                </div>--}}
-{{--                                            @elseif($getsettings->pickup_delivery == 3)--}}
-{{--                                                <div class="form-check form-check-inline mb-0">--}}
-{{--                                                    <input class="form-check-input" type="radio" name="order_type"--}}
-{{--                                                        value="2" id="pickup" checked>--}}
-{{--                                                    <label class="form-check-label fs-7 fw-500" for="pickup">--}}
-{{--                                                        {{ trans('labels.take_away') }}--}}
-{{--                                                    </label>--}}
-{{--                                                </div>--}}
+                                            {{--                                                <div class="form-check form-check-inline mb-0"> --}}
+                                            {{--                                                    <input class="form-check-input" type="radio" name="order_type" value="1" id="delivery" --}}
+                                            {{--                                                        {{ $address->address_type === 'delivery' ? 'checked' : ($address->address_type === 'carryout' ? '' : 'checked')  }}> --}}
+                                            {{--                                                    <label class="form-check-label fs-7 fw-500" for="delivery"> --}}
+                                            {{--                                                        {{ trans('labels.delivery') }} --}}
+                                            {{--                                                    </label> --}}
+                                            {{--                                                </div> --}}
+                                            <div class="form-check form-check-inline mb-0">
+                                                <input class="form-check-input" type="radio" name="order_type"
+                                                    value="2" id="pickup" checked>
+                                                <label class="form-check-label fs-7 fw-500" for="pickup">
+                                                    {{ trans('labels.take_away') }}
+                                                </label>
+                                            </div>
+                                            {{--                                            @elseif($getsettings->pickup_delivery == 2) --}}
+                                            {{--                                                <div class="form-check form-check-inline mb-0"> --}}
+                                            {{--                                                    <input class="form-check-input" type="radio" name="order_type" --}}
+                                            {{--                                                        value="1" checked id="delivery"> --}}
+                                            {{--                                                    <label class="form-check-label fs-7 fw-500" for="delivery"> --}}
+                                            {{--                                                        {{ trans('labels.delivery') }} --}}
+                                            {{--                                                    </label> --}}
+                                            {{--                                                </div> --}}
+                                            {{--                                            @elseif($getsettings->pickup_delivery == 3) --}}
+                                            {{--                                                <div class="form-check form-check-inline mb-0"> --}}
+                                            {{--                                                    <input class="form-check-input" type="radio" name="order_type" --}}
+                                            {{--                                                        value="2" id="pickup" checked> --}}
+                                            {{--                                                    <label class="form-check-label fs-7 fw-500" for="pickup"> --}}
+                                            {{--                                                        {{ trans('labels.take_away') }} --}}
+                                            {{--                                                    </label> --}}
+                                            {{--                                                </div> --}}
                                         </div>
                                     </div>
                                 </div>
@@ -108,11 +110,9 @@ $itemData = Helper::getBranch(); // ✅ works
                                                     <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="date"
-                                                       class="form-control rounded-2 p-3 delivery_pickup_date"
-                                                       name="delivery_date"
-                                                       value="{{ old('delivery_date') }}"
-                                                       id="delivery_dt"
-                                                       min="{{ date('Y-m-d') }}">
+                                                    class="form-control rounded-2 p-3 delivery_pickup_date"
+                                                    name="delivery_date" value="{{ old('delivery_date') }}"
+                                                    id="delivery_dt" min="{{ date('Y-m-d') }}">
                                             </div>
                                             <div
                                                 class="col-sm-6 delivery-time {{ session()->get('direction') == '2' ? 'text-right' : '' }}">
@@ -136,11 +136,18 @@ $itemData = Helper::getBranch(); // ✅ works
                                             <div class="col-12">
                                                 <div class="alert alert-info text-center shadow-sm rounded">
                                                     <h4 class="mb-1">Branch Selected</h4>
+                                                    <?php
+                                                    $helper = new App\Helpers\Helper();
+                                                    $branch = $helper->getBranch()->name;
+                                                    ?>
                                                     <p class="mb-0">
-                                                        You’ve selected <strong>{{ (new App\Helpers\helper)->getBranch()->name }}</strong>
+                                                        You’ve selected
+
+                                                        <strong>{{ $branch }}</strong>
                                                         as your pickup location for carryout.
                                                         <br>
-                                                        <a href="{{ route('location') }}" class="text-primary" style="font-size: 13px">Change Branch</a>
+                                                        <a href="{{ route('location') }}" class="text-primary"
+                                                            style="font-size: 13px">Change Branch</a>
                                                     </p>
                                                 </div>
                                             </div>
@@ -189,84 +196,18 @@ $itemData = Helper::getBranch(); // ✅ works
                                                 value="{{ Auth::user() && Auth::user()->type == 2 ? Auth::user()->mobile : old('mobile') }}"
                                                 required>
                                         </div>
-                                         <div class="col-md-12 mb-3">
+                                        <div class="col-md-12 mb-3">
                                             <label for="mobile" class="form-label">{{ trans('labels.address') }}
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <textarea type="text" class="form-control" name="address" id="new_address" rows="6"
-                                                placeholder="{{ trans('labels.address') }}"
-                                                required>{{ Auth::user() && Auth::user()->type == 2 ? Auth::user()->address : old('address') }}</textarea>
+                                                placeholder="{{ trans('labels.address') }}" required>{{ Auth::user() && Auth::user()->type == 2 ? Auth::user()->address : old('address') }}</textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="card mb-3" id="addressdiv">
-                                <div class="card-body">
-                                    <div
-                                        class="d-flex justify-content-between align-items-center heading mb-2 border-bottom">
-                                        <h5>{{ trans('labels.delivery_address') }}</h5>
-                                    </div>
-                                    <div class="row g-3">
-                                        @if (Auth::user() && Auth::user()->type == 2)
-                                            <div class="col-md-9 col-sm-8">
-                                                @if ($getaddresses->count() > 0)
-                                                    <label class="form-label">{{ trans('labels.select_address') }}</label>
-                                                    <select name="address_type" id="address_type" class="form-select">
-                                                        @foreach ($getaddresses as $address)
-                                                            <option value="{{ $address->id }}"
-                                                                {{ $address->is_default == 1 ? 'selected' : '' }}>
-                                                                {{ $address->title }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                @endif
-                                            </div>
-                                            <div class="col-md-3 col-sm-4 py-sm-4">
-                                                <a href="{{ URL::to('/address') }}" type="button"
-                                                    class="btn btn-address mt-sm-2 w-100">
-                                                    <i class="fa-solid fa-plus mx-1"></i>
-                                                    {{ trans('labels.add_address') }}</a>
-                                            </div>
-                                        @endif
-                                        <div class="col-12">
-                                            <label for="address" class="form-label">{{ trans('labels.address') }}
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <textarea name="address" id="new_address" class="form-control" rows="6"
-                                                placeholder="{{ trans('labels.address') }}" required>{{ $address->address ?? old('address') }}</textarea>
-                                        </div>
 
-                                        <div class="col-md-6">
-                                            <label for="city" class="form-label">{{ trans('labels.city') }}
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" name="city" id="new_city"
-                                                placeholder="{{ trans('labels.city') }}" value="{{ $address->city ?? old('city') }}">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="state" class="form-label">{{ trans('labels.state') }}
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <select class="form-control form-select" name="state_id" id="state">
-                                                {{-- 
-                                                @foreach($states as $state)
-                                                    <option value="{{ $state->name }}" {{ $address->state->id === $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
-                                                @endforeach
-                                                --}}
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <label for="pincode" class="form-label">{{ trans('labels.pincode') }}
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" name="pincode" id="new_pincode"
-                                                placeholder="{{ trans('labels.pincode') }}"
-                                                value="{{ $address->zip ?? old('pincode') }}">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div class="payment-option mb-3 border">
                                 <div class="heading mb-2 border-bottom">
@@ -346,9 +287,11 @@ $itemData = Helper::getBranch(); // ✅ works
                                             $discount_offer = 0;
                                         }
                                         if (session()->has('addressdata')) {
-                                            $grand_total = ($order_total - $discount_amount) - $discount_offer + $totalcarttax;
+                                            $grand_total =
+                                                $order_total - $discount_amount - $discount_offer + $totalcarttax;
                                         } else {
-                                            $grand_total = ($order_total - $discount_amount) - $discount_offer + $totalcarttax;
+                                            $grand_total =
+                                                $order_total - $discount_amount - $discount_offer + $totalcarttax;
                                         }
                                     @endphp
 
@@ -412,10 +355,9 @@ $itemData = Helper::getBranch(); // ✅ works
                             </div>
                             <!-- special-instruction -->
                             <div class="special-instruction mb-3 border">
-                                <label class="form-label mb-3 border-bottom pb-2 w-100"
-                                       for="tip">Tip</label>
-                                <input type="number" class="form-control" name="tip" id="tip" min="1" step="1"
-                                          placeholder="Tip">
+                                <label class="form-label mb-3 border-bottom pb-2 w-100" for="tip">Tip</label>
+                                <input type="number" class="form-control" name="tip" id="tip" min="1"
+                                    step="1" placeholder="Tip">
                             </div>
                             <div class="special-instruction mb-3 border">
                                 <label class="form-label mb-3 border-bottom pb-2 w-100"
@@ -431,7 +373,8 @@ $itemData = Helper::getBranch(); // ✅ works
                 <input type="hidden" name="user_id" id="user_id" value="{{ @Auth::user()->id }}">
                 <input type="hidden" name="session_id" id="session_id" value="{{ @Session::getId() }}">
                 <input type="hidden" name="order_type" id="order_type" value="{{ session()->get('order_type') }}">
-                <input type="hidden" name="grand_total" id="grand_total" value="{{ helper::currency_format($grand_total) }}">
+                <input type="hidden" name="grand_total" id="grand_total"
+                    value="{{ helper::currency_format($grand_total) }}">
                 <input type="hidden" name="sub_total" id="sub_total" value="{{ $order_total }}">
                 <input type="hidden" name="discount" id="discount" value="{{ $discount_amount }}">
                 <input type="hidden" name="totaltaxamount" id="totaltaxamount" value="{{ $totalcarttax }}">
@@ -448,20 +391,8 @@ $itemData = Helper::getBranch(); // ✅ works
 
                 <input type="hidden" name="sloturl" id="sloturl" value="{{ URL::to('/timeslot') }}">
                 <input type="hidden" name="orderurl" id="orderurl" value="{{ URL::to('placeorder') }}">
-                <input type="hidden" name="paymentsuccess" id="paymentsuccess"
-                    value="{{ URL::to('/paymentsuccess') }}">
-                <input type="hidden" name="paymentfail" id="paymentfail" value="{{ URL::to('/paymentfail') }}">
                 <input type="hidden" name="continueurl" id="continueurl" value="{{ helper::branch_route('home') }}">
                 <input type="hidden" name="environment" id="environment" value="{{ env('Environment') }}">
-                <input type="hidden" name="myfatoorahurl" id="myfatoorahurl" value="{{ URL::to('/myfatoorah') }}">
-                <input type="hidden" name="mercadopagourl" id="mercadopagourl"
-                    value="{{ URL::to('/mercadorequest') }}">
-                <input type="hidden" name="paypalurl" id="paypalurl" value="{{ URL::to('/paypal') }}">
-                <input type="hidden" name="toyyibpayurl" id="toyyibpayurl" value="{{ URL::to('/toyyibpay') }}">
-                <input type="hidden" name="paytaburl" id="paytaburl" value="{{ URL::to('/paytab') }}">
-                <input type="hidden" name="phonepeurl" id="phonepeurl" value="{{ URL::to('/phonepe') }}">
-                <input type="hidden" name="mollieurl" id="mollieurl" value="{{ URL::to('/mollie') }}">
-                <input type="hidden" name="khaltiurl" id="khaltiurl" value="{{ URL::to('/khalti') }}">
 
                 <input type="hidden" value="{{ URL::to('getaddress') }}" name="getaddress" id="getaddress">
 
@@ -497,12 +428,6 @@ $itemData = Helper::getBranch(); // ✅ works
                     id="shipping_area_message">
                 <input type="hidden" value="{{ trans('messages.payment_selection_required') }}"
                     name="payment_type_message" id="payment_type_message">
-
-                <form action="{{ URL::to('paypal') }}" method="post" class="d-none">
-                    {{ csrf_field() }}
-                    <input type="hidden" name="return" value="2">
-                    <input type="submit" class="callpaypal" name="submit">
-                </form>
             </div>
         </section>
     @else
@@ -596,30 +521,27 @@ $itemData = Helper::getBranch(); // ✅ works
     </div>
 @endsection
 @section('scripts')
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://checkout.flutterwave.com/v3.js"></script>
-    <script src="https://js.paystack.co/v1/inline.js"></script>
     <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/checkout.js') }}"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
+
     <script>
-        document.getElementById('tip').addEventListener('keydown', function (e) {
+        document.getElementById('tip').addEventListener('keydown', function(e) {
             if (e.key === '-' || e.key === 'e') {
                 e.preventDefault();
             }
         });
-        
+
         var select = "{{ trans('labels.select') }}";
         var dateFormat = "{{ helper::appdata()->date_format }}";
-        
+
         // Convert app date format to placeholder format
         var placeholderFormat = dateFormat
             .replace(/Y/g, 'yyyy')
             .replace(/m/g, 'mm')
             .replace(/d/g, 'dd');
-        
-        document.addEventListener('DOMContentLoaded', function () {
+
+        document.addEventListener('DOMContentLoaded', function() {
             const deliveryDateInput = document.getElementById('delivery_dt');
             deliveryDateInput.setAttribute('placeholder', placeholderFormat);
         });
@@ -627,21 +549,21 @@ $itemData = Helper::getBranch(); // ✅ works
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const deliveryDateInput = document.getElementById('delivery_dt');
-        
+
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
-        
+
             const localToday = `${yyyy}-${mm}-${dd}`;
-        
+
             // Set min date using user's local timezone
             deliveryDateInput.min = localToday;
-        
+
             // Prevent selecting past dates
-            deliveryDateInput.addEventListener('input', function () {
+            deliveryDateInput.addEventListener('input', function() {
                 if (deliveryDateInput.value < localToday) {
                     deliveryDateInput.value = localToday;
                 }
@@ -652,7 +574,7 @@ $itemData = Helper::getBranch(); // ✅ works
 
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const pickupRadio = document.getElementById("pickup");
             const deliveryRadio = document.getElementById("delivery");
 

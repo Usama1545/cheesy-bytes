@@ -21,7 +21,7 @@
                         @endif
                         <div class="card-image">
                             <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
-                                 class="card-img-top border-0 rounded-0 rounded-top position-relative" alt="dishes">
+                                 class="card-img-top border-0 rounded-0 rounded-top position-relative" alt="dishes" loading="lazy" decoding="async">
                         </div>
                     </a>
                     <div class="card-body pb-0 border-bottom">

@@ -25,6 +25,7 @@ class PizzaCrustController extends Controller
 
     public function edititem($id)
     {
+        $pizza = Item::where('id', $id)->first();
         $sizes = PizzaPrice::where('item_id', $id)->get();
         $crusts = ProductSizeCrust::where('item_id', $id)->get();
 
@@ -39,7 +40,7 @@ class PizzaCrustController extends Controller
             ];
         })->values()->toArray();
 
-        return view('admin.pizza-pricing.edit', compact('groupedData', 'id', 'sizes'));
+        return view('admin.pizza-pricing.edit', compact('groupedData', 'id', 'sizes', 'pizza'));
     }
 
 

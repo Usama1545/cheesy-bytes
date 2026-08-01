@@ -28,7 +28,7 @@
                                 <div class="review">
                                     <div class="d-flex taxt-start col-12 p-2">
                                         <img src="{{ $testimonialdata['user_info']->profile_image }}"
-                                            class="img-circle img-responsive"/>
+                                            class="img-circle img-responsive" loading="lazy" decoding="async" />
                                         <div class="mx-2">
                                             <h4>{{ $testimonialdata['user_info']->name }}</h4>
                                             <div class="review-star">
@@ -96,7 +96,7 @@
                                     <div class="form-group col-lg-12 text-center">
                                         <div class="review border-0 py-2">
                                             <img src="{{ helper::image_path(@Auth::user()->profile_image) }}"
-                                                class="img-circle img-responsive mb-0" />
+                                                class="img-circle img-responsive mb-0" loading="lazy" decoding="async" />
                                             <h4 class="mb-0 mt-3">{{ @Auth::user()->name }}</h4>
                                         </div>
                                         <div class="star-rating">

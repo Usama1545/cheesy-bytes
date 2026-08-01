@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Order;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 
 class DriverController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index()
     {
         $getdriverlist = User::where('type', '3')->orderByDesc('id')->paginate(12);
@@ -35,6 +38,7 @@ class DriverController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         } else {
 
+            $this->assertValidImage($request, 'image', true);
             $image = 'identity-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
             $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/profile', $image);
 
@@ -54,7 +58,7 @@ class DriverController extends Controller
     }
     public function show(Request $request)
     {
-        $getdriverdata = User::find($request->id);
+        $getdriverdata = User::where('id', $request->id)->where('type', 3)->first();
         return view('admin.driver.edit', compact('getdriverdata'));
     }
     public function update(Request $request)
@@ -71,8 +75,9 @@ class DriverController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         } else {
-            $driver = User::find($request->id);
+            $driver = User::where('id', $request->id)->where('type', 3)->first();
             if ($request->file('image') != "") {
+                $this->assertValidImage($request, 'image', true);
                 if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . $driver->identity_image)) {
                     unlink(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . $driver->identity_image);
                 }
@@ -101,7 +106,7 @@ class DriverController extends Controller
     }
     public function driverdetails(Request $request)
     {
-        $getdriverdata = User::where('id', $request->id)->first();
+        $getdriverdata = User::where('id', $request->id)->where('type', 3)->first();
         $getorders = Order::with('user_info', 'driver_info')->where('driver_id', $request->id)->get();
 
         $totalprocessing = Order::whereIn('status_type', array(1, 2))->where('driver_id', $request->id)->count();

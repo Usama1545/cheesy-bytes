@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ValidatesImageUploads;
 use App\Models\Settings;
 use App\Models\WhyChooseUs;
 use Illuminate\Http\Request;
 
 class WhyChooseUsController extends Controller
 {
+    use ValidatesImageUploads;
+
     public function index(Request $request)
     {
         $getsettings = Settings::first();
@@ -21,6 +24,7 @@ class WhyChooseUsController extends Controller
     }
     public function store(Request $request)
     {
+        $this->assertValidImage($request, 'image', true);
         $image = 'choose_us-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
         $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $image);
         $whychooseus = new WhyChooseUs();
@@ -39,6 +43,7 @@ class WhyChooseUsController extends Controller
     {
         $whychooseus = WhyChooseUs::find($request->id);
         if ($request->file('image') != "") {
+            $this->assertValidImage($request, 'image', true);
             if (file_exists(storage_path() . "/app/public/admin-assets/images/about/" . $whychooseus->image)) {
                 unlink(storage_path() . "/app/public/admin-assets/images/about/" . $whychooseus->image);
             }

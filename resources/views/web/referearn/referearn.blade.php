@@ -32,7 +32,7 @@
                         <div class="d-flex flex-column align-items-center">
                             <div class="col-sm-4 col-9">
                                 <img class="mb-4 w-100 h-100"
-                                    src="{{ helper::image_path(helper::appdata()->refer_earn_bg_image) }}">
+                                    src="{{ helper::image_path(helper::appdata()->refer_earn_bg_image) }}" loading="lazy" decoding="async">
                             </div>
                             <h5 class="text-uppercase">{{ trans('labels.refer_earn') }}</h5>
                             <p class="fs-7 text-center text-muted">{{ trans('labels.refer_note_1') }}

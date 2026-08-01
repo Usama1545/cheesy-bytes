@@ -4,7 +4,7 @@
             <div class="card-image card-second d-flex align-items-center col-auto position-relative">
 
                 <img src="{{ @helper::image_path($itemdata->product['item_image']->image_name) }}"
-                     class="card-img-top border-0 rounded-4" alt="dishes">
+                     class="card-img-top border-0 rounded-4" alt="dishes" loading="lazy" decoding="async">
 
             </div>
             <div class="card-body py-0 {{ session()->get('direction') == '2' ? 'pe-3 ps-0' : 'ps-3 pe-0' }}">

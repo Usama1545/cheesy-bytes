@@ -44,6 +44,7 @@ class BranchController extends Controller
         $branch->printer_id = $request->printer_id;
         $branch->seo_name = $request->seo_name;
         $branch->webhook_secret = $request->webhook_secret;
+        $branch->print_method = $request->print_method ?? 'printnode';
         $branch->save();
 
         $payment = Payment::create([
@@ -84,6 +85,7 @@ class BranchController extends Controller
         $branch->printer_id = $request->printer_id;
         $branch->seo_name = $request->seo_name;
         $branch->webhook_secret = $request->webhook_secret;
+        $branch->print_method = $request->print_method ?? 'printnode';
         $branch->save();
 
         $branch->paymentMethod()->update([

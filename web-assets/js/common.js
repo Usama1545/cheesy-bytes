@@ -789,13 +789,3 @@ document.addEventListener("DOMContentLoaded", function () {
             .classList.add("hide-on-safari");
     }
 });
-
-// Quick call JavaScript
-document.addEventListener("DOMContentLoaded", function () {
-    const button = document.querySelector(".your-button-class");
-    if (button) {
-        button.addEventListener("click", function () {
-            this.classList.toggle("expanded");
-        });
-    }
-});

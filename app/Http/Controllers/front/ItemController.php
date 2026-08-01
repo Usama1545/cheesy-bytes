@@ -20,7 +20,7 @@ use App\Models\SystemAddons;
 use App\Models\DealCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Session;
+use Illuminate\Support\Facades\Session;
 
 class ItemController extends Controller
 {

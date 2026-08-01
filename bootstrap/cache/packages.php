@@ -24,13 +24,13 @@
   ),
   'josiasmontag/laravel-recaptchav3' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Lunaweb\\RecaptchaV3\\Providers\\RecaptchaV3ServiceProvider',
-    ),
     'aliases' => 
     array (
       'RecaptchaV3' => 'Lunaweb\\RecaptchaV3\\Facades\\RecaptchaV3',
+    ),
+    'providers' => 
+    array (
+      0 => 'Lunaweb\\RecaptchaV3\\Providers\\RecaptchaV3ServiceProvider',
     ),
   ),
   'kreait/laravel-firebase' => 
@@ -71,13 +71,13 @@
   ),
   'laravel/socialite' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Laravel\\Socialite\\SocialiteServiceProvider',
-    ),
     'aliases' => 
     array (
       'Socialite' => 'Laravel\\Socialite\\Facades\\Socialite',
+    ),
+    'providers' => 
+    array (
+      0 => 'Laravel\\Socialite\\SocialiteServiceProvider',
     ),
   ),
   'laravel/tinker' => 
@@ -89,31 +89,13 @@
   ),
   'maatwebsite/excel' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
-    ),
     'aliases' => 
     array (
       'Excel' => 'Maatwebsite\\Excel\\Facades\\Excel',
     ),
-  ),
-  'mollie/laravel-mollie' => 
-  array (
     'providers' => 
     array (
-      0 => 'Mollie\\Laravel\\MollieServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Mollie' => 'Mollie\\Laravel\\Facades\\Mollie',
-    ),
-  ),
-  'myfatoorah/laravel-package' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'MyFatoorah\\LaravelPackage\\MyFatoorahServiceProvider',
+      0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
     ),
   ),
   'nesbot/carbon' => 
@@ -137,29 +119,11 @@
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
     ),
   ),
-  'rachidlaasri/laravel-installer' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'RachidLaasri\\LaravelInstaller\\Providers\\LaravelInstallerServiceProvider',
-    ),
-  ),
   'spatie/laravel-cookie-consent' => 
   array (
     'providers' => 
     array (
       0 => 'Spatie\\CookieConsent\\CookieConsentServiceProvider',
-    ),
-  ),
-  'spatie/laravel-ignition' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
     ),
   ),
   'spatie/laravel-sitemap' => 

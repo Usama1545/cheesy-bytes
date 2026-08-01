@@ -34,7 +34,7 @@
                         <div class="card-image">
                             <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
                                  class="card-img-top border-0 rounded-0 rounded-top position-relative"
-                                 alt="dishes">
+                                 alt="dishes" loading="lazy" decoding="async">
                         </div>
                     </a>
 

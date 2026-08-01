@@ -30,7 +30,7 @@ use App\Models\Time;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use DateTime;
@@ -394,6 +394,10 @@ class CheckoutController extends Controller
                 'success_url' => route('payment.success', ['order' => $order_number]),
                 'cancel_url' => route('payment.cancel', ['order' => $order_number]),
             ]);
+
+            $order->stripe_session_id = $stripe->id;
+            $order->save();
+
             $this->createPrintJob($order->id);
 
             DB::commit();
@@ -405,7 +409,6 @@ class CheckoutController extends Controller
 
         } catch (\Throwable $th) {
             DB::rollback();
-            dd($th);
             Log::error($th);
             return response()->json(['status' => 0, 'message' => 'Order failed']);
         }
@@ -518,6 +521,60 @@ class CheckoutController extends Controller
         return $startTime . ' - ' . $endTime;
     }
 
+    public function stripeCheckoutSuccess($orderId)
+    {
+        $order = Order::where('order_number', $orderId)->first();
+
+        if (!$order) {
+            Log::error('Payment success: order not found for order_number ' . $orderId);
+            return redirect('/')->with('error', trans('messages.wrong'));
+        }
+
+        if ((int) $order->payment_status !== 2) {
+            if (!$order->stripe_session_id) {
+                return redirect('/')->with('error', trans('messages.unable_to_complete_payment'));
+            }
+
+            try {
+                $stripekey = helper::stripe_data()->secret_key;
+                Stripe\Stripe::setApiKey($stripekey);
+                $session = Stripe\Checkout\Session::retrieve($order->stripe_session_id);
+            } catch (\Throwable $e) {
+                Log::error('Stripe session verification failed: ' . $e->getMessage());
+                return redirect('/')->with('error', trans('messages.unable_to_complete_payment'));
+            }
+
+            if ($session->payment_status !== 'paid') {
+                return redirect('/')->with('error', trans('messages.unable_to_complete_payment'));
+            }
+
+            $order->payment_status = 2;
+            $order->save();
+        }
+
+        if (Auth::check()) {
+            $user = Auth::user();
+            Cart::where('user_id', $user->id)->delete();
+
+            if ($user->is_notification == 1) {
+                $title = trans('labels.order_placed');
+                $body = "Your Order " . $orderId . " has been placed.";
+                helper::push_notification($user->token, $title, $body, "order", $order->id);
+            }
+        } else {
+            $sessionId = Session::getId();
+            Cart::where('session_id', $sessionId)->delete();
+
+            $title = trans('labels.order_placed');
+            $body = "Your Order " . $orderId . " has been placed.";
+            helper::push_notification($sessionId, $title, $body, "order", $order->id);
+        }
+
+        $branchId = Session::get('branch_id');
+        $location = Branch::where('id', $branchId)->first()->slug;
+
+        return redirect(url("/$location/success-$orderId"));
+    }
 
     public function paymentsuccess(Request $request)
     {
@@ -536,45 +593,6 @@ class CheckoutController extends Controller
                 $response = ['status' => 1, 'msg' => 'paid', 'paymentId' => $paymentId];
             }
 
-            if (Session::get('payment_type') == "11") {
-                $checkstatus = app('App\Http\Controllers\addons\PayTabController')->checkpaymentstatus(Session::get('tran_ref'));
-                if ($checkstatus == "A") {
-                    $paymentId = Session::get('tran_ref');
-                    $response = ['status' => '1', 'msg' => 'paid', 'paymentId' => $paymentId];
-                } else {
-                    return redirect('/checkout?buynow=' . Session::get('buynow'))->with('error', trans('messages.unable_to_complete_payment'));
-                }
-            }
-
-            if (Session::get('payment_type') == "12") {
-                if ($request->code == "PAYMENT_SUCCESS") {
-                    $paymentId = $request->transactionId;
-                    $response = ['status' => 1, 'msg' => 'paid', 'paymentId' => $paymentId];
-                } else {
-                    return redirect('/checkout?buynow=' . Session::get('buynow'))->with('error', trans('messages.unable_to_complete_payment'));
-                }
-            }
-
-            if (Session::get('payment_type') == "13") {
-                $checkstatus = app('App\Http\Controllers\addons\MollieController')->checkpaymentstatus(Session::get('tran_ref'));
-
-                if ($checkstatus == "A") {
-                    $paymentId = Session::get('tran_ref');
-                    $response = ['status' => 1, 'msg' => 'paid', 'paymentId' => $paymentId];
-                } else {
-                    return redirect('/checkout?buynow=' . Session::get('buynow'))->with('error', trans('messages.unable_to_complete_payment'));
-                }
-            }
-
-            if (Session::get('payment_type') == "14") {
-
-                if ($request->status == "Completed") {
-                    $paymentId = $request->transaction_id;
-                    $response = ['status' => 1, 'msg' => 'paid', 'paymentId' => $paymentId];
-                } else {
-                    return redirect('/checkout?buynow=' . Session::get('buynow'))->with('error', trans('messages.unable_to_complete_payment'));
-                }
-            }
         } catch (\Exception $e) {
             $response = ['status' => 0, 'msg' => $e->getMessage()];
         }

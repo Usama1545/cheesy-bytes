@@ -31,7 +31,7 @@
                     <div class="col-lg-4 left-side mt-3">
                         <a href="{{ helper::branch_route('home') }}">
                             <img src="{{ helper::image_path(@helper::appdata()->logo) }}" height="55" class="my-3"
-                                alt="footer_logo">
+                                alt="footer_logo" loading="lazy" decoding="async">
                         </a>
                         <h1 style="color: black">{{ @helper::footerData()->title ?? @helper::appdata()->footer_title }}</h1>
                         <p class="mb-0" style="color: black">{{ @helper::footerData()->description ?? @helper::appdata()->footer_description }}</p>

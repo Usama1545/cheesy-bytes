@@ -9,17 +9,64 @@ use App\Models\TopDeals;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Item;
+use App\Models\ProductSizeCrust;
+use App\Models\PizzaPrice;
 use App\Helpers\helper;
 use App\Services\BogoAutoAddService;
 use App\Models\Settings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\DealItem;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\log;
 
 class CartController extends Controller
 {
+    /**
+     * Scope a cart query to the current logged-in user or guest session.
+     */
+    private function buildCartOwnerQuery()
+    {
+        return Auth::user() && Auth::user()->type == 2
+            ? Cart::where('user_id', Auth::user()->id)
+            : Cart::where('session_id', Session::getId());
+    }
+
+    private function normalizeMatchValue($value)
+    {
+        return ($value === null || $value === '') ? null : $value;
+    }
+
+    /**
+     * Find all cart lines belonging to the current user/session that represent
+     * the exact same product configuration (item, deal slot, size/crust,
+     * addons/extras, dippings) as the given criteria.
+     */
+    private function findMatchingCartLines(array $criteria)
+    {
+        $query = $this->buildCartOwnerQuery()
+            ->where('item_id', $criteria['item_id'])
+            ->where('buynow', (int) ($criteria['buynow'] ?? 0));
+
+        foreach (['deal_id', 'deal_category_id', 'size_id', 'crust_id', 'addons_id', 'extras_id', 'dipping_name'] as $field) {
+            $value = $this->normalizeMatchValue($criteria[$field] ?? null);
+            if ($value === null) {
+                $query->where(function ($q) use ($field) {
+                    $q->whereNull($field)->orWhere($field, '');
+                });
+            } else {
+                $query->where($field, $value);
+            }
+        }
+
+        return $query->get();
+    }
+
+    private function findMatchingCartLine(array $criteria)
+    {
+        return $this->findMatchingCartLines($criteria)->first();
+    }
+
     public function index(Request $request)
     {
         if (Auth::user() && Auth::user()->type == 2) {
@@ -73,15 +120,15 @@ class CartController extends Controller
     }
     public function addtocart(Request $request)
     {
-        
-        log::info('yes i am hit');
         $branchId = Session::get('branch_id');
 
         try {
             if ($request->buynow == 1) {
                 if (Auth::user() && Auth::user()->type == 2) {
+                    log::info('user_id', ['user_id' => Auth::user()->id]);
                     Cart::where('buynow', 1)->where('user_id', Auth::user()->id)->delete();
                 } else {
+                    log::info('session_id', ['session_id' => Session::getId()]);
                     Cart::where('buynow', 1)->where('session_id', Session::getId())->delete();
                 }
             }
@@ -91,6 +138,8 @@ class CartController extends Controller
                     $query->on('item_prices.item_id', '=', 'item.id')
                         ->where('item_prices.branch_id', '=', $branchId);
                 })->first();
+
+            $serverItemPrice = $itemdata->item_price;
 
             if ($request->deal_id) {
                 $deal = TopDeals::where('id', $request->deal_id)->first();
@@ -169,18 +218,8 @@ class CartController extends Controller
 
 
                         if ($existingDiscountedQty + $requestedQty <= $maxDiscountedAllowed) {
-                            // Apply discount
-                            if ($deal->offer_type == 1) {
-                                $discount = min($deal->offer_amount, $request->item_price);
-                            } else {
-                                // $price = $request->item_price - $request->item_price * ($deal->offer_amount / 100);
-                            }
-                            $price = $request->item_price;
-
-                            $request->merge([
-                                'item_price' => $price,
-                                'is_discounted' => true,
-                            ]);
+                            $serverItemPrice = 0;
+                            $request->merge(['is_discounted' => true]);
                         } else {
                             return response()->json([
                                 'status' => 0,
@@ -195,35 +234,66 @@ class CartController extends Controller
             }
 
 
-            $cart = new Cart();
-            if (Auth::user() && Auth::user()->type == 2) {
-                $cart->user_id = Auth::user()->id;
-                $cart->session_id = "";
+            $requestQty = (int) ($request->qty ?: 1);
+            $matchCriteria = [
+                'item_id' => $itemdata->id,
+                'deal_id' => $request->deal_id ?? null,
+                'deal_category_id' => $request->deal_category_id ?? null,
+                'size_id' => $request->size_id ?? null,
+                'crust_id' => $request->crust_id ?? null,
+                'addons_id' => $request->addons_id ?? null,
+                'extras_id' => $request->extras_id ?? null,
+                'dipping_name' => null,
+                'buynow' => (int) ($request->buynow ?? 0),
+            ];
+
+            $existingLine = $this->findMatchingCartLine($matchCriteria);
+
+            if ($existingLine) {
+                log::info('addtocart: matching cart line found, merging qty instead of creating new row', [
+                    'cart_id' => $existingLine->id,
+                    'old_qty' => $existingLine->qty,
+                    'added_qty' => $requestQty,
+                    'criteria' => $matchCriteria,
+                ]);
+                $existingLine->qty += $requestQty;
+                $existingLine->save();
+                $cart = $existingLine;
             } else {
-                $cart->user_id = "";
-                $cart->session_id = Session::getId();
+                log::info('addtocart: no matching cart line found, creating new row', [
+                    'criteria' => $matchCriteria,
+                ]);
+                $cart = new Cart();
+                if (Auth::user() && Auth::user()->type == 2) {
+                    $cart->user_id = Auth::user()->id;
+                    $cart->session_id = "";
+                } else {
+                    $cart->user_id = "";
+                    $cart->session_id = Session::getId();
+                }
+                $cart->item_id = $itemdata->id;
+                $cart->deal_id = $request->deal_id ?? null;
+                $cart->item_name = $request->item_name;
+                $cart->item_type = $request->item_type;
+                $cart->item_image = $request->image_name;
+                $cart->size_id = $request->size_id;
+                $cart->crust_id = $request->crust_id;
+                $cart->deal_category_id = $request->deal_category_id ?? null;
+                $cart->tax = $request->tax;
+                $cart->item_price = helper::number_format($serverItemPrice);
+                $cart->addons_id = $request->addons_id == null ? null : $request->addons_id;
+                $cart->addons_name = $request->addons_name == null ? null : $request->addons_name;
+                $cart->addons_price = $request->addons_price == null ? null : $request->addons_price;
+                $cart->addons_total_price = helper::number_format($request->addons_price == "" ? 0 : array_sum(explode('| ', $request->addons_price)));
+                $cart->extras_id = $request->extras_id == null ? null : $request->extras_id;
+                $cart->extras_name = $request->extras_name == null ? null : $request->extras_name;
+                $cart->extras_price = $request->extras_price == null ? null : $request->extras_price;
+                $cart->extras_total_price = helper::number_format($request->extras_price == "" ? 0 : array_sum(explode('| ', $request->extras_price)));
+                $cart->qty = $requestQty;
+                $cart->buynow = $request->buynow;
+                $cart->save();
+                log::info('addtocart: new cart row created', ['cart_id' => $cart->id]);
             }
-            $cart->item_id = $itemdata->id;
-            $cart->deal_id = $request->deal_id ?? null;
-            $cart->item_name = $request->item_name;
-            $cart->item_type = $request->item_type;
-            $cart->item_image = $request->image_name;
-            $cart->size_id = $request->size_id;
-            $cart->crust_id = $request->crust_id;
-            $cart->deal_category_id = $request->deal_category_id ?? null;
-            $cart->tax = $request->tax;
-            $cart->item_price = helper::number_format($request->item_price);
-            $cart->addons_id = $request->addons_id == null ? null : $request->addons_id;
-            $cart->addons_name = $request->addons_name == null ? null : $request->addons_name;
-            $cart->addons_price = $request->addons_price == null ? null : $request->addons_price;
-            $cart->addons_total_price = helper::number_format($request->addons_price == "" ? 0 : array_sum(explode('| ', $request->addons_price)));
-            $cart->extras_id = $request->extras_id == null ? null : $request->extras_id;
-            $cart->extras_name = $request->extras_name == null ? null : $request->extras_name;
-            $cart->extras_price = $request->extras_price == null ? null : $request->extras_price;
-            $cart->extras_total_price = helper::number_format($request->extras_price == "" ? 0 : array_sum(explode('| ', $request->extras_price)));
-            $cart->qty = $request->qty;
-            $cart->buynow = $request->buynow;
-            $cart->save();
 
             $autoAddedItems = BogoAutoAddService::autoAddFreeItems($cart);
 
@@ -308,14 +378,37 @@ class CartController extends Controller
                 $dippingQuantity = null;
             }
             $itemdata = Item::where('slug', $validated['slug'])->first();
-            $cart = new Cart();
-            if (Auth::user() && Auth::user()->type == 2) {
-                $cart->user_id = Auth::user()->id;
-                $cart->session_id = "";
-            } else {
-                $cart->user_id = "";
-                $cart->session_id = Session::getId();
+
+            if (!$itemdata) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Item not found.',
+                    'buynow' => $request->buynow
+                ], 404);
             }
+
+            $branchId = Session::get('branch_id');
+
+            $pizzaBasePrice = PizzaPrice::where('item_id', $itemdata->id)
+                ->where('branch_id', $branchId)
+                ->where('size_id', $validated['size_id'])
+                ->value('price');
+
+            $sizeCrustPrice = ProductSizeCrust::where('item_id', $itemdata->id)
+                ->where('size_id', $validated['size_id'])
+                ->where('crust_id', $validated['crust_id'])
+                ->value('price');
+
+            if ($pizzaBasePrice === null || $sizeCrustPrice === null) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Selected size/crust combination is not available for this item.',
+                    'buynow' => $request->buynow
+                ], 400);
+            }
+
+            $serverItemPrice = $pizzaBasePrice + $sizeCrustPrice;
+
             if ($request->deal_id) {
                 $deal = TopDeals::where('id', $request->deal_id)->first();
                 if ($deal && $deal->deal_type == 3) {
@@ -389,20 +482,8 @@ class CartController extends Controller
 
 
                         if ($existingDiscountedQty + $requestedQty <= $maxDiscountedAllowed) {
-                            // Apply discount
-                            // if ($deal->offer_type == 1) {
-                            //     $discount = min($deal->offer_amount, $request->item_price);
-                            //     $price = $request->item_price - $discount;
-                            // } else {
-                            //     $price = $request->item_price - $request->item_price * ($deal->offer_amount / 100);
-                            // }
-                            
-                            $price = $request->item_price ;
-                            
-                            $request->merge([
-                                'item_price' => $price,
-                                'is_discounted' => true,
-                            ]);
+                            $serverItemPrice = 0;
+                            $request->merge(['is_discounted' => true]);
                         } else {
                             return response()->json([
                                 'status' => 0,
@@ -415,30 +496,71 @@ class CartController extends Controller
                 }
             }
             $addons_price = $request->addons_price == null ? null :  str_replace('|', '| ', $request->addons_price);
-            $cart->item_id = $itemdata->id;
-            $cart->item_name = $request->item_name;
-            $cart->deal_id = $request->deal_id ?? null;
-            $cart->item_type = $request->item_type;
-            $cart->item_image = $request->image_name;
-            $cart->tax = $itemdata->tax;
-            $cart->deal_category_id = $request->deal_category_id ?? null;
-            $cart->item_price = helper::number_format($request->item_price / $validated['qty']);
-            $cart->addons_id = $request->addons_id == null ? null : str_replace('|', '| ', $request->addons_id) ;
-            $cart->addons_name = $addons_name;
-            $cart->addons_price = $addons_price;
-            $cart->addons_total_price = helper::number_format($request->addons_price == "" ? 0 : array_sum(explode('| ', $addons_price)));
-            $cart->extras_id = $request->extras_id == null ? null : $request->extras_id;
-            $cart->extras_name = $request->extras_name == null ? null : $request->extras_name;
-            $cart->extras_price = $request->extras_price == null ? null : $request->extras_price;
-            $cart->extras_total_price = helper::number_format($request->extras_price == "" ? 0 : array_sum(explode('| ', $request->extras_price)));
-            $cart->dipping_quantity = $dippingQuantity;
-            $cart->dipping_name = $dippingName;
-            $cart->dipping_price = $dippingPrice;
-            $cart->size_id = $validated['size_id'];
-            $cart->crust_id = $validated['crust_id'];
-            $cart->qty = $validated['qty'];
-            $cart->buynow = $request->buynow;
-            $cart->save();
+            $normalizedAddonsId = $request->addons_id == null ? null : str_replace('|', '| ', $request->addons_id);
+            $requestQty = (int) ($validated['qty'] ?: 1);
+
+            $matchCriteria = [
+                'item_id' => $itemdata->id,
+                'deal_id' => $request->deal_id ?? null,
+                'deal_category_id' => $request->deal_category_id ?? null,
+                'size_id' => $validated['size_id'],
+                'crust_id' => $validated['crust_id'],
+                'addons_id' => $normalizedAddonsId,
+                'extras_id' => $request->extras_id ?? null,
+                'dipping_name' => $dippingName,
+                'buynow' => (int) ($request->buynow ?? 0),
+            ];
+
+            $existingLine = $this->findMatchingCartLine($matchCriteria);
+
+            if ($existingLine) {
+                log::info('addpizzatocart: matching cart line found, merging qty instead of creating new row', [
+                    'cart_id' => $existingLine->id,
+                    'old_qty' => $existingLine->qty,
+                    'added_qty' => $requestQty,
+                    'criteria' => $matchCriteria,
+                ]);
+                $existingLine->qty += $requestQty;
+                $existingLine->save();
+                $cart = $existingLine;
+            } else {
+                log::info('addpizzatocart: no matching cart line found, creating new row', [
+                    'criteria' => $matchCriteria,
+                ]);
+                $cart = new Cart();
+                if (Auth::user() && Auth::user()->type == 2) {
+                    $cart->user_id = Auth::user()->id;
+                    $cart->session_id = "";
+                } else {
+                    $cart->user_id = "";
+                    $cart->session_id = Session::getId();
+                }
+                $cart->item_id = $itemdata->id;
+                $cart->item_name = $request->item_name;
+                $cart->deal_id = $request->deal_id ?? null;
+                $cart->item_type = $request->item_type;
+                $cart->item_image = $request->image_name;
+                $cart->tax = $itemdata->tax;
+                $cart->deal_category_id = $request->deal_category_id ?? null;
+                $cart->item_price = helper::number_format($serverItemPrice);
+                $cart->addons_id = $normalizedAddonsId;
+                $cart->addons_name = $addons_name;
+                $cart->addons_price = $addons_price;
+                $cart->addons_total_price = helper::number_format($request->addons_price == "" ? 0 : array_sum(explode('| ', $addons_price)));
+                $cart->extras_id = $request->extras_id == null ? null : $request->extras_id;
+                $cart->extras_name = $request->extras_name == null ? null : $request->extras_name;
+                $cart->extras_price = $request->extras_price == null ? null : $request->extras_price;
+                $cart->extras_total_price = helper::number_format($request->extras_price == "" ? 0 : array_sum(explode('| ', $request->extras_price)));
+                $cart->dipping_quantity = $dippingQuantity;
+                $cart->dipping_name = $dippingName;
+                $cart->dipping_price = $dippingPrice;
+                $cart->size_id = $validated['size_id'];
+                $cart->crust_id = $validated['crust_id'];
+                $cart->qty = $requestQty;
+                $cart->buynow = $request->buynow;
+                $cart->save();
+                log::info('addpizzatocart: new cart row created', ['cart_id' => $cart->id]);
+            }
 
             BogoAutoAddService::autoAddFreeItems($cart);
 
@@ -458,11 +580,27 @@ class CartController extends Controller
     }
     public function deletecartitem(Request $request)
     {
-        $checkcart = Cart::find($request->id);
+        $cartQuery = Auth::check() && Auth::user()->type == 2
+            ? Cart::where('user_id', Auth::id())
+            : Cart::where('session_id', Session::getId());
+
+        $checkcart = (clone $cartQuery)->where('id', $request->id)->first();
 
         if (!$checkcart) {
+            log::info('deletecartitem: cart item not found', ['id' => $request->id]);
             return 0;
         }
+
+        log::info('deletecartitem: request received', [
+            'cart_id' => $checkcart->id,
+            'item_id' => $checkcart->item_id,
+            'item_name' => $checkcart->item_name,
+            'deal_id' => $checkcart->deal_id,
+            'deal_category_id' => $checkcart->deal_category_id,
+            'size_id' => $checkcart->size_id,
+            'crust_id' => $checkcart->crust_id,
+            'qty' => $checkcart->qty,
+        ]);
 
         // if not part of any deal, delete directly
         if (!$checkcart->deal_id) {
@@ -479,27 +617,49 @@ class CartController extends Controller
             return 1;
         }
 
+        // Deal item: also remove any other cart lines that represent the exact
+        // same product/options (item, size, crust, addons, extras, dipping)
+        // within this deal slot, so leftover duplicate rows don't linger.
+        $matchingLines = $this->findMatchingCartLines([
+            'item_id' => $checkcart->item_id,
+            'deal_id' => $checkcart->deal_id,
+            'deal_category_id' => $checkcart->deal_category_id,
+            'size_id' => $checkcart->size_id,
+            'crust_id' => $checkcart->crust_id,
+            'addons_id' => $checkcart->addons_id,
+            'extras_id' => $checkcart->extras_id,
+            'dipping_name' => $checkcart->dipping_name,
+            'buynow' => $checkcart->buynow,
+        ]);
+        $combinedQty = $matchingLines->sum('qty');
+
+        log::info('deletecartitem: matching sibling lines for deal item', [
+            'cart_id' => $checkcart->id,
+            'sibling_ids' => $matchingLines->pluck('id')->all(),
+            'combined_qty' => $combinedQty,
+        ]);
+
         // ✅ Free item → allow delete always
         $dealCategory = DealCategory::find($checkcart->deal_category_id);
         if ($dealCategory && $dealCategory->is_free) {
-            $checkcart->delete();
+            foreach ($matchingLines as $line) {
+                $line->delete();
+            }
             session()->forget('discount_data');
             return 1;
         }
 
         // ✅ Required item — need to check validation
-        $cartQuery = Auth::check() && Auth::user()->type == 2
-            ? Cart::where('user_id', Auth::id())
-            : Cart::where('session_id', Session::getId());
-
         // Get all deal categories for this deal
         $dealCategories = DealCategory::where('deal_id', $deal->id)->get();
 
         // Find the required category that this item belongs to
         $requiredCategory = $dealCategories->firstWhere('id', $checkcart->deal_category_id);
-        
+
         if (!$requiredCategory || !$requiredCategory->is_required) {
-            $checkcart->delete();
+            foreach ($matchingLines as $line) {
+                $line->delete();
+            }
             session()->forget('discount_data');
             return 1;
         }
@@ -512,22 +672,24 @@ class CartController extends Controller
 
         $currentSets = intdiv($currentRequiredQty, $requiredCategory->quantity);
 
-        // STEP 2: Calculate sets AFTER deletion
-        $requiredQtyAfterDeletion = $currentRequiredQty - $checkcart->qty;
-        $setsAfterDeletion = intdiv($requiredQtyAfterDeletion, $requiredCategory->quantity);
+        // STEP 2: Calculate sets AFTER deletion (removing all matching sibling lines together)
+        $requiredQtyAfterDeletion = $currentRequiredQty - $combinedQty;
+        $setsAfterDeletion = intdiv(max(0, $requiredQtyAfterDeletion), $requiredCategory->quantity);
         // If sets don't change, safe to delete
         if ($setsAfterDeletion >= $currentSets) {
-            $checkcart->delete();
+            foreach ($matchingLines as $line) {
+                $line->delete();
+            }
             session()->forget('discount_data');
             return 1;
         }
 
         // STEP 3: Sets are reduced - check if we have excess free items
         $freeCategories = $dealCategories->where('is_free', true);
-        
+
         foreach ($freeCategories as $freeCategory) {
             $freeItemIds = DealItem::where('deal_category_id', $freeCategory->id)->pluck('item_id');
-            
+
             $currentFreeQty = (clone $cartQuery)
                 ->whereIn('item_id', $freeItemIds)->where('deal_id', $deal->id)->where('deal_category_id', $freeCategory->id)
                 ->sum('qty');
@@ -540,6 +702,10 @@ class CartController extends Controller
             // If we have more free items than will be allowed after deletion, block the delete
             if ($currentFreeQty > $allowedFreeAfterDeletion) {
                 $excessFreeItems = $currentFreeQty - $allowedFreeAfterDeletion;
+                log::info('deletecartitem: blocked, would orphan free items', [
+                    'cart_id' => $checkcart->id,
+                    'excess_free_items' => $excessFreeItems,
+                ]);
                 return response()->json([
                     'status'  => 2,
                     'message' => "You cannot delete this required item. You have {$excessFreeItems} free item(s) that depend on it. Please remove the free items first.",
@@ -547,8 +713,10 @@ class CartController extends Controller
             }
         }
 
-        // ✅ Passed validation — allow deletion
-        $checkcart->delete();
+        // ✅ Passed validation — allow deletion of this line and its duplicates
+        foreach ($matchingLines as $line) {
+            $line->delete();
+        }
         session()->forget('discount_data');
         return 1;
     }
@@ -556,16 +724,18 @@ class CartController extends Controller
 
     public function qtyupdate(Request $request)
 {
-    $checkcart = Cart::find($request->id);
+    $cartQuery = Auth::check() && Auth::user()->type == 2
+        ? Cart::where('user_id', Auth::id())
+        : Cart::where('session_id', Session::getId());
+
+    $checkcart = (clone $cartQuery)->where('id', $request->id)->first();
 
     if (!$checkcart) {
         return response()->json(['status' => 0, 'message' => trans('messages.invalid_cart')], 200);
     }
 
     // Determine total cart quantity
-    $total_count = Auth::check() && Auth::user()->type == 2
-        ? Cart::where('user_id', Auth::id())->sum('qty')
-        : Cart::where('session_id', Session::getId())->sum('qty');
+    $total_count = (clone $cartQuery)->sum('qty');
 
     $needsAutoAdd = false;
 
@@ -580,11 +750,6 @@ class CartController extends Controller
                     $deal = TopDeals::find($checkcart->deal_id);
 
                     if ($deal && $deal->deal_type == 3) {
-                        // Base cart query
-                        $cartQuery = Auth::check() && Auth::user()->type == 2
-                            ? Cart::where('user_id', Auth::id())
-                            : Cart::where('session_id', Session::getId());
-
                         // Fetch deal categories
                         $dealCategories = DealCategory::where('deal_id', $deal->id)->get();
 

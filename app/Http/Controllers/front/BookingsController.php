@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Session;
+use Illuminate\Support\Facades\Session;
 
 class BookingsController extends Controller
 {

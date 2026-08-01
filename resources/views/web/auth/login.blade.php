@@ -38,7 +38,7 @@
                             @csrf
                             <a href="{{ route('home') }}">
                                 <img src="{{ helper::image_path(@helper::appdata()->logo) }}" alt=""
-                                     class="login-form-logo"></a>
+                                     class="login-form-logo" loading="lazy" decoding="async"></a>
                             <h5 class="bottom-line py-2 mt-3 m-0 fw-bold text-white">{{ trans('labels.sign_to_continue') }}</h5>
                             <h6 class="fs-7 text-white">{{ trans('labels.sign_in_note') }}</h6>
                             <div class="form-body mt-4">
@@ -84,39 +84,6 @@
                                             class="btn btn-primary w-100">{{ trans('labels.signin') }}</button>
                                 </div>
                             </div>
-                            <div class="or_section">
-                                <div class="line ms-4"></div>
-                                <p class="mb-0 fw-light text-white">{{ trans('labels.or') }}</p>
-                                <div class="line me-4"></div>
-                            </div>
-                            <div class="row social_icon">
-                                <div class="col d-sm-flex justify-content-center text-center d-sm-flex p-0">
-                                    @if (@helper::checkaddons('google_login'))
-                                        @if (helper::appdata()->google_mode == 1)
-                                            <div class="col-sm-5 col bg-white rounded-2 py-2 m-2">
-                                                <a
-                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else href="{{ URL::to('login/google') }}" @endif>
-                                                    <img src="{{ helper::web_image_path('google.svg') }}"
-                                                         alt="social-icon" class="brands-logo"><span
-                                                        class="text-dark px-1">Sign in</span>
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endif
-                                    @if (@helper::checkaddons('facebook_login'))
-                                        @if (helper::appdata()->facebook_mode == 1)
-                                            <div class="col-sm-5 col bg-white rounded-2 py-2 m-2">
-                                                <a
-                                                    @if (env('Environment') == 'sendbox') onclick="myFunction()" @else href="{{ URL::to('login/facebook') }}" @endif>
-                                                    <img src="{{ helper::web_image_path('facebook.svg') }}"
-                                                         alt="social-icon" class="brands-logo"><span
-                                                        class="text-dark px-1">Sign in</span>
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endif
-                                </div>
-                            </div>
                             <div class="m-3 text-center">
                                 <p class="text-white mb-0 fs-7">
                                     {{ trans('labels.dont_account') }}
@@ -127,7 +94,7 @@
                         </form>
                     </div>
                     <div class="image col-8 d-none d-md-block">
-                        <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100" style="border-radius: 0px">
+                        <img src="{{ helper::image_path(helper::appdata()->auth_bg_image) }}" class="w-100" style="border-radius: 0px" loading="lazy" decoding="async">
                     </div>
                 </div>
             </div>

@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Helper;
-use Session;
+use Illuminate\Support\Facades\Session;
 
 class DealController extends Controller
 {

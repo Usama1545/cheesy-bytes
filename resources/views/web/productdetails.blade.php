@@ -38,12 +38,12 @@ $itemData = Helper::getBranch(); // ✅ works
                             <div class="card h-100 overflow-hidden rounded-0 border-0 position-relative">
                                 <!-- new big-view -->
                                 <div class="sp-loading"><img src="https://via.placeholder.com/1100x1220" alt=""
-                                        class="rounded-4"><br>LOADING IMAGES</div>
+                                        class="rounded-4" loading="lazy" decoding="async"><br>LOADING IMAGES</div>
                                 <div class="sp-wrap">
                                     @foreach ($getitemdata['item_images'] as $key => $firstimage)
                                         <a href="{{ @helper::image_path($firstimage->image_name) }}">
                                             <img src="{{ @helper::image_path($firstimage->image_name) }}" alt=""
-                                                class="rounded-4"></a>
+                                                class="rounded-4" loading="lazy" decoding="async"></a>
                                     @endforeach
                                 </div>
                                 <!-- new big-view -->
@@ -95,7 +95,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                 <div class="d-flex text-align-center mt-2">
                                     <img class="col-1 {{ session()->get('direction') == 2 ? 'ms-1' : 'me-1' }}"
                                         @if ($getitemdata->item_type == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
-                                        alt="">
+                                        alt="" loading="lazy" decoding="async">
                                     <span class="item-title">{{ $getitemdata->item_name }}</span>
                                 </div>
                             </div>
@@ -723,7 +723,7 @@ $itemData = Helper::getBranch(); // ✅ works
                                                             class="avatar avatar-lg mb-md-0 mb-2 flex-shrink-0 {{ session()->get('direction') == 2 ? ' ms-sm-3' : 'me-sm-3' }}">
                                                             <img class="avatar-img rounded-circle w-100 h-100 object-fit-cover"
                                                                 src="{{ $reviewdata->user_info->profile_image }}"
-                                                                alt="avatar">
+                                                                alt="avatar" loading="lazy" decoding="async">
                                                         </div>
                                                         <!-- review avatar -->
 

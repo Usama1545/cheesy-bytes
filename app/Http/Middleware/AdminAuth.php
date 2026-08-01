@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Auth;
 use App\Models\Roles;
-use Session;
+use Illuminate\Support\Facades\Session;
 use App\Helpers\helper;
 
 class AdminAuth
