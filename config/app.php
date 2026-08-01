@@ -197,8 +197,6 @@ return [
 
         Maatwebsite\Excel\ExcelServiceProvider::class,
 
-        RachidLaasri\LaravelInstaller\Providers\LaravelInstallerServiceProvider::class,
-
     ],
 
     /*

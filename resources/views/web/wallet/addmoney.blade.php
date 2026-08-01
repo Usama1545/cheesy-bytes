@@ -107,8 +107,5 @@
 @section('scripts')
     <script src="https://checkout.stripe.com/v2/checkout.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://checkout.flutterwave.com/v3.js"></script>
-    <script src="https://js.paystack.co/v1/inline.js"></script>
     <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/wallet.js') }}"></script>
 @endsection
