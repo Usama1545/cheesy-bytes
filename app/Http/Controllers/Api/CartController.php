@@ -620,6 +620,167 @@ class CartController extends Controller
         }
     }
 
+    /**
+     * Remove up to $qtyToRemove of a specific item from the given deal categories
+     * (oldest cart lines first), deleting lines that are fully consumed and
+     * decrementing the last partially-consumed line. Returns the quantity actually
+     * removed.
+     *
+     * Used to keep paid/free pairs of the SAME product in a "buy X get X free"
+     * deal in sync: whichever side (paid or free) a user removes first, the
+     * matching quantity of the other side is auto-removed too, instead of
+     * leaving a leftover line that ends up mismatched with a different product.
+     */
+    private function cascadeRemoveDealItem($cartQuery, TopDeals $deal, $categoryIds, $itemId, int $qtyToRemove): int
+    {
+        $categoryIds = collect($categoryIds)->filter()->values();
+
+        if ($qtyToRemove <= 0 || $categoryIds->isEmpty()) {
+            return 0;
+        }
+
+        $lines = (clone $cartQuery)
+            ->where('deal_id', $deal->id)
+            ->where('item_id', $itemId)
+            ->whereIn('deal_category_id', $categoryIds)
+            ->orderBy('id')
+            ->get();
+
+        $removed = 0;
+        $remaining = $qtyToRemove;
+
+        foreach ($lines as $line) {
+            if ($remaining <= 0) {
+                break;
+            }
+            if ($line->qty <= $remaining) {
+                $removed += $line->qty;
+                $remaining -= $line->qty;
+                $line->delete();
+            } else {
+                $line->qty -= $remaining;
+                $line->save();
+                $removed += $remaining;
+                $remaining = 0;
+            }
+        }
+
+        return $removed;
+    }
+
+    /**
+     * Delete a deal-linked cart line for a "Buy X get Y free" (deal_type 3) deal.
+     *
+     * - Deleting a free line cascades to auto-remove the same quantity of the
+     *   matching paid (required) line for the SAME item_id, so a paid item never
+     *   lingers mismatched with some other product's free item.
+     * - Deleting a required line that would orphan free items first tries the
+     *   same cascade in reverse (auto-remove the matching free item for the SAME
+     *   item_id). Only if that can't fully resolve it (e.g. the excess free
+     *   items belong to a different product) does it fall back to blocking the
+     *   delete and asking the user to remove the free item(s) first.
+     *
+     * @return array{ok: bool, message?: string}
+     */
+    private function deleteDealCartLine(Cart $checkcart, $cartQuery): array
+    {
+        $deal = TopDeals::find($checkcart->deal_id);
+        if (!$deal || $deal->deal_type != 3) {
+            $checkcart->delete();
+            session()->forget('discount_data');
+            return ['ok' => true];
+        }
+
+        $dealCategory = DealCategory::find($checkcart->deal_category_id);
+
+        // Free item → allow delete, and cascade-remove the paid counterpart
+        // (same item_id, same deal) so it doesn't linger mismatched with a
+        // different product's free item once its own free pair is gone.
+        if ($dealCategory && $dealCategory->is_free) {
+            $itemId = $checkcart->item_id;
+            $freeQtyRemoved = $checkcart->qty;
+
+            $checkcart->delete();
+            session()->forget('discount_data');
+
+            $requiredCategoryIds = DealCategory::where('deal_id', $deal->id)
+                ->where('is_required', true)
+                ->pluck('id');
+            $this->cascadeRemoveDealItem($cartQuery, $deal, $requiredCategoryIds, $itemId, $freeQtyRemoved);
+
+            return ['ok' => true];
+        }
+
+        // Required item — need to check validation
+        $dealCategories = DealCategory::where('deal_id', $deal->id)->get();
+        $requiredCategory = $dealCategories->firstWhere('id', $checkcart->deal_category_id);
+
+        if (!$requiredCategory || !$requiredCategory->is_required) {
+            $checkcart->delete();
+            session()->forget('discount_data');
+            return ['ok' => true];
+        }
+
+        // STEP 1: Calculate current sets BEFORE deletion
+        $requiredItemIds = DealItem::where('deal_category_id', $requiredCategory->id)->pluck('item_id');
+        $currentRequiredQty = (clone $cartQuery)
+            ->whereIn('item_id', $requiredItemIds)
+            ->where('deal_id', $deal->id)
+            ->where('deal_category_id', $requiredCategory->id)
+            ->sum('qty');
+
+        $currentSets = intdiv($currentRequiredQty, $requiredCategory->quantity);
+
+        // STEP 2: Calculate sets AFTER deletion
+        $requiredQtyAfterDeletion = $currentRequiredQty - $checkcart->qty;
+        $setsAfterDeletion = intdiv(max(0, $requiredQtyAfterDeletion), $requiredCategory->quantity);
+
+        // If sets don't change, safe to delete
+        if ($setsAfterDeletion >= $currentSets) {
+            $checkcart->delete();
+            session()->forget('discount_data');
+            return ['ok' => true];
+        }
+
+        // STEP 3: Sets are reduced - check if we have excess free items
+        $freeCategories = $dealCategories->where('is_free', true);
+
+        foreach ($freeCategories as $freeCategory) {
+            $freeItemIds = DealItem::where('deal_category_id', $freeCategory->id)->pluck('item_id');
+
+            $currentFreeQty = (clone $cartQuery)
+                ->whereIn('item_id', $freeItemIds)
+                ->where('deal_id', $deal->id)
+                ->where('deal_category_id', $freeCategory->id)
+                ->sum('qty');
+
+            // Calculate how many free items are allowed based on current sets vs after deletion
+            $allowedFreeAfterDeletion = $setsAfterDeletion * $freeCategory->quantity;
+
+            // If we have more free items than will be allowed after deletion, first
+            // try auto-removing the matching free item for the SAME product.
+            if ($currentFreeQty > $allowedFreeAfterDeletion) {
+                $excessFreeItems = $currentFreeQty - $allowedFreeAfterDeletion;
+
+                $excessFreeItems -= $this->cascadeRemoveDealItem($cartQuery, $deal, [$freeCategory->id], $checkcart->item_id, $excessFreeItems);
+
+                // Backup: the cascade couldn't fully resolve it (the excess free
+                // items belong to a different product) — block and notify instead.
+                if ($excessFreeItems > 0) {
+                    return [
+                        'ok' => false,
+                        'message' => "You cannot delete this required item. You have {$excessFreeItems} free item(s) that depend on it. Please remove the free items first.",
+                    ];
+                }
+            }
+        }
+
+        // ✅ Passed validation — allow deletion
+        $checkcart->delete();
+        session()->forget('discount_data');
+        return ['ok' => true];
+    }
+
     public function removeCartItem(Request $request)
     {
         $sessionId = $request->header('X-Session-Id');
@@ -659,133 +820,18 @@ class CartController extends Controller
                 ]);
             }
 
-            $deal = TopDeals::find($checkcart->deal_id);
-            if (!$deal || $deal->deal_type != 3) {
-                // normal delete if not a "Buy X get Y free" type deal
-                $checkcart->delete();
-                session()->forget('discount_data');
-                
-                $cart_count = $cartQuery->count();
-                $cart_total = $cartQuery->sum('qty');
-                
+            $result = $this->deleteDealCartLine($checkcart, $cartQuery);
+
+            if (!$result['ok']) {
                 return response()->json([
-                    'status' => true,
-                    'message' => 'Item removed from cart successfully',
-                    'data' => [
-                        'cart_count' => $cart_count,
-                        'cart_total' => $cart_total
-                    ]
-                ]);
+                    'status' => false,
+                    'message' => $result['message'],
+                ], 400);
             }
 
-            // ✅ Free item → allow delete always
-            $dealCategory = DealCategory::find($checkcart->deal_category_id);
-            if ($dealCategory && $dealCategory->is_free) {
-                $checkcart->delete();
-                session()->forget('discount_data');
-                
-                $cart_count = $cartQuery->count();
-                $cart_total = $cartQuery->sum('qty');
-                
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Free item removed from cart successfully',
-                    'data' => [
-                        'cart_count' => $cart_count,
-                        'cart_total' => $cart_total
-                    ]
-                ]);
-            }
-
-            // ✅ Required item — need to check validation
-            // Get all deal categories for this deal
-            $dealCategories = DealCategory::where('deal_id', $deal->id)->get();
-
-            // Find the required category that this item belongs to
-            $requiredCategory = $dealCategories->firstWhere('id', $checkcart->deal_category_id);
-            
-            if (!$requiredCategory || !$requiredCategory->is_required) {
-                $checkcart->delete();
-                session()->forget('discount_data');
-                
-                $cart_count = $cartQuery->count();
-                $cart_total = $cartQuery->sum('qty');
-                
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Item removed from cart successfully',
-                    'data' => [
-                        'cart_count' => $cart_count,
-                        'cart_total' => $cart_total
-                    ]
-                ]);
-            }
-
-            // STEP 1: Calculate current sets BEFORE deletion
-            $requiredItemIds = DealItem::where('deal_category_id', $requiredCategory->id)->pluck('item_id');
-            $currentRequiredQty = (clone $cartQuery)
-                ->whereIn('item_id', $requiredItemIds)
-                ->where('deal_id', $deal->id)
-                ->where('deal_category_id', $requiredCategory->id)
-                ->sum('qty');
-
-            $currentSets = intdiv($currentRequiredQty, $requiredCategory->quantity);
-
-            // STEP 2: Calculate sets AFTER deletion
-            $requiredQtyAfterDeletion = $currentRequiredQty - $checkcart->qty;
-            $setsAfterDeletion = intdiv($requiredQtyAfterDeletion, $requiredCategory->quantity);
-            
-            // If sets don't change, safe to delete
-            if ($setsAfterDeletion >= $currentSets) {
-                $checkcart->delete();
-                session()->forget('discount_data');
-                
-                $cart_count = $cartQuery->count();
-                $cart_total = $cartQuery->sum('qty');
-                
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Item removed from cart successfully',
-                    'data' => [
-                        'cart_count' => $cart_count,
-                        'cart_total' => $cart_total
-                    ]
-                ]);
-            }
-
-            // STEP 3: Sets are reduced - check if we have excess free items
-            $freeCategories = $dealCategories->where('is_free', true);
-            
-            foreach ($freeCategories as $freeCategory) {
-                $freeItemIds = DealItem::where('deal_category_id', $freeCategory->id)->pluck('item_id');
-                
-                $currentFreeQty = (clone $cartQuery)
-                    ->whereIn('item_id', $freeItemIds)
-                    ->where('deal_id', $deal->id)
-                    ->where('deal_category_id', $freeCategory->id)
-                    ->sum('qty');
-
-                // Calculate how many free items are allowed based on current sets vs after deletion
-                $currentlyAllowedFree = $currentSets * $freeCategory->quantity;
-                $allowedFreeAfterDeletion = $setsAfterDeletion * $freeCategory->quantity;
-
-                // If we have more free items than will be allowed after deletion, block the delete
-                if ($currentFreeQty > $allowedFreeAfterDeletion) {
-                    $excessFreeItems = $currentFreeQty - $allowedFreeAfterDeletion;
-                    return response()->json([
-                        'status' => false,
-                        'message' => "You cannot delete this required item. You have {$excessFreeItems} free item(s) that depend on it. Please remove the free items first.",
-                    ], 400);
-                }
-            }
-
-            // ✅ Passed validation — allow deletion
-            $checkcart->delete();
-            session()->forget('discount_data');
-            
             $cart_count = $cartQuery->count();
             $cart_total = $cartQuery->sum('qty');
-            
+
             return response()->json([
                 'status' => true,
                 'message' => 'Item removed from cart successfully',
@@ -831,12 +877,23 @@ class CartController extends Controller
 
             if ($checkcart->qty == 1 && $request->type == "minus") {
                 // Delete the item if quantity would become 0
-                $checkcart->delete();
-                session()->forget('discount_data');
-                
+                if ($checkcart->deal_id) {
+                    $result = $this->deleteDealCartLine($checkcart, $cartQuery);
+
+                    if (!$result['ok']) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => $result['message'],
+                        ], 400);
+                    }
+                } else {
+                    $checkcart->delete();
+                    session()->forget('discount_data');
+                }
+
                 $cart_count = $cartQuery->count();
                 $cart_total = $cartQuery->sum('qty');
-                
+
                 return response()->json([
                     'status' => true,
                     'message' => 'Item removed from cart',
@@ -969,13 +1026,26 @@ class CartController extends Controller
 
                                     if ($currentFreeQty > $allowedFreeAfterDecrease) {
                                         $excessFreeItems = $currentFreeQty - $allowedFreeAfterDecrease;
-                                        return response()->json([
-                                            'status' => false,
-                                            'message' => "You cannot decrease this required item. You have {$excessFreeItems} free item(s) that depend on it. Please remove free items first.",
-                                        ], 400);
+
+                                        // Prefer auto-removing the matching free item for the
+                                        // SAME product before falling back to blocking.
+                                        $excessFreeItems -= $this->cascadeRemoveDealItem($cartQuery, $deal, [$freeCategory->id], $checkcart->item_id, $excessFreeItems);
+
+                                        if ($excessFreeItems > 0) {
+                                            return response()->json([
+                                                'status' => false,
+                                                'message' => "You cannot decrease this required item. You have {$excessFreeItems} free item(s) that depend on it. Please remove free items first.",
+                                            ], 400);
+                                        }
                                     }
                                 }
                             }
+                        } elseif ($currentItemCategory && $currentItemCategory->is_free) {
+                            // Decreasing a free item's qty should also decrease its paid
+                            // counterpart (same item_id, same deal) by the same amount, so
+                            // the paid/free pairing for this specific product stays in sync.
+                            $requiredCategoryIds = $dealCategories->where('is_required', true)->pluck('id');
+                            $this->cascadeRemoveDealItem($cartQuery, $deal, $requiredCategoryIds, $checkcart->item_id, 1);
                         }
                     }
                 }
