@@ -120,6 +120,14 @@ class CartController extends Controller
     }
     public function addtocart(Request $request)
     {
+        $validated = $request->validate([
+            'slug' => 'required|string|exists:item,slug',
+            'deal_id' => 'nullable|exists:top_deals,id',
+            'deal_category_id' => 'nullable|exists:deal_categories,id',
+            'size_id' => 'nullable|exists:sizes,id',
+            'crust_id' => 'nullable|exists:crusts,id',
+            'qty' => 'nullable|integer|min:1',
+        ]);
         $branchId = Session::get('branch_id');
 
         try {
@@ -132,7 +140,7 @@ class CartController extends Controller
                     Cart::where('buynow', 1)->where('session_id', Session::getId())->delete();
                 }
             }
-            $itemdata = Item::where('slug', $request->slug)->select('item.*',
+            $itemdata = Item::where('slug', $validated['slug'])->select('item.*',
                 DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"))
                 ->leftJoin('item_prices', function ($query) use ($branchId) {
                     $query->on('item_prices.item_id', '=', 'item.id')
@@ -140,6 +148,28 @@ class CartController extends Controller
                 })->first();
 
             $serverItemPrice = $itemdata->item_price;
+
+            if ($request->filled('size_id') && $request->filled('crust_id')) {
+                $pizzaBasePrice = PizzaPrice::where('item_id', $itemdata->id)
+                    ->where('branch_id', $branchId)
+                    ->where('size_id', $request->size_id)
+                    ->value('price');
+
+                $sizeCrustPrice = ProductSizeCrust::where('item_id', $itemdata->id)
+                    ->where('size_id', $request->size_id)
+                    ->where('crust_id', $request->crust_id)
+                    ->value('price');
+
+                if ($pizzaBasePrice === null || $sizeCrustPrice === null) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Selected size/crust combination is not available for this item.',
+                        'buynow' => $request->buynow
+                    ], 200);
+                }
+
+                $serverItemPrice = $pizzaBasePrice + $sizeCrustPrice;
+            }
 
             if ($request->deal_id) {
                 $deal = TopDeals::where('id', $request->deal_id)->first();

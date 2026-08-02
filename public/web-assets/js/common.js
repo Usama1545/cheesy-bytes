@@ -234,7 +234,6 @@ function addtocart(addcarturl, id, buynow) {
                         $(".addons_error_" + group.id + "_" + id).text(
                             "Please select at least " +
                                 group.min_count +
-                                " " +
                                 group.name,
                         );
                         errorDetected = true; // Set flag to true indicating an error is detected
@@ -276,10 +275,14 @@ function addtocart(addcarturl, id, buynow) {
     }
     var slug = $("#slug_" + id).val();
     var item_name = $("#item_name_" + id).val();
+    var deal_id = $("#deal_id_" + id).val();
+    var deal_category_id = $("#deal_category_id_" + id).val();
     var item_type = $("#item_type_" + id).val();
     var image_name = $("#image_name_" + id).val();
     var item_tax = $("#item_tax_" + id).val();
     var item_price = $("#item_price_" + id).val();
+    var size_id = $("#selected_size_id_" + id).val();
+    var crust_id = $("#selected_crust_id_" + id).val();
     var addons_id = $(".addons_chk_" + id + ":checked")
         .map(function () {
             return $(this).attr("data-addons-id");
@@ -331,6 +334,10 @@ function addtocart(addcarturl, id, buynow) {
         extras_price,
         addcarturl,
         buynow,
+        deal_id,
+        deal_category_id,
+        size_id,
+        crust_id,
     );
 }
 
@@ -349,12 +356,18 @@ function calladdtocart(
     extras_price,
     addcarturl,
     buynow,
+    deal_id,
+    deal_category_id,
+    size_id,
+    crust_id,
 ) {
     "use strict";
     var request_url = $("#request_url_" + slug).val();
     var qtys = parseInt($("#item_qty_" + slug).val());
     var login_required = $("#login_required_" + slug).val();
     var checklogin = $("#checklogin_" + slug).val();
+    const segments = window.location.pathname.split("/");
+    const cityName = segments[1];
     if ($("#customer_login_" + slug).val() != null) {
         var customer_login = JSON.parse($("#customer_login_" + slug).val());
     }
@@ -367,6 +380,8 @@ function calladdtocart(
             slug: slug,
             item_name: item_name,
             item_type: item_type,
+            deal_id: deal_id ?? null,
+            deal_category_id: deal_category_id ?? null,
             image_name: image_name,
             tax: item_tax,
             item_price: item_price,
@@ -378,6 +393,8 @@ function calladdtocart(
             extras_name: extras_name,
             extras_price: extras_price,
             buynow: buynow,
+            size_id: size_id,
+            crust_id: crust_id,
         },
         method: "POST",
         dataType: "json",
@@ -389,7 +406,7 @@ function calladdtocart(
                         customer_login != null
                     ) {
                         if (checklogin) {
-                            location.href = "\checkout?buynow=1";
+                            location.href = "checkout?buynow=1";
                         } else if (login_required == 1) {
                             if ($("#modalitemdetails").is(":visible")) {
                                 $("#modalitemdetails").modal("hide");
@@ -398,10 +415,18 @@ function calladdtocart(
                             $(".quick_order_loader").addClass("d-none");
                             $("#useroption").modal("show");
                         } else {
-                            location.href = "\checkout?buynow=1";
+                            if (cityName) {
+                                location.href = `/${cityName}/checkout?buynow=1`;
+                            } else {
+                                location.href = `/checkout?buynow=1`; // Fallback in case city_name is missing
+                            }
                         }
                     } else {
-                        location.href = "\checkout?buynow=1";
+                        if (cityName) {
+                            location.href = `/${cityName}/checkout?buynow=1`;
+                        } else {
+                            location.href = `/checkout?buynow=1`; // Fallback in case city_name is missing
+                        }
                     }
                 } else {
                     if (
@@ -477,6 +502,7 @@ function showitem(slug, showurl, isPriceRange, detailsUrl) {
             $(".addon_modal_loader_" + slug).addClass("d-none");
         },
         error: function () {
+            console.log("i am wrong");
             toastr.error(wrong);
             $(".addon_modal_" + slug).prop("disabled", false);
             $(".addon_modal_icon_" + slug).removeClass("d-none");
@@ -510,6 +536,42 @@ function showdealitem(slug, deal_id, showurl) {
             $(".addon_modal_loader_" + slug).addClass("d-none");
         },
         error: function () {
+            console.log("i am wrong");
+            toastr.error(wrong);
+            $(".addon_modal_" + slug).prop("disabled", false);
+            $(".addon_modal_icon_" + slug).removeClass("d-none");
+            $(".addon_modal_loader_" + slug).addClass("d-none");
+        },
+    });
+}
+
+function showBogoDealItem(slug, deal_id, category_id, showurl) {
+    "use strict";
+    $(".addon_modal_" + slug).prop("disabled", true);
+    $(".addon_modal_icon_" + slug).addClass("d-none");
+    $(".addon_modal_loader_" + slug).removeClass("d-none");
+    $.ajax({
+        headers: {
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+        },
+        url: showurl,
+        data: {
+            slug: slug,
+            deal_id: deal_id,
+            deal_category_id: category_id,
+        },
+        method: "GET",
+        dataType: "json",
+        success: function (response) {
+            $("#modalitem_body").html(response.output);
+            $("#modalitemdetails").modal("show");
+            getaddons(response.id);
+            $(".addon_modal_" + slug).prop("disabled", false);
+            $(".addon_modal_icon_" + slug).removeClass("d-none");
+            $(".addon_modal_loader_" + slug).addClass("d-none");
+        },
+        error: function () {
+            console.log("i am wrong");
             toastr.error(wrong);
             $(".addon_modal_" + slug).prop("disabled", false);
             $(".addon_modal_icon_" + slug).removeClass("d-none");
@@ -613,6 +675,7 @@ function getaddons(id) {
         });
     });
     var item_price = parseFloat($("#item_price_" + id).val());
+    var qty = parseFloat($("#item_qty_" + id).val());
     var addonstotal = 0;
     var subtotal = 0;
 
@@ -622,7 +685,7 @@ function getaddons(id) {
             addonstotal += parseFloat(el.getAttribute("data-addons-price"));
         });
     }
-    subtotal = item_price + addonstotal;
+    subtotal = (item_price + addonstotal) * qty;
     $(".subtotal_" + id).text(currency_format(subtotal));
 }
 
@@ -642,14 +705,14 @@ function checkout() {
     "use strict";
     var request_url = $("#request_url").val();
     if (request_url == "cart") {
-        location.href = "\checkout?buynow=0";
+        location.href = "checkout?buynow=0";
     } else {
-        location.href = "\checkout?buynow=1";
+        location.href = "checkout?buynow=1";
     }
 }
 function showlogin() {
     "use strict";
-    window.location.href = "login";
+    window.location.href = "/login";
 }
 function itemsallergens(item_id, item_url) {
     "use strict";
@@ -707,6 +770,14 @@ $(document).ready(function () {
         );
         deferredPrompt = e;
     });
+});
+
+// PWA animation js
+window.addEventListener("load", function () {
+    const pwaEl = document.querySelector(".pwa");
+    if (pwaEl) {
+        pwaEl.classList.add("animate");
+    }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
