@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Item;
 use App\Models\ProductSizeCrust;
+use App\Models\PizzaPrice;
 use App\Helpers\helper;
 use App\Models\Settings;
 use Illuminate\Support\Facades\Auth;
@@ -25,15 +26,14 @@ class CartController extends Controller
 {
     public function addtocart(Request $request)
     {
-        log::info('add to cart',[
-            'request' => $request->all(),
-        ]);
         // Validate required fields
         $validated = $request->validate([
             'slug' => 'required|string',
             'qty' => 'required|integer|min:1',
             'branch_id' => 'required|integer|exists:branches,id',
             'item_price' => 'required|numeric|min:0',
+            'size_id' => 'nullable|integer|exists:sizes,id',
+            'crust_id' => 'nullable|integer|exists:crusts,id',
         ]);
 
         $sessionId = $request->header('X-Session-Id');
@@ -79,6 +79,28 @@ class CartController extends Controller
             }
 
             $serverItemPrice = $itemdata->item_price;
+
+            if ($request->filled('size_id') && $request->filled('crust_id')) {
+                $pizzaBasePrice = PizzaPrice::where('item_id', $itemdata->id)
+                    ->where('branch_id', $branchId)
+                    ->where('size_id', $request->size_id)
+                    ->value('price');
+
+                $sizeCrustPrice = ProductSizeCrust::where('item_id', $itemdata->id)
+                    ->where('size_id', $request->size_id)
+                    ->where('crust_id', $request->crust_id)
+                    ->value('price');
+
+                if ($pizzaBasePrice === null || $sizeCrustPrice === null) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Selected size/crust combination is not available for this item.',
+                        'buynow' => $request->buynow ?? 0
+                    ], 400);
+                }
+
+                $serverItemPrice = $pizzaBasePrice + $sizeCrustPrice;
+            }
 
             // Validate deal if provided
             if ($request->has('deal_id') && $request->deal_id) {
@@ -433,12 +455,17 @@ class CartController extends Controller
                 ], 404);
             }
 
+            $pizzaBasePrice = PizzaPrice::where('item_id', $itemdata->id)
+                ->where('branch_id', $branchId)
+                ->where('size_id', $validated['size_id'])
+                ->value('price');
+
             $sizeCrustPrice = ProductSizeCrust::where('item_id', $itemdata->id)
                 ->where('size_id', $validated['size_id'])
                 ->where('crust_id', $validated['crust_id'])
                 ->value('price');
 
-            if ($sizeCrustPrice === null) {
+            if ($pizzaBasePrice === null || $sizeCrustPrice === null) {
                 return response()->json([
                     'status' => 0,
                     'message' => 'Selected size/crust combination is not available for this item.',
@@ -446,7 +473,7 @@ class CartController extends Controller
                 ], 400);
             }
 
-            $serverItemPrice = $sizeCrustPrice;
+            $serverItemPrice = $pizzaBasePrice + $sizeCrustPrice;
 
             // Validate deal if provided
             if ($request->has('deal_id') && $request->deal_id) {
