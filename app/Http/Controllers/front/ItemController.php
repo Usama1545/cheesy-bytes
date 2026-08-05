@@ -496,6 +496,12 @@ class ItemController extends Controller
                 ->where('item.id', '!=', @$getitemdata->id)
                 ->where('item.cat_id', '=', @$getitemdata->cat_id)
                 ->where('item.item_status', '1')
+                ->where(function ($query) use ($branchId) {
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->take(3)->get();
         } else {
             $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images')
@@ -537,6 +543,12 @@ class ItemController extends Controller
                 ->where('item.id', '!=', @$getitemdata->id)
                 ->where('item.cat_id', '=', @$getitemdata->cat_id)
                 ->where('item.item_status', '1')
+                ->where(function ($query) use ($branchId) {
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->take(3)->get();
         }
         $crusts = ProductSizeCrust::where('item_id', $getitemdata->id)->get();
@@ -583,6 +595,7 @@ class ItemController extends Controller
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $topdeals = helper::top_deals();
+        $branchId = Session::get('branch_id');
 
         if ($user_id != null) {
             $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'item_image')->select('item.*', DB::raw('(case when favorite.item_id is null then 0 else 1 end) as is_favorite'), DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
@@ -625,6 +638,12 @@ class ItemController extends Controller
                 ->where('item.id', '!=', @$getitemdata->id)
                 ->where('item.cat_id', '=', @$getitemdata->cat_id)
                 ->where('item.item_status', '1')
+                ->where(function ($query) use ($branchId) {
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->take(3)->get();
         } else {
             $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images')->select('item.*', DB::raw('(case when item.price is null then 0 else item.price end) as item_price'), DB::raw('(case when cart.item_id is null then 0 else 1 end) as is_cart'))
@@ -652,6 +671,12 @@ class ItemController extends Controller
                 ->orderByDesc('item.id')
                 ->where('item.id', '!=', @$getitemdata->id)
                 ->where('item.cat_id', '=', @$getitemdata->cat_id)
+                ->where(function ($query) use ($branchId) {
+                    $query->where('item.branch_ids', 'like', "%,$branchId,%") // Match middle
+                    ->orWhere('item.branch_ids', 'like', "$branchId,%") // Match start
+                    ->orWhere('item.branch_ids', 'like', "%,$branchId") // Match end
+                    ->orWhere('item.branch_ids', '=', $branchId);
+                })
                 ->take(3)->get();
         }
         $itemreviewdata = Ratting::with('user_info')->select('id', 'ratting', 'comment', 'item_id', 'user_id', 'created_at')->where('item_id', $getitemdata->id)->where('status', 1)->get();
