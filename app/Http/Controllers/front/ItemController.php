@@ -921,6 +921,7 @@ class ItemController extends Controller
 
     public function deals(Request $request)
     {
+        dd('test');
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $branchId = Session::get('branch_id');
