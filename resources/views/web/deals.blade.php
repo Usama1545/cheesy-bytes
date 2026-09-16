@@ -35,7 +35,7 @@ $itemData = Helper::getBranch(); // ✅ works
             <div class="row g-4">
 
                 <div class="d-none d-md-block">
-                    @include('web.home1.homeDealsStack') <!-- Show on md and larger -->
+                    @include('web.home1.homeDealsStack') <!-- Show on home md and larger -->
                 </div>
 
                 <div class="d-block d-md-none">
