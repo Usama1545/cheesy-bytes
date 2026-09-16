@@ -1122,7 +1122,6 @@ class helper
             ->groupBy('item.id') // Ensuring each item appears only once
             ->get();
 
-            dd($getsearchitems);
         return $getsearchitems;
     }
 
