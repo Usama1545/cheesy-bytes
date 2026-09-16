@@ -942,10 +942,7 @@ class ItemController extends Controller
                 $query->where('start_date', '<=', $currentDateTime->toDateString())
                     ->where('end_date', '>=', $currentDateTime->toDateString());
             })
-            ->where(function ($query) use ($currentDateTime) {
-                $query->where('start_time', '<=', $currentDateTime->toTimeString())
-                    ->where('end_time', '>=', $currentDateTime->toTimeString());
-            })
+           
             ->where(function ($query) use ($branchId) {
                 $query->where('item.branch_ids', 'like', "%,$branchId,%")
                     ->orWhere('item.branch_ids', 'like', "$branchId,%")
@@ -961,7 +958,6 @@ class ItemController extends Controller
             )
             ->groupBy('item.id') // Ensuring each item appears only once
             ->get();
-
 
         return view('web.deals', compact('getsearchitems'));
 
