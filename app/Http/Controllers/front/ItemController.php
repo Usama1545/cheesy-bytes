@@ -923,7 +923,7 @@ class ItemController extends Controller
     {
        
 
-        return view('web.deals', compact('getsearchitems'));
+        return view('web.deals');
 
     }
 
