@@ -4,6 +4,7 @@ use App\Helpers\helper;
 $helper = new App\Helpers\helper();
 $itemData = $helper->getTopHomeDeals();
 $count = count($itemData);
+dd($itemData);
 
 $mainItem = $itemData->first();
 $sideItems = $itemData->slice(1, 2); // Only 2 side items
