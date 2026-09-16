@@ -21,6 +21,7 @@ use App\Models\DealCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
 
 class ItemController extends Controller
 {
@@ -918,12 +919,12 @@ class ItemController extends Controller
 
     }
 
-public function deals(Request $request)
+    public function deals(Request $request)
     {
         $user_id = @Auth::user()->id;
         $session_id = Session::getId();
         $branchId = Session::get('branch_id');
-        $currentDateTime = now(); // Get the current date and time
+        $currentDateTime = Carbon::now('America/Chicago'); // Get the current date and time in the branch's local timezone
 
 
         $getsearchitems = TopDeals::with('product')
