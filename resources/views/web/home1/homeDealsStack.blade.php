@@ -3,6 +3,7 @@ use App\Helpers\helper;
 
 $helper = new App\Helpers\helper();
 $itemData = $helper->getTopHomeDeals();
+dd($itemData);
 $count = count($itemData);
 
 $mainItem = $itemData->first();
