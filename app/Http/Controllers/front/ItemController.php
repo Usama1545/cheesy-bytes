@@ -921,47 +921,7 @@ class ItemController extends Controller
 
     public function deals(Request $request)
     {
-        $user_id = @Auth::user()->id;
-        $session_id = Session::getId();
-        $branchId = Session::get('branch_id');
-        $currentDateTime = Carbon::now('America/Chicago'); // Get the current date and time in the branch's local timezone
-
-
-        $getsearchitems = TopDeals::with('product')
-            ->join('item', 'top_deals.product_id', '=', 'item.id')
-            ->leftJoin('cart', function ($query) use ($session_id) {
-                $query->on('cart.item_id', '=', 'item.id')
-                    ->where('cart.user_id', '=', $session_id)
-                    ->where('cart.buynow', '=', '0');
-            })
-            ->leftJoin('item_prices', function ($query) use ($branchId) {
-                $query->on('item_prices.item_id', '=', 'item.id')
-                    ->where('item_prices.branch_id', '=', $branchId);
-            })
-            ->where(function ($query) use ($currentDateTime) {
-                $query->where('start_date', '<=', $currentDateTime->toDateString())
-                    ->where('end_date', '>=', $currentDateTime->toDateString());
-            })
-            ->where(function ($query) use ($currentDateTime) {
-                $query->where('start_time', '<=', $currentDateTime->toTimeString())
-                    ->where('end_time', '>=', $currentDateTime->toTimeString());
-            })
-            ->where(function ($query) use ($branchId) {
-                $query->where('item.branch_ids', 'like', "%,$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "$branchId,%")
-                    ->orWhere('item.branch_ids', 'like', "%,$branchId")
-                    ->orWhere('item.branch_ids', '=', $branchId);
-            })
-            ->select(
-                'top_deals.*',
-                'top_deals.id as deal_id',
-                'item.*',
-                'cart.id as cart_id',
-                'item_prices.price as dealPrice'
-            )
-            ->orderBy('top_deals.order', 'asc')
-            ->groupBy('item.id') // Ensuring each item appears only once
-            ->get();
+       
 
         return view('web.deals', compact('getsearchitems'));
 
