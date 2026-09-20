@@ -375,6 +375,7 @@ class ItemController extends Controller
 
             DB::commit();
         } catch (\Throwable $e) {
+            dd($e);
             DB::rollBack();
             foreach ($copiedFiles as $file) {
                 @unlink($file);
