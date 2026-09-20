@@ -992,6 +992,9 @@ class SiteController extends Controller
         $id = $item->id;
         $dealprice = null;
 
+        // Deal-only products are kept inactive; allow them when requested through their own deal.
+        $allowInactive = TopDeals::containsItem($request->input('dealId'), $id);
+
         $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'pizzaPrices', 'item_image')
             ->select('item.*',
                 DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"))
@@ -1001,7 +1004,7 @@ class SiteController extends Controller
             })
             ->groupBy('item.id')
             ->where('item.slug', $slug)
-            ->where('item.item_status', '1')
+            ->when(!$allowInactive, fn($q) => $q->where('item.item_status', '1'))
             ->first();
 
             $getitemdata['addons_group'] = AddonsGroup::select('id', 'name', 'selection_type', 'selection_count', 'min_count', 'max_count')

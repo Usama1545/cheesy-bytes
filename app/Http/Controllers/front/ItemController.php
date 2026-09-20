@@ -273,11 +273,14 @@ class ItemController extends Controller
     public function productdetails($id, Request $request)
     {
         $branchId = Session::get('branch_id');
-        dd($branchId);
 
         $dealprice = null;
 
         // Fetch item with price and relations
+        // Products created only for a deal are kept inactive so they stay off the menu;
+        // still allow them when the request comes from a deal that actually contains the item.
+        $allowInactive = TopDeals::containsItem($request->input('dealId'), $id);
+
         $getitemdata = Item::with('category_info', 'subcategory_info', 'item_images', 'pizzaPrices', 'item_image')
             ->select('item.*', DB::raw("MAX(CASE WHEN item_prices.branch_id = $branchId THEN COALESCE(item_prices.price, 0) ELSE 0 END) AS item_price"))
             ->leftJoin('item_prices', function ($query) use ($branchId) {
@@ -286,7 +289,7 @@ class ItemController extends Controller
             })
             ->groupBy('item.id')
             ->where('item.id', $id)
-            ->where('item.item_status', '1')
+            ->when(!$allowInactive, fn($q) => $q->where('item.item_status', '1'))
             ->first();
 
         if (!$getitemdata) {

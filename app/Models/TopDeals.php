@@ -26,6 +26,32 @@ class TopDeals extends Model
         });
     }
 
+    /**
+     * Whether the given item is part of the given deal (used to let deal-only,
+     * deactivated products load when requested through their own deal).
+     */
+    public static function containsItem($dealId, $itemId): bool
+    {
+        if (!$dealId) {
+            return false;
+        }
+
+        $deal = static::find($dealId);
+        if (!$deal) {
+            return false;
+        }
+
+        if ($deal->deal_type == 3) {
+            return DealItem::where('deal_id', $deal->id)->where('item_id', $itemId)->exists();
+        }
+
+        if ($deal->deal_type == 4) {
+            return BmsmDealProduct::where('deal_id', $deal->id)->where('item_id', $itemId)->exists();
+        }
+
+        return in_array((string) $itemId, explode(',', (string) $deal->product_ids), true);
+    }
+
     public function product()
     {
         return $this->belongsTo(Item::class,'product_id','id');
