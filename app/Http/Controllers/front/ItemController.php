@@ -273,6 +273,8 @@ class ItemController extends Controller
     public function productdetails($id, Request $request)
     {
         $branchId = Session::get('branch_id');
+        dd($branchId);
+
         $dealprice = null;
 
         // Fetch item with price and relations
