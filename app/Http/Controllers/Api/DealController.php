@@ -90,6 +90,7 @@ class DealController extends Controller
                     'end_time'     => $deal->end_time,
                     'image'        => $image,
                     'dealPrice'    => $deal->dealPrice,
+                    'custom_message' => $deal->custom_message,
 
                     'meta' => [
                         'is_flat'      => $deal->deal_type == 1,

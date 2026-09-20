@@ -46,6 +46,7 @@ class DealController extends Controller
             'offer_type' => 'required|in:1,2',
             'offer_amount' => 'required|numeric|min:0',
             'order' => 'required|integer|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
             'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
@@ -75,6 +76,7 @@ class DealController extends Controller
             'offer_type' => $request->offer_type,
             'offer_amount' => $request->offer_amount,
             'order' => $request->order,
+            'custom_message' => $request->custom_message,
             'size_id' => implode(',', $request->size_id),
             'product_ids'=> implode(',', $request->product_ids),
             'web_image' => $image,
@@ -115,6 +117,7 @@ class DealController extends Controller
             'offer_type' => 'required|in:1,2',
             'offer_amount' => 'required|numeric|min:0',
             'order' => 'required|integer|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
             'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
@@ -156,6 +159,7 @@ class DealController extends Controller
             'offer_type' => $request->offer_type,
             'offer_amount' => $request->offer_amount,
             'order' => $request->order,
+            'custom_message' => $request->custom_message,
             'size_id' => implode(',', $request->size_id),
             'product_ids'=> implode(',', $request->product_ids),
             'web_image' => $image,
@@ -498,6 +502,7 @@ class DealController extends Controller
                     'size_id'       => $categoryMeta->size_id,   // ✅ now per-rule
                     'offer_type'    => $topDealData->offer_type,
                     'offer_amount'  => $topDealData->offer_amount,
+                    'custom_message' => $topDealData->custom_message,
                     'deal_id'       => $id,
                     'deal_type'     => $dealType,
                     'category_meta' => [
@@ -522,6 +527,7 @@ class DealController extends Controller
                     'size_id' => $topDealData->size_id,
                     'offer_type' => $topDealData->offer_type,
                     'offer_amount' => $topDealData->offer_amount,
+                    'custom_message' => $topDealData->custom_message,
                     'deal_id' => $id,
                     'deal_type' => $dealType,
                     'category_meta' => null,
@@ -640,8 +646,8 @@ class DealController extends Controller
                 
                 // Apply deal pricing logic
                 if ($topDealData->offer_type == 1) {
-                    // Fixed price offer
-                    $dealPrice = $topDealData->offer_amount;
+                    // Fixed amount off (matches cart/API: price - offer_amount)
+                    $dealPrice = $originalPrice - $topDealData->offer_amount;
                 } elseif ($topDealData->offer_type == 2) {
                     // Percentage discount
                     $discountAmount = ($originalPrice * $topDealData->offer_amount) / 100;
@@ -668,6 +674,7 @@ class DealController extends Controller
                     'size_id' => $topDealData->size_id,
                     'offer_type' => $topDealData->offer_type,
                     'offer_amount' => $topDealData->offer_amount,
+                    'custom_message' => $topDealData->custom_message,
                     'deal_id' => $topDealData->id,
                     'deal_type' => $dealType,
                     'category_meta' => null,
@@ -725,6 +732,7 @@ class DealController extends Controller
             'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to the sizes table
             'min_count' => 'required|numeric|min:1',
             'order' => 'required|numeric|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
             'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);
@@ -756,6 +764,7 @@ class DealController extends Controller
             'min_count' => $validatedData['min_count'],
             'deal_type' => 1, // Default deal_type
             'order' => $validatedData['order'],
+            'custom_message' => $validatedData['custom_message'] ?? null,
             'web_image' => $image,
             'mobile_image' => $mobile_image
         ]);
@@ -794,6 +803,7 @@ class DealController extends Controller
             'size_id' => 'required|exists:sizes,id', // Assuming size_id relates to sizes table
             'min_count' => 'required|numeric|min:1',
             'order' => 'required|numeric|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
             'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
         ]);

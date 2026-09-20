@@ -41,6 +41,7 @@ class BmsmDealController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'end_time' => 'required|date_format:H:i',
             'order' => 'required|numeric|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'bmsm_deal_type' => 'required|in:1,2', // 1 = product, 2 = cart
             'tiers' => 'required|array|min:1',
             'tiers.*.min_qty' => 'required|numeric|min:1',
@@ -65,6 +66,7 @@ class BmsmDealController extends Controller
             'end_date' => $request->end_date,
             'end_time' => $request->end_time,
             'order' => $request->order,
+            'custom_message' => $request->custom_message,
             'bmsm_deal_type' => $request->bmsm_deal_type,
             'web_image' => $image,
             'mobile_image' => $mobile_image,
@@ -128,6 +130,7 @@ class BmsmDealController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'end_time' => 'required|date_format:H:i:s',
             'order' => 'required|numeric|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'bmsm_deal_type' => 'required|in:1,2', // 1 = product, 2 = cart
             'tiers' => 'required|array|min:1',
             'tiers.*.min_qty' => 'required|numeric|min:1',
@@ -165,6 +168,7 @@ class BmsmDealController extends Controller
             'end_time' => $request->end_time,
             'size_id' => $request->size_id,
             'order' => $request->order,
+            'custom_message' => $request->custom_message,
             'bmsm_deal_type' => $request->bmsm_deal_type,
             'web_image' => $image,
             'mobile_image' => $mobile_image,

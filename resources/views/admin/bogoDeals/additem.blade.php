@@ -95,6 +95,12 @@
                                     <input type="number" class="form-control numbers_only" name="order"
                                         value="{{ old('order') }}" placeholder="Order By">
                                 </div>
+                                <div class="form-group col-md-12">
+                                    <label class="form-label">Custom Message</label>
+                                    <input type="text" class="form-control" name="custom_message" maxlength="255"
+                                        placeholder="Optional. Shown on the deal page instead of the default text"
+                                        value="{{ old('custom_message') }}">
+                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="col-form-label">{{ trans('labels.image') }}

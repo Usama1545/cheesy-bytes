@@ -13,7 +13,7 @@
                         <div class="row g-3 align-items-center justify-content-between mb-sm-5 mb-4">
                             <div class="col-auto menu-heading">
                                 <p class="sub-lables text-capitalize mt-2 mb-0">
-                                    {{ $deal['category_name'] }}
+                                    {{ ($loop->first && !empty($deal['custom_message'])) ? $deal['custom_message'] : $deal['category_name'] }}
                                 </p>
 
                                 <h1 class="text-uppercase">

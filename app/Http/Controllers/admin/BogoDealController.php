@@ -40,6 +40,7 @@ class BogoDealController extends Controller
             'end_time' => 'required|date_format:H:i',
             'is_active' => 'boolean',
             'order' => 'required|numeric|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'deal_rules' => 'required|array',
             'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
             'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
@@ -65,6 +66,7 @@ class BogoDealController extends Controller
             'end_time' => $request->end_time,
             'size_id' => $request->size_id,
             'order' => $request->order,
+            'custom_message' => $request->custom_message,
             'web_image' => $image,
             'mobile_image' => $mobile_image,
         ]);
@@ -146,6 +148,7 @@ class BogoDealController extends Controller
             'end_time' => 'required',
             'size_id' => 'nullable|integer|exists:sizes,id',
             'order' => 'required|numeric|min:1',
+            'custom_message' => 'nullable|string|max:255',
             'deal_rules' => 'required|array',
             'web_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
             'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,avif,webp|max:2048',
@@ -181,6 +184,7 @@ class BogoDealController extends Controller
             'end_time' => $request->end_time,
             'size_id' => $request->size_id,
             'order' => $request->order,
+            'custom_message' => $request->custom_message,
             'web_image' => $image,
             'mobile_image' => $mobile_image,
         ]);

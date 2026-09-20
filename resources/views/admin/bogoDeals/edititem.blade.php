@@ -96,6 +96,12 @@
                                         <input type="number" class="form-control" value="{{ $getitem->order }}"
                                             name="order" required="">
                                     </div>
+                                <div class="form-group col-md-12">
+                                    <label class="form-label">Custom Message</label>
+                                    <input type="text" class="form-control" name="custom_message" maxlength="255"
+                                        placeholder="Optional. Shown on the deal page instead of the default text"
+                                        value="{{ old('custom_message', $getitem->custom_message) }}">
+                                </div>
                                     <div class="col-md-6">
                                         <label class="col-form-label" for="">{{ trans('labels.image') }}
                                         </label>

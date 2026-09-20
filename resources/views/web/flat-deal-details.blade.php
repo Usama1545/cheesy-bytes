@@ -9,7 +9,9 @@
                 <div class="container">
                     <div class="row g-3 align-items-center justify-content-between mb-sm-5 mb-4">
                         <div class="col-auto menu-heading">
-                            @if ($deal['offer_type'] == 1)
+                            @if (!empty($deal['custom_message']))
+                                <p class="sub-lables mt-2 mb-0">{{ $deal['custom_message'] }}</p>
+                            @elseif ($deal['offer_type'] == 1)
                                 <p class="sub-lables text-capitalize mt-2 mb-0">Get every items on flat
                                     ${{ $deal['offer_amount'] }} discount</p>
                             @else
