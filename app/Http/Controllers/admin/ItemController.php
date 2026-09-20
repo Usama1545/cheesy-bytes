@@ -357,21 +357,7 @@ class ItemController extends Controller
                 $copy->save();
             }
 
-            // Images: the copy gets its own files so deleting one item never breaks the other
-            foreach (ItemImages::where('item_id', $source->id)->get() as $img) {
-                $copy = $img->replicate();
-                $copy->item_id = $item->id;
-
-                foreach (['image' => 'item-', 'thumbnail' => 'thumb-item-'] as $column => $prefix) {
-                    if ($img->$column && file_exists($imagePath . $img->$column)) {
-                        $newName = $prefix . uniqid() . '.' . pathinfo($img->$column, PATHINFO_EXTENSION);
-                        copy($imagePath . $img->$column, $imagePath . $newName);
-                        $copiedFiles[] = $imagePath . $newName;
-                        $copy->$column = $newName;
-                    }
-                }
-                $copy->save();
-            }
+           
 
             DB::commit();
         } catch (\Throwable $e) {
