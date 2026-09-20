@@ -57,6 +57,14 @@
                     <div class="d-flex flex-wrap gap-1">
                         <a class="btn btn-sm btn-info square" tooltip="{{ trans('labels.edit') }}"
                             href="{{ URL::to('admin/item-' . $item->id) }}"> <i class="fa-solid fa-pen-to-square"></i></a>
+                        <form action="{{ URL::to('admin/item/duplicate') }}" method="POST" class="d-inline"
+                            onsubmit="return confirm('Duplicate this product with all its prices, extras, addons and images?');">
+                            @csrf
+                            <input type="hidden" name="id" value="{{ $item->id }}">
+                            <button type="submit" class="btn btn-sm btn-warning square" tooltip="Duplicate"
+                                @if (env('Environment') == 'sendbox') onclick="myFunction(); return false;" @endif>
+                                <i class="fa-solid fa-copy"></i></button>
+                        </form>
                         <a class="btn btn-sm btn-danger square" tooltip="{{ trans('labels.delete') }}"
                             @if (env('Environment') == 'sendbox') onclick="myFunction()"
                         @else onclick="Delete('{{ $item->id }}','{{ URL::to('admin/item/delete') }}')" @endif>

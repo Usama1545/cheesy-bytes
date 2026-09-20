@@ -4,6 +4,8 @@ namespace App\Http\Controllers\admin;
 
 use App\Exports\ItemsPerBranchExport;
 use App\Models\itemPrice;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\helper;
@@ -309,6 +311,79 @@ class ItemController extends Controller
         } else {
             return redirect()->back()->with('error', trans('messages.wrong'));
         }
+    }
+
+    public function duplicate(Request $request)
+    {
+        $source = Item::with(['prices', 'pizzaPrices', 'pricing'])->find($request->id);
+        if (!$source) {
+            return redirect()->back()->with('error', trans('messages.wrong'));
+        }
+
+        $imagePath = env('ASSETSPATHURL') . 'admin-assets/images/item/';
+        $copiedFiles = [];
+
+        DB::beginTransaction();
+        try {
+            // Item row (addons_id, branch_ids, tax, category etc. are copied as-is)
+            $item = $source->replicate();
+            $item->item_name = $source->item_name . ' (Copy)';
+            $item->slug = $this->getitemslug($item->item_name);
+            $item->item_status = 2; // inactive until reviewed
+            $item->avg_ratting = 0;
+            $item->save();
+
+            foreach ($source->prices as $price) {
+                $copy = $price->replicate();
+                $copy->item_id = $item->id;
+                $copy->save();
+            }
+
+            foreach ($source->pizzaPrices as $price) {
+                $copy = $price->replicate();
+                $copy->item_id = $item->id;
+                $copy->save();
+            }
+
+            foreach ($source->pricing as $price) {
+                $copy = $price->replicate();
+                $copy->item_id = $item->id;
+                $copy->save();
+            }
+
+            foreach (Extra::where('item_id', $source->id)->get() as $extra) {
+                $copy = $extra->replicate();
+                $copy->item_id = $item->id;
+                $copy->save();
+            }
+
+            // Images: the copy gets its own files so deleting one item never breaks the other
+            foreach (ItemImages::where('item_id', $source->id)->get() as $img) {
+                $copy = $img->replicate();
+                $copy->item_id = $item->id;
+
+                foreach (['image' => 'item-', 'thumbnail' => 'thumb-item-'] as $column => $prefix) {
+                    if ($img->$column && file_exists($imagePath . $img->$column)) {
+                        $newName = $prefix . uniqid() . '.' . pathinfo($img->$column, PATHINFO_EXTENSION);
+                        copy($imagePath . $img->$column, $imagePath . $newName);
+                        $copiedFiles[] = $imagePath . $newName;
+                        $copy->$column = $newName;
+                    }
+                }
+                $copy->save();
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            foreach ($copiedFiles as $file) {
+                @unlink($file);
+            }
+            Log::error('Item duplicate failed', ['item_id' => $request->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', trans('messages.wrong'));
+        }
+
+        return redirect('admin/item-' . $item->id)->with('success', trans('messages.success'));
     }
 
     public function reorder_item(Request $request)

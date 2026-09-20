@@ -217,6 +217,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
         Route::post('item/status', [ItemController::class, 'status']);
         Route::post('item/featured', [ItemController::class, 'featured']);
         Route::post('item/delete', [ItemController::class, 'delete']);
+        Route::post('item/duplicate', [ItemController::class, 'duplicate']);
         Route::get('item-{id}', [ItemController::class, 'edititem']);
         Route::get('item/subcategories', [ItemController::class, 'subcategories']);
         Route::get('/getextras', [ItemController::class, 'getextras']);
