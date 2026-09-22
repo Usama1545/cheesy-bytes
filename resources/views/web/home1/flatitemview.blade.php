@@ -30,7 +30,8 @@
                 data-deal-price="{{ $dealPrice }}">
                 <div class="card-image">
                     <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
-                        class="card-img-top border-0 rounded-0 rounded-top position-relative" alt="dishes" loading="lazy" decoding="async">
+                        class="card-img-top border-0 rounded-0 rounded-top position-relative" alt="dishes"
+                        loading="lazy" decoding="async">
                 </div>
             </a>
         @else
@@ -38,7 +39,8 @@
                 href="{{ helper::branch_route('itemdetails', ['slug' => $itemdata->slug, 'deal_id' => $dealId, 'deal_price' => $dealPrice]) }}">
                 <div class="card-image">
                     <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
-                        class="card-img-top border-0 rounded-0 rounded-top position-relative" alt="dishes" loading="lazy" decoding="async">
+                        class="card-img-top border-0 rounded-0 rounded-top position-relative" alt="dishes"
+                        loading="lazy" decoding="async">
                 </div>
             </a>
         @endif
@@ -49,11 +51,11 @@
                     <span>{{ $itemdata['category_info']->category_name }}</span>
                 </div>
                 <div>
-                    <div class="d-flex fs-8 align-items-center">
+                    <!--<div class="d-flex fs-8 align-items-center">
                         <i class="fa-solid fa-star text-warning"></i>
                         <p class="m-0 text-dark fw-500 {{ session()->get('direction') == '2' ? 'pe-1' : 'ps-1' }}">
                             {{ number_format($itemdata->avg_ratting, 1) }}</p>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 

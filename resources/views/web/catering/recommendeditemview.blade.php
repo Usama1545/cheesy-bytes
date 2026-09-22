@@ -6,20 +6,22 @@
                     <span>{{ $itemdata['category_info']->category_name }}</span>
                 </div>
                 <div class="">
-                    <div class="d-flex fs-8 align-items-center">
+                    {{-- <div class="d-flex fs-8 align-items-center">
                         <i class="fa-solid fa-star text-warning"></i>
                         <p class="m-0 text-dark fw-500 {{ session()->get('direction') == '2' ? 'pe-1' : 'ps-1' }}">
                             {{ number_format($itemdata->avg_ratting, 1) }}</p>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
             <h5 class="item-card-title pb-3 fs-6 d-flex">
                 @if ($itemdata->item_type == 1)
                     <img src="{{ helper::image_path('veg.svg') }}" alt=""
-                        class=" {{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}" loading="lazy" decoding="async">
+                        class=" {{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}" loading="lazy"
+                        decoding="async">
                 @else
                     <img src="{{ helper::image_path('nonveg.svg') }}" alt=""
-                        class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}" loading="lazy" decoding="async">
+                        class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}" loading="lazy"
+                        decoding="async">
                 @endif
                 <div class="d-flex align-items-center gap-1">
                     <a href="{{ URL::to('item-' . $itemdata->slug) }}">
@@ -60,8 +62,9 @@
         <div class="item-card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex justify-content-between align-items-center gap-2">
-                    @if($itemdata->is_price_range && $itemdata->max_price > 0)
-                        <span>{{ helper::currency_format($price) }} - {{ helper::currency_format($itemdata->max_price) }}</span>
+                    @if ($itemdata->is_price_range && $itemdata->max_price > 0)
+                        <span>{{ helper::currency_format($price) }} -
+                            {{ helper::currency_format($itemdata->max_price) }}</span>
                     @else
                         <span>{{ helper::currency_format($price) }}</span>
                         @if ($original_price > $price)
@@ -97,7 +100,8 @@
                     </div>
                 @endif
                 <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
-                    class="card-img-top border-0 rounded-0 rounded-top-0 position-relative" alt="dishes" loading="lazy" decoding="async">
+                    class="card-img-top border-0 rounded-0 rounded-top-0 position-relative" alt="dishes"
+                    loading="lazy" decoding="async">
             </div>
         </a>
     </div>
