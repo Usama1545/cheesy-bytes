@@ -33,11 +33,11 @@
                 </div>
             @endif
 
-            @if ($type === 'extra')
+            {{-- @if ($type === 'extra')
                 <div class="product-name small fw-bold">
                     {{ Str::limit($item->product->item_name ?? '', 40) }}
                 </div>
-            @endif
+            @endif --}}
         </div>
 
         <div>
