@@ -383,11 +383,10 @@ class DealController extends Controller
                 ];
             })->values();
 
-        Log::info('items', ['items' => $items->toArray()]);
         /**
          * TYPE 2 → return flat items (app expects this)
          */
-        if ($dealType == 2 || $dealType == 0 || $dealType == 1 || $dealType == 3) {
+        if ($dealType == 2) {
             return response()->json([
                 'deal_id'   => $dealId,
                 'deal_type' => 2,
