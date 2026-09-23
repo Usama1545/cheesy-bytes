@@ -250,7 +250,7 @@ class DealController extends Controller
 
     public function dealItems(Request $request, $dealId)
     {
-        \Log::info('deals fetched', [
+        Log::info('deals fetched', [
             'dealId' => $dealId,
             'request' => $request->all(),
         ]);
@@ -383,6 +383,7 @@ class DealController extends Controller
                 ];
             })->values();
 
+        Log::info('items', ['items' => $items->toArray()]);
         /**
          * TYPE 2 → return flat items (app expects this)
          */
