@@ -389,7 +389,7 @@ class DealController extends Controller
         if ($dealType == 2 || $dealType == 0) {
             return response()->json([
                 'deal_id'   => $dealId,
-                'deal_type' => 2,
+                'deal_type' => 0,
                 'items'     => $items
             ]);
         }
