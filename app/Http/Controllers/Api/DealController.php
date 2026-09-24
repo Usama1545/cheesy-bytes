@@ -386,7 +386,7 @@ class DealController extends Controller
         /**
          * TYPE 2 → return flat items (app expects this)
          */
-        if ($dealType == 2) {
+        if ($dealType == 2 || $dealType == 0) {
             return response()->json([
                 'deal_id'   => $dealId,
                 'deal_type' => 2,

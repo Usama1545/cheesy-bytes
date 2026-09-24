@@ -1,14 +1,14 @@
 <?php return array (
   'barryvdh/laravel-dompdf' => 
   array (
+    'aliases' => 
+    array (
+      'PDF' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
+      'Pdf' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
+    ),
     'providers' => 
     array (
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Pdf' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
-      'PDF' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
     ),
   ),
   'intervention/image' => 
@@ -46,13 +46,13 @@
   ),
   'ladumor/laravel-pwa' => 
   array (
-    'providers' => 
-    array (
-      0 => '\\Ladumor\\LaravelPwa\\PWAServiceProvider',
-    ),
     'aliases' => 
     array (
       'LaravelPwa' => 'Ladumor\\LaravelPwa\\LaravelPwa',
+    ),
+    'providers' => 
+    array (
+      0 => '\\Ladumor\\LaravelPwa\\PWAServiceProvider',
     ),
   ),
   'laravel/sail' => 
